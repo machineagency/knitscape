@@ -1,4 +1,4 @@
-export function brush(pos, motifID, state, dispatch) {
+export function brush(pos, motifID, state, dispatch, color) {
   let currentPos = pos;
 
   function brushPixel(newPos, state) {
@@ -6,7 +6,7 @@ export function brush(pos, motifID, state, dispatch) {
     const updated = state.motifs[motifID].bitmap.line(
       { x: currentPos.pX, y: currentPos.pY },
       { x: newPos.pX, y: newPos.pY },
-      state.activeColor
+      color
     );
 
     currentPos = newPos;
@@ -21,7 +21,7 @@ export function brush(pos, motifID, state, dispatch) {
   return brushPixel;
 }
 
-export function flood(pos, motifID, state, dispatch) {
+export function flood(pos, motifID, state, dispatch, color) {
   let currentPos = pos;
 
   function floodArea(newPos, state) {
@@ -32,7 +32,7 @@ export function flood(pos, motifID, state, dispatch) {
       motifID: motifID,
       bitmap: state.motifs[motifID].bitmap.flood(
         { x: currentPos.pX, y: currentPos.pY },
-        state.activeColor
+        color
       ),
     });
   }
@@ -41,7 +41,7 @@ export function flood(pos, motifID, state, dispatch) {
   return floodArea;
 }
 
-export function rect(start, motifID, state, dispatch) {
+export function rect(start, motifID, state, dispatch, color) {
   // When we start to draw a rectangle, we save the currently active bitmap
   // so our changes will only be completely overriden when we stop dragging
   const bimp = state.motifs[motifID].bitmap;
@@ -55,7 +55,7 @@ export function rect(start, motifID, state, dispatch) {
       bitmap: bimp.rect(
         { x: start.pX, y: start.pY },
         { x: currentPos.pX, y: currentPos.pY },
-        state.activeColor
+        color
       ),
       motifID: motifID,
     });
@@ -64,7 +64,7 @@ export function rect(start, motifID, state, dispatch) {
   return drawRectangle;
 }
 
-export function line(start, motifID, state, dispatch) {
+export function line(start, motifID, state, dispatch, color) {
   const bimp = state.motifs[motifID].bitmap;
   let currentPos = start;
 
@@ -76,7 +76,7 @@ export function line(start, motifID, state, dispatch) {
       bitmap: bimp.line(
         { x: start.pX, y: start.pY },
         { x: currentPos.pX, y: currentPos.pY },
-        state.activeColor
+        color
       ),
       motifID: motifID,
     });

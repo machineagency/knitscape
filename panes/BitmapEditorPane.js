@@ -134,10 +134,10 @@ export class BitmapEditorPane {
       y: [0, currentBitmap.height * palette.scale[1]],
     });
 
-    const onDown = (pos) => {
+    const onDown = (pos, color) => {
       let tool = tools[this.paneState.activeTool];
       if (!tool) return;
-      let toolMove = tool(pos, this.motifID, state, dispatch);
+      let toolMove = tool(pos, this.motifID, state, dispatch, color);
       if (toolMove) return (pos) => toolMove(pos, state);
     };
 

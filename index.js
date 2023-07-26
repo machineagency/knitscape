@@ -1,30 +1,36 @@
 import { SplitLayoutManager } from "./layout";
 import { html, render } from "lit-html";
-import { live } from "lit-html/directives/live.js";
 import { Bimp, BimpCanvas } from "./bimp";
-import { BitmapEditorPane } from "./panes/BitmapEditorPane";
-import { EmptyPane } from "./panes/EmptyPane";
 import { patterns } from "./patterns";
-import { pixel2, stitchPalette, colorP2 } from "./palette";
-
+import { pixel2 } from "./palette";
 import { actions } from "./actions";
-import { tools } from "./tools";
-import { canvasEvents } from "./addCanvasInteraction";
+
+import { StitchSimPane } from "./panes/StitchSimPane";
+import { DownloadPane } from "./panes/DownloadPane";
+import { ColorPane } from "./panes/ColorPane";
+import { EmptyPane } from "./panes/EmptyPane";
+import { BitmapEditorPane } from "./panes/BitmapEditorPane";
 
 const testLayout = {
-  sizes: [50, 50],
-  children: [{ sizes: [50, 50], children: ["motif0", "empty1"] }, ["empty2"]],
+  sizes: [30, 70],
+  children: [
+    { sizes: [80, 20], children: ["motif0", "download"] },
+    ["simulation"],
+  ],
 };
 
 const viewMap = {
   motif0: "motif",
-  empty1: "empty",
-  empty2: "empty",
+  download: "download",
+  simulation: "simulation",
 };
 
 const paneTypes = {
   motif: BitmapEditorPane,
   empty: EmptyPane,
+  simulation: StitchSimPane,
+  color: ColorPane,
+  download: DownloadPane,
 };
 
 const triangle = new Bimp(24, 20, patterns.triangle);
@@ -35,8 +41,16 @@ const GLOBAL_STATE = {
   motifs: {
     motif0: {
       bitmap: triangle,
-      palette: colorP2,
-      bimpCanvas: new BimpCanvas(triangle, colorP2),
+      palette: pixel2,
+      bimpCanvas: new BimpCanvas(triangle, pixel2),
+    },
+  },
+  simulation: {
+    currentTarget: ["motifs", "motif0"],
+    PARAMS: {
+      yarnWidth: 8,
+      hDist: 15,
+      vDist: 20,
     },
   },
   motifCounter: 1,
@@ -44,8 +58,10 @@ const GLOBAL_STATE = {
 
 // render app skeleton
 render(
-  html`<div id="sidebar"></div>
-    <div id="container"></div> `,
+  html`
+    <!-- <div id="sidebar"></div> -->
+    <div id="container"></div>
+  `,
   document.body
 );
 
@@ -70,28 +86,28 @@ function syncPreviews(state) {
 
 // Function for rendering the pane options. Note how layoutManager.attachPaneDropData
 // is called in the dragstart event
-function sidebar(state, dispatch) {
-  return html`${Object.entries(state.motifs).map(
-      ([key, val]) =>
-        html`<div
-          class="preview-container"
-          draggable="true"
-          @dragstart=${(e) =>
-            layoutManager.attachPaneDropData(e, key, "motif")}>
-          <canvas data-motifid=${key} class="preview-canvas"></canvas>
-        </div> `
-    )}
-    <div id="export">
-      <div class="control-header">Export</div>
-      <div class="flex-buttons">
-        <button @click=${() => dispatch("download", "txt")}>TXT</button>
-        <button @click=${() => dispatch("download", "jpg")}>JPG</button>
-        <button @click=${() => dispatch("download", "png")}>PNG</button>
-        <button @click=${() => dispatch("download", "bmp")}>BMP</button>
-        <button @click=${() => dispatch("download", "json")}>JSON</button>
-      </div>
-    </div>`;
-}
+// function sidebar(state, dispatch) {
+//   return html`${Object.entries(state.motifs).map(
+//       ([key, val]) =>
+//         html`<div
+//           class="preview-container"
+//           draggable="true"
+//           @dragstart=${(e) =>
+//             layoutManager.attachPaneDropData(e, key, "motif")}>
+//           <canvas data-motifid=${key} class="preview-canvas"></canvas>
+//         </div> `
+//     )}
+//     <div id="export">
+//       <div class="control-header">Export</div>
+//       <div class="flex-buttons">
+//         <button @click=${() => dispatch("download", "txt")}>TXT</button>
+//         <button @click=${() => dispatch("download", "jpg")}>JPG</button>
+//         <button @click=${() => dispatch("download", "png")}>PNG</button>
+//         <button @click=${() => dispatch("download", "bmp")}>BMP</button>
+//         <button @click=${() => dispatch("download", "json")}>JSON</button>
+//       </div>
+//     </div>`;
+// }
 
 function initPane(paneID, paneData, paneType) {
   if (!paneType) return;
@@ -131,8 +147,8 @@ function sync() {
     viewMap[paneData].sync(GLOBAL_STATE);
     viewMap[paneData].renderView(GLOBAL_STATE);
   });
-  render(sidebar(GLOBAL_STATE), sidebarContainer);
-  syncPreviews(GLOBAL_STATE);
+  // render(sidebar(GLOBAL_STATE), sidebarContainer);
+  // syncPreviews(GLOBAL_STATE);
 }
 
 // this should probably be a "load workspace" function

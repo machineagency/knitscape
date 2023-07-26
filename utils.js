@@ -60,16 +60,17 @@ export const exportJSON = (bitmap, palette) => {
 };
 
 export const exportTXT = (bitmap, palette) => {
-  const text = bitmap
-    .make2d()
-    .map((row) => row.join(""))
-    .join("\n");
+  const text =
+    "SilverKnit\n" +
+    bitmap
+      .make2d()
+      .map((row) => row.join(""))
+      .join("\n");
   return "data:text/plain;charset=utf-8," + encodeURIComponent(text);
 };
 
 export const exporters = {
   txt: exportTXT,
-  // bmp: exportBMP,
   json: exportJSON,
   png: exportPNG,
   jpg: exportJPG,

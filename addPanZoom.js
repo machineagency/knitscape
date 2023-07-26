@@ -2,7 +2,6 @@ import { createListener } from "./utils.js";
 
 export function addPanZoom(el, state) {
   const listen = createListener(el);
-  console.log(el);
 
   let mousedown = false;
 

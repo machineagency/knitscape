@@ -22,12 +22,15 @@ export function canvasEvents(canvas, state, getCurrentMoveHandler) {
   }
 
   listen("pointerdown", "", (downevent) => {
+    downevent.preventDefault();
     // if it is not a left click, return
-    if (downevent.button != 0) return;
+    // if (downevent.button != 0) return;
+
+    const color = downevent.button === 0 ? 0 : 1;
 
     // do the down handler. this calls the function of the current tool,
     // which may return a move handler
-    const moveHandler = getCurrentMoveHandler(getCoordinates(downevent));
+    const moveHandler = getCurrentMoveHandler(getCoordinates(downevent), color);
 
     // if there is no move handler, we don't need to do anything else, return
     if (!moveHandler) return;
@@ -40,6 +43,7 @@ export function canvasEvents(canvas, state, getCurrentMoveHandler) {
   });
 
   listen("pointermove", "", (e) => {
+    e.preventDefault();
     if (e.buttons == 0) {
       // If no mouse button is pressed
       onMove = null;

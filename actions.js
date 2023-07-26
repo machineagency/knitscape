@@ -160,8 +160,8 @@ return new Bimp(width, height, pixels);`,
 
     motifs[`motif${state.motifCounter}`] = {
       bitmap: newBimp,
-      bimpCanvas: new BimpCanvas(newBimp, colorP2),
-      palette: colorP2,
+      bimpCanvas: new BimpCanvas(newBimp, pixel2),
+      palette: pixel2,
     };
 
     return {
