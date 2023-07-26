@@ -1,0 +1,15 @@
+{
+  "scripts": {
+    "dev": "vite",
+    "host": "vite --host",
+    "build": "vite build",
+    "preview": "vite build && vite preview",
+    "deploy": "vite build --base=/knitscape/ && gh-pages -d dist"
+  },
+  "dependencies": {
+    "gh-pages": "^5.0.0",
+    "lit-html": "^2.7.5",
+    "split.js": "^1.6.5",
+    "vite": "^4.4.7"
+  }
+}
