@@ -276,6 +276,7 @@ export class YarnModel {
         target: target,
         row: stitchRow,
         linkType: last + headOrLeg,
+        index: index - 1,
       });
       source = target;
       last = headOrLeg;

@@ -9,13 +9,14 @@ import { StitchSimPane } from "./panes/StitchSimPane";
 import { DownloadPane } from "./panes/DownloadPane";
 import { ColorPane } from "./panes/ColorPane";
 import { EmptyPane } from "./panes/EmptyPane";
+import { PreviewPane } from "./panes/PreviewPane";
 import { BitmapEditorPane } from "./panes/BitmapEditorPane";
 
 const testLayout = {
   sizes: [30, 70],
   children: [
     { sizes: [80, 20], children: ["motif0", "download"] },
-    ["simulation"],
+    ["preview"],
   ],
 };
 
@@ -23,6 +24,7 @@ const viewMap = {
   motif0: "motif",
   download: "download",
   simulation: "simulation",
+  preview: "preview",
 };
 
 const paneTypes = {
@@ -30,6 +32,7 @@ const paneTypes = {
   empty: EmptyPane,
   simulation: StitchSimPane,
   color: ColorPane,
+  preview: PreviewPane,
   download: DownloadPane,
 };
 
@@ -48,9 +51,9 @@ const GLOBAL_STATE = {
   simulation: {
     currentTarget: ["motifs", "motif0"],
     PARAMS: {
-      yarnWidth: 8,
-      hDist: 15,
-      vDist: 20,
+      yarnWidth: 6,
+      hDist: 10,
+      vDist: 12,
     },
   },
   motifCounter: 1,
