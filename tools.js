@@ -1,8 +1,10 @@
 export function brush(pos, motifID, state, dispatch, color) {
   let currentPos = pos;
 
-  function brushPixel(newPos, state) {
-    if (newPos.pX == currentPos.pX && newPos.pY == currentPos.pY) return;
+  function brushPixel(newPos, state, first = false) {
+    if (!first) {
+      if (newPos.pX == currentPos.pX && newPos.pY == currentPos.pY) return;
+    }
     const updated = state.motifs[motifID].bitmap.line(
       { x: currentPos.pX, y: currentPos.pY },
       { x: newPos.pX, y: newPos.pY },
@@ -17,15 +19,17 @@ export function brush(pos, motifID, state, dispatch, color) {
     });
   }
 
-  brushPixel(pos, state);
+  brushPixel(pos, state, true);
   return brushPixel;
 }
 
 export function flood(pos, motifID, state, dispatch, color) {
   let currentPos = pos;
 
-  function floodArea(newPos, state) {
-    if (newPos.pX == currentPos.pX && newPos.pY == currentPos.pY) return;
+  function floodArea(newPos, state, first = false) {
+    if (!first) {
+      if (newPos.pX == currentPos.pX && newPos.pY == currentPos.pY) return;
+    }
     currentPos = newPos;
 
     dispatch("editMotif", {
@@ -37,7 +41,7 @@ export function flood(pos, motifID, state, dispatch, color) {
     });
   }
 
-  floodArea(pos, state);
+  floodArea(pos, state, true);
   return floodArea;
 }
 
@@ -47,8 +51,10 @@ export function rect(start, motifID, state, dispatch, color) {
   const bimp = state.motifs[motifID].bitmap;
   let currentPos = start;
 
-  function drawRectangle(newPos) {
-    if (newPos.pX == currentPos.pX && newPos.pY == currentPos.pY) return;
+  function drawRectangle(newPos, first = false) {
+    if (!first) {
+      if (newPos.pX == currentPos.pX && newPos.pY == currentPos.pY) return;
+    }
     currentPos = newPos;
 
     dispatch("editMotif", {
@@ -60,7 +66,7 @@ export function rect(start, motifID, state, dispatch, color) {
       motifID: motifID,
     });
   }
-  drawRectangle(start);
+  drawRectangle(start, true);
   return drawRectangle;
 }
 
@@ -68,8 +74,10 @@ export function line(start, motifID, state, dispatch, color) {
   const bimp = state.motifs[motifID].bitmap;
   let currentPos = start;
 
-  function drawLine(newPos) {
-    if (newPos.pX == currentPos.pX && newPos.pY == currentPos.pY) return;
+  function drawLine(newPos, first = false) {
+    if (!first) {
+      if (newPos.pX == currentPos.pX && newPos.pY == currentPos.pY) return;
+    }
     currentPos = newPos;
 
     dispatch("editMotif", {
@@ -81,7 +89,7 @@ export function line(start, motifID, state, dispatch, color) {
       motifID: motifID,
     });
   }
-  drawLine(start);
+  drawLine(start, true);
   return drawLine;
 }
 
