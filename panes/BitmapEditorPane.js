@@ -1,8 +1,16 @@
 import { html, render } from "lit-html";
 import { addPanZoom } from "../addPanZoom";
 
-import { tools } from "../tools";
-import { canvasEvents } from "../addCanvasInteraction";
+import { tools } from "../bimp/tools";
+import { canvasEvents } from "../bimp/addCanvasInteraction";
+
+function resizeMotif(state, width, height, motifID) {
+  const newMotifs = { ...state.motifs };
+
+  newMotifs[motifID].bitmap = newMotifs[motifID].bitmap.resize(width, height);
+
+  return newMotifs;
+}
 
 function sizeControls(motifID, state, dispatch, center) {
   const current = state.motifs[motifID].bitmap;
@@ -12,7 +20,7 @@ function sizeControls(motifID, state, dispatch, center) {
     <div
       class="input-spinner"
       @click=${() =>
-        dispatch("resizeMotif", [width - 1, height, motifID], center)}>
+        dispatch({ motifs: resizeMotif(state, width - 1, height, motifID) })}>
       <i class="fa-solid fa-minus fa-2xs fa-fw"></i>
     </div>
     <input
@@ -22,23 +30,21 @@ function sizeControls(motifID, state, dispatch, center) {
       step="1"
       id="width"
       @change=${(e) =>
-        dispatch(
-          "resizeMotif",
-          [Number(e.target.value), height, motifID],
-          center
-        )}
+        dispatch({
+          motifs: resizeMotif(state, Number(e.target.value), height, motifID),
+        })}
       value=${width} />
     <div
       class="input-spinner"
       @click=${() =>
-        dispatch("resizeMotif", [width + 1, height, motifID], center)}>
+        dispatch({ motifs: resizeMotif(state, width + 1, height, motifID) })}>
       <i class="fa-solid fa-plus fa-2xs fa-fw"></i>
     </div>
     <span>by</span>
     <div
       class="input-spinner"
       @click=${() =>
-        dispatch("resizeMotif", [width, height - 1, motifID], center)}>
+        dispatch({ motifs: resizeMotif(state, width, height - 1, motifID) })}>
       <i class="fa-solid fa-minus fa-2xs fa-fw"></i>
     </div>
     <input
@@ -47,16 +53,14 @@ function sizeControls(motifID, state, dispatch, center) {
       min="1"
       step="1"
       @change=${(e) =>
-        dispatch(
-          "resizeMotif",
-          [width, Number(e.target.value), motifID],
-          center
-        )}
+        dispatch({
+          motifs: resizeMotif(state, width, Number(e.target.value), motifID),
+        })}
       value=${height} />
     <div
       class="input-spinner"
       @click=${() =>
-        dispatch("resizeMotif", [width, height + 1, motifID], center)}>
+        dispatch({ motifs: resizeMotif(state, width, height + 1, motifID) })}>
       <i class="fa-solid fa-plus fa-2xs fa-fw"></i>
     </div>
   </div>`;
@@ -94,8 +98,10 @@ export function bitmapEditorView(activeTool, setActiveTool) {
         <i class="fa-solid fa-minus"></i>
       </div>
       <div
-        class="tool-select ${activeTool == "pan" ? "selected" : "not-selected"}"
-        @click=${() => setActiveTool("pan")}>
+        class="tool-select ${activeTool == "shift"
+          ? "selected"
+          : "not-selected"}"
+        @click=${() => setActiveTool("shift")}>
         <i class="fa-solid fa-up-down-left-right"></i>
       </div>
     </div>

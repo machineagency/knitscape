@@ -1,6 +1,6 @@
 import { html, render } from "lit-html";
 import { runSimulation } from "../stitchsim/Simulation";
-import { Bimp } from "../bimp";
+import { Bimp } from "../bimp/bimp";
 
 let timeoutID;
 

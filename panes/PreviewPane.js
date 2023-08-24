@@ -1,6 +1,6 @@
 import { html, render } from "lit-html";
 import { renderPreview } from "../stitchsim/StitchPreview";
-import { Bimp } from "../bimp";
+import { Bimp } from "../bimp/bimp";
 
 let timeoutID;
 
@@ -14,10 +14,10 @@ export class PreviewPane {
     this.sim = null;
     this.clear = null;
     this.relax = null;
-    this.mainYarn = "#F1C113";
-    this.contrastYarn = "#1885d8";
+    this.contrastYarn = "#c6905d";
+    this.mainYarn = "#f0dcb2";
     this.v = 45;
-    this.h = 70;
+    this.h = 64;
   }
 
   view(state) {
@@ -53,7 +53,9 @@ export class PreviewPane {
         <button @click=${(e) => this.relax()}>Relax</button>
       </div>
       <div class="simcontainer">
+        <div class="yarn-changes"></div>
         <svg
+          class="sim-svg"
           width="100%"
           height="auto"
           viewBox="0 0 1200 1200"

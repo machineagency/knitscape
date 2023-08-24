@@ -47,11 +47,11 @@ export const exportPNG = (bitmap, palette) => {
 
 export const exportJSON = (bitmap, palette) => {
   const jsonObj = {
-    pixels: bitmap.pixels,
+    pixels: Array.from(bitmap.pixels),
     width: bitmap.width,
     height: bitmap.height,
-    palette: palette,
   };
+  console.log(jsonObj);
 
   return (
     "data:text/json;charset=utf-8," +

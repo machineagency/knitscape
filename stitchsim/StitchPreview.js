@@ -1,7 +1,20 @@
 import { ProcessModel } from "./ProcessModel";
 import { Pattern } from "./Pattern";
 import { YarnModel } from "./YarnModel";
+import { default as YarnForce } from "./YarnForce";
 import * as d3 from "d3";
+
+// const yarnChanges = [
+//   1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+//   0, 0, 0, 0, 1, 1,
+// ];
+
+const yarnChanges = [
+  0, 0, 0, 0, 0, 0, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1, 3, 3, 3, 3, 3, 3, 1, 1,
+];
+// function yarnColor(rowNum) {
+//   return yarns[yarnChanges[rowNum % yarnChanges.length]];
+// }
 
 export function renderPreview(PARAMS, pattern, mainColor, contrastColor) {
   const pat = new Pattern(pattern);
@@ -10,14 +23,21 @@ export function renderPreview(PARAMS, pattern, mainColor, contrastColor) {
   const yarnGraph = new YarnModel(testModel.cn);
   const opColors = d3.scaleOrdinal(d3.schemePastel1);
 
-  const color = [mainColor, contrastColor];
-  // const color = d3.quantize(
-  //   d3.interpolateHcl("#f4e153", "#362142"),
-  //   pat.height
-  // );
+  // const color = [mainColor, contrastColor];
+  //#f0dcb2
+  const color = ["#f0dcb2", "#2d436e", "#5e8c66", "#e0961d"];
+
+  const gradient = d3.quantize(
+    d3.interpolateHcl("#f4e153", "#362142"),
+    pat.height
+  );
   const svg = d3.select("#swatch-preview");
   const spread = 1;
-  const linkStrength = 0.6;
+  const linkStrength = 0.1;
+
+  function yarnColor(rowNum) {
+    return color[yarnChanges[rowNum % yarnChanges.length]];
+  }
 
   function layoutNodes(yarnGraph) {
     // calculates the x,y values for the i,j
@@ -59,7 +79,7 @@ export function renderPreview(PARAMS, pattern, mainColor, contrastColor) {
     })
     .attr("data-link", (d) => d.linkType)
     .attr("fill", "none")
-    .attr("stroke", (d) => color[d.row % 4 < 2 ? 0 : 1]);
+    .attr("stroke", (d) => yarnColor(d.row));
 
   const frontYarns = yarnsFront
     .attr("stroke-width", PARAMS.yarnWidth)
@@ -73,9 +93,9 @@ export function renderPreview(PARAMS, pattern, mainColor, contrastColor) {
     })
     .attr("data-link", (d) => d.linkType)
     .attr("fill", "none")
-    .attr("stroke", (d) => color[d.row % 4 < 2 ? 0 : 1]);
+    .attr("stroke", (d) => yarnColor(d.row));
 
-  // operationContainer
+  // const operations = operationContainer
   //   .selectAll()
   //   .data(ops)
   //   .join("polygon")
@@ -173,6 +193,12 @@ export function renderPreview(PARAMS, pattern, mainColor, contrastColor) {
     updateNormals();
     frontYarns.attr("d", yarnCurve);
     backYarns.attr("d", yarnCurve);
+    // operations.attr("points", (d) =>
+    //   d.cnIndices.reduce(
+    //     (str, vertexID) => `${str} ${nodes[vertexID].x},${nodes[vertexID].y}`,
+    //     ""
+    //   )
+    // );
   }
 
   draw();
@@ -185,8 +211,7 @@ export function renderPreview(PARAMS, pattern, mainColor, contrastColor) {
     d3.forceSimulation(nodes)
       .force(
         "link",
-        d3
-          .forceLink(yarnPathLinks)
+        YarnForce(yarnPathLinks)
           .strength(linkStrength)
           .iterations(2)
           .distance((l) =>

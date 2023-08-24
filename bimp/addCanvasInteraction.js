@@ -1,4 +1,4 @@
-import { createListener } from "./utils.js";
+import { createListener } from "../utils.js";
 
 export function canvasEvents(canvas, state, getCurrentMoveHandler) {
   const listen = createListener(canvas);

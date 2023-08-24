@@ -1,9 +1,8 @@
 import { SplitLayoutManager } from "./layout";
 import { html, render } from "lit-html";
-import { Bimp, BimpCanvas } from "./bimp";
-import { patterns } from "./patterns";
-import { pixel2 } from "./palette";
-import { actions } from "./actions";
+import { Bimp, BimpCanvas } from "./bimp/bimp";
+import { repeats } from "./db/repeats";
+import { pixel2 } from "./bimp/palette";
 
 import { StitchSimPane } from "./panes/StitchSimPane";
 import { DownloadPane } from "./panes/DownloadPane";
@@ -11,16 +10,20 @@ import { ColorPane } from "./panes/ColorPane";
 import { EmptyPane } from "./panes/EmptyPane";
 import { PreviewPane } from "./panes/PreviewPane";
 import { BitmapEditorPane } from "./panes/BitmapEditorPane";
+import { YarnPane } from "./panes/YarnPane";
+
+import yarns from "./db/yarns.json";
 
 const testLayout = {
   sizes: [30, 70],
   children: [
-    { sizes: [80, 20], children: ["motif0", "download"] },
+    { sizes: [60, 30, 10], children: ["motif0", "yarns", "download"] },
     ["preview"],
   ],
 };
 
 const viewMap = {
+  yarns: "yarns",
   motif0: "motif",
   download: "download",
   simulation: "simulation",
@@ -34,20 +37,28 @@ const paneTypes = {
   color: ColorPane,
   preview: PreviewPane,
   download: DownloadPane,
+  yarns: YarnPane,
 };
 
-const triangle = new Bimp(24, 20, patterns.triangle);
+const defaultPattern = repeats.hex_small;
 
-const GLOBAL_STATE = {
+const pat = new Bimp(
+  defaultPattern.width,
+  defaultPattern.height,
+  defaultPattern.pixels
+);
+
+let GLOBAL_STATE = {
   title: "untitled",
   history: [],
   motifs: {
     motif0: {
-      bitmap: triangle,
+      bitmap: pat,
       palette: pixel2,
-      bimpCanvas: new BimpCanvas(triangle, pixel2),
+      bimpCanvas: new BimpCanvas(pat, pixel2),
     },
   },
+  yarns: yarns,
   simulation: {
     currentTarget: ["motifs", "motif0"],
     PARAMS: {
@@ -57,6 +68,10 @@ const GLOBAL_STATE = {
     },
   },
   motifCounter: 1,
+  workspace: {
+    rows: 20,
+    cols: 20,
+  },
 };
 
 // render app skeleton
@@ -87,31 +102,6 @@ function syncPreviews(state) {
   }
 }
 
-// Function for rendering the pane options. Note how layoutManager.attachPaneDropData
-// is called in the dragstart event
-// function sidebar(state, dispatch) {
-//   return html`${Object.entries(state.motifs).map(
-//       ([key, val]) =>
-//         html`<div
-//           class="preview-container"
-//           draggable="true"
-//           @dragstart=${(e) =>
-//             layoutManager.attachPaneDropData(e, key, "motif")}>
-//           <canvas data-motifid=${key} class="preview-canvas"></canvas>
-//         </div> `
-//     )}
-//     <div id="export">
-//       <div class="control-header">Export</div>
-//       <div class="flex-buttons">
-//         <button @click=${() => dispatch("download", "txt")}>TXT</button>
-//         <button @click=${() => dispatch("download", "jpg")}>JPG</button>
-//         <button @click=${() => dispatch("download", "png")}>PNG</button>
-//         <button @click=${() => dispatch("download", "bmp")}>BMP</button>
-//         <button @click=${() => dispatch("download", "json")}>JSON</button>
-//       </div>
-//     </div>`;
-// }
-
 function initPane(paneID, paneData, paneType) {
   if (!paneType) return;
   viewMap[paneData] = new paneTypes[paneType](
@@ -122,26 +112,13 @@ function initPane(paneID, paneData, paneType) {
   );
 }
 
-async function dispatch(action, args, cb) {
-  try {
-    // console.log(action);
-    const { changes, postRender } = actions[action](
-      GLOBAL_STATE,
-      args,
-      dispatch
-    );
+function updateState(state, action) {
+  return Object.assign({}, state, action);
+}
 
-    Object.assign(GLOBAL_STATE, changes);
-
-    sync();
-
-    if (postRender) postRender();
-
-    if (cb) cb(GLOBAL_STATE);
-  } catch (e) {
-    console.error(`Problem in action ${action}`);
-    console.error(e);
-  }
+function dispatch(action) {
+  GLOBAL_STATE = updateState(GLOBAL_STATE, action);
+  sync();
 }
 
 function sync() {
@@ -150,8 +127,6 @@ function sync() {
     viewMap[paneData].sync(GLOBAL_STATE);
     viewMap[paneData].renderView(GLOBAL_STATE);
   });
-  // render(sidebar(GLOBAL_STATE), sidebarContainer);
-  // syncPreviews(GLOBAL_STATE);
 }
 
 // this should probably be a "load workspace" function

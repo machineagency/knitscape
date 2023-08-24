@@ -1,12 +1,10 @@
 "use strict";
-import { Palette, PixelPalette } from "./palette";
 
 export class Bimp {
   constructor(width, height, pixels) {
     this.width = width;
     this.height = height;
     this.pixels = new Uint8ClampedArray(pixels);
-    // this.palette = palette;
   }
 
   static empty(width, height, color) {
@@ -26,40 +24,6 @@ export class Bimp {
     }
 
     return new Bimp(width, height, tiled);
-  }
-
-  static fromImage(img) {
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    const width = img.width;
-    const height = img.height;
-    canvas.width = width;
-    canvas.height = height;
-
-    ctx.drawImage(img, 0, 0);
-    const imData = ctx.getImageData(0, 0, width, height).data;
-
-    const colorTable = [];
-    const reverseColorTable = {};
-    const pixels = [];
-
-    for (let i = 0; i < imData.length; i += 4) {
-      const colorArr = [imData[i], imData[i + 1], imData[i + 2]];
-      const colorKey = colorArr.toString();
-      if (!(colorKey in reverseColorTable)) {
-        // if we have not already seen the entry, add it to the color table
-        colorTable.push(colorArr);
-        // and update the reverse color table
-        reverseColorTable[colorKey] = colorTable.length - 1;
-      }
-      // then push the color array to the pixels
-      pixels.push(reverseColorTable[colorKey]);
-    }
-
-    const palette = new PixelPalette(colorTable);
-    const bitmap = new Bimp(width, height, pixels);
-
-    return { bitmap, palette };
   }
 
   resize(width, height) {
@@ -138,6 +102,23 @@ export class Bimp {
     return this.draw(drawn);
   }
 
+  shift(dx, dy) {
+    console.log(dx, dy);
+    let changes = [];
+
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
+        changes.push({
+          x: (x - dx) % this.width,
+          y: (y - dy) % this.height,
+          color: this.pixel(x, y),
+        });
+      }
+    }
+
+    return this.draw(changes);
+  }
+
   rect(start, end, color) {
     let xStart = Math.min(start.x, end.x);
     let yStart = Math.min(start.y, end.y);
@@ -171,13 +152,6 @@ export class Bimp {
       }
     }
     return this.draw(changes);
-  }
-}
-
-export class BimpDirect extends Bimp {
-  constructor(width, height, pixels, bitDepth) {
-    super(width, height, pixels);
-    this.bitDepth = bitDepth;
   }
 }
 
