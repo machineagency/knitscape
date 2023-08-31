@@ -180,8 +180,6 @@ function makeYarnEditor() {
   });
 }
 
-render(view(), document.body);
-
 function syncRepeat({ state }) {
   let { bitmap } = state;
   return {
@@ -226,6 +224,8 @@ function syncYarnChanges({ state }) {
 }
 
 async function init() {
+  render(view(), document.body);
+
   repeatEditor = await makeRepeatEditor();
   yarnEditor = makeYarnEditor();
   preview = makePreview();

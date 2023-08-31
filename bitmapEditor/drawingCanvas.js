@@ -1,10 +1,6 @@
 function canvasExtension(
   { state, parent, dispatch },
-  {
-    paletteBuilder,
-    container = "desktop",
-    palettePosition = "sidebarSecondary",
-  }
+  { paletteBuilder, canvas }
 ) {
   state.paletteIndex = 0;
 
@@ -13,16 +9,16 @@ function canvasExtension(
 
   let lastDrawn = null;
 
-  const dom = document.createElement("canvas");
-  dom.style.cssText = "outline: 1px solid black";
-  parent[container].appendChild(dom);
-  if (palettePosition) {
-    parent[palettePosition].appendChild(palette.dom);
-  }
+  // const dom = document.createElement("canvas");
+  // dom.style.cssText = "outline: 1px solid black";
+  // parent[container].appendChild(dom);
+  // if (palettePosition) {
+  //   parent[palettePosition].appendChild(palette.dom);
+  // }
 
   function draw() {
     // Draws only the pixels that have changed
-    const ctx = dom.getContext("2d");
+    const ctx = canvas.getContext("2d");
 
     for (let y = 0; y < bitmap.height; y++) {
       for (let x = 0; x < bitmap.width; x++) {
@@ -45,9 +41,9 @@ function canvasExtension(
   }
 
   function updateDom() {
-    dom.width = bitmap.width * aspectRatio[0] * scale;
-    dom.height = bitmap.height * aspectRatio[1] * scale;
-    dom.style.transform = `translate(${pan.x}px, ${pan.y}px)`;
+    canvas.width = bitmap.width * aspectRatio[0] * scale;
+    canvas.height = bitmap.height * aspectRatio[1] * scale;
+    // canvas.style.transform = `translate(${pan.x}px, ${pan.y}px)`;
   }
 
   function calcCenterFit() {
@@ -55,7 +51,7 @@ function canvasExtension(
     // fit this bitmap at the current aspect ratio.
     // There will likely be some padding around the edges - but
     // the canvas can get blurry when dealing with sub-pixels.
-    const bbox = parent[container].getBoundingClientRect();
+    const bbox = canvas.parentElement.getBoundingClientRect();
 
     const availableWidth = bbox.width;
     const availableHeight = bbox.height;
@@ -71,14 +67,14 @@ function canvasExtension(
     const y = Math.floor(
       (availableHeight - bitmap.height * aspectRatio[1] * newScale) / 2
     );
-    dispatch({ scale: newScale, pan: { x, y } });
+    dispatch({ scale: newScale }); //, pan: { x, y } });
   }
 
-  const resizeObserver = new ResizeObserver((entries) => {
-    calcCenterFit();
-  });
+  // const resizeObserver = new ResizeObserver((entries) => {
+  //   calcCenterFit();
+  // });
 
-  resizeObserver.observe(parent[container]);
+  // resizeObserver.observe(canvas.parentElement);
 
   return {
     attached(state) {

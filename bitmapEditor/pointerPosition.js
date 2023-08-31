@@ -1,6 +1,6 @@
 export function pointerTrackingExtension(
   { state, parent, dispatch },
-  { target = "desktop" }
+  { target }
 ) {
   state.pos = { x: -1, y: -1 };
 
@@ -8,19 +8,19 @@ export function pointerTrackingExtension(
     // will get the bitmap position at the DOM coords
     // takes into account the visible range and aspect ratio
 
-    const bounds = parent[target].getBoundingClientRect();
+    const bounds = target.getBoundingClientRect();
 
     const x = Math.floor(
-      (clientX - state.pan.x - bounds.x) / (state.aspectRatio[0] * state.scale)
+      (clientX - bounds.x) / (state.aspectRatio[0] * state.scale)
     );
     const y = Math.floor(
-      (clientY - state.pan.y - bounds.y) / (state.aspectRatio[1] * state.scale)
+      (clientY - bounds.y) / (state.aspectRatio[1] * state.scale)
     );
 
     return { x, y };
   }
 
-  parent[target].addEventListener("mousemove", (e) => {
+  target.addEventListener("mousemove", (e) => {
     const { x, y } = posAtCoords(e.clientX, e.clientY);
     if (state.pos.x != x || state.pos.y != y) {
       dispatch({ pos: { x, y } });

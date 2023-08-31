@@ -1,16 +1,12 @@
-function makeGrid({ state, parent }, { container = "desktop" }) {
-  let { aspectRatio, scale, bitmap, pan } = state;
+function makeGrid({ state }, { canvas }) {
+  let { aspectRatio, scale, bitmap } = state;
   let cellSize = [aspectRatio[0] * scale, aspectRatio[1] * scale];
 
-  const dom = document.createElement("canvas");
-  dom.style.cssText = `image-rendering: pixelated;`;
-  parent[container].appendChild(dom);
-
   function draw() {
-    const ctx = dom.getContext("2d");
-    ctx.translate(-0.5, -0.5);
+    const ctx = canvas.getContext("2d");
 
-    ctx.clearRect(0, 0, dom.width, dom.height);
+    ctx.save();
+    ctx.translate(-0.5, -0.5);
 
     ctx.beginPath();
 
@@ -25,31 +21,16 @@ function makeGrid({ state, parent }, { container = "desktop" }) {
     }
 
     ctx.stroke();
-  }
 
-  function updateDom() {
-    dom.width = bitmap.width * aspectRatio[0] * scale;
-    dom.height = bitmap.height * aspectRatio[1] * scale;
-    dom.style.transform = `translate(${pan.x}px, ${pan.y}px)`;
+    ctx.restore();
   }
 
   return {
     syncState(state) {
-      if (
-        state.bitmap.width != bitmap.width ||
-        state.bitmap.height != bitmap.height ||
-        state.aspectRatio[0] != aspectRatio[0] ||
-        state.aspectRatio[1] != aspectRatio[1] ||
-        state.scale != scale ||
-        state.pan.x != pan.x ||
-        state.pan.y != pan.y
-      ) {
-        ({ aspectRatio, scale, pan, bitmap } = state);
+      ({ aspectRatio, scale, bitmap } = state);
+      cellSize = [aspectRatio[0] * scale, aspectRatio[1] * scale];
 
-        cellSize = [aspectRatio[0] * scale, aspectRatio[1] * scale];
-        updateDom();
-        draw();
-      }
+      draw();
     },
   };
 }

@@ -12,34 +12,44 @@ body {
   display: flex;
 }
 
-#left {
+#center {
+  display: grid;
   flex: 1 1 0;
-  display: flex;
-  flex-direction: column;
+  place-items: stretch;
+  grid-template-areas:
+    "colors vgutter preview"
+    "controls controls hgutter"
+    "controls controls needles";
+  grid-template-columns: min-content min-content 1fr;
+  grid-template-rows: 1fr min-content min-content;
 }
 
-#right {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+#center > * {
+  outline: 1px solid white;
+}
+
+#color-change-editor-container {
+  grid-area: colors;
+}
+
+#preview-gutter-vertical {
+  grid-area: vgutter;
+  width: 25px;
 }
 
 #preview-container {
-  flex: 1 1 0;
-  display: flex;
+  grid-area: preview;
 }
 
-#yarn {
-  /* flex: 1 1 min-content; */
+#preview-controls {
+  grid-area: controls;
 }
 
-#preview {
-  flex: 1 1 0;
+#preview-gutter-horizontal {
+  grid-area: hgutter;
+  height: 25px;
 }
 
-.bimp-desktop {
-  outline: 1px solid black;
-  background-color: #3f3f3f;
-  grid-area: c;
-  display: flex;
+#needle-work-editor-container {
+  grid-area: needles;
 }

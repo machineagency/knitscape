@@ -1,23 +1,20 @@
 function highlightExtension(
   { state, parent },
-  {
-    cell = true,
-    row = false,
-    col = false,
-    color = "#00000044",
-    container = "desktop",
-  }
+  { cell = true, row = false, col = false, color = "#00000044", canvas }
 ) {
   let { aspectRatio, scale, bitmap, pos, pan } = state;
   let cellSize = [aspectRatio[0] * scale, aspectRatio[1] * scale];
 
-  const dom = document.createElement("canvas");
-  dom.style.cssText = `image-rendering: pixelated;`;
-  parent[container].appendChild(dom);
+  // const dom = document.createElement("canvas");
+  // dom.style.cssText = `image-rendering: pixelated;`;
+  // parent[container].appendChild(dom);
 
   function draw() {
-    const ctx = dom.getContext("2d");
-    ctx.clearRect(0, 0, dom.width, dom.height);
+    const ctx = canvas.getContext("2d");
+
+    ctx.save();
+
+    // ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = color;
 
     if (cell) {
@@ -44,16 +41,17 @@ function highlightExtension(
         cellSize[1] * bitmap.height
       );
     }
+    ctx.restore();
   }
 
-  function resizeCanvas(bitmap) {
-    dom.width = bitmap.width * aspectRatio[0] * scale;
-    dom.height = bitmap.height * aspectRatio[1] * scale;
-  }
+  // function resizeCanvas(bitmap) {
+  //   dom.width = bitmap.width * aspectRatio[0] * scale;
+  //   dom.height = bitmap.height * aspectRatio[1] * scale;
+  // }
 
-  function positionCanvas() {
-    dom.style.transform = `translate(${pan.x}px, ${pan.y}px)`;
-  }
+  // function positionCanvas() {
+  //   dom.style.transform = `translate(${pan.x}px, ${pan.y}px)`;
+  // }
 
   return {
     syncState(state) {
@@ -72,8 +70,8 @@ function highlightExtension(
         pan = state.pan;
 
         cellSize = [aspectRatio[0] * scale, aspectRatio[1] * scale];
-        resizeCanvas(bitmap);
-        positionCanvas();
+        // resizeCanvas(bitmap);
+        // positionCanvas();
         draw();
       }
     },

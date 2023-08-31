@@ -6,18 +6,17 @@ function toolboxExtension(
 ) {
   state.activeTool = Object.keys(tools)[0];
 
-  const layers = parent[target];
-
-  layers.addEventListener("pointerdown", (e) => {
+  target.addEventListener("pointerdown", (e) => {
     let pos = state.pos;
     let tool = tools[state.activeTool];
     let onMove = tool(pos, state, dispatch);
+    console.log(pos);
 
     if (!onMove) return;
 
     let move = (moveEvent) => {
       if (moveEvent.buttons == 0) {
-        layers.removeEventListener("mousemove", move);
+        target.removeEventListener("mousemove", move);
       } else {
         let newPos = state.pos;
         if (newPos.x == pos.x && newPos.y == pos.y) return;
@@ -25,7 +24,7 @@ function toolboxExtension(
         pos = newPos;
       }
     };
-    layers.addEventListener("mousemove", move);
+    target.addEventListener("mousemove", move);
   });
 
   function view(state) {

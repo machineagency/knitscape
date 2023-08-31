@@ -2,7 +2,8 @@ import { html, render } from "lit-html";
 import { pointerTracker } from "./pointerPosition";
 import { Bimp } from "./Bimp";
 
-const core = [pointerTracker()];
+// const core = [pointerTracker()];
+const core = [];
 
 function updateState(state, action) {
   return { ...state, ...action };
@@ -98,7 +99,7 @@ const defaultState = {
 };
 
 export class BimpEditor {
-  constructor({ state, parent, components, buildLayout = defaultLayout }) {
+  constructor({ state, parent, components, layout = defaultLayout }) {
     this.state = state;
     this.initialized = false;
 
@@ -110,7 +111,7 @@ export class BimpEditor {
       this.syncState(state, changes);
     };
 
-    this.dom = buildLayout(parent);
+    // this.dom = layout(parent);
 
     this.components = core.concat(components.flat()).map((component) =>
       component({
@@ -120,7 +121,7 @@ export class BimpEditor {
       })
     );
 
-    parent.appendChild(this.dom["container"]);
+    // parent.appendChild(this.dom["container"]);
     this.initialized = true;
 
     // tell components they've been attached to the DOM
@@ -133,7 +134,7 @@ export class BimpEditor {
   addComponent(component) {
     const newComponent = component({
       state: this.state,
-      parent: this.dom,
+      // parent: this.dom,
       dispatch: this.dispatch,
     });
     this.components.push(newComponent);
