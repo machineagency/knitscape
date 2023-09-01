@@ -1,4 +1,4 @@
-function gridExtension({ state }, {}) {
+function outlineExtension({ state }, {}) {
   let { aspectRatio, scale, bitmap, canvas } = state;
   let cellSize = [aspectRatio[0] * scale, aspectRatio[1] * scale];
 
@@ -35,6 +35,6 @@ function gridExtension({ state }, {}) {
   };
 }
 
-export function grid(options = {}) {
-  return (config) => gridExtension(config, options);
+export function outlineArea(options = {}) {
+  return (config) => outlineExtension(config, options);
 }

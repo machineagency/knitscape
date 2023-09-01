@@ -1,7 +1,4 @@
-export function pointerTrackingExtension(
-  { state, parent, dispatch },
-  { target }
-) {
+export function pointerTrackingExtension({ state, dispatch }, { target }) {
   state.pos = { x: -1, y: -1 };
 
   function posAtCoords(clientX, clientY) {
