@@ -24,29 +24,28 @@ function heightControlExtension() {
           content: "+";
         }
       </style>
-        <span>Height</span>
-        <div class="control-group">
-          <button
-            class="minus"
-            @click=${() =>
-              dispatch({
-                bitmap: bitmap.resize(bitmap.width, bitmap.height - 1),
-              })}></button>
-          <input
-            type="number"
-            .value=${live(bitmap.height)}
-            class="size-input"
-            @change=${(e) =>
-              dispatch({
-                bitmap: bitmap.resize(bitmap.width, Number(e.target.value)),
-              })} />
-          <button
-            class="plus"
-            @click=${() =>
-              dispatch({
-                bitmap: bitmap.resize(bitmap.width, bitmap.height + 1),
-              })}></button>
-        </div>
+      <span>Height</span>
+      <div class="number-spinner">
+        <button
+          class="minus"
+          @click=${() =>
+            dispatch({
+              bitmap: bitmap.resize(bitmap.width, bitmap.height - 1),
+            })}></button>
+        <input
+          type="number"
+          .value=${live(bitmap.height)}
+          class="size-input"
+          @change=${(e) =>
+            dispatch({
+              bitmap: bitmap.resize(bitmap.width, Number(e.target.value)),
+            })} />
+        <button
+          class="plus"
+          @click=${() =>
+            dispatch({
+              bitmap: bitmap.resize(bitmap.width, bitmap.height + 1),
+            })}></button>
       </div>`;
   }
   return { view };

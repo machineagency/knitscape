@@ -34,7 +34,7 @@ function pixelPerfectCanvasExtension(
         state.bitmap.width != bitmap.width ||
         state.bitmap.height != bitmap.height
       ) {
-        ({ aspectRatio, bitmap } = state);
+        ({ bitmap } = state);
 
         setTimeout(() => pixelPerfectScale(), 1);
         return;

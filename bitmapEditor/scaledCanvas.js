@@ -11,7 +11,9 @@ function scaledCanvasExtension({ state }, {}) {
       if (
         state.aspectRatio[0] != aspectRatio[0] ||
         state.aspectRatio[1] != aspectRatio[1] ||
-        state.scale != scale
+        state.scale != scale ||
+        state.bitmap.width != bitmap.width ||
+        state.bitmap.height != bitmap.height
       ) {
         ({ aspectRatio, scale, bitmap } = state);
         updateDom();

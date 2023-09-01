@@ -1,4 +1,6 @@
 import { html, render } from "lit-html";
+import { live } from "lit-html/directives/live.js";
+
 import { Bimp } from "./bitmapEditor/Bimp";
 import { BimpEditor } from "./bitmapEditor/BimpEditor";
 import { fieldMonitor } from "./bitmapEditor/stateFieldMonitor";
@@ -50,13 +52,6 @@ async function stitchSymbolPalette() {
 
 let GLOBAL_STATE = startState;
 
-let STATEEE = {
-  repeat: {},
-  yarns: {},
-  yarnChanges: {},
-  needlesInWork: {},
-};
-
 let repeatEditorCanvas,
   colorChangeEditorCanvas,
   needleEditorCanvas,
@@ -73,9 +68,10 @@ function view() {
             <span>Pattern Repeat</span>
           </div>
           <div id="repeat-controls" style="grid-area: controls;">
-            <div id="repeat-tools">
-              <div id="repeat-palette"></div>
-            </div>
+            <div id="repeat-height"></div>
+
+            <div id="repeat-tools"></div>
+            <div id="repeat-palette"></div>
           </div>
 
           <div id="repeat-gutter-v" style="grid-area: vgutter;"></div>
@@ -83,7 +79,9 @@ function view() {
             <canvas id="repeat-editor"></canvas>
           </div>
           <div id="repeat-gutter-h" style="grid-area: hgutter;"></div>
-          <div id="repeat-padding" style="grid-area: padding;"></div>
+          <div id="repeat-padding" style="grid-area: padding;">
+            <div id="repeat-width"></div>
+          </div>
         </div>
       </div>
       <div id="pattern-container">
@@ -169,6 +167,70 @@ function gutterView({ gutterFunc, container, axis }) {
   };
 }
 
+function widthSpinner({ container }) {
+  return (state, dispatch) => {
+    let { bitmap } = state;
+    render(
+      html`<div class="width-spinner">
+        <button
+          class="plus"
+          @click=${() =>
+            dispatch({
+              bitmap: bitmap.resize(bitmap.width + 1, bitmap.height),
+            })}></button>
+        <input
+          type="text"
+          .value=${live(bitmap.width)}
+          class="size-input"
+          @change=${(e) =>
+            dispatch({
+              bitmap: bitmap.resize(Number(e.target.value), bitmap.height),
+            })} />
+
+        <button
+          class="minus"
+          @click=${() =>
+            dispatch({
+              bitmap: bitmap.resize(bitmap.width - 1, bitmap.height),
+            })}></button>
+      </div>`,
+      container
+    );
+  };
+}
+
+function heightSpinner({ container }) {
+  return (state, dispatch) => {
+    let { bitmap } = state;
+    render(
+      html`<div class="height-spinner">
+        <button
+          class="plus"
+          @click=${() =>
+            dispatch({
+              bitmap: bitmap.resize(bitmap.width, bitmap.height + 1),
+            })}></button>
+        <input
+          type="text"
+          .value=${live(bitmap.height)}
+          class="size-input"
+          @change=${(e) =>
+            dispatch({
+              bitmap: bitmap.resize(bitmap.width, Number(e.target.value)),
+            })} />
+
+        <button
+          class="minus"
+          @click=${() =>
+            dispatch({
+              bitmap: bitmap.resize(bitmap.width, bitmap.height - 1),
+            })}></button>
+      </div>`,
+      container
+    );
+  };
+}
+
 function toolSelectView(tools, container) {
   return (state, dispatch) =>
     render(
@@ -207,12 +269,20 @@ function imagePaletteSelect(palette, container) {
 
 async function buildRepeatEditor() {
   function measureFunc({ aspectRatio, bitmap }) {
+    console.log("asdf");
     const bbox = document
       .getElementById("repeat-container")
       .getBoundingClientRect();
 
-    const availableWidth = 0.9 * bbox.width;
-    const availableHeight = 0.9 * bbox.height;
+    const availableWidth = 0.7 * bbox.width;
+    const availableHeight = 0.7 * bbox.height;
+
+    console.log(
+      Math.min(
+        Math.floor(availableWidth / (bitmap.width * aspectRatio[0])),
+        Math.floor(availableHeight / (bitmap.height * aspectRatio[1]))
+      )
+    );
 
     return Math.min(
       Math.floor(availableWidth / (bitmap.width * aspectRatio[0])),
@@ -265,6 +335,16 @@ async function buildRepeatEditor() {
           gutterFunc: bottomLeft,
           container: document.getElementById("repeat-gutter-v"),
           axis: "vertical",
+        }),
+      }),
+      stateHook({
+        cb: heightSpinner({
+          container: document.getElementById("repeat-height"),
+        }),
+      }),
+      stateHook({
+        cb: widthSpinner({
+          container: document.getElementById("repeat-width"),
         }),
       }),
     ],
