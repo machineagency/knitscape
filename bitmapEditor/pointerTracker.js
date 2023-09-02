@@ -24,6 +24,10 @@ export function pointerTrackingExtension({ state, dispatch }, { target }) {
     }
   });
 
+  target.addEventListener("mouseleave", (e) => {
+    dispatch({ pos: { x: -1, y: -1 } });
+  });
+
   return {
     syncState(newState) {
       state = newState;

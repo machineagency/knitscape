@@ -1,20 +1,14 @@
 function highlightExtension(
-  { state, parent },
-  { cell = true, row = false, col = false, color = "#00000044", canvas }
+  { state },
+  { cell = true, row = false, col = false, color = "#00000044" }
 ) {
-  let { aspectRatio, scale, bitmap, pos, pan } = state;
+  let { aspectRatio, scale, bitmap, pos, pan, canvas } = state;
   let cellSize = [aspectRatio[0] * scale, aspectRatio[1] * scale];
 
-  // const dom = document.createElement("canvas");
-  // dom.style.cssText = `image-rendering: pixelated;`;
-  // parent[container].appendChild(dom);
-
   function draw() {
+    if (pos.x < 0 || pos.y < 0) return;
     const ctx = canvas.getContext("2d");
 
-    ctx.save();
-
-    // ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = color;
 
     if (cell) {
@@ -41,17 +35,7 @@ function highlightExtension(
         cellSize[1] * bitmap.height
       );
     }
-    ctx.restore();
   }
-
-  // function resizeCanvas(bitmap) {
-  //   dom.width = bitmap.width * aspectRatio[0] * scale;
-  //   dom.height = bitmap.height * aspectRatio[1] * scale;
-  // }
-
-  // function positionCanvas() {
-  //   dom.style.transform = `translate(${pan.x}px, ${pan.y}px)`;
-  // }
 
   return {
     syncState(state) {
@@ -70,8 +54,7 @@ function highlightExtension(
         pan = state.pan;
 
         cellSize = [aspectRatio[0] * scale, aspectRatio[1] * scale];
-        // resizeCanvas(bitmap);
-        // positionCanvas();
+
         draw();
       }
     },

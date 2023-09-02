@@ -8,6 +8,7 @@ import { scaledCanvas } from "./bitmapEditor/scaledCanvas";
 import { canvasScaler } from "./bitmapEditor/canvasScaler";
 import { pointerTracker } from "./bitmapEditor/pointerTracker";
 import { grid } from "./bitmapEditor/grid";
+import { highlight } from "./bitmapEditor/highlight";
 
 import { paletteRenderer } from "./bitmapEditor/paletteRenderer";
 import { hexPalette, imagePalette } from "./bitmapEditor/palettes";
@@ -24,6 +25,14 @@ import tuckUrl from "./stitchSymbols/tuck.png";
 import purlUrl from "./stitchSymbols/purl.png";
 
 import { buildColorChangeEditor } from "./colorChangeEditor";
+
+const iconMap = {
+  flood: "fa-fill-drip",
+  brush: "fa-paintbrush",
+  rect: "fa-vector-square",
+  line: "fa-minus",
+  shift: "fa-up-down-left-right",
+};
 
 async function stitchSymbolPalette() {
   const knit = new Image();
@@ -69,14 +78,14 @@ function view() {
             GLOBAL_STATE.scale = GLOBAL_STATE.scale + 1;
             syncScale();
           }}>
-          zoom in
+          <i class="fa-solid fa-magnifying-glass-plus"></i>
         </button>
         <button
           @click=${() => {
             GLOBAL_STATE.scale = GLOBAL_STATE.scale - 1;
             syncScale();
           }}>
-          zoom out
+          <i class="fa-solid fa-magnifying-glass-minus"></i>
         </button>
         <div id="repeat-tools"></div>
         <div id="repeat-palette"></div>
@@ -230,7 +239,7 @@ function toolSelectView(tools, container) {
             html`<button
               class=${state.activeTool == tool ? "active" : ""}
               @click=${() => dispatch({ activeTool: tool })}>
-              ${tool}
+              <i class="fa-solid ${iconMap[tool]}"></i>
             </button>`
         )}
       </div>`,
@@ -277,6 +286,7 @@ async function buildRepeatEditor() {
       }),
       paletteRenderer({ drawFunc: imagePalette }),
       grid(),
+      highlight(),
       stateHook({
         check: fieldMonitor("activeTool"),
         cb: toolSelectView(
@@ -342,22 +352,6 @@ function buildNeedleEditor() {
   });
 }
 
-function measurePatternContainer({ aspectRatio, bitmap }) {
-  const bbox = document
-    .getElementById("pattern-container")
-    .getBoundingClientRect();
-
-  const availableWidth = bbox.width;
-  const availableHeight = bbox.height;
-
-  console.log(availableHeight, availableWidth);
-
-  return Math.min(
-    Math.floor(availableWidth / (bitmap.width * aspectRatio[0])),
-    Math.floor(availableHeight / (bitmap.height * aspectRatio[1]))
-  );
-}
-
 function buildPreview() {
   return new BimpEditor({
     state: {
@@ -377,6 +371,7 @@ function buildPreview() {
       canvasScaler(),
       paletteRenderer({ drawFunc: hexPalette }),
       grid(),
+      highlight(),
       stateHook({
         cb: gutterView({
           gutterFunc: bottomLeft,
@@ -501,6 +496,19 @@ async function init() {
     preview.dispatch({
       palette,
     });
+  });
+
+  preview.addEffect("pos", ({ bitmap, pos }) => {
+    if (pos.x > -1 || pos.y > -1) {
+      repeatEditor.dispatch({
+        pos: {
+          x: pos.x % repeatEditor.state.bitmap.width,
+          y:
+            repeatEditor.state.bitmap.height -
+            ((bitmap.height - pos.y) % repeatEditor.state.bitmap.height),
+        },
+      });
+    }
   });
   syncScale();
 }
