@@ -1,6 +1,7 @@
 {
-  "previewX": 6,
+  "previewX": 3,
   "previewY": 3,
+  "scale": 25,
   "repeat": {
     "pixels": [
       0,

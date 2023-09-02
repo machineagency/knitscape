@@ -1,95 +1,10 @@
-// import { html, render } from "lit-html";
-// import { pointerTracker } from "./pointerPosition";
 import { Bimp } from "./Bimp";
 
-// const core = [pointerTracker()];
 const core = [];
 
 function updateState(state, action) {
   return { ...state, ...action };
 }
-
-// function defaultLayout(parent) {
-//   render(
-//     html`<style>
-//         .bimp-container {
-//           display: flex;
-//           flex-direction: column;
-//           height: 100%;
-//           flex: 1 1 0;
-//         }
-//         .bimp-center {
-//           display: flex;
-//           flex: 1 0 0;
-//           gap: 5px;
-//         }
-//         .bimp-workspace {
-//           display: grid;
-//           flex: 1 1 0;
-//           gap: 1px;
-//           grid-template-areas:
-//             ". top ."
-//             "left c right"
-//             ". bottom .";
-//           overflow: hidden;
-//           grid-template-columns: min-content 1fr min-content;
-//           grid-template-rows: min-content 1fr min-content;
-//           /* outline: 1px solid black; */
-//           background-color: #222222;
-
-//           flex: 1 1 0;
-//           min-height: 0;
-//           min-width: 0;
-//         }
-
-//         .bimp-workspace > * {
-//           position: relative;
-//         }
-
-//         .bimp-desktop > * {
-//           position: absolute;
-//           flex: 1 1 0;
-//         }
-//         .bimp-sidebar-primary,
-//         .bimp-sidebar-secondary {
-//           display: flex;
-//           flex-direction: column;
-//           justify-content: space-between;
-//           padding: 4px;
-//         }
-//         .bimp-taskbar-primary,
-//         .bimp-taskbar-secondary {
-//           display: flex;
-//           align-items: center;
-//           justify-content: center;
-//           padding: 4px;
-//           gap: 5px;
-//         }
-//       </style>
-//       <div class="bimp-container">
-//         <div class="bimp-taskbar-primary"></div>
-//         <div class="bimp-center">
-//           <div class="bimp-sidebar-primary"></div>
-//           <div class="bimp-workspace">
-//             <div class="bimp-desktop"></div>
-//           </div>
-//           <div class="bimp-sidebar-secondary"></div>
-//         </div>
-//         <div class="bimp-taskbar-secondary"></div>
-//       </div>`,
-//     parent
-//   );
-
-//   return {
-//     container: parent.querySelector(":scope .bimp-container"),
-//     workspace: parent.querySelector(":scope .bimp-workspace"),
-//     desktop: parent.querySelector(":scope .bimp-desktop"),
-//     sidebarPrimary: parent.querySelector(":scope .bimp-sidebar-primary"),
-//     sidebarSecondary: parent.querySelector(":scope .bimp-sidebar-secondary"),
-//     taskbarPrimary: parent.querySelector(":scope .bimp-taskbar-primary"),
-//     taskbarSecondary: parent.querySelector(":scope .bimp-taskbar-secondary"),
-//   };
-// }
 
 const defaultState = {
   bitmap: Bimp.empty(10, 10, 0),
@@ -101,14 +16,22 @@ const defaultState = {
 };
 
 export class BimpEditor {
-  constructor({ state, components }) {
+  constructor({ state, components = [], effects = {} }) {
     this.state = { ...defaultState, ...state };
     this.initialized = false;
+
+    this.effects = effects;
 
     this.dispatch = (action) => {
       const changes = Object.keys(action);
 
       this.state = updateState(this.state, action);
+
+      changes.forEach((key) => {
+        if (key in this.effects) {
+          this.effects[key].forEach((effect) => effect(this.state));
+        }
+      });
 
       this.syncState(this.state, changes);
     };
@@ -127,6 +50,11 @@ export class BimpEditor {
     this.components.forEach((component) => {
       if ("attached" in component) component.attached(this.state);
     });
+  }
+
+  addEffect(key, cb) {
+    // should probably make an id and return it? to remove effects later
+    this.effects[key] = [...(this.effects[key] || []), cb];
   }
 
   addComponent(component) {

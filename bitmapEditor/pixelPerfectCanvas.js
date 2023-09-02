@@ -20,14 +20,15 @@ function pixelPerfectCanvasExtension(
 ) {
   let { bitmap } = state;
 
-  function pixelPerfectScale() {
+  function pixelPerfectScale(state) {
     const newScale = measureFunc(state);
     dispatch({ scale: newScale });
   }
 
   return {
-    attached() {
-      setTimeout(() => pixelPerfectScale(), 1);
+    attached(state) {
+      setTimeout(() => pixelPerfectScale(state), 1);
+      // pixelPerfectScale(state);
     },
     syncState(state) {
       if (
@@ -35,8 +36,9 @@ function pixelPerfectCanvasExtension(
         state.bitmap.height != bitmap.height
       ) {
         ({ bitmap } = state);
+        // pixelPerfectScale(state);
 
-        setTimeout(() => pixelPerfectScale(), 1);
+        setTimeout(() => pixelPerfectScale(state), 1);
         return;
       }
     },

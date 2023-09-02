@@ -5,9 +5,13 @@ import { Bimp } from "./bitmapEditor/Bimp";
 import { BimpEditor } from "./bitmapEditor/BimpEditor";
 import { fieldMonitor } from "./bitmapEditor/stateFieldMonitor";
 import { scaledCanvas } from "./bitmapEditor/scaledCanvas";
-import { canvasScaler } from "./bitmapEditor/canvasScaler";
+import { pixelPerfectCanvas } from "./bitmapEditor/pixelPerfectCanvas";
 import { pointerTracker } from "./bitmapEditor/pointerTracker";
 import { grid } from "./bitmapEditor/grid";
+import { highlight } from "./bitmapEditor/highlight";
+
+import { numberGutter } from "./bitmapEditor/numberGutter";
+import { colorNumberGutter } from "./bitmapEditor/colorNumberGutter";
 
 import { paletteRenderer } from "./bitmapEditor/paletteRenderer";
 import { hexPalette, imagePalette } from "./bitmapEditor/palettes";
@@ -15,6 +19,7 @@ import { hexPalette, imagePalette } from "./bitmapEditor/palettes";
 import { pointerEvents } from "./bitmapEditor/pointerEvents";
 import { brush, flood, line, rect, shift, pan } from "./bitmapEditor/tools";
 import { stateHook } from "./bitmapEditor/stateHook";
+import { heightControl, controlPanel } from "./bitmapEditor/controlPanel";
 
 import startState from "./startState.json";
 
@@ -22,8 +27,6 @@ import knitUrl from "./stitchSymbols/knit.png";
 import slipUrl from "./stitchSymbols/slip.png";
 import tuckUrl from "./stitchSymbols/tuck.png";
 import purlUrl from "./stitchSymbols/purl.png";
-
-import { buildColorChangeEditor } from "./colorChangeEditor";
 
 async function stitchSymbolPalette() {
   const knit = new Image();
@@ -56,60 +59,68 @@ let repeatEditorCanvas,
 
 let repeatEditor, colorChangeEditor, needleEditor, preview;
 
+function repeatEditorView() {
+  return html`<div id="repeat-editor-container" style="grid-area: repeat;">
+    <div id="repeat-controls" style="grid-area: controls;">
+      <div id="repeat-tools"></div>
+      <div id="repeat-palette"></div>
+      <div id="repeat-height"></div>
+    </div>
+
+    <div id="repeat-gutter-v" style="grid-area: vgutter;"></div>
+    <div id="repeat-container" style="grid-area: repeat;">
+      <canvas id="repeat-editor"></canvas>
+    </div>
+    <div id="repeat-gutter-h" style="grid-area: hgutter;"></div>
+    <div id="repeat-controls-bottom" style="grid-area: repeatbottom;">
+      <div id="repeat-width"></div>
+    </div>
+  </div>`;
+}
+
 function view() {
   return html`
-    <div id="site-content">
-      <div id="site-title" style="grid-area: title;">
-        <span>knitscape</span>
-      </div>
-
-      <div id="left-controls" style="grid-area: lcontrols;">
-        <button
-          @click=${() => {
-            GLOBAL_STATE.scale = GLOBAL_STATE.scale + 1;
-            syncScale();
-          }}>
-          zoom in
-        </button>
-        <button
-          @click=${() => {
-            GLOBAL_STATE.scale = GLOBAL_STATE.scale - 1;
-            syncScale();
-          }}>
-          zoom out
-        </button>
-        <div id="repeat-tools"></div>
-        <div id="repeat-palette"></div>
-        <div id="repeat-height"></div>
-      </div>
-      <div class="lgutter" style="grid-area: lgutter;">
-        <div class="preview"></div>
-        <div class="repeat"></div>
-      </div>
-      <div id="pattern-container" style="grid-area: pattern;">
-        <canvas id="preview"></canvas>
-        <canvas id="repeat"></canvas>
-      </div>
-      <div class="bgutter" style="grid-area: bgutter;">
-        <div class="preview"></div>
-        <div class="repeat"></div>
-      </div>
-      <!-- <div style="grid-area: needles;">
-        <canvas id="needle-work-editor"></canvas>
-      </div> -->
-      <div id="bottom-controls" style="grid-area: bcontrols;">
-        <div id="repeat-width"></div>
-      </div>
-
-      <div id="color-change-container" style="grid-area: colors;">
-        <canvas id="color-change-editor" height="25" width="25"></canvas>
-        <div id="color-controls">
-          <div id="yarn-palette"></div>
-          <div id="color-height"></div>
+    <div id="main-content">
+      <div id="top" style="grid-area: top;"></div>
+      ${repeatEditorView()}
+      <div id="pattern-container" style="grid-area: pattern">
+        <div id="color-change-container" style="grid-area: colors;">
+          <canvas id="color-change-editor"></canvas>
         </div>
+        <div id="preview-gutter-v" style="grid-area: vgutter;"></div>
+        <div id="preview-container" style="grid-area: preview;">
+          <canvas id="preview"></canvas>
+        </div>
+        <div id="preview-gutter-h" style="grid-area: hgutter;"></div>
+        <div style="grid-area: needles;">
+          <canvas id="needle-work-editor"></canvas>
+        </div>
+        <div id="preview-controls" style="grid-area: controls;"></div>
       </div>
     </div>
   `;
+}
+
+function generateYarnPreview(repeat, x, y, yarnChanges) {
+  const height = repeat.height * y;
+  const width = repeat.width * x;
+
+  let tiled = Bimp.fromTile(width, height, repeat.vMirror());
+
+  let recolor = [];
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (tiled.pixel(x, y) == 0) {
+        recolor.push(yarnChanges[y % yarnChanges.length]);
+      } else {
+        recolor.push(-1);
+      }
+    }
+  }
+
+  let colored = new Bimp(width, height, recolor);
+  return colored.vMirror();
 }
 
 function bottomLeft({ bitmap }, axis) {
@@ -159,9 +170,7 @@ function widthSpinner({ container }) {
           @click=${() =>
             dispatch({
               bitmap: bitmap.resize(bitmap.width - 1, bitmap.height),
-            })}>
-          <i class="fa-solid fa-minus"></i>
-        </button>
+            })}></button>
 
         <input
           type="text"
@@ -176,9 +185,7 @@ function widthSpinner({ container }) {
           @click=${() =>
             dispatch({
               bitmap: bitmap.resize(bitmap.width + 1, bitmap.height),
-            })}>
-          <i class="fa-solid fa-plus"></i>
-        </button>
+            })}></button>
       </div>`,
       container
     );
@@ -195,9 +202,7 @@ function heightSpinner({ container }) {
           @click=${() =>
             dispatch({
               bitmap: bitmap.resize(bitmap.width, bitmap.height + 1),
-            })}>
-          <i class="fa-solid fa-plus"></i>
-        </button>
+            })}></button>
         <input
           type="text"
           .value=${live(bitmap.height)}
@@ -212,9 +217,7 @@ function heightSpinner({ container }) {
           @click=${() =>
             dispatch({
               bitmap: bitmap.resize(bitmap.width, bitmap.height - 1),
-            })}>
-          <i class="fa-solid fa-minus"></i>
-        </button>
+            })}></button>
       </div>`,
       container
     );
@@ -258,6 +261,19 @@ function imagePaletteSelect(palette, container) {
 }
 
 async function buildRepeatEditor() {
+  function measureFunc({ aspectRatio, bitmap }) {
+    const bbox = document
+      .getElementById("repeat-container")
+      .getBoundingClientRect();
+
+    const availableWidth = bbox.width;
+    const availableHeight = bbox.height;
+
+    return Math.min(
+      Math.floor(availableWidth / (bitmap.width * aspectRatio[0])),
+      Math.floor(availableHeight / (bitmap.height * aspectRatio[1]))
+    );
+  }
   let repeatTools = { brush, flood, line, rect, shift };
 
   const palette = await stitchSymbolPalette();
@@ -267,9 +283,10 @@ async function buildRepeatEditor() {
       palette,
       canvas: repeatEditorCanvas,
     },
+
     components: [
       pointerTracker({ target: repeatEditorCanvas }),
-      canvasScaler(),
+      scaledCanvas({ measureFunc }),
 
       pointerEvents({
         tools: repeatTools,
@@ -294,14 +311,14 @@ async function buildRepeatEditor() {
       stateHook({
         cb: gutterView({
           gutterFunc: bottomLeft,
-          container: document.querySelector(".bgutter .repeat"),
+          container: document.getElementById("repeat-gutter-h"),
           axis: "horizontal",
         }),
       }),
       stateHook({
         cb: gutterView({
           gutterFunc: bottomLeft,
-          container: document.querySelector(".lgutter .repeat"),
+          container: document.getElementById("repeat-gutter-v"),
           axis: "vertical",
         }),
       }),
@@ -315,6 +332,29 @@ async function buildRepeatEditor() {
           container: document.getElementById("repeat-width"),
         }),
       }),
+    ],
+  });
+}
+
+function buildColorChangeEditor() {
+  return new BimpEditor({
+    state: {
+      bitmap: Bimp.fromJSON(GLOBAL_STATE.yarns).vMirror(),
+      palette: GLOBAL_STATE.yarnPalette,
+      canvas: colorChangeEditorCanvas,
+    },
+
+    components: [
+      pointerTracker({ target: colorChangeEditorCanvas }),
+      scaledCanvas({}),
+      paletteRenderer({
+        drawFunc: hexPalette,
+      }),
+      pointerEvents({
+        tools: { brush },
+        eventTarget: colorChangeEditorCanvas,
+      }),
+      grid(),
     ],
   });
 }
@@ -342,23 +382,21 @@ function buildNeedleEditor() {
   });
 }
 
-function measurePatternContainer({ aspectRatio, bitmap }) {
-  const bbox = document
-    .getElementById("pattern-container")
-    .getBoundingClientRect();
-
-  const availableWidth = bbox.width;
-  const availableHeight = bbox.height;
-
-  console.log(availableHeight, availableWidth);
-
-  return Math.min(
-    Math.floor(availableWidth / (bitmap.width * aspectRatio[0])),
-    Math.floor(availableHeight / (bitmap.height * aspectRatio[1]))
-  );
-}
-
 function buildPreview() {
+  function measureFunc({ aspectRatio, bitmap }) {
+    const bbox = document
+      .getElementById("pattern-container")
+      .getBoundingClientRect();
+
+    const availableWidth = 0.8 * bbox.width;
+    const availableHeight = 0.8 * bbox.height;
+
+    return Math.min(
+      Math.floor(availableWidth / (bitmap.width * aspectRatio[0])),
+      Math.floor(availableHeight / (bitmap.height * aspectRatio[1]))
+    );
+  }
+
   return new BimpEditor({
     state: {
       bitmap: generateYarnPreview(
@@ -367,27 +405,26 @@ function buildPreview() {
         GLOBAL_STATE.previewY,
         GLOBAL_STATE.yarns.pixels
       ),
-      scale: GLOBAL_STATE.scale,
       palette: GLOBAL_STATE.yarnPalette,
       canvas: previewCanvas,
     },
 
     components: [
       pointerTracker({ target: previewCanvas }),
-      canvasScaler(),
+      scaledCanvas({ measureFunc }),
       paletteRenderer({ drawFunc: hexPalette }),
-      grid(),
+      // grid(),
       stateHook({
         cb: gutterView({
           gutterFunc: bottomLeft,
-          container: document.querySelector(".bgutter .preview"),
+          container: document.getElementById("preview-gutter-h"),
           axis: "horizontal",
         }),
       }),
       stateHook({
         cb: gutterView({
           gutterFunc: bottomLeft,
-          container: document.querySelector(".lgutter .preview"),
+          container: document.getElementById("preview-gutter-v"),
           axis: "vertical",
         }),
       }),
@@ -404,12 +441,7 @@ function syncRepeat(state) {
   );
 
   preview.dispatch({
-    bitmap: generateYarnPreview(
-      Bimp.fromJSON(state.bitmap),
-      GLOBAL_STATE.previewX,
-      GLOBAL_STATE.previewY,
-      GLOBAL_STATE.yarns.pixels
-    ),
+    bitmap: tiled,
   });
 }
 
@@ -428,81 +460,41 @@ function syncYarnChanges(state) {
   });
 }
 
-function syncScale() {
-  const bbox = document
-    .getElementById("pattern-container")
-    .getBoundingClientRect();
-
-  GLOBAL_STATE.previewX = Math.floor(bbox.width / GLOBAL_STATE.scale);
-  GLOBAL_STATE.previewY = Math.floor(bbox.height / GLOBAL_STATE.scale);
-
-  const scale = GLOBAL_STATE.scale;
-
-  repeatEditor.dispatch({
-    scale,
-  });
+function syncScale(state) {
   colorChangeEditor.dispatch({
-    scale,
-  });
-  preview.dispatch({
-    scale,
-    bitmap: generateYarnPreview(
-      Bimp.fromJSON(repeatEditor.state.bitmap),
-      GLOBAL_STATE.previewX,
-      GLOBAL_STATE.previewY,
-      GLOBAL_STATE.yarns.pixels
-    ),
+    scale: state.scale,
   });
 
-  // needleEditor.dispatch({
-  //   scale: state.scale,
-  // });
-}
+  needleEditor.dispatch({
+    scale: state.scale,
+  });
 
-function generateYarnPreview(repeat, width, height, yarnChanges) {
-  let tiled = Bimp.fromTile(width, height, repeat.vMirror());
-
-  let recolor = [];
-
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      if (tiled.pixel(x, y) == 0) {
-        recolor.push(yarnChanges[y % yarnChanges.length]);
-      } else {
-        recolor.push(-1);
-      }
-    }
-  }
-
-  let colored = new Bimp(width, height, recolor);
-  return colored.vMirror();
+  // document.getElementById("repeat-padding").style.height = `${state.scale}px`;
 }
 
 async function init() {
   render(view(), document.body);
-  repeatEditorCanvas = document.getElementById("repeat");
+
+  repeatEditorCanvas = document.getElementById("repeat-editor");
   colorChangeEditorCanvas = document.getElementById("color-change-editor");
   previewCanvas = document.getElementById("preview");
   needleEditorCanvas = document.getElementById("needle-work-editor");
 
   repeatEditor = await buildRepeatEditor();
-  colorChangeEditor = buildColorChangeEditor(
-    GLOBAL_STATE,
-    colorChangeEditorCanvas
-  );
-  // needleEditor = buildNeedleEditor();
-
+  colorChangeEditor = buildColorChangeEditor();
+  needleEditor = buildNeedleEditor();
   preview = buildPreview();
-  repeatEditor.addEffect("bitmap", syncRepeat);
-  colorChangeEditor.addEffect("bitmap", syncYarnChanges);
 
-  colorChangeEditor.addEffect("palette", ({ palette }) => {
-    GLOBAL_STATE.yarnPalette = palette;
-    preview.dispatch({
-      palette,
-    });
-  });
-  syncScale();
+  repeatEditor.addComponent(
+    stateHook({ check: fieldMonitor("bitmap"), cb: syncRepeat })
+  );
+  colorChangeEditor.addComponent(
+    stateHook({ check: fieldMonitor("bitmap"), cb: syncYarnChanges })
+  );
+
+  preview.addComponent(
+    stateHook({ check: fieldMonitor("scale"), cb: syncScale })
+  );
 }
 
 window.onload = init;

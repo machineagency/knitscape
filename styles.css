@@ -4,19 +4,16 @@
       format("woff2 supports variations"),
     url("/assets/fonts/NP-VariableVF.woff2") format("woff2-variations");
 }
+
 body {
   background-color: #2d2c2c;
   color: #fafafa;
   height: 100vh;
-  display: flex;
-  flex-direction: column;
+  width: 100vw;
+
   font-family: "National Park";
   user-select: none;
-}
-
-canvas {
-  display: block;
-  outline: 1px solid black;
+  display: flex;
 }
 
 button {
@@ -33,130 +30,135 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
+
+  box-shadow: 0 0 0px 1px #0000009e;
+
+  display: flex;
+  align-items: center;
 }
 
 button:hover {
-  background-color: #676767;
+  background-color: #535353;
   color: #fafafa;
   font-weight: 600;
 }
 
-#main-content {
-  flex: 1;
-  display: flex;
-  gap: 1rem;
-  padding: 2rem 1rem;
+button:active {
+  background-color: #7a7a7a;
+  color: #fafafa;
+  font-weight: 600;
 }
 
-#left {
+button > i {
+  display: inline;
+  line-height: 0 !important;
+}
+
+canvas {
+  outline: 1px solid black;
+  display: block;
+}
+
+#site-title {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  font-size: xx-large;
+  font-weight: 100;
+  color: #bdbdbd;
+  margin-bottom: 4px;
+}
+
+#site-content {
+  position: relative;
   flex: 1 1 0;
+  display: grid;
+  padding: 0.5rem 1rem;
+  grid-template-areas:
+    ". title title title ."
+    "lcontrols lgutter pattern colors sim"
+    ". . bgutter . ."
+    ". . bcontrols . .";
+  grid-template-columns: min-content min-content 1fr 75px 1fr;
+  grid-template-rows: min-content minmax(0, 1fr) min-content min-content;
+}
+
+#site-content > * {
+  min-width: 0;
+}
+
+#pattern-container,
+#color-change-container {
+  height: 100%;
+  position: relative;
+}
+
+.lgutter {
+  position: relative;
+  width: 25px;
+}
+
+.lgutter > * {
+  position: absolute;
+  bottom: 0;
+}
+
+.bgutter {
+  position: relative;
+  height: 25px;
+}
+
+.bgutter > * {
+  position: absolute;
+  left: 0;
+}
+
+#pattern-container > canvas {
+  position: absolute;
+  bottom: 0;
+}
+
+#left-controls {
+  width: 50px;
+  gap: 8px;
   display: flex;
   flex-direction: column;
-  max-width: 400px;
+  justify-content: end;
+  margin-right: 1rem;
+  align-items: end;
 }
 
-#left > * {
-  flex: 1 1 0;
-}
-
-#repeat-container {
-  display: grid;
-  align-content: end;
-
-  grid-template-areas:
-    ". top top"
-    "controls vgutter repeat"
-    ". . hgutter"
-    "padding padding padding";
-  grid-template-columns: min-content min-content 1fr;
-}
-
-#pattern-container {
-  flex: 1 1 0;
-  display: grid;
-  align-content: end;
-  grid-template-areas:
-    ". . top top"
-    "colorlabel colors vgutter preview"
-    "controls controls controls hgutter"
-    "controls controls controls needles";
-
-  grid-template-columns: min-content min-content min-content 1fr;
+#bottom-controls {
+  height: 30px;
+  gap: 6px;
+  display: flex;
+  margin-top: 1rem;
 }
 
 #color-change-container {
-  align-self: end;
-}
-
-.section-title {
-  font-size: larger;
   display: flex;
-  align-items: center;
-  height: 3rem;
+  align-items: end;
+  gap: 1rem;
+  padding-left: 0.3rem;
 }
 
-.vertical-title {
-  font-size: larger;
+#color-controls {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  width: 3rem;
-
-  writing-mode: tb-rl;
-  transform: rotate(-180deg);
+  gap: 1rem;
 }
 
-#repeat-controls {
-  width: 50px;
+#yarn-palette {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-}
-
-/* TOOL SELECT */
-
-.tool-select {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  padding: 4px;
-  justify-content: center;
-}
-
-.tool-select .active {
-  background-color: #343434;
-  color: #f1f1f1;
-  font-weight: 700;
-}
-
-/* PALETTE SELECT */
-
-.palette-select {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  justify-content: center;
-  padding: 0 6px;
-}
-
-.palette-select > img {
-  border: 1px solid black;
-  max-height: 40px;
-  cursor: pointer;
-}
-
-.selected {
-  outline: 1px solid white;
+  gap: 0.5rem;
 }
 
 /* GUTTER */
+
 .gutter {
   display: flex;
-
-  user-select: none;
   color: #969696;
-
-  font-family: "National Park";
   font-size: 0.7em;
 }
 
@@ -190,31 +192,101 @@ button:hover {
   font-weight: 600;
 }
 
-/* NUMBER SPINNER */
+/* TOOL SELECT */
 
-.height-spinner {
-  font-size: 0.8rem;
+#repeat-tools {
+  align-self: normal;
+}
+
+.tool-select {
   display: flex;
   flex-direction: column;
-  align-items: stretch;
   gap: 5px;
-  padding: 5px;
+  justify-content: center;
 }
 
-.width-spinner {
-  font-size: 0.8rem;
-  display: flex;
-  gap: 5px;
-  padding: 5px;
+.tool-select .active {
+  background-color: #343434;
+  color: #f1f1f1;
+  font-weight: 700;
 }
 
-.number-spinner > * {
-  /* width: 100%; */
+/* PALETTE SELECT */
+
+.palette-select {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 4px;
 }
-.control-group {
+
+.hex-select {
+  border: 1px solid black;
+  max-height: 40px;
+  cursor: pointer;
+  aspect-ratio: 1;
+  position: relative;
+}
+
+.palette-select > img {
+  border: 1px solid black;
+  max-height: 40px;
+  cursor: pointer;
+  aspect-ratio: 1;
+}
+
+.selected {
+  outline: 1px solid white;
+}
+
+.edit-color {
+  display: none;
+  position: absolute;
+  left: 100%;
+  height: 100%;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  background-color: #252525;
+  color: #9e9e9e;
+  cursor: pointer;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 0 0px 1px #0000009e;
+}
+
+.hex-select:hover .edit-color {
   display: flex;
 }
+
+.edit-color:hover {
+  color: #fafafa;
+  background-color: #343434;
+}
+
+.hex-select input {
+  visibility: hidden;
+  width: 0px;
+  padding: 0;
+  margin: 0;
+  position: absolute;
+  left: 100%;
+}
+
+/* NUMBER SPINNER */
+
+.spinner {
+  display: flex;
+  gap: 5px;
+}
+
+.spinner.vertical {
+  flex-direction: column;
+  align-items: center;
+}
+
 .size-input {
+  align-self: center;
+  width: 30px;
   color: #9e9e9e;
   font-size: 1rem;
   text-align: center;
@@ -223,21 +295,14 @@ button:hover {
 
 .plus,
 .minus {
-  font-size: 1.5rem;
-  outline: 1px solid black;
-}
-.minus::before {
-  content: "-";
-}
-.plus::before {
-  content: "+";
+  aspect-ratio: 1;
 }
 
 input {
   background: none;
   border: none;
 }
+
 input:focus {
-  background: white;
-  border: 1px solid grey;
+  color: #fafafa;
 }

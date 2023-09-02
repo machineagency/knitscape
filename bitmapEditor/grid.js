@@ -26,6 +26,11 @@ function gridExtension({ state }, {}) {
   }
 
   return {
+    attached(state) {
+      ({ aspectRatio, scale, bitmap } = state);
+      cellSize = [aspectRatio[0] * scale, aspectRatio[1] * scale];
+      draw();
+    },
     syncState(state) {
       ({ aspectRatio, scale, bitmap } = state);
       cellSize = [aspectRatio[0] * scale, aspectRatio[1] * scale];
