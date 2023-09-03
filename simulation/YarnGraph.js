@@ -8,13 +8,15 @@ import * as d3 from "d3";
 
 const LINK_WIDTH = 7;
 
-const test = new Bimp(4, 4, [0, 0, 0, 0, 0, 2, 2, 0, 0, 2, 2, 0, 0, 0, 0, 0]);
+// const test = new Bimp(3, 1, [0, 0, 0]);
+// const test = new Bimp(3, 2, [0, 0, 0, 0, 2, 0]);
+// const test = new Bimp(3, 3, [0, 0, 0, 0, 2, 0, 0, 2, 0]);
+const test = new Bimp(3, 5, [0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0]);
 
-const testPattern = new Pattern(test);
+const testPattern = new Pattern(test.vMirror());
 const testModel = new ProcessModel(testPattern);
 const yarnGraph = new YarnModel(testModel.cn);
 
-console.log(testPattern);
 function layoutNodes(yarnGraph) {
   // calculates the x,y pixel values for the i,j nodes based on current window size
   const w = window.innerWidth;
@@ -40,6 +42,9 @@ const nodes = layoutNodes(yarnGraph);
 const links = yarnGraph.yarnPathToLinks();
 const ops = testPattern.makeOpData();
 
+console.log(nodes);
+console.log(links);
+
 function stitchX(stitch) {
   const inds = stitch.cnIndices;
   return (
@@ -58,8 +63,8 @@ const opColors = d3.scaleOrdinal(d3.schemePastel1);
 
 const directionColors = ["#e91e63", "#03a9f4"];
 const cnColors = {
-  ACN: "#000",
-  PCN: "#56c34a",
+  ACN: "#444",
+  PCN: "#fff",
   UACN: "#00f",
   ECN: "#f00",
 };
@@ -125,14 +130,39 @@ const frontYarns = yarnsFrontContainer
   .attr("x2", (d) => nodes[d.target].x)
   .attr("y2", (d) => nodes[d.target].y);
 
+yarnsFrontContainer
+  .attr("text-anchor", "middle")
+  .attr("font-size", "24")
+  .selectAll()
+  .data(links)
+  .join("text")
+  .text((d) => d.linkType)
+  .attr("x", (d) => (nodes[d.source].x + nodes[d.target].x) / 2)
+  .attr("y", (d) => (nodes[d.source].y + nodes[d.target].y) / 2)
+  .attr("alignment-baseline", "middle");
+
 const cns = cnNodeContainer
   .selectAll()
   .data(nodes)
   .join("circle")
-  .attr("r", LINK_WIDTH / 2 + 2)
+  .attr("r", 10)
   .attr("cx", (d) => d.x)
   .attr("cy", (d) => d.y)
-  .attr("fill", (d) => cnColors[d.cn]);
+  .attr("fill", (d) => cnColors[d.cn])
+  .attr("stroke", "black")
+  .attr("stroke-width", "2px")
+  .attr("title", "TEST");
+
+// const cnLabels = cnNodeContainer
+//   .attr("text-anchor", "middle")
+//   .attr("font-size", "24")
+//   .selectAll()
+//   .data(nodes)
+//   .join("text")
+//   .text((d) => JSON.stringify(d.mv))
+//   .attr("x", (d) => d.x + 35)
+//   .attr("y", (d) => d.y + 20)
+//   .attr("alignment-baseline", "middle");
 
 const operations = operationContainer
   .selectAll()

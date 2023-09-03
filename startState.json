@@ -1,12 +1,5 @@
 {
-  "previewX": 3,
-  "previewY": 3,
   "scale": 25,
-  "sim": {
-    "yarnWidth": 6,
-    "hDist": 10,
-    "vDist": 12
-  },
   "repeat": {
     "pixels": [
       0,

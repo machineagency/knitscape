@@ -238,6 +238,7 @@ canvas {
   display: flex;
   flex-direction: column-reverse;
   gap: 4px;
+  z-index: 10;
 }
 
 .hex-select {
