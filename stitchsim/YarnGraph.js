@@ -3,6 +3,8 @@ import { Pattern } from "../pattern/pattern";
 import { YarnModel } from "./YarnModel";
 import * as d3 from "d3";
 
+// Draws the yarn path through the contact neighborhoods
+
 const PARAMS = {
   linkWidth: 7,
 };

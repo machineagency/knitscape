@@ -1,3 +1,5 @@
+// Adapted from https://github.com/d3/d3-force/blob/main/src/link.js
+
 function constant(x) {
   return function () {
     return x;
@@ -18,7 +20,7 @@ function find(nodeById, nodeId) {
   return node;
 }
 
-export default function (links) {
+export function yarnLinkForce(links) {
   var id = index,
     strength = defaultStrength,
     strengths,
@@ -44,15 +46,16 @@ export default function (links) {
         y = target.y + target.vy - source.y - source.vy || jiggle(random);
         l = Math.sqrt(x * x + y * y);
 
-        if (
-          Math.sign(l - distances[i]) <= 0 &&
-          (link.linkType == "FLFH" || l.linkType == "LHLL")
-        ) {
-          //
-
-          l = ((l - distances[i]) / l) * alpha * 0.01;
+        if (link.linkType == "FLFH" || l.linkType == "LHLL") {
+          // If it is a vertical link
+          if (Math.sign(l - distances[i]) <= 0)
+            // if it is shorter than it is supposed to be, it doesn't try to expand
+            l = ((l - distances[i]) / l) * alpha * 0.001;
+          else {
+            l = ((l - distances[i]) / l) * alpha * 0.18;
+          }
         } else {
-          l = ((l - distances[i]) / l) * alpha * 0.09;
+          l = ((l - distances[i]) / l) * alpha * 0.18;
         }
 
         // l = ((l - distances[i]) / l) * alpha * 0.6;

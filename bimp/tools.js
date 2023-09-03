@@ -1,124 +1,73 @@
-function editMotif(state, bitmap, motifID) {
-  const newMotifs = { ...state.motifs };
-  const motif = newMotifs[motifID];
-
-  motif.bitmap = bitmap;
-  motif.bimpCanvas.updateOffscreenCanvas(motif.bitmap, motif.palette);
-  return newMotifs;
-}
-
-export function brush(pos, motifID, state, dispatch, color) {
-  let currentPos = pos;
-
-  function brushPixel(newPos, state, first = false) {
-    if (!first) {
-      if (newPos.pX == currentPos.pX && newPos.pY == currentPos.pY) return;
-    }
-    const updated = state.motifs[motifID].bitmap.line(
-      { x: currentPos.pX, y: currentPos.pY },
-      { x: newPos.pX, y: newPos.pY },
-      color
+export function brush(start, state, dispatch) {
+  function onMove(newPos, state) {
+    const updated = state.bitmap.line(
+      { x: start.x, y: start.y },
+      { x: newPos.x, y: newPos.y },
+      state.paletteIndex
     );
 
-    currentPos = newPos;
-
-    dispatch({ motifs: editMotif(state, updated, motifID) });
+    start = newPos;
+    dispatch({ bitmap: updated });
   }
 
-  brushPixel(pos, state, true);
-  return brushPixel;
+  onMove(start, state);
+  return onMove;
 }
 
-export function flood(pos, motifID, state, dispatch, color) {
-  let currentPos = pos;
-
-  function floodArea(newPos, state, first = false) {
-    if (!first) {
-      if (newPos.pX == currentPos.pX && newPos.pY == currentPos.pY) return;
-    }
-    currentPos = newPos;
-
-    const updated = state.motifs[motifID].bitmap.flood(
-      { x: currentPos.pX, y: currentPos.pY },
-      color
-    );
-
-    dispatch({ motifs: editMotif(state, updated, motifID) });
+export function flood(start, state, dispatch) {
+  function onMove({ x, y }, state) {
+    dispatch({ bitmap: state.bitmap.flood({ x, y }, state.paletteIndex) });
   }
 
-  floodArea(pos, state, true);
-  return floodArea;
+  onMove(start, state);
+  return onMove;
 }
 
-export function rect(start, motifID, state, dispatch, color) {
+export function rect(start, state, dispatch) {
   // When we start to draw a rectangle, we save the currently active bitmap
   // so our changes will only be completely overriden when we stop dragging
-  const bimp = state.motifs[motifID].bitmap;
-  let currentPos = start;
-
-  function drawRectangle(newPos, _, first = false) {
-    if (!first) {
-      if (newPos.pX == currentPos.pX && newPos.pY == currentPos.pY) return;
-    }
-    currentPos = newPos;
-    const updated = bimp.rect(
-      { x: start.pX, y: start.pY },
-      { x: currentPos.pX, y: currentPos.pY },
-      color
+  function onMove({ x, y }, _) {
+    const updated = state.bitmap.rect(
+      { x: start.x, y: start.y },
+      { x, y },
+      state.paletteIndex
     );
 
-    dispatch({ motifs: editMotif(state, updated, motifID) });
+    dispatch({ bitmap: updated });
   }
-  drawRectangle(start, true);
-  return drawRectangle;
+  onMove(start);
+  return onMove;
 }
 
-export function line(start, motifID, state, dispatch, color) {
-  const bimp = state.motifs[motifID].bitmap;
-  let currentPos = start;
-
-  function drawLine(newPos, _, first = false) {
-    if (!first) {
-      if (newPos.pX == currentPos.pX && newPos.pY == currentPos.pY) return;
-    }
-    currentPos = newPos;
-
-    const updated = bimp.line(
-      { x: start.pX, y: start.pY },
-      { x: currentPos.pX, y: currentPos.pY },
-      color
-    );
-
-    dispatch({ motifs: editMotif(state, updated, motifID) });
+export function line(start, state, dispatch) {
+  function onMove({ x, y }) {
+    dispatch({
+      bitmap: state.bitmap.line(
+        { x: start.x, y: start.y },
+        { x, y },
+        state.paletteIndex
+      ),
+    });
   }
-  drawLine(start, true);
-  return drawLine;
+
+  onMove(start);
+  return onMove;
 }
 
-export function shift(start, motifID, state, dispatch, color) {
-  let currentPos = start;
-
-  function doShift(newPos, state, first = false) {
-    if (!first) {
-      if (newPos.pX == currentPos.pX && newPos.pY == currentPos.pY) return;
-    }
-    currentPos = newPos;
-
-    const updated = state.motifs[motifID].bitmap.shift(
-      start.pX - newPos.pX,
-      start.pY - newPos.pY
-    );
-
-    dispatch({ motifs: editMotif(state, updated, motifID) });
+export function shift(start, state, dispatch) {
+  function onMove({ x, y }) {
+    dispatch({ bitmap: state.bitmap.shift(start.x - x, start.y - y) });
   }
-  doShift(start, true);
-  return doShift;
+  onMove(start);
+  return onMove;
 }
 
-export const tools = {
-  line,
-  brush,
-  flood,
-  rect,
-  shift,
-};
+export function pan(startPos, state, dispatch) {
+  function onMove(currentPos, { pan, scale, aspectRatio }) {
+    const dx = (startPos.x - currentPos.x) * scale * aspectRatio[0];
+    const dy = (startPos.y - currentPos.y) * scale * aspectRatio[1];
+
+    dispatch({ pan: { x: pan.x - dx, y: pan.y - dy } });
+  }
+  return onMove;
+}

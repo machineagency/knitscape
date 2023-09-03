@@ -1,5 +1,3 @@
-// import
-
 function paletteRendererExtension(
   { state },
   { drawFunc, paletteOverride, bitmapOverride }

@@ -1,17 +1,17 @@
 import { html, render } from "lit-html";
 import { live } from "lit-html/directives/live.js";
 
-import { BimpEditor } from "./bitmapEditor/BimpEditor";
-import { Bimp } from "./bitmapEditor/Bimp";
+import { BimpEditor } from "./bimp/BimpEditor";
+import { Bimp } from "./bimp/Bimp";
 
-import { pointerTracker } from "./bitmapEditor/pointerTracker";
-import { grid } from "./bitmapEditor/grid";
-import { canvasScaler } from "./bitmapEditor/canvasScaler";
-import { paletteRenderer } from "./bitmapEditor/paletteRenderer";
-import { hexPalette } from "./bitmapEditor/palettes";
-import { pointerEvents } from "./bitmapEditor/pointerEvents";
-import { brush } from "./bitmapEditor/tools";
-import { stateHook } from "./bitmapEditor/stateHook";
+import { pointerTracker } from "./bimp/pointerTracker";
+import { grid } from "./bimp/grid";
+import { canvasScaler } from "./bimp/canvasScaler";
+import { paletteRenderer } from "./bimp/paletteRenderer";
+import { hexPalette } from "./bimp/palettes";
+import { pointerEvents } from "./bimp/pointerEvents";
+import { brush } from "./bimp/tools";
+import { stateHook } from "./bimp/stateHook";
 
 function getRandomColor() {
   var letters = "0123456789ABCDEF";

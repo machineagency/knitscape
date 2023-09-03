@@ -1,21 +1,20 @@
 import { html, render } from "lit-html";
 import { live } from "lit-html/directives/live.js";
 
-import { Bimp } from "./bitmapEditor/Bimp";
-import { BimpEditor } from "./bitmapEditor/BimpEditor";
-import { fieldMonitor } from "./bitmapEditor/stateFieldMonitor";
-import { scaledCanvas } from "./bitmapEditor/scaledCanvas";
-import { canvasScaler } from "./bitmapEditor/canvasScaler";
-import { pointerTracker } from "./bitmapEditor/pointerTracker";
-import { grid } from "./bitmapEditor/grid";
-import { highlight } from "./bitmapEditor/highlight";
+import { Bimp } from "./bimp/Bimp";
+import { BimpEditor } from "./bimp/BimpEditor";
+import { fieldMonitor } from "./bimp/stateFieldMonitor";
+import { canvasScaler } from "./bimp/canvasScaler";
+import { pointerTracker } from "./bimp/pointerTracker";
+import { grid } from "./bimp/grid";
+import { highlight } from "./bimp/highlight";
 
-import { paletteRenderer } from "./bitmapEditor/paletteRenderer";
-import { hexPalette, imagePalette } from "./bitmapEditor/palettes";
+import { paletteRenderer } from "./bimp/paletteRenderer";
+import { hexPalette, imagePalette } from "./bimp/palettes";
 
-import { pointerEvents } from "./bitmapEditor/pointerEvents";
-import { brush, flood, line, rect, shift, pan } from "./bitmapEditor/tools";
-import { stateHook } from "./bitmapEditor/stateHook";
+import { pointerEvents } from "./bimp/pointerEvents";
+import { brush, flood, line, rect, shift } from "./bimp/tools";
+import { stateHook } from "./bimp/stateHook";
 
 import startState from "./startState.json";
 
@@ -46,7 +45,7 @@ document.body.onmouseup = function () {
   --GLOBAL_STATE.mouseDown;
 };
 
-let clear, relax;
+let clear, relax, flip;
 let timeoutID;
 
 let repeatEditorCanvas,
@@ -112,6 +111,7 @@ function view() {
       <div id="sim-container" style="grid-area: sim">
         <div id="sim-controls" style="grid-area: simcontrols">
           <button @click=${() => relax()}>relax</button>
+          <button @click=${() => flip()}>flip</button>
         </div>
         <svg id="simulation"></svg>
       </div>
@@ -330,28 +330,28 @@ async function buildRepeatEditor() {
   });
 }
 
-function buildNeedleEditor() {
-  return new BimpEditor({
-    state: {
-      bitmap: Bimp.fromJSON(GLOBAL_STATE.needles),
-      palette: ["#ffffff", "#000000"],
-      canvas: needleEditorCanvas,
-    },
+// function buildNeedleEditor() {
+//   return new BimpEditor({
+//     state: {
+//       bitmap: Bimp.fromJSON(GLOBAL_STATE.needles),
+//       palette: ["#ffffff", "#000000"],
+//       canvas: needleEditorCanvas,
+//     },
 
-    components: [
-      pointerTracker({ target: needleEditorCanvas }),
-      scaledCanvas({}),
-      paletteRenderer({
-        drawFunc: hexPalette,
-      }),
-      pointerEvents({
-        tools: { brush },
-        eventTarget: needleEditorCanvas,
-      }),
-      grid({ lineColor: "#999999" }),
-    ],
-  });
-}
+//     components: [
+//       pointerTracker({ target: needleEditorCanvas }),
+//       scaledCanvas({}),
+//       paletteRenderer({
+//         drawFunc: hexPalette,
+//       }),
+//       pointerEvents({
+//         tools: { brush },
+//         eventTarget: needleEditorCanvas,
+//       }),
+//       grid({ lineColor: "#999999" }),
+//     ],
+//   });
+// }
 
 async function buildPreview() {
   const stitchSymbolPalette = await transparentStitchPalette();
@@ -492,8 +492,7 @@ function runSimulation(symbolLayer) {
   timeoutID = setTimeout(() => {
     if (clear) clear();
     clear = null;
-    ({ clear, relax } = renderPreview(
-      GLOBAL_STATE.sim,
+    ({ clear, relax, flip } = renderPreview(
       symbolLayer,
       colorChangeEditor.state.bitmap.pixels,
       GLOBAL_STATE.yarnPalette

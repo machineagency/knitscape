@@ -167,7 +167,12 @@ canvas {
 
 #sim-controls {
   display: flex;
+  gap: 5px;
   justify-content: end;
+}
+
+#sim-controls > button {
+  width: 40px;
 }
 
 /* GUTTER */

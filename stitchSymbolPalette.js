@@ -1,11 +1,11 @@
-import knitUrl from "./stitches/knit.png";
-import slipUrl from "./stitches/slip.png";
-import tuckUrl from "./stitches/tuck.png";
-import purlUrl from "./stitches/purl.png";
-import knitTransparentUrl from "./stitches/knit_transparent.png";
-import slipTransparentUrl from "./stitches/slip_transparent.png";
-import tuckTransparentUrl from "./stitches/tuck_transparent.png";
-import purlTransparentUrl from "./stitches/purl_transparent.png";
+import knitUrl from "./assets/stitches/knit.png";
+import slipUrl from "./assets/stitches/slip.png";
+import tuckUrl from "./assets/stitches/tuck.png";
+import purlUrl from "./assets/stitches/purl.png";
+import knitTransparentUrl from "./assets/stitches/knit_transparent.png";
+import slipTransparentUrl from "./assets/stitches/slip_transparent.png";
+import tuckTransparentUrl from "./assets/stitches/tuck_transparent.png";
+import purlTransparentUrl from "./assets/stitches/purl_transparent.png";
 
 export async function stitchSymbolPalette() {
   const knit = new Image();
