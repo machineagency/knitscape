@@ -5,7 +5,7 @@ const opTypes = {
   p: 3,
 };
 
-const pixToOp = ["K", "P", "T", "T"];
+const pixToOp = ["K", "P", "M", "T"];
 
 export class Pattern {
   constructor(bitmap) {

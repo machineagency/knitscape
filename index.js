@@ -25,7 +25,7 @@ import {
 
 import { buildColorChangeEditor } from "./colorChangeEditor";
 
-import { renderPreview } from "./stitchsim/StitchPreview";
+import { renderPreview } from "./simulation/yarnSimulation";
 
 const iconMap = {
   flood: "fa-fill-drip",

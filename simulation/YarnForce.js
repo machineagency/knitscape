@@ -39,6 +39,7 @@ export function yarnLinkForce(links) {
   }
 
   function force(alpha) {
+    // console.log(distances);
     for (var k = 0, n = links.length; k < iterations; ++k) {
       for (var i = 0, link, source, target, x, y, l, b; i < n; ++i) {
         (link = links[i]), (source = link.source), (target = link.target);
@@ -46,19 +47,17 @@ export function yarnLinkForce(links) {
         y = target.y + target.vy - source.y - source.vy || jiggle(random);
         l = Math.sqrt(x * x + y * y);
 
-        if (link.linkType == "FLFH" || l.linkType == "LHLL") {
+        if (link.linkType == "FLFH" || link.linkType == "LHLL") {
           // If it is a vertical link
           if (Math.sign(l - distances[i]) <= 0)
             // if it is shorter than it is supposed to be, it doesn't try to expand
             l = ((l - distances[i]) / l) * alpha * 0.001;
           else {
-            l = ((l - distances[i]) / l) * alpha * 0.18;
+            l = ((l - distances[i]) / l) * alpha * 0.2;
           }
         } else {
-          l = ((l - distances[i]) / l) * alpha * 0.18;
+          l = ((l - distances[i]) / l) * alpha * 0.5;
         }
-
-        // l = ((l - distances[i]) / l) * alpha * 0.6;
 
         (x *= l), (y *= l);
         target.vx -= x * (b = bias[i]);

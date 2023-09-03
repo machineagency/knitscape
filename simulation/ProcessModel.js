@@ -73,32 +73,6 @@ class ContactNeighborhood {
   neighborhood(i, j) {
     return this.contacts[j * this.width + i];
   }
-
-  // bl(m, n) {
-  //   return 2 * m, n;
-  // }
-
-  // br(m, n) {
-  //   return 2 * m + 1, n;
-  // }
-
-  // tl(m, n) {
-  //   return 2 * m, n + 1;
-  // }
-
-  // tr(m, n) {
-  //   return 2 * m + 1, n + 1;
-  // }
-
-  // getStitchContacts(m, n) {
-  //   // returns the four contact neighborhoods for the instruction at m,n
-  //   return [
-  //     this.neighborhood(2 * m, n), // bottom left
-  //     this.neighborhood(2 * m + 1, n), // bottom right
-  //     this.neighborhood(2 * m, n + 1), // top left
-  //     this.neighborhood(2 * m + 1, n + 1), // top right
-  //   ];
-  // }
 }
 
 export class ProcessModel {
@@ -109,49 +83,6 @@ export class ProcessModel {
     this.cn = new ContactNeighborhood(this.width, this.height);
     this.populateContacts();
   }
-
-  // handleKnitPurlCN(i, j, op) {
-  //   // Set lower CN stitch type
-  //   this.cn.setSt(i, j, op);
-
-  //   // Set upper CN MV
-  //   this.cn.setMV(i, j + 1, [0, 0]);
-
-  //   // get lower CN type
-  //   const cnType = this.cn.getAV(i, j);
-
-  //   if (cnType == PCN) {
-  //     // pcn
-  //     if (this.cn.getMV(i, j)[0] === 0) {
-  //       this.cn.setAV(i, j, ACN);
-
-  //       // set upper to PCN
-  //       this.cn.setAV(i, j + 1, PCN);
-  //     } else {
-  //       this.cn.setAV(i, j, PCN);
-
-  //       if (op == KNIT) {
-  //         this.cn.setAV(i, j + 1, UACN);
-  //       } else {
-  //         this.cn.setAV(i, j + 1, PCN);
-  //       }
-  //     }
-  //   } else if (cnType == UACN) {
-  //     // uacn
-
-  //     // check if UACN origin is anchored, if it is, change to ACN
-  //     const deltaI = this.cn.getMV(i, j)[0];
-  //     if (this.cn.getAV(i + deltaI, j - 1) == ACN) {
-  //       this.cn.setAV(i, j, ACN);
-  //     }
-  //   } else if (cnType == ECN) {
-  //     if (op == KNIT) {
-  //       this.cn.setAV(i, j + 1, UACN);
-  //     } else {
-  //       this.cn.setAV(i, j + 1, PCN);
-  //     }
-  //   }
-  // }
 
   handleKPLower(i, j, op) {
     // Set ST
@@ -182,7 +113,6 @@ export class ProcessModel {
 
       if (this.cn.getAV(i, j - 1) == PCN) {
         this.cn.setAV(i, j - 1, ACN);
-        // this.cn.setAV(i, j + 1, PCN);
       }
 
       // Otherwise do not change
@@ -221,43 +151,30 @@ export class ProcessModel {
 
   handleTuckMissLower(i, j, op) {
     const AV = this.cn.getAV(i, j);
-
     if (AV == PCN || AV == UACN) {
       // Set deltaJ to one to indicate that the CN has moved up
       this.cn.setDeltaJ(i, j, 1);
     } else if (AV == ECN) {
+      // Special case if we are doing a miss stitch above a miss stitch
       // Look down the column to find where the delta J is positive, and increment it.
       let found = false;
       let search = 0;
+      let iter = 0;
       while (!found) {
         const deltaJ = this.cn.getMV(i, j - search)[1];
         if (deltaJ > 0) {
           this.cn.setDeltaJ(i, j - search, deltaJ + 1);
           found = true;
         }
+        search++;
+        iter++;
+        if (iter > 1000) {
+          console.error("COULDN'T FIND STITCH");
+          break;
+        }
       }
     }
   }
-
-  // handleTuckMissCN(i, j, op) {
-  //   const AV = this.cn.getAV(i, j);
-
-  //   if (AV == PCN) {
-  //     this.cn.setDeltaJ(i, j, 1);
-  //   } else if (AV == UACN) {
-  //     this.cn.setDeltaJ(i, j, 1);
-  //   } else if (AV == ECN) {
-  //     // Handle special MV case here
-  //   }
-
-  //   if (op == TUCK) {
-  //     this.cn.setAV(i, j + 1, UACN);
-  //     this.cn.setMV(i, j + 1, [0, 0]);
-  //   } else if (op == MISS) {
-  //     this.cn.setAV(i, j + 1, ECN);
-  //     this.cn.setMV(i, j + 1, [0, -1]);
-  //   }
-  // }
 
   handleOp(i, j, op, offset) {
     if (op == KNIT || op == PURL) {
@@ -285,10 +202,9 @@ export class ProcessModel {
     if (ltr) {
       // left to right
       for (let m = 0; m < this.width; m++) {
-        const op = this.instructions.op(m, n);
+        const op = this.instructions.op(m, n); // get current operation
 
         this.handleOp(2 * m, n, op, 1);
-        // this.handleOp(2 * m + 1, n, op);
       }
     } else {
       // right to left

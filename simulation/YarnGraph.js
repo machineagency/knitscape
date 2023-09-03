@@ -1,46 +1,19 @@
 import { ProcessModel } from "./ProcessModel";
-import { Pattern } from "../pattern/pattern";
+import { Pattern } from "./Pattern";
+import { Bimp } from "../bimp/Bimp";
 import { YarnModel } from "./YarnModel";
 import * as d3 from "d3";
 
 // Draws the yarn path through the contact neighborhoods
 
-const PARAMS = {
-  linkWidth: 7,
-};
+const LINK_WIDTH = 7;
 
-const pWidth = 4;
-const pHeight = 10;
+// const test = new Bimp(3, 1, [0, 0, 0]);
+// const test = new Bimp(3, 2, [0, 0, 0, 0, 2, 0]);
+// const test = new Bimp(3, 3, [0, 0, 0, 0, 2, 0, 0, 2, 0]);
+const test = new Bimp(3, 5, [0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0]);
 
-const ROW1 = ["K", "K", "K", "K"];
-const ROW2 = ["K", "K", "K", "K", "K", "T", "T", "K"];
-const ROW3 = ["K", "K", "K", "K", "K", "T", "T", "K", "K", "T", "K", "K"];
-const ROW4 = [
-  "K",
-  "K",
-  "K",
-  "K",
-  "K",
-  "T",
-  "T",
-  "K",
-  "K",
-  "T",
-  "K",
-  "K",
-  "K",
-  "K",
-  "K",
-  "K",
-  "K",
-  "K",
-  "K",
-  "K",
-];
-
-const TEST3 = Array(pWidth * pHeight).fill("K");
-
-const testPattern = new Pattern(ROW4, pWidth);
+const testPattern = new Pattern(test.vMirror());
 const testModel = new ProcessModel(testPattern);
 const yarnGraph = new YarnModel(testModel.cn);
 
@@ -69,6 +42,9 @@ const nodes = layoutNodes(yarnGraph);
 const links = yarnGraph.yarnPathToLinks();
 const ops = testPattern.makeOpData();
 
+console.log(nodes);
+console.log(links);
+
 function stitchX(stitch) {
   const inds = stitch.cnIndices;
   return (
@@ -87,8 +63,8 @@ const opColors = d3.scaleOrdinal(d3.schemePastel1);
 
 const directionColors = ["#e91e63", "#03a9f4"];
 const cnColors = {
-  ACN: "#000",
-  PCN: "#56c34a",
+  ACN: "#444",
+  PCN: "#fff",
   UACN: "#00f",
   ECN: "#f00",
 };
@@ -123,7 +99,7 @@ const cnNodeContainer = svg.append("g").attr("class", "contact-nodes");
 
 const backYarns = yarnsBehindContainer
   .attr("filter", "brightness(0.7)")
-  .attr("stroke-width", PARAMS.linkWidth)
+  .attr("stroke-width", LINK_WIDTH)
   .attr("stroke-linecap", "round")
   .selectAll("line")
   .data(links)
@@ -139,7 +115,7 @@ const backYarns = yarnsBehindContainer
   .attr("stroke", (d) => directionColors[d.row % 2]);
 
 const frontYarns = yarnsFrontContainer
-  .attr("stroke-width", PARAMS.linkWidth)
+  .attr("stroke-width", LINK_WIDTH)
   .attr("stroke-linecap", "round")
   .selectAll("line")
   .data(links)
@@ -154,14 +130,39 @@ const frontYarns = yarnsFrontContainer
   .attr("x2", (d) => nodes[d.target].x)
   .attr("y2", (d) => nodes[d.target].y);
 
+yarnsFrontContainer
+  .attr("text-anchor", "middle")
+  .attr("font-size", "24")
+  .selectAll()
+  .data(links)
+  .join("text")
+  .text((d) => d.linkType)
+  .attr("x", (d) => (nodes[d.source].x + nodes[d.target].x) / 2)
+  .attr("y", (d) => (nodes[d.source].y + nodes[d.target].y) / 2)
+  .attr("alignment-baseline", "middle");
+
 const cns = cnNodeContainer
   .selectAll()
   .data(nodes)
   .join("circle")
-  .attr("r", PARAMS.linkWidth / 2 + 2)
+  .attr("r", 10)
   .attr("cx", (d) => d.x)
   .attr("cy", (d) => d.y)
-  .attr("fill", (d) => cnColors[d.cn]);
+  .attr("fill", (d) => cnColors[d.cn])
+  .attr("stroke", "black")
+  .attr("stroke-width", "2px")
+  .attr("title", "TEST");
+
+// const cnLabels = cnNodeContainer
+//   .attr("text-anchor", "middle")
+//   .attr("font-size", "24")
+//   .selectAll()
+//   .data(nodes)
+//   .join("text")
+//   .text((d) => JSON.stringify(d.mv))
+//   .attr("x", (d) => d.x + 35)
+//   .attr("y", (d) => d.y + 20)
+//   .attr("alignment-baseline", "middle");
 
 const operations = operationContainer
   .selectAll()
