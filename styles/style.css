@@ -109,23 +109,20 @@ input[type="color"] {
   -moz-appearance: none;
   appearance: none;
   background-color: transparent;
-  max-width: 100px;
-  max-height: 100px;
+  /* max-width: 100px;
+  max-height: 100px; */
   height: 100%;
   width: 100%;
   border: none;
   cursor: pointer;
-  z-index: 1;
 }
 input[type="color"]::-webkit-color-swatch {
-  border-radius: 1rem;
+  border-radius: 5px;
   border: 0;
-  box-shadow: 0 0 5px 0 black;
 }
 input[type="color"]::-moz-color-swatch {
-  border-radius: 1rem;
+  border-radius: 5px;
   border: 0;
-  box-shadow: 0 0 5px 0 black;
 }
 
 .unselectable {
@@ -143,19 +140,6 @@ input[type="color"]::-moz-color-swatch {
   flex: 1;
 }
 
-.simcontainer {
-  height: 100%;
-}
-
-svg {
-  display: block;
-  overflow: scroll;
-}
-
-.sim-controls {
-  height: 3rem;
-  display: flex;
-}
 .flex-buttons {
   display: flex;
   height: 100%;

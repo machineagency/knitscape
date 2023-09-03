@@ -1,55 +1,87 @@
 import { ProcessModel } from "./ProcessModel";
 import { Pattern } from "./Pattern";
 import { YarnModel } from "./YarnModel";
+import { yarnLinkForce } from "./YarnForce";
 import * as d3 from "d3";
 
-export function renderPreview(PARAMS, pattern, mainColor, contrastColor) {
-  const pat = new Pattern(pattern);
-  const ops = pat.makeOpData();
+const ITERATIONS = 1;
+
+// Number of stitches to add to the left and right of the pattern
+// (need to do this because tuck / slip stitches can't be on the
+// end of the row)
+const X_PADDING = 1;
+
+// Number of rows to add to the top and bottom of the pattern
+// (will be drawn in a different transparent color)
+const Y_PADDING = 4; //
+
+// Distance vertically between CNs
+const STITCH_HEIGHT = 14;
+
+// Distance horizontally between CNs (will be half of the stitch width)
+const HALF_STITCH_WIDTH = 14;
+
+const OFFSET_X = 15; // Padding from the side of the viewbox
+const SPREAD = 1;
+const LINK_STRENGTH = 0.2;
+
+const YARN_WIDTH = 6;
+
+// The target link distance when the simulation is run
+const H_DIST = 10; //
+const V_DIST = 14;
+
+export function renderPreview(pattern, yarnChanges, color) {
+  let rightSide = true;
+  const pat = new Pattern(pattern.pad(X_PADDING, Y_PADDING, 0));
+  // const ops = pat.makeOpData();
   const testModel = new ProcessModel(pat);
   const yarnGraph = new YarnModel(testModel.cn);
-  const opColors = d3.scaleOrdinal(d3.schemePastel1);
+  // const opColors = d3.scaleOrdinal(d3.schemePastel1);
+  const svg = d3.select("#simulation");
+  svg.attr(
+    "viewBox",
+    `${-HALF_STITCH_WIDTH} 0 ${HALF_STITCH_WIDTH * (pat.width + 2) * 2} ${
+      STITCH_HEIGHT * pat.height
+    }`
+  );
 
-  const color = [mainColor, contrastColor];
-  // const color = d3.quantize(
-  //   d3.interpolateHcl("#f4e153", "#362142"),
-  //   pat.height
-  // );
-  const svg = d3.select("#swatch-preview");
-  const spread = 1;
-  const linkStrength = 0.6;
+  const yarns = yarnChanges.toReversed();
+
+  function yarnColor(rowNum) {
+    if (rowNum < Y_PADDING || rowNum >= pat.height - Y_PADDING)
+      return "#00000055";
+    return color[yarns[(rowNum - Y_PADDING) % yarns.length]];
+  }
 
   function layoutNodes(yarnGraph) {
     // calculates the x,y values for the i,j
-    const stitchHeight = 18;
-    const stitchWidth = 12;
+
     yarnGraph.contactNodes.forEach((node, index) => {
       const i = index % yarnGraph.width;
       const j = (index - i) / yarnGraph.width;
       node.i = i;
       node.j = j;
 
-      node.x = 30 + i * stitchWidth;
-      node.y = (yarnGraph.height - j) * stitchHeight;
+      node.x = OFFSET_X + i * HALF_STITCH_WIDTH;
+      node.y = (yarnGraph.height - j) * STITCH_HEIGHT;
     });
 
     return yarnGraph.contactNodes;
   }
 
   // Data for simulation
-  const operationContainer = svg.append("g").attr("class", "operations");
+  // const operationContainer = svg.append("g").attr("class", "operations");
 
   const nodes = layoutNodes(yarnGraph);
   const yarnPath = yarnGraph.makeNice();
   const yarnPathLinks = yarnGraph.yarnPathToLinks(); //.reverse();
 
-  const yarnsBehind = svg.append("g").attr("class", "yarns-behind");
-  const yarnsFront = svg.append("g").attr("class", "yarns");
-  const ui = svg.append("g").attr("class", "ui");
+  const yarnsBehind = svg.append("g");
+  const yarnsFront = svg.append("g");
 
   const backYarns = yarnsBehind
-    .attr("filter", "brightness(0.7)")
-    .attr("stroke-width", PARAMS.yarnWidth)
+    .attr("stroke-width", YARN_WIDTH)
     .attr("stroke-linecap", "round")
     .selectAll()
     .data(yarnPathLinks)
@@ -59,10 +91,10 @@ export function renderPreview(PARAMS, pattern, mainColor, contrastColor) {
     })
     .attr("data-link", (d) => d.linkType)
     .attr("fill", "none")
-    .attr("stroke", (d) => color[d.row % 4 < 2 ? 0 : 1]);
+    .attr("stroke", (d) => yarnColor(d.row));
 
   const frontYarns = yarnsFront
-    .attr("stroke-width", PARAMS.yarnWidth)
+    .attr("stroke-width", YARN_WIDTH)
     .attr("stroke-linecap", "round")
     .selectAll()
     .data(yarnPathLinks)
@@ -73,9 +105,9 @@ export function renderPreview(PARAMS, pattern, mainColor, contrastColor) {
     })
     .attr("data-link", (d) => d.linkType)
     .attr("fill", "none")
-    .attr("stroke", (d) => color[d.row % 4 < 2 ? 0 : 1]);
+    .attr("stroke", (d) => yarnColor(d.row));
 
-  // operationContainer
+  // const operations = operationContainer
   //   .selectAll()
   //   .data(ops)
   //   .join("polygon")
@@ -93,7 +125,7 @@ export function renderPreview(PARAMS, pattern, mainColor, contrastColor) {
     const x = prev.x - next.x;
     const y = prev.y - next.y;
 
-    const mag = spread * Math.sqrt(x ** 2 + y ** 2);
+    const mag = SPREAD * Math.sqrt(x ** 2 + y ** 2);
 
     if (flip) {
       return [-y / mag, x / mag];
@@ -147,8 +179,8 @@ export function renderPreview(PARAMS, pattern, mainColor, contrastColor) {
 
   const openYarnCurve = d3
     .line()
-    .x((d) => nodes[d.cnIndex].x + (PARAMS.yarnWidth / 2) * d.normal[0])
-    .y((d) => nodes[d.cnIndex].y + (PARAMS.yarnWidth / 2) * d.normal[1])
+    .x((d) => nodes[d.cnIndex].x + (YARN_WIDTH / 2) * d.normal[0])
+    .y((d) => nodes[d.cnIndex].y + (YARN_WIDTH / 2) * d.normal[1])
     .curve(d3.curveCatmullRomOpen);
 
   function yarnCurve(yarnLink) {
@@ -173,9 +205,16 @@ export function renderPreview(PARAMS, pattern, mainColor, contrastColor) {
     updateNormals();
     frontYarns.attr("d", yarnCurve);
     backYarns.attr("d", yarnCurve);
+    // operations.attr("points", (d) =>
+    //   d.cnIndices.reduce(
+    //     (str, vertexID) => `${str} ${nodes[vertexID].x},${nodes[vertexID].y}`,
+    //     ""
+    //   )
+    // );
   }
 
   draw();
+  viewRightSide();
 
   function clear() {
     svg.selectAll("*").remove();
@@ -185,18 +224,37 @@ export function renderPreview(PARAMS, pattern, mainColor, contrastColor) {
     d3.forceSimulation(nodes)
       .force(
         "link",
-        d3
-          .forceLink(yarnPathLinks)
-          .strength(linkStrength)
-          .iterations(2)
+        yarnLinkForce(yarnPathLinks)
+          .strength(LINK_STRENGTH)
+          .iterations(ITERATIONS)
           .distance((l) =>
-            l.linkType == "LLFL" || l.linkType == "FHLH"
-              ? PARAMS.hDist
-              : PARAMS.vDist
+            l.linkType == "LLFL" || l.linkType == "FHLH" ? H_DIST : V_DIST
           )
       )
 
       .on("tick", draw);
   }
-  return { clear, relax };
+
+  function viewRightSide() {
+    yarnsBehind.attr("filter", "brightness(0.7)");
+    yarnsFront.attr("filter", "none");
+
+    svg.attr("transform", null);
+  }
+
+  function viewWrongSide() {
+    yarnsFront.attr("filter", "brightness(0.7)");
+    yarnsBehind.attr("filter", "none");
+
+    // Mirrors the svg
+    svg.attr("transform", "scale(-1,1)");
+  }
+
+  function flip() {
+    // Reorders the front and back yarn groups and re-applies the filter
+    rightSide = !rightSide;
+    d3.select("g").raise();
+    rightSide ? viewRightSide() : viewWrongSide();
+  }
+  return { clear, relax, flip };
 }

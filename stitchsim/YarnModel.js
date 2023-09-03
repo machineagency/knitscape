@@ -265,6 +265,7 @@ export class YarnModel {
 
   yarnPathToLinks() {
     let source = 0;
+    // console.log(this.yarnPath);
     let last = this.yarnPath[0][3];
     const links = [];
 
