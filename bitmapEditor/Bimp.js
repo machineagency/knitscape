@@ -28,6 +28,22 @@ export class Bimp {
     return new Bimp(width, height, tiled);
   }
 
+  pad(paddingX, paddingY, color) {
+    const filled = Array(paddingY * (this.width + 2 * paddingX)).fill(color);
+    const col = Array(paddingX).fill(color);
+    let twod = this.make2d();
+
+    return new Bimp(this.width + 2 * paddingX, this.height + 2 * paddingY, [
+      ...twod.reduce(
+        (acc, row) => {
+          return [...acc, ...col, ...row, ...col];
+        },
+        [...filled]
+      ),
+      ...filled,
+    ]);
+  }
+
   resize(width, height) {
     let resized = [];
     for (let y = 0; y < height; y++) {

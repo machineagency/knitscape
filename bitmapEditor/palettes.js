@@ -1,5 +1,6 @@
 export function hexPalette(paletteEntry, ctx, width, height) {
   // paletteEntry will be a hex code
+  // console.log(paletteEntry);
   ctx.fillStyle = paletteEntry;
   ctx.fillRect(0, 0, width, height);
 }

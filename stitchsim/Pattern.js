@@ -2,15 +2,16 @@ const opTypes = {
   T: 0,
   K: 1,
   S: 2,
+  p: 3,
 };
 
-const pixToOp = ["K", "T", "S"];
+const pixToOp = ["K", "P", "T", "T"];
 
 export class Pattern {
   constructor(bitmap) {
     this.width = bitmap.width;
     this.height = bitmap.height;
-    this.ops = Array.from(bitmap.vMirror())
+    this.ops = Array.from(bitmap.pixels)
       .map((val) => pixToOp[val])
       .toReversed();
   }

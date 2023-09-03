@@ -4,52 +4,47 @@ import { YarnModel } from "./YarnModel";
 import { default as YarnForce } from "./YarnForce";
 import * as d3 from "d3";
 
-// const yarnChanges = [
-//   1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-//   0, 0, 0, 0, 1, 1,
-// ];
+const ITERATIONS = 2;
+const X_PADDING = 1;
+const Y_PADDING = 4;
+const stitchHeight = 18;
+const stitchWidth = 12;
+const OFFSET_X = 15;
+const SPREAD = 1;
+const LINK_STRENGTH = 0.1;
 
-const yarnChanges = [
-  0, 0, 0, 0, 0, 0, 1, 1, 2, 2, 2, 2, 2, 2, 1, 1, 3, 3, 3, 3, 3, 3, 1, 1,
-];
-// function yarnColor(rowNum) {
-//   return yarns[yarnChanges[rowNum % yarnChanges.length]];
-// }
-
-export function renderPreview(PARAMS, pattern, mainColor, contrastColor) {
-  const pat = new Pattern(pattern);
-  const ops = pat.makeOpData();
+export function renderPreview(PARAMS, pattern, yarnChanges, color) {
+  const pat = new Pattern(pattern.pad(X_PADDING, Y_PADDING, 0));
+  // const ops = pat.makeOpData();
   const testModel = new ProcessModel(pat);
   const yarnGraph = new YarnModel(testModel.cn);
-  const opColors = d3.scaleOrdinal(d3.schemePastel1);
-
-  // const color = [mainColor, contrastColor];
-  //#f0dcb2
-  const color = ["#f0dcb2", "#2d436e", "#5e8c66", "#e0961d"];
-
-  const gradient = d3.quantize(
-    d3.interpolateHcl("#f4e153", "#362142"),
-    pat.height
+  // const opColors = d3.scaleOrdinal(d3.schemePastel1);
+  const svg = d3.select("#simulation");
+  svg.attr(
+    "viewBox",
+    `${-stitchWidth} 0 ${stitchWidth * (pat.width + 1) * 2} ${
+      stitchHeight * pat.height
+    }`
   );
-  const svg = d3.select("#swatch-preview");
-  const spread = 1;
-  const linkStrength = 0.1;
+
+  const yarns = yarnChanges.toReversed();
 
   function yarnColor(rowNum) {
-    return color[yarnChanges[rowNum % yarnChanges.length]];
+    if (rowNum < Y_PADDING || rowNum >= pat.height - Y_PADDING)
+      return "#00000055";
+    return color[yarns[(rowNum - Y_PADDING) % yarns.length]];
   }
 
   function layoutNodes(yarnGraph) {
     // calculates the x,y values for the i,j
-    const stitchHeight = 18;
-    const stitchWidth = 12;
+
     yarnGraph.contactNodes.forEach((node, index) => {
       const i = index % yarnGraph.width;
       const j = (index - i) / yarnGraph.width;
       node.i = i;
       node.j = j;
 
-      node.x = 30 + i * stitchWidth;
+      node.x = OFFSET_X + i * stitchWidth;
       node.y = (yarnGraph.height - j) * stitchHeight;
     });
 
@@ -57,7 +52,7 @@ export function renderPreview(PARAMS, pattern, mainColor, contrastColor) {
   }
 
   // Data for simulation
-  const operationContainer = svg.append("g").attr("class", "operations");
+  // const operationContainer = svg.append("g").attr("class", "operations");
 
   const nodes = layoutNodes(yarnGraph);
   const yarnPath = yarnGraph.makeNice();
@@ -65,7 +60,7 @@ export function renderPreview(PARAMS, pattern, mainColor, contrastColor) {
 
   const yarnsBehind = svg.append("g").attr("class", "yarns-behind");
   const yarnsFront = svg.append("g").attr("class", "yarns");
-  const ui = svg.append("g").attr("class", "ui");
+  // const ui = svg.append("g").attr("class", "ui");
 
   const backYarns = yarnsBehind
     .attr("filter", "brightness(0.7)")
@@ -113,7 +108,7 @@ export function renderPreview(PARAMS, pattern, mainColor, contrastColor) {
     const x = prev.x - next.x;
     const y = prev.y - next.y;
 
-    const mag = spread * Math.sqrt(x ** 2 + y ** 2);
+    const mag = SPREAD * Math.sqrt(x ** 2 + y ** 2);
 
     if (flip) {
       return [-y / mag, x / mag];
@@ -212,8 +207,8 @@ export function renderPreview(PARAMS, pattern, mainColor, contrastColor) {
       .force(
         "link",
         YarnForce(yarnPathLinks)
-          .strength(linkStrength)
-          .iterations(2)
+          .strength(LINK_STRENGTH)
+          .iterations(ITERATIONS)
           .distance((l) =>
             l.linkType == "LLFL" || l.linkType == "FHLH"
               ? PARAMS.hDist
