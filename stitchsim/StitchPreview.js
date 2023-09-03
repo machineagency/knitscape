@@ -4,6 +4,7 @@ import { YarnModel } from "./YarnModel";
 import { yarnLinkForce } from "./YarnForce";
 import * as d3 from "d3";
 
+// Number of iterations for relaxation
 const ITERATIONS = 1;
 
 // Number of stitches to add to the left and right of the pattern
@@ -28,14 +29,18 @@ const LINK_STRENGTH = 0.2;
 const YARN_WIDTH = 6;
 
 // The target link distance when the simulation is run
-const H_DIST = 10; //
+const H_DIST = 10;
 const V_DIST = 14;
 
 export function renderPreview(pattern, yarnChanges, color) {
   let rightSide = true;
   const pat = new Pattern(pattern.pad(X_PADDING, Y_PADDING, 0));
+
   // const ops = pat.makeOpData();
   const testModel = new ProcessModel(pat);
+
+  console.log(testModel);
+  return;
   const yarnGraph = new YarnModel(testModel.cn);
   // const opColors = d3.scaleOrdinal(d3.schemePastel1);
   const svg = d3.select("#simulation");

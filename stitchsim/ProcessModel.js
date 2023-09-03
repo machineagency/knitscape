@@ -229,11 +229,17 @@ export class ProcessModel {
       // Look down the column to find where the delta J is positive, and increment it.
       let found = false;
       let search = 0;
+      let iter = 0;
       while (!found) {
         const deltaJ = this.cn.getMV(i, j - search)[1];
         if (deltaJ > 0) {
           this.cn.setDeltaJ(i, j - search, deltaJ + 1);
           found = true;
+        }
+        iter++;
+        if (iter > 1000) {
+          console.error("ERROR IN TUCK MISS HANDLING");
+          break;
         }
       }
     }

@@ -1,49 +1,20 @@
 import { ProcessModel } from "./ProcessModel";
-import { Pattern } from "../pattern/pattern";
+import { Pattern } from "./Pattern";
+import { Bimp } from "../bimp/Bimp";
 import { YarnModel } from "./YarnModel";
 import * as d3 from "d3";
 
 // Draws the yarn path through the contact neighborhoods
 
-const PARAMS = {
-  linkWidth: 7,
-};
+const LINK_WIDTH = 7;
 
-const pWidth = 4;
-const pHeight = 10;
+const test = new Bimp(4, 4, [0, 0, 0, 0, 0, 2, 2, 0, 0, 2, 2, 0, 0, 0, 0, 0]);
 
-const ROW1 = ["K", "K", "K", "K"];
-const ROW2 = ["K", "K", "K", "K", "K", "T", "T", "K"];
-const ROW3 = ["K", "K", "K", "K", "K", "T", "T", "K", "K", "T", "K", "K"];
-const ROW4 = [
-  "K",
-  "K",
-  "K",
-  "K",
-  "K",
-  "T",
-  "T",
-  "K",
-  "K",
-  "T",
-  "K",
-  "K",
-  "K",
-  "K",
-  "K",
-  "K",
-  "K",
-  "K",
-  "K",
-  "K",
-];
-
-const TEST3 = Array(pWidth * pHeight).fill("K");
-
-const testPattern = new Pattern(ROW4, pWidth);
+const testPattern = new Pattern(test);
 const testModel = new ProcessModel(testPattern);
 const yarnGraph = new YarnModel(testModel.cn);
 
+console.log(testPattern);
 function layoutNodes(yarnGraph) {
   // calculates the x,y pixel values for the i,j nodes based on current window size
   const w = window.innerWidth;
@@ -123,7 +94,7 @@ const cnNodeContainer = svg.append("g").attr("class", "contact-nodes");
 
 const backYarns = yarnsBehindContainer
   .attr("filter", "brightness(0.7)")
-  .attr("stroke-width", PARAMS.linkWidth)
+  .attr("stroke-width", LINK_WIDTH)
   .attr("stroke-linecap", "round")
   .selectAll("line")
   .data(links)
@@ -139,7 +110,7 @@ const backYarns = yarnsBehindContainer
   .attr("stroke", (d) => directionColors[d.row % 2]);
 
 const frontYarns = yarnsFrontContainer
-  .attr("stroke-width", PARAMS.linkWidth)
+  .attr("stroke-width", LINK_WIDTH)
   .attr("stroke-linecap", "round")
   .selectAll("line")
   .data(links)
@@ -158,7 +129,7 @@ const cns = cnNodeContainer
   .selectAll()
   .data(nodes)
   .join("circle")
-  .attr("r", PARAMS.linkWidth / 2 + 2)
+  .attr("r", LINK_WIDTH / 2 + 2)
   .attr("cx", (d) => d.x)
   .attr("cy", (d) => d.y)
   .attr("fill", (d) => cnColors[d.cn]);
