@@ -2,16 +2,17 @@ import { html, render } from "lit-html";
 
 import { Bimp } from "./bimp/Bimp";
 
-import { buildRepeatEditor } from "./repeatEditor";
-import { buildColorChangeEditor } from "./colorChangeEditor";
-import { buildNeedleEditor } from "./needleEditor";
-import { buildPreview } from "./previewEditor";
+import { buildRepeatEditor } from "./editors/repeatEditor";
+import { buildColorChangeEditor } from "./editors/colorChangeEditor";
+import { buildNeedleEditor } from "./editors/needleEditor";
+import { buildPreview } from "./editors/previewEditor";
 
 import { download } from "./utils";
 
 import { simulate } from "./simulation/yarnSimulation";
 // import startState from "./patterns/hex_quilt.json";
-import startState from "./patterns/pyramids.json";
+// import startState from "./patterns/pyramids.json";
+import startState from "./patterns/vertical_tuck_stripes.json";
 
 let repeatEditor, colorChangeEditor, needleEditor, preview;
 
@@ -114,7 +115,12 @@ function view() {
       </div>
       <div id="pattern-container" style="grid-area: pattern;">
         <canvas id="preview"></canvas>
+        <canvas id="preview-symbols"></canvas>
+        <canvas id="preview-grid"></canvas>
+        <!-- <canvas id="preview-highlight"></canvas> -->
         <canvas id="repeat"></canvas>
+        <!-- <canvas id="repeat-outline"></canvas> -->
+        <canvas id="repeat-grid"></canvas>
       </div>
 
       <div class="bgutter" style="grid-area: bgutter;">
@@ -133,6 +139,7 @@ function view() {
             <i class="fa-solid fa-grip fa-xs"></i>
           </div>
           <canvas id="color-change-editor" height="25" width="25"></canvas>
+          <canvas id="color-change-grid" height="25" width="25"></canvas>
         </div>
         <div id="color-controls">
           <div id="yarn-palette"></div>
@@ -226,7 +233,7 @@ function runSimulation() {
 }
 
 window.onmouseup = function () {
-  runSimulation();
+  setTimeout(() => runSimulation(), 30);
 };
 
 async function init() {

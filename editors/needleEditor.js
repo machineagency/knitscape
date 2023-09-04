@@ -1,14 +1,14 @@
-import { Bimp } from "./bimp/Bimp";
-import { BimpEditor } from "./bimp/BimpEditor";
+import { Bimp } from "../bimp/Bimp";
+import { BimpEditor } from "../bimp/BimpEditor";
 
-import { pointerTracker } from "./bimp/pointerTracker";
-import { grid } from "./bimp/grid";
-import { canvasScaler } from "./bimp/canvasScaler";
-import { paletteRenderer } from "./bimp/paletteRenderer";
-import { imagePalette } from "./bimp/palettes";
-import { pointerEvents } from "./bimp/pointerEvents";
+import { pointerTracker } from "../bimp/pointerTracker";
+import { grid } from "../bimp/grid";
+import { canvasScaler } from "../bimp/canvasScaler";
+import { paletteRenderer } from "../bimp/paletteRenderer";
+import { imagePalette } from "../bimp/palettes";
+import { pointerEvents } from "../bimp/pointerEvents";
 
-import { buildImagePalette } from "./utils";
+import { buildImagePalette } from "../utils";
 
 function resizeDragger(dragger) {
   return ({ state, dispatch }) => {
@@ -74,16 +74,16 @@ export async function buildNeedleEditor(state, canvas) {
     state: {
       bitmap: Bimp.fromJSON(state.needles),
       palette,
-      canvas: canvas,
     },
 
     components: [
       pointerTracker({ target: canvas }),
-      canvasScaler(),
+      canvasScaler({ canvas }),
       paletteRenderer({
         drawFunc: imagePalette,
+        canvas,
       }),
-      grid(),
+      // grid(),
       pointerEvents({
         tools: { flip },
         eventTarget: canvas,

@@ -1,16 +1,16 @@
 import { html, render } from "lit-html";
 
-import { BimpEditor } from "./bimp/BimpEditor";
-import { Bimp } from "./bimp/Bimp";
+import { BimpEditor } from "../bimp/BimpEditor";
+import { Bimp } from "../bimp/Bimp";
 
-import { pointerTracker } from "./bimp/pointerTracker";
-import { grid } from "./bimp/grid";
-import { canvasScaler } from "./bimp/canvasScaler";
-import { paletteRenderer } from "./bimp/paletteRenderer";
-import { hexPalette } from "./bimp/palettes";
-import { pointerEvents } from "./bimp/pointerEvents";
-import { brush } from "./bimp/tools";
-import { stateHook } from "./bimp/stateHook";
+import { pointerTracker } from "../bimp/pointerTracker";
+import { grid } from "../bimp/grid";
+import { canvasScaler } from "../bimp/canvasScaler";
+import { paletteRenderer } from "../bimp/paletteRenderer";
+import { hexPalette } from "../bimp/palettes";
+import { pointerEvents } from "../bimp/pointerEvents";
+import { brush } from "../bimp/tools";
+import { stateHook } from "../bimp/stateHook";
 
 function getRandomColor() {
   var letters = "0123456789ABCDEF";
@@ -164,30 +164,27 @@ function resizeDragger(dragger) {
 
 export function buildColorChangeEditor(state, canvas) {
   const dragger = document.getElementById("color-dragger");
-
+  const gridCanvas = document.getElementById("color-change-grid");
   return new BimpEditor({
     state: {
       bitmap: Bimp.fromJSON(state.yarns).vMirror(),
       palette: state.yarnPalette,
-      canvas: canvas,
     },
 
     components: [
-      pointerTracker({ target: canvas }),
-      canvasScaler(),
+      pointerTracker({ target: gridCanvas }),
+      canvasScaler({ canvas }),
+      canvasScaler({ canvas: gridCanvas }),
       paletteRenderer({
         drawFunc: hexPalette,
+        canvas,
       }),
-      grid(),
+      grid({ canvas: gridCanvas }),
       pointerEvents({
         tools: { brush },
-        eventTarget: canvas,
+        eventTarget: gridCanvas,
       }),
-      // stateHook({
-      //   cb: yarnHeightSpinner({
-      //     container: document.getElementById("color-height"),
-      //   }),
-      // }),
+
       stateHook({
         cb: hexPaletteSelect(document.getElementById("yarn-palette")),
       }),

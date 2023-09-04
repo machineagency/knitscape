@@ -150,6 +150,13 @@ canvas {
   padding-left: 0.3rem;
 }
 
+#color-canvas-container {
+}
+
+#color-change-grid {
+  position: absolute;
+}
+
 #color-controls {
   display: flex;
   flex-direction: column;

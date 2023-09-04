@@ -1,16 +1,16 @@
-import { BimpEditor } from "./bimp/BimpEditor";
+import { BimpEditor } from "../bimp/BimpEditor";
 
-import { pointerTracker } from "./bimp/pointerTracker";
-import { grid } from "./bimp/grid";
-import { canvasScaler } from "./bimp/canvasScaler";
-import { paletteRenderer } from "./bimp/paletteRenderer";
-import { imagePalette, hexPalette } from "./bimp/palettes";
-import { stateHook } from "./bimp/stateHook";
+import { pointerTracker } from "../bimp/pointerTracker";
+import { grid } from "../bimp/grid";
+import { canvasScaler } from "../bimp/canvasScaler";
+import { paletteRenderer } from "../bimp/paletteRenderer";
+import { imagePalette, hexPalette } from "../bimp/palettes";
+import { stateHook } from "../bimp/stateHook";
 
-import { highlight } from "./bimp/highlight";
+import { highlight } from "../bimp/highlight";
 
-import { buildImagePalette } from "./utils";
-import { gutterView, bottomLeft } from "./gutter";
+import { buildImagePalette } from "../utils";
+import { gutterView, bottomLeft } from "../gutter";
 
 export async function buildPreview(state, canvas, { colorLayer, symbolLayer }) {
   const stitchSymbolPalette = await buildImagePalette([
@@ -20,6 +20,9 @@ export async function buildPreview(state, canvas, { colorLayer, symbolLayer }) {
     "tuck",
   ]);
 
+  const gridCanvas = document.getElementById("preview-grid");
+  const symbolCanvas = document.getElementById("preview-symbols");
+
   return new BimpEditor({
     state: {
       bitmap: colorLayer,
@@ -27,19 +30,22 @@ export async function buildPreview(state, canvas, { colorLayer, symbolLayer }) {
       scale: state.scale,
       palette: state.yarnPalette,
       stitchPalette: stitchSymbolPalette,
-      canvas,
     },
 
     components: [
-      pointerTracker({ target: canvas }),
-      canvasScaler(),
-      paletteRenderer({ drawFunc: hexPalette }),
+      pointerTracker({ target: gridCanvas }),
+      canvasScaler({ canvas }),
+      canvasScaler({ canvas: symbolCanvas }),
+      canvasScaler({ canvas: gridCanvas }),
+
+      paletteRenderer({ drawFunc: hexPalette, canvas }),
       paletteRenderer({
         drawFunc: imagePalette,
         paletteOverride: "stitchPalette",
         bitmapOverride: "symbolMap",
+        canvas: symbolCanvas,
       }),
-      grid(),
+      grid({ canvas: gridCanvas }),
       highlight(),
       stateHook({
         cb: gutterView({
