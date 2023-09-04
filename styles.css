@@ -59,6 +59,16 @@ canvas {
   display: block;
 }
 
+.grabbing {
+  user-select: none;
+  cursor: grabbing;
+}
+
+.grab {
+  user-select: none;
+  cursor: grab;
+}
+
 #site-title {
   height: 40px;
   display: flex;
@@ -78,9 +88,10 @@ canvas {
     ". title title title ."
     "lcontrols lgutter pattern colors sim"
     ". . bgutter . simcontrols"
+    ". . needles . ."
     ". . bcontrols . .";
-  grid-template-columns: min-content min-content 1fr 75px 1fr;
-  grid-template-rows: min-content minmax(0, 1fr) min-content min-content;
+  grid-template-columns: min-content min-content 1fr min-content 1fr;
+  grid-template-rows: min-content minmax(0, 1fr) min-content min-content min-content;
 }
 
 #site-content > * {
@@ -327,4 +338,39 @@ input {
 
 input:focus {
   color: #fafafa;
+}
+
+/* SPLIT DRAG */
+
+#height-dragger {
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  height: 100%;
+}
+
+.dragger {
+  background-color: #4d4d4d;
+  color: #9e9e9e;
+  outline: 1px solid black;
+  display: flex;
+  padding: 4px;
+  align-items: center;
+  justify-content: center;
+}
+
+#needle-container {
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: start;
+}
+
+.dragger.vertical {
+  border-radius: 4px 4px 0 0;
+  height: 15px;
+}
+
+.dragger.horizontal {
+  height: 100%;
+  border-radius: 0 4px 4px 0;
 }

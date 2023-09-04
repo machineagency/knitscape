@@ -24,6 +24,7 @@ import {
 } from "./stitchSymbolPalette";
 
 import { buildColorChangeEditor } from "./colorChangeEditor";
+import { buildNeedleEditor } from "./needleEditor";
 
 import { renderPreview } from "./simulation/yarnSimulation";
 
@@ -89,22 +90,33 @@ function view() {
         <canvas id="preview"></canvas>
         <canvas id="repeat"></canvas>
       </div>
+
       <div class="bgutter" style="grid-area: bgutter;">
         <div class="preview"></div>
         <div class="repeat"></div>
       </div>
-      <!-- <div style="grid-area: needles;">
-        <canvas id="needle-work-editor"></canvas>
-      </div> -->
+
       <div id="bottom-controls" style="grid-area: bcontrols;">
         <div id="repeat-width"></div>
+        <div id="needle-width"></div>
       </div>
 
       <div id="color-change-container" style="grid-area: colors;">
-        <canvas id="color-change-editor" height="25" width="25"></canvas>
+        <div id="height-dragger">
+          <div id="color-dragger" class="dragger vertical grab">
+            <i class="fa-solid fa-grip fa-xs"></i>
+          </div>
+          <canvas id="color-change-editor" height="25" width="25"></canvas>
+        </div>
         <div id="color-controls">
           <div id="yarn-palette"></div>
-          <div id="color-height"></div>
+        </div>
+      </div>
+
+      <div id="needle-container" style="grid-area: needles;">
+        <canvas id="needle-editor"></canvas>
+        <div id="needle-dragger" class="dragger horizontal grab">
+          <i class="fa-solid fa-grip-vertical fa-xs"></i>
         </div>
       </div>
 
@@ -330,29 +342,6 @@ async function buildRepeatEditor() {
   });
 }
 
-// function buildNeedleEditor() {
-//   return new BimpEditor({
-//     state: {
-//       bitmap: Bimp.fromJSON(GLOBAL_STATE.needles),
-//       palette: ["#ffffff", "#000000"],
-//       canvas: needleEditorCanvas,
-//     },
-
-//     components: [
-//       pointerTracker({ target: needleEditorCanvas }),
-//       scaledCanvas({}),
-//       paletteRenderer({
-//         drawFunc: hexPalette,
-//       }),
-//       pointerEvents({
-//         tools: { brush },
-//         eventTarget: needleEditorCanvas,
-//       }),
-//       grid({ lineColor: "#999999" }),
-//     ],
-//   });
-// }
-
 async function buildPreview() {
   const stitchSymbolPalette = await transparentStitchPalette();
 
@@ -451,22 +440,17 @@ function syncScale() {
     GLOBAL_STATE.yarns.pixels
   );
 
-  repeatEditor.dispatch({
-    scale,
-  });
-  colorChangeEditor.dispatch({
-    scale,
-  });
+  repeatEditor.dispatch({ scale });
+  colorChangeEditor.dispatch({ scale });
+  needleEditor.dispatch({ scale });
+
   preview.dispatch({
     scale,
     bitmap: colorLayer,
     symbolMap: symbolLayer,
   });
-  runSimulation(symbolLayer);
 
-  // needleEditor.dispatch({
-  //   scale: state.scale,
-  // });
+  runSimulation(symbolLayer);
 }
 
 function generateYarnPreview(repeat, width, height, yarnChanges) {
@@ -505,14 +489,15 @@ async function init() {
   repeatEditorCanvas = document.getElementById("repeat");
   colorChangeEditorCanvas = document.getElementById("color-change-editor");
   previewCanvas = document.getElementById("preview");
-  needleEditorCanvas = document.getElementById("needle-work-editor");
+  needleEditorCanvas = document.getElementById("needle-editor");
 
   repeatEditor = await buildRepeatEditor();
   colorChangeEditor = buildColorChangeEditor(
     GLOBAL_STATE,
     colorChangeEditorCanvas
   );
-  // needleEditor = buildNeedleEditor();
+
+  needleEditor = buildNeedleEditor(GLOBAL_STATE, needleEditorCanvas);
 
   preview = await buildPreview();
   repeatEditor.addEffect("bitmap", syncRepeat);

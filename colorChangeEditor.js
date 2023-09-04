@@ -77,52 +77,96 @@ function hexPaletteSelect(container) {
     );
 }
 
-function yarnHeightSpinner({ container }) {
-  return (state, dispatch) => {
-    let { bitmap } = state;
-    render(
-      html`<div class="spinner vertical">
-        <button
-          class="plus"
-          @click=${() =>
-            dispatch({
-              bitmap: bitmap
-                .vMirror()
-                .resize(bitmap.width, bitmap.height + 1)
-                .vMirror(),
-            })}>
-          <i class="fa-solid fa-plus"></i>
-        </button>
-        <input
-          type="text"
-          .value=${live(bitmap.height)}
-          class="size-input"
-          @change=${(e) =>
-            dispatch({
-              bitmap: bitmap
-                .vMirror()
-                .resize(bitmap.width, Number(e.target.value))
-                .vMirror(),
-            })} />
+// function yarnHeightSpinner({ container }) {
+//   return (state, dispatch) => {
+//     let { bitmap } = state;
+//     render(
+//       html`<div class="spinner vertical">
+//         <button
+//           class="plus"
+//           @click=${() =>
+//             dispatch({
+//               bitmap: bitmap
+//                 .vMirror()
+//                 .resize(bitmap.width, bitmap.height + 1)
+//                 .vMirror(),
+//             })}>
+//           <i class="fa-solid fa-plus"></i>
+//         </button>
+//         <input
+//           type="text"
+//           .value=${live(bitmap.height)}
+//           class="size-input"
+//           @change=${(e) =>
+//             dispatch({
+//               bitmap: bitmap
+//                 .vMirror()
+//                 .resize(bitmap.width, Number(e.target.value))
+//                 .vMirror(),
+//             })} />
 
-        <button
-          class="minus"
-          @click=${() =>
-            dispatch({
-              bitmap: bitmap
-                .vMirror()
-                .resize(bitmap.width, bitmap.height - 1)
-                .vMirror(),
-            })}>
-          <i class="fa-solid fa-minus"></i>
-        </button>
-      </div>`,
-      container
-    );
+//         <button
+//           class="minus"
+//           @click=${() =>
+//             dispatch({
+//               bitmap: bitmap
+//                 .vMirror()
+//                 .resize(bitmap.width, bitmap.height - 1)
+//                 .vMirror(),
+//             })}>
+//           <i class="fa-solid fa-minus"></i>
+//         </button>
+//       </div>`,
+//       container
+//     );
+//   };
+// }
+
+function resizeDragger(dragger) {
+  return ({ state, dispatch }) => {
+    let { bitmap, scale } = state;
+
+    dragger.addEventListener("pointerdown", (e) => {
+      const startBIMP = bitmap;
+      const start = e.clientY;
+
+      document.body.classList.add("grabbing");
+      dragger.classList.remove("grab");
+
+      const onmove = (e) => {
+        if (e.buttons == 0) {
+          window.removeEventListener("mousemove", onmove);
+          document.body.classList.remove("grabbing");
+          dragger.classList.add("grab");
+        }
+
+
+        let newSize =
+        startBIMP.height + Math.floor((start - e.clientY) / scale);
+        if (newSize < 1) return;
+
+        dispatch({
+          bitmap: startBIMP
+            .vMirror()
+            .resize(startBIMP.width, newSize)
+            .vMirror(),
+        });
+      };
+
+      window.addEventListener("mousemove", onmove);
+    });
+
+    return {
+      syncState(state) {
+        ({ bitmap, scale } = state);
+      },
+    };
   };
 }
 
 export function buildColorChangeEditor(state, canvas) {
+  const dragger = document.getElementById("color-dragger");
+
   return new BimpEditor({
     state: {
       bitmap: Bimp.fromJSON(state.yarns).vMirror(),
@@ -141,14 +185,15 @@ export function buildColorChangeEditor(state, canvas) {
         tools: { brush },
         eventTarget: canvas,
       }),
-      stateHook({
-        cb: yarnHeightSpinner({
-          container: document.getElementById("color-height"),
-        }),
-      }),
+      // stateHook({
+      //   cb: yarnHeightSpinner({
+      //     container: document.getElementById("color-height"),
+      //   }),
+      // }),
       stateHook({
         cb: hexPaletteSelect(document.getElementById("yarn-palette")),
       }),
+      resizeDragger(dragger),
     ],
   });
 }
