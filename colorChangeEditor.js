@@ -1,5 +1,4 @@
 import { html, render } from "lit-html";
-import { live } from "lit-html/directives/live.js";
 
 import { BimpEditor } from "./bimp/BimpEditor";
 import { Bimp } from "./bimp/Bimp";
@@ -140,9 +139,8 @@ function resizeDragger(dragger) {
           dragger.classList.add("grab");
         }
 
-
         let newSize =
-        startBIMP.height + Math.floor((start - e.clientY) / scale);
+          startBIMP.height + Math.floor((start - e.clientY) / scale);
         if (newSize < 1) return;
 
         dispatch({

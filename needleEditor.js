@@ -1,16 +1,14 @@
-import { html, render } from "lit-html";
-import { live } from "lit-html/directives/live.js";
-
-import { BimpEditor } from "./bimp/BimpEditor";
 import { Bimp } from "./bimp/Bimp";
+import { BimpEditor } from "./bimp/BimpEditor";
 
 import { pointerTracker } from "./bimp/pointerTracker";
 import { grid } from "./bimp/grid";
 import { canvasScaler } from "./bimp/canvasScaler";
 import { paletteRenderer } from "./bimp/paletteRenderer";
-import { hexPalette } from "./bimp/palettes";
+import { imagePalette } from "./bimp/palettes";
 import { pointerEvents } from "./bimp/pointerEvents";
-import { brush } from "./bimp/tools";
+
+import { buildImagePalette } from "./utils";
 
 function resizeDragger(dragger) {
   return ({ state, dispatch }) => {
@@ -50,13 +48,32 @@ function resizeDragger(dragger) {
   };
 }
 
-export function buildNeedleEditor(state, canvas) {
+// A special tool that just reverses the bit underneath.
+// Only works for a one - bit bitmap.
+function flip(start, state, dispatch) {
+  function onMove({ x, y }, state) {
+    dispatch({
+      bitmap: state.bitmap.draw([
+        { x, y, color: state.bitmap.pixel(x, y) == 0 ? 1 : 0 },
+      ]),
+    });
+  }
+
+  onMove(start, state);
+  return onMove;
+}
+
+export async function buildNeedleEditor(state, canvas) {
   const dragger = document.getElementById("needle-dragger");
+  const palette = await buildImagePalette([
+    "needle_in_work",
+    "needle_out_of_work",
+  ]);
 
   return new BimpEditor({
     state: {
       bitmap: Bimp.fromJSON(state.needles),
-      palette: ["#000", "f#ff"],
+      palette,
       canvas: canvas,
     },
 
@@ -64,11 +81,11 @@ export function buildNeedleEditor(state, canvas) {
       pointerTracker({ target: canvas }),
       canvasScaler(),
       paletteRenderer({
-        drawFunc: hexPalette,
+        drawFunc: imagePalette,
       }),
       grid(),
       pointerEvents({
-        tools: { brush },
+        tools: { flip },
         eventTarget: canvas,
       }),
       resizeDragger(dragger),

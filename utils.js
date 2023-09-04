@@ -38,3 +38,18 @@ export const exporters = {
   png: exportPNG,
   jpg: exportJPG,
 };
+
+export async function buildImagePalette(imageNames) {
+  return await Promise.all(
+    imageNames.map(async (imageName) => {
+      const im = new Image();
+      im.src = new URL(
+        `./assets/stitches/${imageName}.png`,
+        import.meta.url
+      ).href;
+
+      await im.decode();
+      return { image: im, title: imageName };
+    })
+  );
+}

@@ -32,7 +32,7 @@ const YARN_WIDTH = 6;
 const H_SHRINK = 1;
 const V_DIST = 12;
 
-export function renderPreview(pattern, yarnChanges, color) {
+export function simulate(pattern, yarnChanges, color) {
   let rightSide = true;
   let relaxed = false;
 
