@@ -7,8 +7,11 @@ import { buildColorChangeEditor } from "./colorChangeEditor";
 import { buildNeedleEditor } from "./needleEditor";
 import { buildPreview } from "./previewEditor";
 
+import { download } from "./utils";
+
 import { simulate } from "./simulation/yarnSimulation";
-import startState from "./patterns/hex_quilt.json";
+// import startState from "./patterns/hex_quilt.json";
+import startState from "./patterns/pyramids.json";
 
 let repeatEditor, colorChangeEditor, needleEditor, preview;
 
@@ -24,6 +27,49 @@ function loadWorkspace(workspace) {
   GLOBAL_STATE.updateSim = true;
 }
 
+function downloadPNG() {
+  download(
+    document.getElementById("preview").toDataURL("image/png"),
+    "chart.png"
+  );
+}
+
+function downloadSilverKnitTxt() {
+  const text =
+    "SilverKnit\n" +
+    repeatEditor.state.bitmap
+      .make2d()
+      .map((row) =>
+        row
+          .map((pixel) => {
+            if (pixel == 0 || pixel == 1) return 8;
+            else return 7;
+          })
+          .join("")
+      )
+      .join("\n");
+
+  download(
+    "data:text/plain;charset=utf-8," + encodeURIComponent(text),
+    "pattern.txt"
+  );
+}
+
+function downloadJSON() {
+  const dataStr =
+    "data:text/json;charset=utf-8," +
+    encodeURIComponent(
+      JSON.stringify({
+        yarnPalette: GLOBAL_STATE.yarnPalette,
+        needles: needleEditor.state.bitmap.toJSON(),
+        repeat: repeatEditor.state.bitmap.toJSON(),
+        yarns: colorChangeEditor.state.bitmap.toJSON(),
+      })
+    );
+
+  download(dataStr, "pattern.json");
+}
+
 function view() {
   return html`
     <div id="site-content">
@@ -32,6 +78,18 @@ function view() {
       </div>
 
       <div id="left-controls" style="grid-area: lcontrols;">
+        <div>
+          <div class="dropdown-container">
+            <i class="fa-solid fa-download"></i>
+            <div class="dropdown">
+              <div @click=${() => downloadJSON()}>Pattern JSON</div>
+              <div @click=${() => downloadSilverKnitTxt()}>
+                TXT (SilverKnit)
+              </div>
+              <div @click=${() => downloadPNG()}>Chart PNG</div>
+            </div>
+          </div>
+        </div>
         <button
           @click=${() => {
             GLOBAL_STATE.scale = GLOBAL_STATE.scale + 1;

@@ -32,12 +32,15 @@ export const exportTXT = (bitmap, palette) => {
   return "data:text/plain;charset=utf-8," + encodeURIComponent(text);
 };
 
-export const exporters = {
-  txt: exportTXT,
-  json: exportJSON,
-  png: exportPNG,
-  jpg: exportJPG,
-};
+export function download(dataStr, downloadName) {
+  const downloadAnchorNode = document.createElement("a");
+
+  downloadAnchorNode.setAttribute("href", dataStr);
+  downloadAnchorNode.setAttribute("download", downloadName);
+  document.body.appendChild(downloadAnchorNode);
+  downloadAnchorNode.click();
+  downloadAnchorNode.remove();
+}
 
 export async function buildImagePalette(imageNames) {
   return await Promise.all(
