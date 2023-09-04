@@ -16,7 +16,8 @@ suitable for hand-knitting as well.
 ## todo
 
 - needles in/out work
-- re-add download/export
+- undo/redo
+- download/export
 - pattern library
 
 nice to have
