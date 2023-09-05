@@ -12,7 +12,8 @@ import { download } from "./utils";
 import { simulate } from "./simulation/yarnSimulation";
 // import startState from "./patterns/hex_quilt.json";
 // import startState from "./patterns/pyramids.json";
-import startState from "./patterns/vertical_tuck_stripes.json";
+// import startState from "./patterns/vertical_tuck_stripes.json";
+import startState from "./patterns/test.json";
 
 let repeatEditor, colorChangeEditor, needleEditor, preview;
 
@@ -64,7 +65,7 @@ function downloadJSON() {
         yarnPalette: GLOBAL_STATE.yarnPalette,
         needles: needleEditor.state.bitmap.toJSON(),
         repeat: repeatEditor.state.bitmap.toJSON(),
-        yarns: colorChangeEditor.state.bitmap.toJSON(),
+        yarns: colorChangeEditor.state.bitmap.vMirror().toJSON(),
       })
     );
 
@@ -228,6 +229,7 @@ function runSimulation() {
   ({ clear, relax, flip } = simulate(
     preview.state.symbolMap,
     colorChangeEditor.state.bitmap.pixels,
+    Array.from(needleEditor.state.bitmap.pixels),
     GLOBAL_STATE.yarnPalette
   ));
 }
@@ -269,6 +271,9 @@ async function init() {
   // Synchronize editor changes
   repeatEditor.addEffect("bitmap", regenPreview);
   colorChangeEditor.addEffect("bitmap", regenPreview);
+  needleEditor.addEffect("bitmap", () => {
+    GLOBAL_STATE.updateSim = true;
+  });
 
   // Sync changes to palette
   colorChangeEditor.addEffect("palette", ({ palette }) => {
