@@ -10,9 +10,7 @@ import { buildPreview } from "./editors/previewEditor";
 import { download } from "./utils";
 
 import { simulate } from "./simulation/yarnSimulation";
-// import startState from "./patterns/hex_quilt.json";
-// import startState from "./patterns/pyramids.json";
-// import startState from "./patterns/vertical_tuck_stripes.json";
+
 import startState from "./patterns/test.json";
 
 const library = import.meta.glob("/patterns/*.json");
@@ -146,11 +144,11 @@ function view() {
       <div id="pattern-container" style="grid-area: pattern;">
         <canvas id="preview"></canvas>
         <canvas id="preview-symbols"></canvas>
-        <canvas id="preview-grid"></canvas>
-        <!-- <canvas id="preview-highlight"></canvas> -->
+        <canvas id="preview-needles"></canvas>
+
         <canvas id="repeat"></canvas>
-        <!-- <canvas id="repeat-outline"></canvas> -->
-        <canvas id="repeat-grid"></canvas>
+        <canvas id="pattern-highlight"></canvas>
+        <canvas id="pattern-grid"></canvas>
       </div>
 
       <div class="bgutter" style="grid-area: bgutter;">
@@ -205,6 +203,8 @@ function regenPreview() {
   preview.dispatch({
     bitmap: colorLayer,
     symbolMap: symbolLayer,
+    scale: GLOBAL_STATE.scale,
+    needles: needleEditor.state.bitmap,
   });
 
   GLOBAL_STATE.updateSim = true;
@@ -222,8 +222,8 @@ function syncScale() {
 
   repeatEditor.dispatch({ scale });
   colorChangeEditor.dispatch({ scale });
-  needleEditor.dispatch({ scale });
   preview.dispatch({ scale });
+  needleEditor.dispatch({ scale });
 
   regenPreview();
 
@@ -273,7 +273,6 @@ async function init() {
 
   let repeatEditorCanvas = document.getElementById("repeat");
   let colorChangeEditorCanvas = document.getElementById("color-change-editor");
-  let previewCanvas = document.getElementById("preview");
   let needleEditorCanvas = document.getElementById("needle-editor");
 
   // Make the initial bitmaps based on global state
@@ -285,24 +284,19 @@ async function init() {
   );
 
   // Build all the editors
-  repeatEditor = await buildRepeatEditor(
-    GLOBAL_STATE,
-    repeatEditorCanvas,
-    previewCanvas
-  );
+  repeatEditor = await buildRepeatEditor(GLOBAL_STATE, repeatEditorCanvas);
   colorChangeEditor = buildColorChangeEditor(
     GLOBAL_STATE,
     colorChangeEditorCanvas
   );
   needleEditor = await buildNeedleEditor(GLOBAL_STATE, needleEditorCanvas);
-  preview = await buildPreview(GLOBAL_STATE, previewCanvas, initial);
+  preview = await buildPreview(GLOBAL_STATE, initial);
 
   // Synchronize editor changes
   repeatEditor.addEffect("bitmap", regenPreview);
+  needleEditor.addEffect("bitmap", regenPreview);
+
   colorChangeEditor.addEffect("bitmap", regenPreview);
-  needleEditor.addEffect("bitmap", () => {
-    GLOBAL_STATE.updateSim = true;
-  });
 
   // Sync changes to palette
   colorChangeEditor.addEffect("palette", ({ palette }) => {

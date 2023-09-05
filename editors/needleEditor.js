@@ -2,7 +2,6 @@ import { Bimp } from "../bimp/Bimp";
 import { BimpEditor } from "../bimp/BimpEditor";
 
 import { pointerTracker } from "../bimp/pointerTracker";
-import { grid } from "../bimp/grid";
 import { canvasScaler } from "../bimp/canvasScaler";
 import { paletteRenderer } from "../bimp/paletteRenderer";
 import { imagePalette } from "../bimp/palettes";
@@ -83,7 +82,6 @@ export async function buildNeedleEditor(state, canvas) {
         drawFunc: imagePalette,
         canvas,
       }),
-      // grid(),
       pointerEvents({
         tools: { flip },
         eventTarget: canvas,

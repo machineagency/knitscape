@@ -4,17 +4,12 @@ import { live } from "lit-html/directives/live.js";
 import { BimpEditor } from "../bimp/BimpEditor";
 import { Bimp } from "../bimp/Bimp";
 
-import { pointerTracker } from "../bimp/pointerTracker";
-import { grid } from "../bimp/grid";
 import { canvasScaler } from "../bimp/canvasScaler";
 import { paletteRenderer } from "../bimp/paletteRenderer";
 import { imagePalette } from "../bimp/palettes";
 import { pointerEvents } from "../bimp/pointerEvents";
 import { stateHook } from "../bimp/stateHook";
 import { fieldMonitor } from "../bimp/stateFieldMonitor";
-
-import { outline } from "../bimp/outline";
-import { highlight } from "../bimp/highlight";
 
 import { brush, flood, line, rect, shift } from "../bimp/tools";
 
@@ -137,34 +132,25 @@ function heightSpinner({ container }) {
   };
 }
 
-export async function buildRepeatEditor(state, canvas, previewCanvas) {
+export async function buildRepeatEditor(state, canvas) {
   let repeatTools = { brush, flood, line, rect, shift };
-  const outlineCanvas = document.getElementById("repeat-outline");
-  const gridCanvas = document.getElementById("repeat-grid");
+
+  const topCanvas = document.getElementById("pattern-grid");
   const palette = await buildImagePalette(["knit", "purl", "slip", "tuck"]);
 
   return new BimpEditor({
     state: {
       bitmap: Bimp.fromJSON(state.repeat),
       palette,
+      pos: { x: -1, y: -1 },
     },
     components: [
-      pointerTracker({ target: gridCanvas }),
       canvasScaler({ canvas }),
-      // canvasScaler({ canvas: outlineCanvas }),
-      canvasScaler({ canvas: gridCanvas }),
       pointerEvents({
         tools: repeatTools,
-        eventTarget: gridCanvas,
-      }),
-      pointerEvents({
-        tools: repeatTools,
-        eventTarget: document.getElementById("preview-grid"),
+        eventTarget: topCanvas,
       }),
       paletteRenderer({ drawFunc: imagePalette, canvas }),
-      // highlight(),
-      // outline({ canvas: outlineCanvas }),
-      grid({ canvas: gridCanvas }),
       stateHook({
         check: fieldMonitor("activeTool"),
         cb: toolSelectView(

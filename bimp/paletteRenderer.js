@@ -28,7 +28,7 @@ function draw(
       if (previous == null || previous.pixel(x, y) != paletteIndex) {
         ctx.translate(x * scale, y * scale);
 
-        drawFunc(palette[paletteIndex], ctx, scale, scale);
+        drawFunc(palette[paletteIndex], ctx, scale, x, y);
         ctx.setTransform(1, 0, 0, 1, 0, 0);
       }
     }
