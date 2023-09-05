@@ -12,12 +12,12 @@ suitable for hand-knitting as well.
 - 2D yarn relaxation simulation
 - flip simulation swatch (view "wrong" or "right" side)
 - color chooser and randomizer
+- download/export to JSON, PNG, and SilverKnit's TXT format
+- put needles in and out of work (creates a ladder, ideal for tuck lace)
 
 ## todo
 
-- needles in/out work
 - undo/redo
-- download/export
 - pattern library
 
 nice to have
@@ -35,13 +35,3 @@ ideas
 - fair isle mode: specify two colors in a row, chart design switches between
   them
 
-<!-- ## shout-outs
-
-- D3 (specifically [d3-force](https://github.com/d3/d3-force)) to create a
-  spring model of the yarn crossings
-- TopoKnit for the yarn crossing model
-- `lit-html` for html templating
-- [`bimp`](https://github.com/branchwelder/bimp) for bitmap editing
-- `Font Awesome Icons`
-- [`National Park Typeface`](https://nationalparktypeface.com/)
-- [`Eloquent JavaScript`] -->

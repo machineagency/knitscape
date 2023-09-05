@@ -1,8 +1,18 @@
-function draw(canvas, drawFunc, bitmap, palette, scale, previous, prevScale) {
+function draw(
+  canvas,
+  drawFunc,
+  bitmap,
+  palette,
+  scale,
+  previous,
+  prevScale,
+  prevPalette
+) {
   if (
     previous == null ||
     previous.width != bitmap.width ||
     previous.height != bitmap.height ||
+    prevPalette != palette ||
     scale != prevScale
   ) {
     previous = null;
@@ -32,6 +42,7 @@ function paletteRendererExtension(
   state.paletteIndex = 0;
   let previous = null;
   let prevScale = null;
+  let prevPalette = null;
 
   return {
     syncState(state) {
@@ -46,6 +57,7 @@ function paletteRendererExtension(
       );
       previous = state[bitmapOverride];
       prevScale = state.scale;
+      prevPalette = state[paletteOverride];
     },
   };
 }

@@ -15,6 +15,8 @@ import { simulate } from "./simulation/yarnSimulation";
 // import startState from "./patterns/vertical_tuck_stripes.json";
 import startState from "./patterns/test.json";
 
+const library = import.meta.glob("/patterns/*.json");
+
 let repeatEditor, colorChangeEditor, needleEditor, preview;
 
 let clear, relax, flip;
@@ -72,6 +74,26 @@ function downloadJSON() {
   download(dataStr, "pattern.json");
 }
 
+function load(path) {
+  library[path]().then((mod) => {
+    loadWorkspace(mod);
+    syncScale();
+    regenPreview();
+
+    repeatEditor.dispatch({ bitmap: Bimp.fromJSON(mod.repeat) });
+    needleEditor.dispatch({ bitmap: Bimp.fromJSON(mod.needles) });
+    colorChangeEditor.dispatch({ bitmap: Bimp.fromJSON(mod.yarns).vMirror() });
+
+    colorChangeEditor.dispatch({ palette: mod.yarnPalette });
+
+    colorChangeEditor.dispatch({ scale });
+    needleEditor.dispatch({ scale });
+    preview.dispatch({ scale });
+
+    GLOBAL_STATE.updateSim = true;
+  });
+}
+
 function view() {
   return html`
     <div id="site-content">
@@ -80,16 +102,23 @@ function view() {
       </div>
 
       <div id="left-controls" style="grid-area: lcontrols;">
-        <div>
-          <div class="dropdown-container">
-            <i class="fa-solid fa-download"></i>
-            <div class="dropdown">
-              <div @click=${() => downloadJSON()}>Pattern JSON</div>
-              <div @click=${() => downloadSilverKnitTxt()}>
-                TXT (SilverKnit)
-              </div>
-              <div @click=${() => downloadPNG()}>Chart PNG</div>
-            </div>
+        <div class="dropdown-container">
+          <i class="fa-solid fa-download"></i>
+          <div class="dropdown">
+            <div @click=${() => downloadJSON()}>Pattern JSON</div>
+            <div @click=${() => downloadSilverKnitTxt()}>TXT (SilverKnit)</div>
+            <div @click=${() => downloadPNG()}>Chart PNG</div>
+          </div>
+        </div>
+        <div class="dropdown-container">
+          <i class="fa-solid fa-book"></i>
+          <div class="dropdown">
+            ${Object.entries(library).map(
+              ([path, _]) =>
+                html`<div class="dropdown-item ex" @click=${() => load(path)}>
+                  ${path.split("/").at(-1).split(".")[0]}
+                </div>`
+            )}
           </div>
         </div>
         <button
