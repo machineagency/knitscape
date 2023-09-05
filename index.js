@@ -1,59 +1,76 @@
 import { html, render } from "lit-html";
-import { live } from "lit-html/directives/live.js";
 
 import { Bimp } from "./bimp/Bimp";
-import { BimpEditor } from "./bimp/BimpEditor";
-import { fieldMonitor } from "./bimp/stateFieldMonitor";
-import { canvasScaler } from "./bimp/canvasScaler";
-import { pointerTracker } from "./bimp/pointerTracker";
-import { grid } from "./bimp/grid";
-import { highlight } from "./bimp/highlight";
 
-import { paletteRenderer } from "./bimp/paletteRenderer";
-import { hexPalette, imagePalette } from "./bimp/palettes";
+import { buildRepeatEditor } from "./editors/repeatEditor";
+import { buildColorChangeEditor } from "./editors/colorChangeEditor";
+import { buildNeedleEditor } from "./editors/needleEditor";
+import { buildPreview } from "./editors/previewEditor";
 
-import { pointerEvents } from "./bimp/pointerEvents";
-import { brush, flood, line, rect, shift } from "./bimp/tools";
-import { stateHook } from "./bimp/stateHook";
+import { download } from "./utils";
 
-import startState from "./startState.json";
-
-import {
-  stitchSymbolPalette,
-  transparentStitchPalette,
-} from "./stitchSymbolPalette";
-
-import { buildColorChangeEditor } from "./colorChangeEditor";
-
-import { renderPreview } from "./simulation/yarnSimulation";
-
-const iconMap = {
-  flood: "fa-fill-drip",
-  brush: "fa-paintbrush",
-  rect: "fa-vector-square",
-  line: "fa-minus",
-  shift: "fa-up-down-left-right",
-};
-
-let GLOBAL_STATE = startState;
-
-GLOBAL_STATE.mouseDown = 0;
-document.body.onmousedown = function () {
-  ++GLOBAL_STATE.mouseDown;
-};
-document.body.onmouseup = function () {
-  --GLOBAL_STATE.mouseDown;
-};
-
-let clear, relax, flip;
-let timeoutID;
-
-let repeatEditorCanvas,
-  colorChangeEditorCanvas,
-  needleEditorCanvas,
-  previewCanvas;
+import { simulate } from "./simulation/yarnSimulation";
+// import startState from "./patterns/hex_quilt.json";
+// import startState from "./patterns/pyramids.json";
+// import startState from "./patterns/vertical_tuck_stripes.json";
+import startState from "./patterns/test.json";
 
 let repeatEditor, colorChangeEditor, needleEditor, preview;
+
+let clear, relax, flip;
+
+let GLOBAL_STATE = {
+  scale: 25,
+  updateSim: false,
+};
+
+function loadWorkspace(workspace) {
+  GLOBAL_STATE = { ...GLOBAL_STATE, ...workspace };
+  GLOBAL_STATE.updateSim = true;
+}
+
+function downloadPNG() {
+  download(
+    document.getElementById("preview").toDataURL("image/png"),
+    "chart.png"
+  );
+}
+
+function downloadSilverKnitTxt() {
+  const text =
+    "SilverKnit\n" +
+    repeatEditor.state.bitmap
+      .make2d()
+      .map((row) =>
+        row
+          .map((pixel) => {
+            if (pixel == 0 || pixel == 1) return 8;
+            else return 7;
+          })
+          .join("")
+      )
+      .join("\n");
+
+  download(
+    "data:text/plain;charset=utf-8," + encodeURIComponent(text),
+    "pattern.txt"
+  );
+}
+
+function downloadJSON() {
+  const dataStr =
+    "data:text/json;charset=utf-8," +
+    encodeURIComponent(
+      JSON.stringify({
+        yarnPalette: GLOBAL_STATE.yarnPalette,
+        needles: needleEditor.state.bitmap.toJSON(),
+        repeat: repeatEditor.state.bitmap.toJSON(),
+        yarns: colorChangeEditor.state.bitmap.vMirror().toJSON(),
+      })
+    );
+
+  download(dataStr, "pattern.json");
+}
 
 function view() {
   return html`
@@ -63,6 +80,18 @@ function view() {
       </div>
 
       <div id="left-controls" style="grid-area: lcontrols;">
+        <div>
+          <div class="dropdown-container">
+            <i class="fa-solid fa-download"></i>
+            <div class="dropdown">
+              <div @click=${() => downloadJSON()}>Pattern JSON</div>
+              <div @click=${() => downloadSilverKnitTxt()}>
+                TXT (SilverKnit)
+              </div>
+              <div @click=${() => downloadPNG()}>Chart PNG</div>
+            </div>
+          </div>
+        </div>
         <button
           @click=${() => {
             GLOBAL_STATE.scale = GLOBAL_STATE.scale + 1;
@@ -87,24 +116,41 @@ function view() {
       </div>
       <div id="pattern-container" style="grid-area: pattern;">
         <canvas id="preview"></canvas>
+        <canvas id="preview-symbols"></canvas>
+        <canvas id="preview-grid"></canvas>
+        <!-- <canvas id="preview-highlight"></canvas> -->
         <canvas id="repeat"></canvas>
+        <!-- <canvas id="repeat-outline"></canvas> -->
+        <canvas id="repeat-grid"></canvas>
       </div>
+
       <div class="bgutter" style="grid-area: bgutter;">
         <div class="preview"></div>
         <div class="repeat"></div>
       </div>
-      <!-- <div style="grid-area: needles;">
-        <canvas id="needle-work-editor"></canvas>
-      </div> -->
+
       <div id="bottom-controls" style="grid-area: bcontrols;">
         <div id="repeat-width"></div>
+        <div id="needle-width"></div>
       </div>
 
       <div id="color-change-container" style="grid-area: colors;">
-        <canvas id="color-change-editor" height="25" width="25"></canvas>
+        <div id="height-dragger">
+          <div id="color-dragger" class="dragger vertical grab">
+            <i class="fa-solid fa-grip fa-xs"></i>
+          </div>
+          <canvas id="color-change-editor" height="25" width="25"></canvas>
+          <canvas id="color-change-grid" height="25" width="25"></canvas>
+        </div>
         <div id="color-controls">
           <div id="yarn-palette"></div>
-          <div id="color-height"></div>
+        </div>
+      </div>
+
+      <div id="needle-container" style="grid-area: needles;">
+        <canvas id="needle-editor"></canvas>
+        <div id="needle-dragger" class="dragger horizontal grab">
+          <i class="fa-solid fa-grip-vertical fa-xs"></i>
         </div>
       </div>
 
@@ -119,311 +165,12 @@ function view() {
   `;
 }
 
-function bottomLeft({ bitmap }, axis) {
-  if (axis == "horizontal") {
-    return Array.apply(null, Array(bitmap.width)).map((x, i) => i + 1);
-  } else if (axis == "vertical") {
-    return Array.apply(null, Array(bitmap.height))
-      .map((x, i) => i + 1)
-      .reverse();
-  }
-}
-
-function gutterView({ gutterFunc, container, axis }) {
-  return (state, dispatch) => {
-    let arr = gutterFunc(state, axis);
-
-    function checkHighlight(num) {
-      if (axis == "horizontal" && state.pos.x == num) {
-        return true;
-      } else if (axis == "vertical" && state.pos.y == num) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-    render(
-      html`<div class="gutter ${axis}" style="--scale:${state.scale}px;">
-        ${arr.map(
-          (content, index) =>
-            html`<div class="cell ${checkHighlight(index) ? "highlight" : ""}">
-              ${content}
-            </div>`
-        )}
-      </div>`,
-      container
-    );
-  };
-}
-
-function widthSpinner({ container }) {
-  return (state, dispatch) => {
-    let { bitmap } = state;
-    render(
-      html`<div class="spinner horizontal">
-        <button
-          class="minus"
-          @click=${() =>
-            dispatch({
-              bitmap: bitmap.resize(bitmap.width - 1, bitmap.height),
-            })}>
-          <i class="fa-solid fa-minus"></i>
-        </button>
-
-        <input
-          type="text"
-          .value=${live(bitmap.width)}
-          class="size-input"
-          @change=${(e) =>
-            dispatch({
-              bitmap: bitmap.resize(Number(e.target.value), bitmap.height),
-            })} />
-        <button
-          class="plus"
-          @click=${() =>
-            dispatch({
-              bitmap: bitmap.resize(bitmap.width + 1, bitmap.height),
-            })}>
-          <i class="fa-solid fa-plus"></i>
-        </button>
-      </div>`,
-      container
-    );
-  };
-}
-
-function heightSpinner({ container }) {
-  return (state, dispatch) => {
-    let { bitmap } = state;
-    render(
-      html`<div class="spinner vertical">
-        <button
-          class="plus"
-          @click=${() =>
-            dispatch({
-              bitmap: bitmap.resize(bitmap.width, bitmap.height + 1),
-            })}>
-          <i class="fa-solid fa-plus"></i>
-        </button>
-        <input
-          type="text"
-          .value=${live(bitmap.height)}
-          class="size-input"
-          @change=${(e) =>
-            dispatch({
-              bitmap: bitmap.resize(bitmap.width, Number(e.target.value)),
-            })} />
-
-        <button
-          class="minus"
-          @click=${() =>
-            dispatch({
-              bitmap: bitmap.resize(bitmap.width, bitmap.height - 1),
-            })}>
-          <i class="fa-solid fa-minus"></i>
-        </button>
-      </div>`,
-      container
-    );
-  };
-}
-
-function toolSelectView(tools, container) {
-  return (state, dispatch) =>
-    render(
-      html`<div class="tool-select">
-        ${Object.keys(tools).map(
-          (tool) =>
-            html`<button
-              class=${state.activeTool == tool ? "active" : ""}
-              @click=${() => dispatch({ activeTool: tool })}>
-              <i class="fa-solid ${iconMap[tool]}"></i>
-            </button>`
-        )}
-      </div>`,
-      container
-    );
-}
-
-function imagePaletteSelect(palette, container) {
-  return (state, dispatch) =>
-    render(
-      html`
-        <div class="palette-select">
-          ${palette.map(
-            ({ image, title }, index) =>
-              html`<img
-                class=${index == state.paletteIndex ? "selected" : ""}
-                src=${image.src}
-                title=${title}
-                @click=${() => dispatch({ paletteIndex: index })} />`
-          )}
-        </div>
-      `,
-      container
-    );
-}
-
-async function buildRepeatEditor() {
-  let repeatTools = { brush, flood, line, rect, shift };
-
-  const palette = await stitchSymbolPalette();
-  return new BimpEditor({
-    state: {
-      bitmap: Bimp.fromJSON(GLOBAL_STATE.repeat),
-      palette,
-      canvas: repeatEditorCanvas,
-    },
-    components: [
-      pointerTracker({ target: repeatEditorCanvas }),
-      canvasScaler(),
-      pointerEvents({
-        tools: repeatTools,
-        eventTarget: repeatEditorCanvas,
-      }),
-      pointerEvents({
-        tools: repeatTools,
-        eventTarget: previewCanvas,
-      }),
-      paletteRenderer({ drawFunc: imagePalette }),
-      grid(),
-      highlight(),
-      stateHook({
-        check: fieldMonitor("activeTool"),
-        cb: toolSelectView(
-          repeatTools,
-          document.getElementById("repeat-tools")
-        ),
-      }),
-      stateHook({
-        check: fieldMonitor("paletteIndex"),
-        cb: imagePaletteSelect(
-          palette,
-          document.getElementById("repeat-palette")
-        ),
-      }),
-      stateHook({
-        cb: gutterView({
-          gutterFunc: bottomLeft,
-          container: document.querySelector(".bgutter .repeat"),
-          axis: "horizontal",
-        }),
-      }),
-      stateHook({
-        cb: gutterView({
-          gutterFunc: bottomLeft,
-          container: document.querySelector(".lgutter .repeat"),
-          axis: "vertical",
-        }),
-      }),
-      stateHook({
-        cb: heightSpinner({
-          container: document.getElementById("repeat-height"),
-        }),
-      }),
-      stateHook({
-        cb: widthSpinner({
-          container: document.getElementById("repeat-width"),
-        }),
-      }),
-    ],
-  });
-}
-
-// function buildNeedleEditor() {
-//   return new BimpEditor({
-//     state: {
-//       bitmap: Bimp.fromJSON(GLOBAL_STATE.needles),
-//       palette: ["#ffffff", "#000000"],
-//       canvas: needleEditorCanvas,
-//     },
-
-//     components: [
-//       pointerTracker({ target: needleEditorCanvas }),
-//       scaledCanvas({}),
-//       paletteRenderer({
-//         drawFunc: hexPalette,
-//       }),
-//       pointerEvents({
-//         tools: { brush },
-//         eventTarget: needleEditorCanvas,
-//       }),
-//       grid({ lineColor: "#999999" }),
-//     ],
-//   });
-// }
-
-async function buildPreview() {
-  const stitchSymbolPalette = await transparentStitchPalette();
-
-  const { colorLayer, symbolLayer } = generateYarnPreview(
-    Bimp.fromJSON(GLOBAL_STATE.repeat),
-    GLOBAL_STATE.previewX,
-    GLOBAL_STATE.previewY,
-    GLOBAL_STATE.yarns.pixels
-  );
-
-  return new BimpEditor({
-    state: {
-      bitmap: colorLayer,
-      symbolMap: symbolLayer,
-      scale: GLOBAL_STATE.scale,
-      palette: GLOBAL_STATE.yarnPalette,
-      stitchPalette: stitchSymbolPalette,
-      canvas: previewCanvas,
-    },
-
-    components: [
-      pointerTracker({ target: previewCanvas }),
-      canvasScaler(),
-      paletteRenderer({ drawFunc: hexPalette }),
-      paletteRenderer({
-        drawFunc: imagePalette,
-        paletteOverride: "stitchPalette",
-        bitmapOverride: "symbolMap",
-      }),
-      grid(),
-      highlight(),
-      stateHook({
-        cb: gutterView({
-          gutterFunc: bottomLeft,
-          container: document.querySelector(".bgutter .preview"),
-          axis: "horizontal",
-        }),
-      }),
-      stateHook({
-        cb: gutterView({
-          gutterFunc: bottomLeft,
-          container: document.querySelector(".lgutter .preview"),
-          axis: "vertical",
-        }),
-      }),
-    ],
-  });
-}
-
-function syncRepeat(state) {
-  const { colorLayer, symbolLayer } = generateYarnPreview(
-    Bimp.fromJSON(state.bitmap),
-    GLOBAL_STATE.previewX,
-    GLOBAL_STATE.previewY,
-    GLOBAL_STATE.yarns.pixels
-  );
-  preview.dispatch({
-    bitmap: colorLayer,
-    symbolMap: symbolLayer,
-  });
-  runSimulation(symbolLayer);
-}
-
-function syncYarnChanges(state) {
-  GLOBAL_STATE.yarns.pixels = state.bitmap.vMirror().pixels;
-
+function regenPreview() {
   const { colorLayer, symbolLayer } = generateYarnPreview(
     Bimp.fromJSON(repeatEditor.state.bitmap),
     GLOBAL_STATE.previewX,
     GLOBAL_STATE.previewY,
-    GLOBAL_STATE.yarns.pixels
+    colorChangeEditor.state.bitmap.vMirror().pixels
   );
 
   preview.dispatch({
@@ -431,7 +178,7 @@ function syncYarnChanges(state) {
     symbolMap: symbolLayer,
   });
 
-  runSimulation(symbolLayer);
+  GLOBAL_STATE.updateSim = true;
 }
 
 function syncScale() {
@@ -444,29 +191,14 @@ function syncScale() {
 
   const scale = GLOBAL_STATE.scale;
 
-  const { colorLayer, symbolLayer } = generateYarnPreview(
-    Bimp.fromJSON(repeatEditor.state.bitmap),
-    GLOBAL_STATE.previewX,
-    GLOBAL_STATE.previewY,
-    GLOBAL_STATE.yarns.pixels
-  );
+  repeatEditor.dispatch({ scale });
+  colorChangeEditor.dispatch({ scale });
+  needleEditor.dispatch({ scale });
+  preview.dispatch({ scale });
 
-  repeatEditor.dispatch({
-    scale,
-  });
-  colorChangeEditor.dispatch({
-    scale,
-  });
-  preview.dispatch({
-    scale,
-    bitmap: colorLayer,
-    symbolMap: symbolLayer,
-  });
-  runSimulation(symbolLayer);
+  regenPreview();
 
-  // needleEditor.dispatch({
-  //   scale: state.scale,
-  // });
+  runSimulation();
 }
 
 function generateYarnPreview(repeat, width, height, yarnChanges) {
@@ -484,55 +216,76 @@ function generateYarnPreview(repeat, width, height, yarnChanges) {
 
   let colored = new Bimp(width, height, recolor);
   let stitches = new Bimp(width, height, stitchMap);
+
   return { colorLayer: colored.vMirror(), symbolLayer: stitches.vMirror() };
 }
 
-function runSimulation(symbolLayer) {
-  if (timeoutID) clearTimeout(timeoutID);
-  timeoutID = setTimeout(() => {
-    if (clear) clear();
-    clear = null;
-    ({ clear, relax, flip } = renderPreview(
-      symbolLayer,
-      colorChangeEditor.state.bitmap.pixels,
-      GLOBAL_STATE.yarnPalette
-    ));
-  }, 200);
+function runSimulation() {
+  if (!GLOBAL_STATE.updateSim) return;
+  GLOBAL_STATE.updateSim = false;
+
+  if (clear) clear();
+
+  ({ clear, relax, flip } = simulate(
+    preview.state.symbolMap,
+    colorChangeEditor.state.bitmap.pixels,
+    Array.from(needleEditor.state.bitmap.pixels),
+    GLOBAL_STATE.yarnPalette
+  ));
 }
 
-async function init() {
-  render(view(), document.body);
-  repeatEditorCanvas = document.getElementById("repeat");
-  colorChangeEditorCanvas = document.getElementById("color-change-editor");
-  previewCanvas = document.getElementById("preview");
-  needleEditorCanvas = document.getElementById("needle-work-editor");
+window.onmouseup = function () {
+  setTimeout(() => runSimulation(), 30);
+};
 
-  repeatEditor = await buildRepeatEditor();
+async function init() {
+  loadWorkspace(startState);
+  render(view(), document.body);
+
+  let repeatEditorCanvas = document.getElementById("repeat");
+  let colorChangeEditorCanvas = document.getElementById("color-change-editor");
+  let previewCanvas = document.getElementById("preview");
+  let needleEditorCanvas = document.getElementById("needle-editor");
+
+  // Make the initial bitmaps based on global state
+  let initial = generateYarnPreview(
+    Bimp.fromJSON(GLOBAL_STATE.repeat),
+    GLOBAL_STATE.previewX,
+    GLOBAL_STATE.previewY,
+    GLOBAL_STATE.yarns.pixels
+  );
+
+  // Build all the editors
+  repeatEditor = await buildRepeatEditor(
+    GLOBAL_STATE,
+    repeatEditorCanvas,
+    previewCanvas
+  );
   colorChangeEditor = buildColorChangeEditor(
     GLOBAL_STATE,
     colorChangeEditorCanvas
   );
-  // needleEditor = buildNeedleEditor();
+  needleEditor = await buildNeedleEditor(GLOBAL_STATE, needleEditorCanvas);
+  preview = await buildPreview(GLOBAL_STATE, previewCanvas, initial);
 
-  preview = await buildPreview();
-  repeatEditor.addEffect("bitmap", syncRepeat);
-  colorChangeEditor.addEffect("bitmap", syncYarnChanges);
+  // Synchronize editor changes
+  repeatEditor.addEffect("bitmap", regenPreview);
+  colorChangeEditor.addEffect("bitmap", regenPreview);
+  needleEditor.addEffect("bitmap", () => {
+    GLOBAL_STATE.updateSim = true;
+  });
 
+  // Sync changes to palette
   colorChangeEditor.addEffect("palette", ({ palette }) => {
     GLOBAL_STATE.yarnPalette = palette;
+    GLOBAL_STATE.updateSim = true;
+
     preview.dispatch({
       palette,
     });
-
-    const { symbolLayer } = generateYarnPreview(
-      Bimp.fromJSON(repeatEditor.state.bitmap),
-      GLOBAL_STATE.previewX,
-      GLOBAL_STATE.previewY,
-      GLOBAL_STATE.yarns.pixels
-    );
-    runSimulation(symbolLayer);
   });
 
+  // Sync mouse position between preview and repeat editor
   preview.addEffect("pos", ({ bitmap, pos }) => {
     if (pos.x > -1 || pos.y > -1) {
       let newX = pos.x % repeatEditor.state.bitmap.width;
@@ -549,7 +302,10 @@ async function init() {
       });
     }
   });
+
+  // Finally, explicitly synchronize the scale and run the sim
   syncScale();
+  runSimulation();
 }
 
 window.onload = init;

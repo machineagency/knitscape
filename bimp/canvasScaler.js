@@ -1,5 +1,5 @@
-function canvasScalerExtension({ state }, {}) {
-  let { canvas, scale } = state;
+function canvasScalerExtension({ state }, { canvas }) {
+  let { scale } = state;
   let width, height;
 
   function updateDom(state) {

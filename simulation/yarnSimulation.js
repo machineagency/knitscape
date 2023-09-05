@@ -23,27 +23,33 @@ const STITCH_HEIGHT = 14;
 const HALF_STITCH_WIDTH = 12;
 
 const OFFSET_X = 15; // Padding from the side of the viewbox
-const SPREAD = 1.3;
+const SPREAD = 1.2;
 const LINK_STRENGTH = 0.1;
 
-const YARN_WIDTH = 6;
+const YARN_WIDTH = 6.5;
 
 // The target link distance when the simulation is run
 const H_SHRINK = 1;
 const V_DIST = 12;
 
-export function renderPreview(pattern, yarnChanges, color) {
+export function simulate(pattern, yarnChanges, needles, color) {
   let rightSide = true;
   let relaxed = false;
 
-  const pat = new Pattern(pattern.pad(X_PADDING, Y_PADDING, 0));
+  let needleArr = Array.from(
+    Array(pattern.width),
+    (val, index) => needles[index % needles.length]
+  ).toReversed();
+
+  const pat = new Pattern(pattern.pad(X_PADDING, Y_PADDING, 0), needleArr);
+
   const testModel = new ProcessModel(pat);
   const yarnGraph = new YarnModel(testModel.cn);
 
   const svg = d3.select("#simulation");
   svg.attr(
     "viewBox",
-    `${-OFFSET_X} 0 ${HALF_STITCH_WIDTH * (pat.width + 2) * 2} ${
+    `${-OFFSET_X} 0 ${HALF_STITCH_WIDTH * needleArr.length * 2} ${
       STITCH_HEIGHT * pat.height
     }`
   );
@@ -59,12 +65,37 @@ export function renderPreview(pattern, yarnChanges, color) {
   function layoutNodes(yarnGraph) {
     // calculates the x,y values for the i,j
 
+    let offsetArr = Array.from(
+      Array(yarnGraph.width),
+      (val, index) => index * HALF_STITCH_WIDTH
+    );
+
+    let needlesSeen = 0;
+    // for each needle in the needle array
+    for (let needle = 0; needle < needleArr.length; needle++) {
+      // if the needle is out of work
+      if (needleArr[needle] == 1) {
+        // add a full stitch width to all offsets
+        for (
+          let offsetIndex = needlesSeen * 2;
+          offsetIndex < yarnGraph.width;
+          offsetIndex++
+        ) {
+          offsetArr[offsetIndex] += 2 * HALF_STITCH_WIDTH;
+        }
+      } else {
+        needlesSeen++;
+      }
+    }
+
     yarnGraph.contactNodes.forEach((node, index) => {
       const i = index % yarnGraph.width;
       const j = (index - i) / yarnGraph.width;
       node.i = i;
       node.j = j;
-      node.x = OFFSET_X + i * HALF_STITCH_WIDTH;
+      // node.x = OFFSET_X + i * HALF_STITCH_WIDTH;
+      node.x = offsetArr[i];
+
       node.y = (yarnGraph.height - j) * STITCH_HEIGHT;
     });
 

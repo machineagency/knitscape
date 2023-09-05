@@ -28,6 +28,14 @@ export class Bimp {
     return new Bimp(width, height, tiled);
   }
 
+  toJSON() {
+    return {
+      pixels: Array.from(this.pixels),
+      width: this.width,
+      height: this.height,
+    };
+  }
+
   pad(paddingX, paddingY, color) {
     const filled = Array(paddingY * (this.width + 2 * paddingX)).fill(color);
     const col = Array(paddingX).fill(color);

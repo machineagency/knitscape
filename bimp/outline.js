@@ -1,17 +1,10 @@
-function outlineExtension(
-  { state, parent },
-  { outer = "#000000", inner = "#ffffff", container = "desktop" }
-) {
-  let { aspectRatio, scale, bitmap, pos, pan } = state;
+function outlineExtension({ state }, { outer = "#000000", inner = "#ffffff" }) {
+  let { aspectRatio, scale, bitmap, pos, pan, canvas } = state;
   let cellSize = [aspectRatio[0] * scale, aspectRatio[1] * scale];
 
-  const dom = document.createElement("canvas");
-  dom.style.cssText = `image-rendering: pixelated;`;
-  parent[container].appendChild(dom);
-
   function draw() {
-    const ctx = dom.getContext("2d");
-    ctx.clearRect(0, 0, dom.width, dom.height);
+    if (pos.x < 0 || pos.y < 0) return;
+    const ctx = canvas.getContext("2d");
 
     ctx.strokeStyle = inner;
     ctx.strokeRect(
@@ -30,12 +23,6 @@ function outlineExtension(
     );
   }
 
-  function updateDom() {
-    dom.width = bitmap.width * aspectRatio[0] * scale;
-    dom.height = bitmap.height * aspectRatio[1] * scale;
-    dom.style.transform = `translate(${pan.x}px, ${pan.y}px)`;
-  }
-
   return {
     syncState(state) {
       if (
@@ -46,10 +33,14 @@ function outlineExtension(
         state.scale != scale ||
         state.pos != pos
       ) {
-        ({ aspectRatio, scale, pan, bitmap, pos } = state);
+        pos = state.pos;
+        bitmap = state.bitmap;
+        aspectRatio = state.aspectRatio;
+        scale = state.scale;
+        pan = state.pan;
 
         cellSize = [aspectRatio[0] * scale, aspectRatio[1] * scale];
-        updateDom();
+
         draw();
       }
     },

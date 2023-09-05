@@ -1,41 +1,40 @@
-function gridExtension({ state }, {}) {
-  let { aspectRatio, scale, bitmap, canvas } = state;
-  let cellSize = [aspectRatio[0] * scale, aspectRatio[1] * scale];
+function drawGrid(canvas, width, height, scale) {
+  const ctx = canvas.getContext("2d");
 
-  function draw() {
-    const ctx = canvas.getContext("2d");
+  ctx.translate(-0.5, -0.5);
 
-    ctx.save();
-    ctx.translate(-0.5, -0.5);
+  ctx.beginPath();
 
-    ctx.beginPath();
-
-    for (let x = 1; x < bitmap.width; x++) {
-      ctx.moveTo(x * cellSize[0], 0);
-      ctx.lineTo(x * cellSize[0], bitmap.height * cellSize[1]);
-    }
-
-    for (let y = 1; y < bitmap.height; y++) {
-      ctx.moveTo(0, y * cellSize[1]);
-      ctx.lineTo(bitmap.width * cellSize[0], y * cellSize[1]);
-    }
-
-    ctx.stroke();
-
-    ctx.restore();
+  for (let x = 1; x < width; x++) {
+    ctx.moveTo(x * scale, 0);
+    ctx.lineTo(x * scale, height * scale);
   }
 
-  return {
-    attached(state) {
-      ({ aspectRatio, scale, bitmap } = state);
-      cellSize = [aspectRatio[0] * scale, aspectRatio[1] * scale];
-      draw();
-    },
-    syncState(state) {
-      ({ aspectRatio, scale, bitmap } = state);
-      cellSize = [aspectRatio[0] * scale, aspectRatio[1] * scale];
+  for (let y = 1; y < height; y++) {
+    ctx.moveTo(0, y * scale);
+    ctx.lineTo(width * scale, y * scale);
+  }
 
-      draw();
+  ctx.stroke();
+}
+
+function gridExtension({}, { canvas }) {
+  let previous = null;
+  let prevScale = null;
+
+  return {
+    syncState({ bitmap, scale }) {
+      if (
+        previous == null ||
+        previous.width != bitmap.width ||
+        previous.height != bitmap.height ||
+        scale != prevScale
+      ) {
+        drawGrid(canvas, bitmap.width, bitmap.height, scale);
+
+        previous = bitmap;
+        prevScale = scale;
+      }
     },
   };
 }
