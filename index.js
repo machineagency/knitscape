@@ -72,24 +72,46 @@ function downloadJSON() {
   download(dataStr, "pattern.json");
 }
 
+function doLoad(e) {
+  let file = e.target.files[0];
+  const fileReader = new FileReader();
+  fileReader.readAsText(file);
+  fileReader.onload = () => {
+    loadJSON(JSON.parse(fileReader.result));
+  };
+}
+
+function upload() {
+  let fileInputElement = document.createElement("input");
+
+  fileInputElement.setAttribute("type", "file");
+  fileInputElement.style.display = "none";
+
+  document.body.appendChild(fileInputElement);
+  fileInputElement.click();
+  fileInputElement.onchange = doLoad;
+  document.body.removeChild(fileInputElement);
+}
+
+function loadJSON(mod) {
+  loadWorkspace(mod);
+  syncScale();
+  regenPreview();
+
+  repeatEditor.dispatch({ bitmap: Bimp.fromJSON(mod.repeat) });
+  needleEditor.dispatch({ bitmap: Bimp.fromJSON(mod.needles) });
+  colorChangeEditor.dispatch({ bitmap: Bimp.fromJSON(mod.yarns).vMirror() });
+
+  colorChangeEditor.dispatch({ palette: mod.yarnPalette });
+
+  colorChangeEditor.dispatch({ scale });
+  needleEditor.dispatch({ scale });
+  preview.dispatch({ scale });
+
+  GLOBAL_STATE.updateSim = true;
+}
 function load(path) {
-  library[path]().then((mod) => {
-    loadWorkspace(mod);
-    syncScale();
-    regenPreview();
-
-    repeatEditor.dispatch({ bitmap: Bimp.fromJSON(mod.repeat) });
-    needleEditor.dispatch({ bitmap: Bimp.fromJSON(mod.needles) });
-    colorChangeEditor.dispatch({ bitmap: Bimp.fromJSON(mod.yarns).vMirror() });
-
-    colorChangeEditor.dispatch({ palette: mod.yarnPalette });
-
-    colorChangeEditor.dispatch({ scale });
-    needleEditor.dispatch({ scale });
-    preview.dispatch({ scale });
-
-    GLOBAL_STATE.updateSim = true;
-  });
+  library[path]().then((mod) => loadJSON(mod));
 }
 
 function view() {
@@ -98,8 +120,9 @@ function view() {
       <div id="site-title" style="grid-area: title;">
         <span>knitscape</span>
       </div>
-
       <div id="left-controls" style="grid-area: lcontrols;">
+        <button @click=${upload}><i class="fa-solid fa-uplod"></i></button>
+
         <div class="dropdown-container">
           <i class="fa-solid fa-download"></i>
           <div class="dropdown">
