@@ -1,1 +1,0 @@
-const t=["#964f80","#ff976b"],e={bits:[0,1,0,1],width:4},s={bits:[0,0,0,0,0,0,0,0,0,0,3,0,0,0,3,0,0,0,3,0,0,0,3,0],width:4},a={bits:[0,0,0,0,1,1],width:1},n={palette:t,needles:e,repeat:s,yarns:a};export{n as default,e as needles,t as palette,s as repeat,a as yarns};
