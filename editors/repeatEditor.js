@@ -6,14 +6,13 @@ import { Bimp } from "../bimp/Bimp";
 
 import { canvasScaler } from "../bimp/canvasScaler";
 import { paletteRenderer } from "../bimp/paletteRenderer";
-import { imagePalette } from "../bimp/palettes";
 import { pointerEvents } from "../bimp/pointerEvents";
 import { stateHook } from "../bimp/stateHook";
 import { fieldMonitor } from "../bimp/stateFieldMonitor";
 
 import { brush, flood, line, rect, shift } from "../bimp/tools";
 
-import { buildImagePalette } from "../utils";
+import { buildImagePalette, imagePalette } from "../utils";
 import { gutterView, bottomLeft } from "../gutter";
 
 const iconMap = {

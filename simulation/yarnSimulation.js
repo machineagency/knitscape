@@ -22,7 +22,6 @@ const STITCH_HEIGHT = 14;
 // Distance horizontally between CNs (will be half of the stitch width)
 const HALF_STITCH_WIDTH = 12;
 
-const OFFSET_X = 15; // Padding from the side of the viewbox
 const SPREAD = 1.2;
 const LINK_STRENGTH = 0.1;
 
@@ -49,9 +48,9 @@ export function simulate(pattern, yarnChanges, needles, color) {
   const svg = d3.select("#simulation");
   svg.attr(
     "viewBox",
-    `${-OFFSET_X} 0 ${HALF_STITCH_WIDTH * needleArr.length * 2} ${
-      STITCH_HEIGHT * pat.height
-    }`
+    `${-HALF_STITCH_WIDTH * 2} 0 ${
+      HALF_STITCH_WIDTH * (needleArr.length + 1) * 2
+    } ${STITCH_HEIGHT * pat.height}`
   );
 
   const yarns = yarnChanges.toReversed();

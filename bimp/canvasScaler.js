@@ -1,10 +1,14 @@
-function canvasScalerExtension({ state }, { canvas }) {
+function canvasScalerExtension(
+  { state },
+  { canvas, setWidth = null, setHeight = null }
+) {
   let { scale } = state;
   let width, height;
-
   function updateDom(state) {
-    canvas.width = state.bitmap.width * state.aspectRatio[0] * state.scale;
-    canvas.height = state.bitmap.height * state.aspectRatio[1] * state.scale;
+    canvas.width =
+      setWidth ?? state.bitmap.width * state.aspectRatio[0] * state.scale;
+    canvas.height =
+      setHeight ?? state.bitmap.height * state.aspectRatio[1] * state.scale;
   }
 
   return {

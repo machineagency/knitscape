@@ -20,7 +20,7 @@ let repeatEditor, colorChangeEditor, needleEditor, preview;
 let clear, relax, flip;
 
 let GLOBAL_STATE = {
-  scale: 25,
+  scale: 30,
   updateSim: false,
 };
 
@@ -93,16 +93,18 @@ function upload() {
   document.body.removeChild(fileInputElement);
 }
 
-function loadJSON(mod) {
-  loadWorkspace(mod);
+function loadJSON(patternJSON) {
+  loadWorkspace(patternJSON);
   syncScale();
   regenPreview();
 
-  repeatEditor.dispatch({ bitmap: Bimp.fromJSON(mod.repeat) });
-  needleEditor.dispatch({ bitmap: Bimp.fromJSON(mod.needles) });
-  colorChangeEditor.dispatch({ bitmap: Bimp.fromJSON(mod.yarns).vMirror() });
+  repeatEditor.dispatch({ bitmap: Bimp.fromJSON(patternJSON.repeat) });
+  needleEditor.dispatch({ bitmap: Bimp.fromJSON(patternJSON.needles) });
+  colorChangeEditor.dispatch({
+    bitmap: Bimp.fromJSON(patternJSON.yarns).vMirror(),
+  });
 
-  colorChangeEditor.dispatch({ palette: mod.yarnPalette });
+  colorChangeEditor.dispatch({ palette: patternJSON.yarnPalette });
 
   colorChangeEditor.dispatch({ scale });
   needleEditor.dispatch({ scale });
@@ -110,6 +112,7 @@ function loadJSON(mod) {
 
   GLOBAL_STATE.updateSim = true;
 }
+
 function load(path) {
   library[path]().then((mod) => loadJSON(mod));
 }
@@ -121,7 +124,7 @@ function view() {
         <span>knitscape</span>
       </div>
       <div id="left-controls" style="grid-area: lcontrols;">
-        <button @click=${upload}><i class="fa-solid fa-uplod"></i></button>
+        <button @click=${upload}><i class="fa-solid fa-upload"></i></button>
 
         <div class="dropdown-container">
           <i class="fa-solid fa-download"></i>
@@ -144,14 +147,16 @@ function view() {
         </div>
         <button
           @click=${() => {
-            GLOBAL_STATE.scale = GLOBAL_STATE.scale + 1;
+            GLOBAL_STATE.scale =
+              GLOBAL_STATE.scale + devicePixelRatio / (devicePixelRatio - 1);
             syncScale();
           }}>
           <i class="fa-solid fa-magnifying-glass-plus"></i>
         </button>
         <button
           @click=${() => {
-            GLOBAL_STATE.scale = GLOBAL_STATE.scale - 1;
+            GLOBAL_STATE.scale =
+              GLOBAL_STATE.scale - devicePixelRatio / (devicePixelRatio - 1);
             syncScale();
           }}>
           <i class="fa-solid fa-magnifying-glass-minus"></i>
@@ -159,29 +164,28 @@ function view() {
         <div id="repeat-tools"></div>
         <div id="repeat-palette"></div>
         <div id="repeat-height"></div>
+        <div id="repeat-width"></div>
       </div>
       <div class="lgutter" style="grid-area: lgutter;">
         <div class="preview"></div>
         <div class="repeat"></div>
       </div>
-      <div id="pattern-container" style="grid-area: pattern;">
+      <div
+        class="pattern-container"
+        id="pattern-container"
+        style="grid-area: pattern;">
         <canvas id="preview"></canvas>
         <canvas id="preview-symbols"></canvas>
         <canvas id="preview-needles"></canvas>
 
         <canvas id="repeat"></canvas>
         <canvas id="pattern-highlight"></canvas>
-        <canvas id="pattern-grid"></canvas>
+        <canvas id="pattern-grid" style="image-rendering:pixelated"></canvas>
       </div>
 
       <div class="bgutter" style="grid-area: bgutter;">
         <div class="preview"></div>
         <div class="repeat"></div>
-      </div>
-
-      <div id="bottom-controls" style="grid-area: bcontrols;">
-        <div id="repeat-width"></div>
-        <div id="needle-width"></div>
       </div>
 
       <div id="color-change-container" style="grid-area: colors;">
@@ -190,7 +194,11 @@ function view() {
             <i class="fa-solid fa-grip fa-xs"></i>
           </div>
           <canvas id="color-change-editor" height="25" width="25"></canvas>
-          <canvas id="color-change-grid" height="25" width="25"></canvas>
+          <canvas
+            id="color-change-grid"
+            height="25"
+            width="25"
+            style="image-rendering:pixelated"></canvas>
         </div>
         <div id="color-controls">
           <div id="yarn-palette"></div>
@@ -198,7 +206,7 @@ function view() {
       </div>
 
       <div id="needle-container" style="grid-area: needles;">
-        <canvas id="needle-editor"></canvas>
+        <canvas id="needle-editor" height="25" width="25"></canvas>
         <div id="needle-dragger" class="dragger horizontal grab">
           <i class="fa-solid fa-grip-vertical fa-xs"></i>
         </div>
@@ -218,16 +226,14 @@ function view() {
 function regenPreview() {
   const { colorLayer, symbolLayer } = generateYarnPreview(
     Bimp.fromJSON(repeatEditor.state.bitmap),
-    GLOBAL_STATE.previewX,
-    GLOBAL_STATE.previewY,
     colorChangeEditor.state.bitmap.vMirror().pixels
   );
 
   preview.dispatch({
     bitmap: colorLayer,
     symbolMap: symbolLayer,
-    scale: GLOBAL_STATE.scale,
-    needles: needleEditor.state.bitmap,
+    scale: GLOBAL_STATE.scale / devicePixelRatio,
+    needles: Array.from(needleEditor.state.bitmap.pixels),
   });
 
   GLOBAL_STATE.updateSim = true;
@@ -238,10 +244,15 @@ function syncScale() {
     .getElementById("pattern-container")
     .getBoundingClientRect();
 
-  GLOBAL_STATE.previewX = Math.floor(bbox.width / GLOBAL_STATE.scale);
-  GLOBAL_STATE.previewY = Math.floor(bbox.height / GLOBAL_STATE.scale);
+  const actualX = bbox.width * devicePixelRatio;
+  const actualY = bbox.height * devicePixelRatio;
 
-  const scale = GLOBAL_STATE.scale;
+  const actualScale = GLOBAL_STATE.scale;
+
+  GLOBAL_STATE.previewX = Math.floor(actualX / actualScale) - 1;
+  GLOBAL_STATE.previewY = Math.floor(actualY / actualScale);
+
+  const scale = actualScale / devicePixelRatio;
 
   repeatEditor.dispatch({ scale });
   colorChangeEditor.dispatch({ scale });
@@ -249,11 +260,12 @@ function syncScale() {
   needleEditor.dispatch({ scale });
 
   regenPreview();
-
   runSimulation();
 }
 
-function generateYarnPreview(repeat, width, height, yarnChanges) {
+function generateYarnPreview(repeat, yarnChanges) {
+  let width = GLOBAL_STATE.previewX;
+  let height = GLOBAL_STATE.previewY;
   let tiled = Bimp.fromTile(width, height, repeat.vMirror());
 
   let recolor = [];
@@ -301,8 +313,6 @@ async function init() {
   // Make the initial bitmaps based on global state
   let initial = generateYarnPreview(
     Bimp.fromJSON(GLOBAL_STATE.repeat),
-    GLOBAL_STATE.previewX,
-    GLOBAL_STATE.previewY,
     GLOBAL_STATE.yarns.pixels
   );
 

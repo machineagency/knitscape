@@ -5,19 +5,14 @@ import { grid } from "../bimp/grid";
 import { canvasScaler } from "../bimp/canvasScaler";
 import { paletteRenderer } from "../bimp/paletteRenderer";
 import { needleRenderer } from "../bimp/needleRenderer";
-import { imagePalette, hexPalette } from "../bimp/palettes";
 import { stateHook } from "../bimp/stateHook";
 
 import { highlightCell } from "../bimp/highlightCell";
 
-import { buildImagePalette } from "../utils";
+import { buildImagePalette, imagePalette, hexPalette } from "../utils";
 import { gutterView, bottomLeft } from "../gutter";
 
-export async function buildPreview(
-  state,
-  { colorLayer, symbolLayer },
-  drawNeedle
-) {
+export async function buildPreview(state, { colorLayer, symbolLayer }) {
   const stitchSymbolPalette = await buildImagePalette([
     "knit_transparent",
     "purl_transparent",
@@ -35,7 +30,7 @@ export async function buildPreview(
     state: {
       bitmap: colorLayer,
       symbolMap: symbolLayer,
-      scale: state.scale,
+      scale: state.scale / devicePixelRatio,
       palette: state.yarnPalette,
       stitchPalette: stitchSymbolPalette,
       needles: [],
@@ -43,14 +38,11 @@ export async function buildPreview(
 
     components: [
       pointerTracker({ target: gridCanvas }),
-
       canvasScaler({ canvas: previewCanvas }),
       canvasScaler({ canvas: symbolCanvas }),
       canvasScaler({ canvas: needleCanvas }),
-
       canvasScaler({ canvas: highlightCanvas }),
       canvasScaler({ canvas: gridCanvas }),
-
       paletteRenderer({ drawFunc: hexPalette, canvas: previewCanvas }),
       paletteRenderer({
         drawFunc: imagePalette,
@@ -58,9 +50,9 @@ export async function buildPreview(
         bitmapOverride: "symbolMap",
         canvas: symbolCanvas,
       }),
-      // needleRenderer({
-      //   canvas: needleCanvas,
-      // }),
+      needleRenderer({
+        canvas: needleCanvas,
+      }),
 
       highlightCell({ canvas: highlightCanvas }),
       grid({ canvas: gridCanvas }),

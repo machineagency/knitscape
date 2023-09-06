@@ -4,10 +4,9 @@ import { BimpEditor } from "../bimp/BimpEditor";
 import { pointerTracker } from "../bimp/pointerTracker";
 import { canvasScaler } from "../bimp/canvasScaler";
 import { paletteRenderer } from "../bimp/paletteRenderer";
-import { imagePalette } from "../bimp/palettes";
 import { pointerEvents } from "../bimp/pointerEvents";
 
-import { buildImagePalette } from "../utils";
+import { buildImagePalette, imagePalette } from "../utils";
 
 function resizeDragger(dragger) {
   return ({ state, dispatch }) => {
@@ -20,13 +19,17 @@ function resizeDragger(dragger) {
       document.body.classList.add("grabbing");
       dragger.classList.remove("grab");
 
-      const onmove = (e) => {
-        if (e.buttons == 0) {
-          window.removeEventListener("mousemove", onmove);
-          document.body.classList.remove("grabbing");
-          dragger.classList.add("grab");
-        }
+      const end = () => {
+        console.log("end");
+        document.body.classList.remove("grabbing");
 
+        window.removeEventListener("pointermove", onmove);
+        window.removeEventListener("pointerup", end);
+
+        dragger.classList.add("grab");
+      };
+
+      const onmove = (e) => {
         let newWidth =
           startBIMP.width - Math.floor((start - e.clientX) / scale);
         if (newWidth < 1) return;
@@ -36,7 +39,8 @@ function resizeDragger(dragger) {
         });
       };
 
-      window.addEventListener("mousemove", onmove);
+      window.addEventListener("pointermove", onmove);
+      window.addEventListener("pointerup", end);
     });
 
     return {
@@ -77,7 +81,7 @@ export async function buildNeedleEditor(state, canvas) {
 
     components: [
       pointerTracker({ target: canvas }),
-      canvasScaler({ canvas }),
+      canvasScaler({ canvas, setHeight: 25 }),
       paletteRenderer({
         drawFunc: imagePalette,
         canvas,

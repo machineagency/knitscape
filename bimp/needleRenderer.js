@@ -1,22 +1,15 @@
 function draw(canvas, bitmap, needles, scale) {
   const ctx = canvas.getContext("2d");
+  ctx.imageSmoothingEnabled = false;
 
-  // ctx.clearRect(0, 0, bitmap.width * scale, bitmap.height * scale);
-  ctx.fillStyle = "#0f0";
-  const needleArr = needles.pixels;
-  console.log(canvas);
+  ctx.clearRect(0, 0, bitmap.width * scale, bitmap.height * scale);
+  ctx.fillStyle = "#2d2c2c";
 
-  console.log(needleArr);
   for (let x = 0; x < bitmap.width; x++) {
-    if (needleArr[x % needleArr.length] == 1) {
-      console.log(x * scale, 0, scale, bitmap.height * scale);
-
+    if (needles[x % needles.length] == 1) {
       ctx.fillRect(x * scale, 0, scale, bitmap.height * scale);
     }
   }
-  console.log(scale);
-
-  ctx.fillRect(50, 50, 50, 50);
 }
 
 function needleRendererExtension({}, { canvas }) {

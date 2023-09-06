@@ -19,7 +19,6 @@ function draw(
   }
 
   const ctx = canvas.getContext("2d");
-  ctx.imageSmoothingQuality = "high";
 
   for (let y = 0; y < bitmap.height; y++) {
     for (let x = 0; x < bitmap.width; x++) {
@@ -29,7 +28,7 @@ function draw(
         ctx.translate(x * scale, y * scale);
 
         drawFunc(palette[paletteIndex], ctx, scale, x, y);
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.resetTransform();
       }
     }
   }
