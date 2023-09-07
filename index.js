@@ -32,6 +32,33 @@ function loadWorkspace(workspace) {
   GLOBAL_STATE.updateSim = true;
 }
 
+function downloadSVG() {
+  var svg = document.getElementById("simulation");
+
+  //get svg source.
+  var serializer = new XMLSerializer();
+  var source = serializer.serializeToString(svg);
+
+  //add name spaces.
+  if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
+    source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+  }
+  if (!source.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)) {
+    source = source.replace(
+      /^<svg/,
+      '<svg xmlns:xlink="http://www.w3.org/1999/xlink"'
+    );
+  }
+
+  //add xml declaration
+  source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
+
+  download(
+    "data:image/svg+xml;charset=utf-8," + encodeURIComponent(source),
+    "swatch.svg"
+  );
+}
+
 function downloadPNG() {
   download(
     document.getElementById("preview").toDataURL("image/png"),
@@ -202,6 +229,7 @@ function view() {
           <div class="dropdown">
             <div @click=${() => downloadJSON()}>Pattern JSON</div>
             <div @click=${() => downloadPNG()}>Chart PNG</div>
+            <div @click=${() => downloadSVG()}>Simulation SVG</div>
             <div @click=${() => downloadBMP()}>Windows BMP (Silver Knit)</div>
             <div @click=${() => downloadSilverKnitTxt()}>TXT (Silver Knit)</div>
           </div>

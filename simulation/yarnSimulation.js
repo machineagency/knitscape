@@ -49,7 +49,7 @@ export function simulate(pattern, yarnChanges, needles, color) {
   svg.attr(
     "viewBox",
     `-10 -10 ${HALF_STITCH_WIDTH * (needleArr.length + 1) * 2} ${
-      STITCH_HEIGHT * (pat.height + 3)
+      STITCH_HEIGHT * (pat.height + 2)
     }`
   );
 
