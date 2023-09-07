@@ -7,7 +7,7 @@ import { buildColorChangeEditor } from "./editors/colorChangeEditor";
 import { buildNeedleEditor } from "./editors/needleEditor";
 import { buildPreview } from "./editors/previewEditor";
 
-import { download } from "./utils";
+import { download, makeBMP } from "./utils";
 
 import { simulate } from "./simulation/yarnSimulation";
 
@@ -36,6 +36,16 @@ function downloadPNG() {
   );
 }
 
+function downloadBMP() {
+  download(
+    makeBMP(
+      repeatEditor.state.bitmap,
+      colorChangeEditor.state.bitmap.pixels,
+      colorChangeEditor.state.palette
+    ).src
+  );
+}
+
 function downloadSilverKnitTxt() {
   const text =
     "SilverKnit\n" +
@@ -44,8 +54,8 @@ function downloadSilverKnitTxt() {
       .map((row) =>
         row
           .map((pixel) => {
-            if (pixel == 0 || pixel == 1) return 8;
-            else return 7;
+            if (pixel == 0 || pixel == 1) return 7;
+            else return 8;
           })
           .join("")
       )
@@ -130,8 +140,9 @@ function view() {
           <i class="fa-solid fa-download"></i>
           <div class="dropdown">
             <div @click=${() => downloadJSON()}>Pattern JSON</div>
-            <div @click=${() => downloadSilverKnitTxt()}>TXT (SilverKnit)</div>
             <div @click=${() => downloadPNG()}>Chart PNG</div>
+            <div @click=${() => downloadBMP()}>Windows BMP (Silver Knit)</div>
+            <div @click=${() => downloadSilverKnitTxt()}>TXT (Silver Knit)</div>
           </div>
         </div>
         <div class="dropdown-container">
