@@ -99,14 +99,14 @@ function heightSpinner({ container }) {
   return (state, dispatch) => {
     let { bitmap } = state;
     render(
-      html`<div class="spinner vertical">
+      html`<div class="spinner horizontal">
         <button
-          class="plus"
+          class="minus"
           @click=${() =>
             dispatch({
-              bitmap: bitmap.resize(bitmap.width, bitmap.height + 1),
+              bitmap: bitmap.resize(bitmap.width, bitmap.height - 1),
             })}>
-          <i class="fa-solid fa-plus"></i>
+          <i class="fa-solid fa-minus"></i>
         </button>
         <input
           type="text"
@@ -116,14 +116,13 @@ function heightSpinner({ container }) {
             dispatch({
               bitmap: bitmap.resize(bitmap.width, Number(e.target.value)),
             })} />
-
         <button
-          class="minus"
+          class="plus"
           @click=${() =>
             dispatch({
-              bitmap: bitmap.resize(bitmap.width, bitmap.height - 1),
+              bitmap: bitmap.resize(bitmap.width, bitmap.height + 1),
             })}>
-          <i class="fa-solid fa-minus"></i>
+          <i class="fa-solid fa-plus"></i>
         </button>
       </div>`,
       container

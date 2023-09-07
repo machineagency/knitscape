@@ -17,15 +17,15 @@ const X_PADDING = 0;
 const Y_PADDING = 4;
 
 // Distance vertically between CNs
-const STITCH_HEIGHT = 14;
+const STITCH_HEIGHT = 10;
 
 // Distance horizontally between CNs (will be half of the stitch width)
 const HALF_STITCH_WIDTH = 12;
 
-const SPREAD = 1.2;
+const SPREAD = 0.9;
 const LINK_STRENGTH = 0.1;
 
-const YARN_WIDTH = 6.5;
+const YARN_WIDTH = 5;
 
 // The target link distance when the simulation is run
 const H_SHRINK = 1;
@@ -48,9 +48,9 @@ export function simulate(pattern, yarnChanges, needles, color) {
   const svg = d3.select("#simulation");
   svg.attr(
     "viewBox",
-    `${-HALF_STITCH_WIDTH * 2} 0 ${
-      HALF_STITCH_WIDTH * (needleArr.length + 1) * 2
-    } ${STITCH_HEIGHT * pat.height}`
+    `-10 -10 ${HALF_STITCH_WIDTH * (needleArr.length + 1) * 2} ${
+      STITCH_HEIGHT * (pat.height + 3)
+    }`
   );
 
   const yarns = yarnChanges.toReversed();
@@ -148,7 +148,7 @@ export function simulate(pattern, yarnChanges, needles, color) {
     .attr("stroke-width", YARN_WIDTH)
     .attr("stroke-linecap", "round")
     .selectAll()
-    .data(yarnPathLinks.toReversed())
+    .data(yarnPathLinks)
     .join("path")
     .filter((d) => calcLayer(d) == "front")
     .attr("data-link", (d) => d.linkType)

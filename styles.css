@@ -53,9 +53,7 @@ button > i {
 
 canvas {
   outline: 1px solid black;
-  /* display: block; */
   box-sizing: content-box;
-  /* image-rendering: pixelated; */
 }
 
 .grabbing {
@@ -84,13 +82,12 @@ canvas {
   display: grid;
   padding: 0.7rem 1rem;
   grid-template-areas:
-    ". title title title ."
+    ". title title title simcontrols"
     "lcontrols lgutter pattern colors sim"
-    ". . bgutter . simcontrols"
-    ". . needles . ."
-    ". . bcontrols . .";
+    "size size bgutter . ."
+    "size size needles . .";
   grid-template-columns: min-content min-content 1fr min-content 1fr;
-  grid-template-rows: min-content minmax(0, 1fr) min-content min-content min-content;
+  grid-template-rows: min-content minmax(0, 1fr) min-content min-content;
 }
 
 #site-content > * {
@@ -102,6 +99,10 @@ canvas {
   box-sizing: content-box;
   height: 100%;
   position: relative;
+}
+
+#pattern-container {
+  overflow: hidden;
 }
 
 .lgutter {
@@ -175,8 +176,9 @@ canvas {
 
 #sim-controls {
   display: flex;
-  gap: 5px;
+  gap: 6px;
   justify-content: end;
+  align-items: center;
 }
 
 #sim-controls > button {
@@ -304,9 +306,22 @@ canvas {
 
 /* NUMBER SPINNER */
 
+#size-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: end;
+}
+
 .spinner {
   display: flex;
   gap: 5px;
+  align-items: center;
+}
+
+.spinner.vertical {
+  flex-direction: column;
+  align-items: center;
 }
 
 .spinner.vertical {
@@ -325,6 +340,9 @@ canvas {
 
 .plus,
 .minus {
+  width: 20px;
+  min-height: 14px;
+
   aspect-ratio: 1;
 }
 

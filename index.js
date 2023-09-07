@@ -1,4 +1,5 @@
 import { html, render } from "lit-html";
+import { live } from "lit-html/directives/live.js";
 
 import { Bimp } from "./bimp/Bimp";
 
@@ -11,7 +12,7 @@ import { download, makeBMP } from "./utils";
 
 import { simulate } from "./simulation/yarnSimulation";
 
-import startState from "./patterns/test.json";
+import startState from "./patterns/concentricSquares.json";
 
 const library = import.meta.glob("/patterns/*.json");
 
@@ -20,8 +21,10 @@ let repeatEditor, colorChangeEditor, needleEditor, preview;
 let clear, relax, flip;
 
 let GLOBAL_STATE = {
-  scale: 30,
+  scale: 25,
   updateSim: false,
+  simWidth: 40,
+  simHeight: 100,
 };
 
 function loadWorkspace(workspace) {
@@ -127,6 +130,64 @@ function load(path) {
   library[path]().then((mod) => loadJSON(mod));
 }
 
+function widthSpinner() {
+  return html`<div class="spinner horizontal">
+    <button
+      class="minus"
+      @click=${() => {
+        GLOBAL_STATE.simWidth = GLOBAL_STATE.simWidth - 1;
+        GLOBAL_STATE.updateSim = true;
+      }}>
+      <i class="fa-solid fa-minus"></i>
+    </button>
+    <input
+      type="text"
+      .value=${live(GLOBAL_STATE.simWidth.toString())}
+      class="size-input"
+      @change=${(e) => {
+        GLOBAL_STATE.simWidth = Number(e.target.value);
+        GLOBAL_STATE.updateSim = true;
+      }} />
+    <button
+      class="plus"
+      @click=${() => {
+        GLOBAL_STATE.simWidth = GLOBAL_STATE.simWidth + 1;
+        GLOBAL_STATE.updateSim = true;
+      }}>
+      <i class="fa-solid fa-plus"></i>
+    </button>
+  </div>`;
+}
+
+function heightSpinner() {
+  return html`<div class="spinner horizontal">
+    <button
+      class="minus"
+      @click=${() => {
+        GLOBAL_STATE.simHeight = GLOBAL_STATE.simHeight - 1;
+        GLOBAL_STATE.updateSim = true;
+      }}>
+      <i class="fa-solid fa-minus"></i>
+    </button>
+    <input
+      type="text"
+      .value=${live(GLOBAL_STATE.simHeight.toString())}
+      class="size-input"
+      @change=${(e) => {
+        GLOBAL_STATE.simHeight = Number(e.target.value);
+        GLOBAL_STATE.updateSim = true;
+      }} />
+    <button
+      class="plus"
+      @click=${() => {
+        GLOBAL_STATE.simHeight = GLOBAL_STATE.simHeight + 1;
+        GLOBAL_STATE.updateSim = true;
+      }}>
+      <i class="fa-solid fa-plus"></i>
+    </button>
+  </div>`;
+}
+
 function view() {
   return html`
     <div id="site-content">
@@ -174,8 +235,6 @@ function view() {
         </button>
         <div id="repeat-tools"></div>
         <div id="repeat-palette"></div>
-        <div id="repeat-height"></div>
-        <div id="repeat-width"></div>
       </div>
       <div class="lgutter" style="grid-area: lgutter;">
         <div class="preview"></div>
@@ -188,7 +247,6 @@ function view() {
         <canvas id="preview"></canvas>
         <canvas id="preview-symbols"></canvas>
         <canvas id="preview-needles"></canvas>
-
         <canvas id="repeat"></canvas>
         <canvas id="pattern-highlight"></canvas>
         <canvas id="pattern-grid" style="image-rendering:pixelated"></canvas>
@@ -215,19 +273,22 @@ function view() {
           <div id="yarn-palette"></div>
         </div>
       </div>
-
+      <div id="size-container" style="grid-area: size;">
+        <div id="repeat-width"></div>
+        <div id="repeat-height"></div>
+      </div>
       <div id="needle-container" style="grid-area: needles;">
         <canvas id="needle-editor" height="25" width="25"></canvas>
         <div id="needle-dragger" class="dragger horizontal grab">
           <i class="fa-solid fa-grip-vertical fa-xs"></i>
         </div>
       </div>
-
+      <div id="sim-controls" style="grid-area: simcontrols">
+        ${widthSpinner()} ${heightSpinner()}
+        <button @click=${() => relax()}>relax</button>
+        <button @click=${() => flip()}>flip</button>
+      </div>
       <div id="sim-container" style="grid-area: sim">
-        <div id="sim-controls" style="grid-area: simcontrols">
-          <button @click=${() => relax()}>relax</button>
-          <button @click=${() => flip()}>flip</button>
-        </div>
         <svg id="simulation"></svg>
       </div>
     </div>
@@ -271,7 +332,7 @@ function syncScale() {
   needleEditor.dispatch({ scale });
 
   regenPreview();
-  runSimulation();
+  // runSimulation();
 }
 
 function generateYarnPreview(repeat, yarnChanges) {
@@ -296,13 +357,19 @@ function generateYarnPreview(repeat, yarnChanges) {
 }
 
 function runSimulation() {
+  render(view(), document.body);
+
   if (!GLOBAL_STATE.updateSim) return;
   GLOBAL_STATE.updateSim = false;
 
   if (clear) clear();
 
   ({ clear, relax, flip } = simulate(
-    preview.state.symbolMap,
+    Bimp.fromTile(
+      GLOBAL_STATE.simWidth,
+      GLOBAL_STATE.simHeight,
+      repeatEditor.state.bitmap.vMirror()
+    ).vMirror(),
     colorChangeEditor.state.bitmap.pixels,
     Array.from(needleEditor.state.bitmap.pixels),
     GLOBAL_STATE.yarnPalette
@@ -350,6 +417,8 @@ async function init() {
     preview.dispatch({
       palette,
     });
+
+    runSimulation();
   });
 
   // Sync mouse position between preview and repeat editor
