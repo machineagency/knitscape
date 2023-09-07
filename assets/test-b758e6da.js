@@ -1,0 +1,1 @@
+const e=["#643f58","#f7f7f7","#5d6689","#d279a4"],t={pixels:[1,0,1,0],width:4,height:1},s={pixels:[0,3,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,3,0,0,0,0,0,0,0,0],width:4,height:8},a={pixels:[2,2,1,1,2,2,3,3],width:1,height:8},n={yarnPalette:e,needles:t,repeat:s,yarns:a};export{n as default,t as needles,s as repeat,e as yarnPalette,a as yarns};
