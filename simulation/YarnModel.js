@@ -53,11 +53,6 @@ function addToList(i, j, legNode, yarnPath, DS) {
 
   if (legNode) {
     // if it is a leg node
-    // let numberOfACNS = acnsAt(i, j, DS).length;
-    // if (numberOfACNS > 0) {
-    // an anchored CN is here
-    //   return true;
-    // } else return false;
     return DS.getST(i, j) == KNIT || DS.getST(i, j) == PURL;
   } else {
     // head node
@@ -67,51 +62,17 @@ function addToList(i, j, legNode, yarnPath, DS) {
       return false;
     } else if (AV == UACN) {
       let m, n, row, part;
-      if (i % 2 == 0 && j % 2 != 0) {
-        // if i is even and j is odd, we look backward in the yarn path
-        // last acn in yarn path
-
+      if (i % 2 != j % 2) {
+        // if parities are different, we look backward in the yarn path
         [m, n, row, part] = yarnPath.at(-1);
       } else {
-        // When the parities are the same, the check looks forward along the yarn for a CN that might be at a lower j value.
-        // look forward for next ACN in yarn path
-        // THIS IS THE ISSUEEEE
-        let found = false;
-        let iCheck = i;
-        let jCheck = j;
-        let legNodeCheck = legNode;
-        let stitchRowCheck = j - 1;
-
-        while (!found) {
-          // get the next cn
-          const check = nextCN(
-            iCheck,
-            jCheck,
-            legNodeCheck,
-            stitchRowCheck,
-            DS
-          );
-          // console.log(check);
-          if (DS.getAV(check.i, check.j) == ACN) {
-            // console.log("FOUND", check.i, check.j);
-            found = true;
-          }
-          iCheck = check.i;
-          jCheck = check.j;
-          legNodeCheck = check.legNode;
-          stitchRowCheck = check.currentStitchRow;
-
-          // if (i == 4 && j == 2) console.log(next);
-        }
-        m = iCheck;
-        n = jCheck;
+        // When the parities are the same, the check looks forward along the yarn
+        const check = nextCN(i, j, legNode, j - 1, DS);
+        m = check.i;
+        n = check.j;
       }
       // Determine final location
       const final = finalLocation(i, j, DS);
-
-      // if (i == 4 && j == 2) console.log(final, m, n);
-
-      // console.log(final, m, n);
 
       if (n < final.j) {
         // if this CN is anchored
@@ -161,7 +122,7 @@ function finalLocationRecursive(i, j, DS) {
 // determines which ACNs are positioned at location (i,j) in the CN grid
 // const ACNList = [];
 // for all in 13*4
-// if
+// check mv
 // }
 
 function nextCN(i, j, legNode, currentStitchRow, DS) {
@@ -265,7 +226,6 @@ export class YarnModel {
 
   yarnPathToLinks() {
     let source = 0;
-    // console.log(this.yarnPath);
     let last = this.yarnPath[0][3];
     const links = [];
 

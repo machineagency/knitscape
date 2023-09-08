@@ -8,40 +8,19 @@ import * as d3 from "d3";
 
 const LINK_WIDTH = 7;
 
-// const test = new Bimp(4, 2, [0, 0, 0, 0, 0, 2, 0, 0]);
-// const test = new Bimp(4, 3, [0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0]);
-// const test = new Bimp(4, 4, [0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0]);
-// const test = new Bimp(
-//   4,
-//   6,
-//   [0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-// );
+// const test = new Bimp(4, 3, [0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0]);
 
-// const test = new Bimp(5, 3, [0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 2, 0, 0]);
+// const test = new Bimp(4, 3, [0, 0, 0, 0, 0, 2, 2, 0, 0, 2, 0, 0]);
 
-// const test = new Bimp(
-//   5,
-//   4,
-//   [0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0]
-// );
+// const test = new Bimp(4, 4, [0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 2, 0, 0]);
 
 const test = new Bimp(
+  4,
   5,
-  5,
-  [0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  [0, 0, 0, 0, 0, 2, 2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 );
 
-// const test = new Bimp(
-//   5,
-//   6,
-//   [
-//     0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-//     0, 0, 0, 0, 0,
-//   ]
-// );
-
-const testPattern = new Pattern(test.vMirror(), [0, 0, 0, 0, 0]);
-console.log(testPattern);
+const testPattern = new Pattern(test.vMirror(), [0, 0, 0, 0]);
 
 const testModel = new ProcessModel(testPattern);
 const yarnGraph = new YarnModel(testModel.cn);
@@ -71,8 +50,8 @@ const nodes = layoutNodes(yarnGraph);
 const links = yarnGraph.yarnPathToLinks();
 const ops = testPattern.makeOpData();
 
-console.log(nodes);
-console.log(links);
+// console.log(nodes);
+// console.log(links);
 
 // function stitchX(stitch) {
 //   const inds = stitch.cnIndices;
