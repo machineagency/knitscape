@@ -17,15 +17,16 @@ const X_PADDING = 0;
 const Y_PADDING = 4;
 
 // Distance vertically between CNs
-const STITCH_HEIGHT = 10;
+// const STITCH_HEIGHT = 10;
+const STITCH_HEIGHT = 16;
 
 // Distance horizontally between CNs (will be half of the stitch width)
 const HALF_STITCH_WIDTH = 12;
 
-const SPREAD = 0.9;
+const SPREAD = 0.5;
 const LINK_STRENGTH = 0.1;
 
-const YARN_WIDTH = 5;
+const YARN_WIDTH = 4;
 
 // The target link distance when the simulation is run
 const H_SHRINK = 1;

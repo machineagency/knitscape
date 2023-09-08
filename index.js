@@ -12,7 +12,7 @@ import { download, makeBMP } from "./utils";
 
 import { simulate } from "./simulation/yarnSimulation";
 
-import startState from "./patterns/concentricSquares.json";
+import startState from "./patterns/debug.json";
 
 const library = import.meta.glob("/patterns/*.json");
 
@@ -21,10 +21,11 @@ let repeatEditor, colorChangeEditor, needleEditor, preview;
 let clear, relax, flip;
 
 let GLOBAL_STATE = {
-  scale: 25,
+  // scale: 25,
+  scale: 75,
   updateSim: false,
-  simWidth: 40,
-  simHeight: 100,
+  simWidth: 8,
+  simHeight: 8,
 };
 
 function loadWorkspace(workspace) {

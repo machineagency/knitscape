@@ -7,19 +7,10 @@ import { pointerTracker } from "../bimp/pointerTracker";
 import { grid } from "../bimp/grid";
 import { canvasScaler } from "../bimp/canvasScaler";
 import { paletteRenderer } from "../bimp/paletteRenderer";
-import { hexPalette } from "../utils";
+import { hexPalette, getRandomColor, shuffle } from "../utils";
 import { pointerEvents } from "../bimp/pointerEvents";
 import { brush } from "../bimp/tools";
 import { stateHook } from "../bimp/stateHook";
-
-function getRandomColor() {
-  var letters = "0123456789ABCDEF";
-  var color = "#";
-  for (var i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
-}
 
 function hexPaletteSelect(container) {
   return (state, dispatch) =>
@@ -59,7 +50,15 @@ function hexPaletteSelect(container) {
               </div>`
           )}
         </div>
-
+        <button
+          style="aspect-ratio: 1;"
+          @click=${() => {
+            dispatch({
+              palette: shuffle(state.palette),
+            });
+          }}>
+          <i class="fa-solid fa-arrows-rotate"></i>
+        </button>
         <button
           style="aspect-ratio: 1;"
           @click=${() => {
@@ -69,7 +68,7 @@ function hexPaletteSelect(container) {
               ),
             });
           }}>
-          <i class="fa-solid fa-arrows-rotate"></i>
+          <i class="fa-solid fa-dice"></i>
         </button>
       `,
       container

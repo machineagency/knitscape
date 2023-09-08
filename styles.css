@@ -360,6 +360,7 @@ input:focus {
   display: flex;
   flex-direction: column;
   justify-content: end;
+  align-items: center;
   height: 100%;
 }
 

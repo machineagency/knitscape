@@ -8,12 +8,41 @@ import * as d3 from "d3";
 
 const LINK_WIDTH = 7;
 
-// const test = new Bimp(3, 1, [0, 0, 0]);
-// const test = new Bimp(3, 2, [0, 0, 0, 0, 2, 0]);
-// const test = new Bimp(3, 3, [0, 0, 0, 0, 2, 0, 0, 2, 0]);
-const test = new Bimp(3, 5, [0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0]);
+// const test = new Bimp(4, 2, [0, 0, 0, 0, 0, 2, 0, 0]);
+// const test = new Bimp(4, 3, [0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0]);
+// const test = new Bimp(4, 4, [0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0]);
+// const test = new Bimp(
+//   4,
+//   6,
+//   [0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+// );
 
-const testPattern = new Pattern(test.vMirror());
+// const test = new Bimp(5, 3, [0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 2, 0, 0]);
+
+// const test = new Bimp(
+//   5,
+//   4,
+//   [0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0]
+// );
+
+const test = new Bimp(
+  5,
+  5,
+  [0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+);
+
+// const test = new Bimp(
+//   5,
+//   6,
+//   [
+//     0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+//     0, 0, 0, 0, 0,
+//   ]
+// );
+
+const testPattern = new Pattern(test.vMirror(), [0, 0, 0, 0, 0]);
+console.log(testPattern);
+
 const testModel = new ProcessModel(testPattern);
 const yarnGraph = new YarnModel(testModel.cn);
 
@@ -45,19 +74,19 @@ const ops = testPattern.makeOpData();
 console.log(nodes);
 console.log(links);
 
-function stitchX(stitch) {
-  const inds = stitch.cnIndices;
-  return (
-    inds.reduce((sum, vertexID) => sum + nodes[vertexID].x, 0) / inds.length
-  );
-}
+// function stitchX(stitch) {
+//   const inds = stitch.cnIndices;
+//   return (
+//     inds.reduce((sum, vertexID) => sum + nodes[vertexID].x, 0) / inds.length
+//   );
+// }
 
-function stitchY(stitch) {
-  const inds = stitch.cnIndices;
-  return (
-    inds.reduce((sum, vertexID) => sum + nodes[vertexID].y, 0) / inds.length
-  );
-}
+// function stitchY(stitch) {
+//   const inds = stitch.cnIndices;
+//   return (
+//     inds.reduce((sum, vertexID) => sum + nodes[vertexID].y, 0) / inds.length
+//   );
+// }
 
 const opColors = d3.scaleOrdinal(d3.schemePastel1);
 
@@ -136,7 +165,7 @@ yarnsFrontContainer
   .selectAll()
   .data(links)
   .join("text")
-  .text((d) => d.linkType)
+  // .text((d) => d.linkType)
   .attr("x", (d) => (nodes[d.source].x + nodes[d.target].x) / 2)
   .attr("y", (d) => (nodes[d.source].y + nodes[d.target].y) / 2)
   .attr("alignment-baseline", "middle");
@@ -150,19 +179,18 @@ const cns = cnNodeContainer
   .attr("cy", (d) => d.y)
   .attr("fill", (d) => cnColors[d.cn])
   .attr("stroke", "black")
-  .attr("stroke-width", "2px")
-  .attr("title", "TEST");
+  .attr("stroke-width", "2px");
 
-// const cnLabels = cnNodeContainer
-//   .attr("text-anchor", "middle")
-//   .attr("font-size", "24")
-//   .selectAll()
-//   .data(nodes)
-//   .join("text")
-//   .text((d) => JSON.stringify(d.mv))
-//   .attr("x", (d) => d.x + 35)
-//   .attr("y", (d) => d.y + 20)
-//   .attr("alignment-baseline", "middle");
+const cnLabels = cnNodeContainer
+  .attr("text-anchor", "middle")
+  .attr("font-size", "12")
+  .selectAll()
+  .data(nodes)
+  .join("text")
+  .text((d) => `${JSON.stringify(d.mv)} i: ${d.i}, j: ${d.j}`)
+  .attr("x", (d) => d.x + 35)
+  .attr("y", (d) => d.y + 20)
+  .attr("alignment-baseline", "middle");
 
 const operations = operationContainer
   .selectAll()
@@ -176,13 +204,13 @@ const operations = operationContainer
     )
   );
 
-const opLabels = labelsContainer
-  .attr("text-anchor", "middle")
-  .attr("font-size", "24")
-  .selectAll()
-  .data(ops)
-  .join("text")
-  .text((d) => d.stitch)
-  .attr("x", (d) => stitchX(d))
-  .attr("y", (d) => stitchY(d))
-  .attr("alignment-baseline", "middle");
+// const opLabels = labelsContainer
+//   .attr("text-anchor", "middle")
+//   .attr("font-size", "24")
+//   .selectAll()
+//   .data(ops)
+//   .join("text")
+//   .text((d) => d.stitch)
+//   .attr("x", (d) => stitchX(d))
+//   .attr("y", (d) => stitchY(d))
+//   .attr("alignment-baseline", "middle");

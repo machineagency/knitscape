@@ -133,6 +133,7 @@ export class ProcessModel {
     }
 
     if (this.cn.getAV(i, j) == UACN) {
+      console.log(i, j);
       // look down the column to find the PCN and actualize them
       // this is the confusing bit
       // how to check if there is a CN moved into the lower cell?
