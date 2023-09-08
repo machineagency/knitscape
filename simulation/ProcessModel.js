@@ -114,7 +114,8 @@ export class ProcessModel {
       if (this.cn.getAV(i, j - 1) == PCN) {
         this.cn.setAV(i, j - 1, ACN);
       }
-
+    }
+    if (AV == ECN) {
       // Otherwise do not change
     }
   }
@@ -133,9 +134,25 @@ export class ProcessModel {
     }
 
     if (this.cn.getAV(i, j) == UACN) {
-      // look down the column to find the PCN and actualize them
-      // this is the confusing bit
-      // how to check if there is a CN moved into the lower cell?
+      let found = false;
+      let search = 0;
+      let iter = 0;
+
+      while (!found) {
+        if (j - search < 0) {
+          break;
+        }
+        if (this.cn.getAV(i, j - search) === "PCN") {
+          found = true;
+          this.cn.setAV(i, j - search, ACN);
+        }
+        search++;
+        iter++;
+        if (iter > 1000) {
+          console.error("COULDN'T FIND STITCH");
+          break;
+        }
+      }
     }
   }
 

@@ -60,6 +60,19 @@ function hexToRgb(hex) {
     : null;
 }
 
+export function shuffle(arr) {
+  return arr.sort(() => (Math.random() > 0.5 ? 1 : -1));
+}
+
+export function getRandomColor() {
+  const letters = "0123456789ABCDEF";
+  let color = "#";
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
+
 export function makeBMP(repeatBimp, colorRepeat, palette) {
   const height = leastCommonMultiple(repeatBimp.height, colorRepeat.length);
   const bmp2d = repeatBimp.make2d();

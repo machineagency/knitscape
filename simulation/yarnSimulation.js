@@ -5,31 +5,31 @@ import { yarnLinkForce } from "./YarnForce";
 import * as d3 from "d3";
 
 // Number of iterations for relaxation
-const ITERATIONS = 1;
+const ITERATIONS = 2;
 
 // Number of stitches to add to the left and right of the pattern
 // (need to do this because tuck / slip stitches can't be on the
 // end of the row)
-const X_PADDING = 0;
+const X_PADDING = 1;
 
 // Number of rows to add to the top and bottom of the pattern
 // (will be drawn in a different transparent color)
 const Y_PADDING = 4;
 
 // Distance vertically between CNs
-const STITCH_HEIGHT = 10;
+const STITCH_HEIGHT = 12;
 
 // Distance horizontally between CNs (will be half of the stitch width)
 const HALF_STITCH_WIDTH = 12;
 
 const SPREAD = 0.9;
-const LINK_STRENGTH = 0.1;
+const LINK_STRENGTH = 0.15;
 
-const YARN_WIDTH = 5;
+const YARN_WIDTH = 6;
 
 // The target link distance when the simulation is run
 const H_SHRINK = 1;
-const V_DIST = 12;
+const V_DIST = 8;
 
 export function simulate(pattern, yarnChanges, needles, color) {
   let rightSide = true;
@@ -39,6 +39,11 @@ export function simulate(pattern, yarnChanges, needles, color) {
     Array(pattern.width),
     (val, index) => needles[index % needles.length]
   ).toReversed();
+
+  for (let i = 0; i < X_PADDING; i++) {
+    needleArr.unshift(0);
+    needleArr.push(0);
+  }
 
   const pat = new Pattern(pattern.pad(X_PADDING, Y_PADDING, 0), needleArr);
 

@@ -12,7 +12,7 @@ import { download, makeBMP } from "./utils";
 
 import { simulate } from "./simulation/yarnSimulation";
 
-import startState from "./patterns/concentricSquares.json";
+import startState from "./patterns/ovals.json";
 
 const library = import.meta.glob("/patterns/*.json");
 
@@ -23,8 +23,8 @@ let clear, relax, flip;
 let GLOBAL_STATE = {
   scale: 25,
   updateSim: false,
-  simWidth: 40,
-  simHeight: 100,
+  simWidth: 30,
+  simHeight: 70,
 };
 
 function loadWorkspace(workspace) {
@@ -247,16 +247,24 @@ function view() {
         </div>
         <button
           @click=${() => {
-            GLOBAL_STATE.scale =
-              GLOBAL_STATE.scale + devicePixelRatio / (devicePixelRatio - 1);
+            if (devicePixelRatio == 1) {
+              GLOBAL_STATE.scale = GLOBAL_STATE.scale + 1;
+            } else {
+              GLOBAL_STATE.scale =
+                GLOBAL_STATE.scale + devicePixelRatio / (devicePixelRatio - 1);
+            }
             syncScale();
           }}>
           <i class="fa-solid fa-magnifying-glass-plus"></i>
         </button>
         <button
           @click=${() => {
-            GLOBAL_STATE.scale =
-              GLOBAL_STATE.scale - devicePixelRatio / (devicePixelRatio - 1);
+            if (devicePixelRatio == 1) {
+              GLOBAL_STATE.scale = GLOBAL_STATE.scale - 1;
+            } else {
+              GLOBAL_STATE.scale =
+                GLOBAL_STATE.scale - devicePixelRatio / (devicePixelRatio - 1);
+            }
             syncScale();
           }}>
           <i class="fa-solid fa-magnifying-glass-minus"></i>
@@ -360,7 +368,6 @@ function syncScale() {
   needleEditor.dispatch({ scale });
 
   regenPreview();
-  // runSimulation();
 }
 
 function generateYarnPreview(repeat, yarnChanges) {
