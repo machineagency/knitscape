@@ -91,7 +91,7 @@ export function makeBMP(repeatBimp, colorRepeat, palette) {
   }
 
   const rgbPalette = palette.map((hex) => hexToRgb(hex));
-  rgbPalette.push([0, 0, 0]);
+  rgbPalette.push([255, 255, 255]);
 
   const im = document.createElement("img");
   bmp_lib.render(im, bits, rgbPalette);
