@@ -5,7 +5,7 @@ import { yarnLinkForce } from "./YarnForce";
 import * as d3 from "d3";
 
 // Number of iterations for relaxation
-const ITERATIONS = 2;
+const ITERATIONS = 1;
 
 // Number of stitches to add to the left and right of the pattern
 // (need to do this because tuck / slip stitches can't be on the
