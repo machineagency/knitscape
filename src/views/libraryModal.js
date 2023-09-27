@@ -1,25 +1,11 @@
 import { html } from "lit-html";
-
-import { GLOBAL_STATE as state } from "./state";
-const library = import.meta.glob("../patterns/*.json");
-
-function load(path, dispatch, loadJSON) {
-  dispatch({ showLibrary: false });
-  library[path]().then((mod) => loadJSON(mod));
-}
+import { library } from "../../patterns/library";
+import { load } from "../actions/importers";
 
 const styles = html`<style>
   #library-modal {
-    position: absolute;
-    margin: 100px;
-    align-self: center;
     min-width: 200px;
     max-width: 700px;
-    z-index: 100000;
-    background-color: #252525;
-    padding: 10px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px 3px #0000009e;
   }
 
   #library-modal > h3 {
@@ -53,16 +39,16 @@ const styles = html`<style>
   }
 </style>`;
 
-export function patternLibrary(dispatch, loadJSON) {
+export function libraryModal() {
   return html`${styles}
-    <div id="library-modal">
+    <div id="library-modal" class="modal">
       <h3>Pattern Library</h3>
       <div id="library-container">
         ${Object.entries(library).map(
           ([path, _]) =>
             html`<div class="library-item">
               <span>${path.split("/").at(-1).split(".")[0]}</span>
-              <button @click=${() => load(path, dispatch, loadJSON)}>
+              <button @click=${() => load(path)}>
                 <i class="fa-solid fa-upload"></i>
               </button>
             </div>`

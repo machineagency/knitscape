@@ -1,8 +1,8 @@
 import { html } from "lit-html";
 import { when } from "lit-html/directives/when.js";
 import { map } from "lit-html/directives/map.js";
-import { Bimp } from "./bimp/Bimp";
-import { GLOBAL_STATE as state } from "./state";
+import { GLOBAL_STATE, dispatch } from "../state";
+import { uploadFile } from "../actions/importers";
 
 const styles = html`<style>
   #taskbar {
@@ -92,54 +92,33 @@ const styles = html`<style>
   }
 </style>`;
 
-function upload(loadJSON) {
-  let fileInputElement = document.createElement("input");
-
-  fileInputElement.setAttribute("type", "file");
-  fileInputElement.style.display = "none";
-
-  document.body.appendChild(fileInputElement);
-  fileInputElement.click();
-  fileInputElement.onchange = (e) => {
-    let file = e.target.files[0];
-    const fileReader = new FileReader();
-    fileReader.readAsText(file);
-    fileReader.onload = () => {
-      loadJSON(JSON.parse(fileReader.result));
-    };
-  };
-  document.body.removeChild(fileInputElement);
-}
-
 const fileMenuData = {
   New: {
     icon: "fa-file",
-    action: (dispatch) => {
-      dispatch({ showFileMenu: !state.showFileMenu });
+    action: () => {
+      dispatch({ showFileMenu: !GLOBAL_STATE.showFileMenu });
     },
   },
   Upload: {
     icon: "fa-upload",
-    action: (dispatch, loadJSON) => {
-      upload(loadJSON);
-      dispatch({ showFileMenu: !state.showFileMenu });
+    action: () => {
+      uploadFile();
+      dispatch({ showFileMenu: !GLOBAL_STATE.showFileMenu });
     },
   },
   Download: {
     icon: "fa-download",
-    action: (dispatch) => {
+    action: () => {
       dispatch({ showDownload: true, showFileMenu: false });
     },
   },
 };
 
-function fileMenu(dispatch, loadJSON) {
+function fileMenu() {
   return html`<div id="file-menu" class="taskbar-dropdown">
     ${map(
       Object.entries(fileMenuData),
-      ([key, data]) => html`<button
-        class="drop-btn"
-        @click=${() => data.action(dispatch, loadJSON)}>
+      ([key, data]) => html`<button class="drop-btn" @click=${data.action}>
         <i class="fa-solid ${data.icon}"></i>
         <span>${key}</span>
       </button>`
@@ -147,35 +126,32 @@ function fileMenu(dispatch, loadJSON) {
   </div>`;
 }
 
-function settings(dispatch) {
-  return html`<div id="settings" class="taskbar-dropdown">
-    <h3>Settings</h3>
-  </div>`;
-}
-
-export function taskbar(dispatch, loadJSON) {
+export function taskbar() {
   return html`${styles}
     <div id="taskbar">
       <span id="site-title">KnitScape</span>
       <div class="btn-group">
-        <div class="task-btn ${state.showFileMenu ? "open" : ""}">
+        <div class="task-btn ${GLOBAL_STATE.showFileMenu ? "open" : ""}">
           <button
-            @click=${() => dispatch({ showFileMenu: !state.showFileMenu })}>
+            @click=${() =>
+              dispatch({ showFileMenu: !GLOBAL_STATE.showFileMenu })}>
             <i class="fa-solid fa-folder"></i>
           </button>
-          ${when(state.showFileMenu, () => fileMenu(dispatch, loadJSON))}
+          ${when(GLOBAL_STATE.showFileMenu, fileMenu)}
         </div>
-        <div class="task-btn ${state.showLibrary ? "open" : ""}">
-          <button @click=${() => dispatch({ showLibrary: !state.showLibrary })}>
+        <div class="task-btn ${GLOBAL_STATE.showLibrary ? "open" : ""}">
+          <button
+            @click=${() =>
+              dispatch({ showLibrary: !GLOBAL_STATE.showLibrary })}>
             <i class="fa-solid fa-book"></i>
           </button>
         </div>
-        <div class="task-btn ${state.showSettings ? "open" : ""}">
+        <div class="task-btn ${GLOBAL_STATE.showSettings ? "open" : ""}">
           <button
-            @click=${() => dispatch({ showSettings: !state.showSettings })}>
+            @click=${() =>
+              dispatch({ showSettings: !GLOBAL_STATE.showSettings })}>
             <i class="fa-solid fa-gear"></i>
           </button>
-          ${when(state.showSettings, () => settings(dispatch))}
         </div>
       </div>
     </div>`;

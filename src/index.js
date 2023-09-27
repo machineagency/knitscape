@@ -1,37 +1,40 @@
 import { html, render } from "lit-html";
 import { live } from "lit-html/directives/live.js";
 import { when } from "lit-html/directives/when.js";
+import Split from "split.js";
 
-import { Bimp } from "./bimp/Bimp";
+// import { Bimp } from "./bimp/Bimp";
 
-import { buildRepeatEditor } from "./editors/repeatEditor";
-import { buildColorChangeEditor } from "./editors/colorChangeEditor";
-import { buildNeedleEditor } from "./editors/needleEditor";
-import { buildPreview } from "./editors/previewEditor";
+// import { buildRepeatEditor } from "./editors/repeatEditor";
+// import { buildColorChangeEditor } from "./editors/colorChangeEditor";
+// import { buildNeedleEditor } from "./editors/needleEditor";
+// import { buildPreview } from "./editors/previewEditor";
 
-// import { download, makeBMP } from "./utils";
+// import { simulate } from "./simulation/yarnSimulation";
 
-import { simulate } from "./simulation/yarnSimulation";
+import { GLOBAL_STATE, KnitScape, loadWorkspace, dispatch } from "./state";
 
-import { GLOBAL_STATE, loadWorkspace, updateState } from "./state";
+// import startState from "../patterns/ovals.json";
 
-import { taskbar } from "./taskbar";
+import { addKeypressListeners } from "./events/keypressEvents";
+import { closeModals } from "./events/closeModals";
 
-import startState from "../patterns/ovals.json";
-import { downloadModal } from "./download";
-import { patternLibrary } from "./patternLibrary";
+import { taskbar } from "./views/taskbar";
+import { downloadModal } from "./views/downloadModal";
+import { libraryModal } from "./views/libraryModal";
+import { settingsModal } from "./views/settingsModal";
+import { debugPane } from "./views/debugPane";
 
-// const library = import.meta.glob("/patterns/*.json");
+import { isMobile } from "./utils";
 
-let repeatEditor, colorChangeEditor, needleEditor, preview;
+// let repeatEditor, colorChangeEditor, needleEditor, preview;
+// let clear, relax, flip;
 
-let clear, relax, flip;
-
-function dispatch(action) {
-  // const changes = Object.keys(action);
-  updateState(action);
-  // app.syncState(state, changes);
-}
+// function dispatch(action) {
+//   // const changes = Object.keys(action);
+//   updateState(action);
+//   // app.syncState(state, changes);
+// }
 
 // function doLoad(e) {
 //   let file = e.target.files[0];
@@ -61,28 +64,24 @@ function dispatch(action) {
 //   document.body.removeChild(fileInputElement);
 // }
 
-function loadJSON(patternJSON) {
-  loadWorkspace(patternJSON);
-  syncScale();
-  regenPreview();
+// function loadJSON(patternJSON) {
+//   loadWorkspace(patternJSON);
+//   syncScale();
+//   regenPreview();
 
-  repeatEditor.dispatch({ bitmap: Bimp.fromJSON(patternJSON.repeat) });
-  needleEditor.dispatch({ bitmap: Bimp.fromJSON(patternJSON.needles) });
-  colorChangeEditor.dispatch({
-    bitmap: Bimp.fromJSON(patternJSON.yarns).vMirror(),
-  });
+//   repeatEditor.dispatch({ bitmap: Bimp.fromJSON(patternJSON.repeat) });
+//   needleEditor.dispatch({ bitmap: Bimp.fromJSON(patternJSON.needles) });
+//   colorChangeEditor.dispatch({
+//     bitmap: Bimp.fromJSON(patternJSON.yarns).vMirror(),
+//   });
 
-  colorChangeEditor.dispatch({ palette: patternJSON.yarnPalette });
+//   colorChangeEditor.dispatch({ palette: patternJSON.yarnPalette });
 
-  colorChangeEditor.dispatch({ scale });
-  needleEditor.dispatch({ scale });
-  preview.dispatch({ scale });
+//   colorChangeEditor.dispatch({ scale });
+//   needleEditor.dispatch({ scale });
+//   preview.dispatch({ scale });
 
-  GLOBAL_STATE.updateSim = true;
-}
-
-// function load(path) {
-//   library[path]().then((mod) => loadJSON(mod));
+//   GLOBAL_STATE.updateSim = true;
 // }
 
 function widthSpinner() {
@@ -143,27 +142,13 @@ function heightSpinner() {
   </div>`;
 }
 
-window.addEventListener("mousedown", (e) => {
-  // close modals if click outside
-  const settings = document.getElementById("settings");
-  const download = document.getElementById("download-modal");
-  const fileMenu = document.getElementById("file-menu");
-  const library = document.getElementById("library-modal");
-
-  if (settings && !settings.contains(e.target))
-    dispatch({ showSettings: false });
-  if (fileMenu && !fileMenu.contains(e.target))
-    dispatch({ showFileMenu: false });
-  if (download && !download.contains(e.target))
-    dispatch({ showDownload: false });
-  if (library && !library.contains(e.target)) dispatch({ showLibrary: false });
-});
-
-function view() {
+function oldView() {
   return html`
-    ${taskbar(dispatch)}
+    ${taskbar(dispatch, loadJSON)}
     ${when(GLOBAL_STATE.showDownload, () => downloadModal(dispatch, loadJSON))}
-    ${when(GLOBAL_STATE.showLibrary, () => patternLibrary(dispatch, loadJSON))}
+    ${when(GLOBAL_STATE.showLibrary, () => libraryModal(dispatch, loadJSON))}
+    ${when(GLOBAL_STATE.showSettings, () => settingsModal())}
+
     <div id="site">
       <div id="download-modal-container"></div>
       <div id="left-controls" style="grid-area: lcontrols;">
@@ -249,6 +234,7 @@ function view() {
       <div id="sim-container" style="grid-area: sim">
         <svg id="simulation"></svg>
       </div>
+      ${when(GLOBAL_STATE.showDebugPane, debugPane)}
     </div>
   `;
 }
@@ -333,72 +319,130 @@ function runSimulation() {
   ));
 }
 
-window.onmouseup = function () {
-  setTimeout(() => runSimulation(), 30);
-};
+// window.onmouseup = function () {
+//   setTimeout(() => runSimulation(), 30);
+// };
 
-async function init() {
-  loadWorkspace(startState);
+// async function init() {
+//   loadWorkspace(startState);
+//   render(view(), document.body);
+
+//   let repeatEditorCanvas = document.getElementById("repeat");
+//   let colorChangeEditorCanvas = document.getElementById("color-change-editor");
+//   let needleEditorCanvas = document.getElementById("needle-editor");
+
+//   // Make the initial bitmaps based on global state
+//   let initial = generateYarnPreview(
+//     Bimp.fromJSON(GLOBAL_STATE.repeat),
+//     GLOBAL_STATE.yarns.pixels
+//   );
+
+//   // Build all the editors
+//   repeatEditor = await buildRepeatEditor(GLOBAL_STATE, repeatEditorCanvas);
+//   colorChangeEditor = buildColorChangeEditor(
+//     GLOBAL_STATE,
+//     colorChangeEditorCanvas
+//   );
+//   needleEditor = await buildNeedleEditor(GLOBAL_STATE, needleEditorCanvas);
+//   preview = await buildPreview(GLOBAL_STATE, initial);
+
+//   // Synchronize editor changes
+//   repeatEditor.addEffect("bitmap", regenPreview);
+//   needleEditor.addEffect("bitmap", regenPreview);
+
+//   colorChangeEditor.addEffect("bitmap", regenPreview);
+
+//   // Sync changes to palette
+//   colorChangeEditor.addEffect("palette", ({ palette }) => {
+//     GLOBAL_STATE.yarnPalette = palette;
+//     GLOBAL_STATE.updateSim = true;
+
+//     preview.dispatch({
+//       palette,
+//     });
+
+//     runSimulation();
+//   });
+
+//   // Sync mouse position between preview and repeat editor
+//   preview.addEffect("pos", ({ bitmap, pos }) => {
+//     if (pos.x > -1 || pos.y > -1) {
+//       let newX = pos.x % repeatEditor.state.bitmap.width;
+//       let newY =
+//         repeatEditor.state.bitmap.height -
+//         ((bitmap.height - pos.y) % repeatEditor.state.bitmap.height);
+
+//       newY = newY == repeatEditor.state.bitmap.height ? 0 : newY;
+//       repeatEditor.dispatch({
+//         pos: {
+//           x: newX,
+//           y: newY,
+//         },
+//       });
+//     }
+//   });
+
+//   // Finally, explicitly synchronize the scale and run the sim
+//   syncScale();
+//   runSimulation();
+// }
+
+function view() {
+  return html`
+    ${taskbar()} ${when(GLOBAL_STATE.showDownload, downloadModal)}
+    ${when(GLOBAL_STATE.showLibrary, libraryModal)}
+    ${when(GLOBAL_STATE.showSettings, settingsModal)}
+
+    <div id="site">
+      <div id="edit-pane">
+        <div id="tools-container"></div>
+        <div id="color-sequence-container"></div>
+        <div id="canvas-container"></div>
+        <div id="color-sequence-container"></div>
+        <div id="palette-container"></div>
+      </div>
+      <div id="view-pane"></div>
+    </div>
+    ${when(GLOBAL_STATE.debug, debugPane)}
+  `;
+}
+
+function r() {
   render(view(), document.body);
+  window.requestAnimationFrame(r);
+}
 
-  let repeatEditorCanvas = document.getElementById("repeat");
-  let colorChangeEditorCanvas = document.getElementById("color-change-editor");
-  let needleEditorCanvas = document.getElementById("needle-editor");
+function initKeyboard() {
+  addKeypressListeners();
+  closeModals();
+}
 
-  // Make the initial bitmaps based on global state
-  let initial = generateYarnPreview(
-    Bimp.fromJSON(GLOBAL_STATE.repeat),
-    GLOBAL_STATE.yarns.pixels
-  );
+function initTouch() {
+  closeModals();
+}
 
-  // Build all the editors
-  repeatEditor = await buildRepeatEditor(GLOBAL_STATE, repeatEditorCanvas);
-  colorChangeEditor = buildColorChangeEditor(
-    GLOBAL_STATE,
-    colorChangeEditorCanvas
-  );
-  needleEditor = await buildNeedleEditor(GLOBAL_STATE, needleEditorCanvas);
-  preview = await buildPreview(GLOBAL_STATE, initial);
+function calcSplit() {
+  const portrait = screen.availHeight > screen.availWidth;
+  document
+    .getElementById("site")
+    .style.setProperty("flex-direction", portrait ? "column" : "row");
 
-  // Synchronize editor changes
-  repeatEditor.addEffect("bitmap", regenPreview);
-  needleEditor.addEffect("bitmap", regenPreview);
-
-  colorChangeEditor.addEffect("bitmap", regenPreview);
-
-  // Sync changes to palette
-  colorChangeEditor.addEffect("palette", ({ palette }) => {
-    GLOBAL_STATE.yarnPalette = palette;
-    GLOBAL_STATE.updateSim = true;
-
-    preview.dispatch({
-      palette,
-    });
-
-    runSimulation();
-  });
-
-  // Sync mouse position between preview and repeat editor
-  preview.addEffect("pos", ({ bitmap, pos }) => {
-    if (pos.x > -1 || pos.y > -1) {
-      let newX = pos.x % repeatEditor.state.bitmap.width;
-      let newY =
-        repeatEditor.state.bitmap.height -
-        ((bitmap.height - pos.y) % repeatEditor.state.bitmap.height);
-
-      newY = newY == repeatEditor.state.bitmap.height ? 0 : newY;
-      repeatEditor.dispatch({
-        pos: {
-          x: newX,
-          y: newY,
-        },
+  return portrait
+    ? Split(["#edit-pane", "#view-pane"], {
+        minSize: 300,
+        gutterSize: 11,
+        direction: "vertical",
+      })
+    : Split(["#edit-pane", "#view-pane"], {
+        minSize: 300,
+        gutterSize: 11,
       });
-    }
-  });
+}
 
-  // Finally, explicitly synchronize the scale and run the sim
-  syncScale();
-  runSimulation();
+function init() {
+  r();
+  let split = calcSplit();
+  isMobile() ? initTouch() : initKeyboard();
 }
 
 window.onload = init;
