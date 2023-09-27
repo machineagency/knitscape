@@ -15,7 +15,7 @@ export async function buildImagePalette(imageNames) {
     imageNames.map(async (imageName) => {
       const im = new Image();
       im.src = new URL(
-        `./assets/stitches/${imageName}.png`,
+        `../assets/stitches/${imageName}.png`,
         import.meta.url
       ).href;
 

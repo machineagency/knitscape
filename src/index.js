@@ -1,5 +1,6 @@
 import { html, render } from "lit-html";
 import { live } from "lit-html/directives/live.js";
+import { when } from "lit-html/directives/when.js";
 
 import { Bimp } from "./bimp/Bimp";
 
@@ -8,130 +9,57 @@ import { buildColorChangeEditor } from "./editors/colorChangeEditor";
 import { buildNeedleEditor } from "./editors/needleEditor";
 import { buildPreview } from "./editors/previewEditor";
 
-import { download, makeBMP } from "./utils";
+// import { download, makeBMP } from "./utils";
 
 import { simulate } from "./simulation/yarnSimulation";
 
-import startState from "./patterns/ovals.json";
+import { GLOBAL_STATE, loadWorkspace, updateState } from "./state";
 
-const library = import.meta.glob("/patterns/*.json");
+import { taskbar } from "./taskbar";
+
+import startState from "../patterns/ovals.json";
+import { downloadModal } from "./download";
+import { patternLibrary } from "./patternLibrary";
+
+// const library = import.meta.glob("/patterns/*.json");
 
 let repeatEditor, colorChangeEditor, needleEditor, preview;
 
 let clear, relax, flip;
 
-let GLOBAL_STATE = {
-  scale: 25,
-  updateSim: false,
-  simWidth: 30,
-  simHeight: 70,
-};
-
-function loadWorkspace(workspace) {
-  GLOBAL_STATE = { ...GLOBAL_STATE, ...workspace };
-  GLOBAL_STATE.updateSim = true;
+function dispatch(action) {
+  // const changes = Object.keys(action);
+  updateState(action);
+  // app.syncState(state, changes);
 }
 
-function downloadSVG() {
-  var svg = document.getElementById("simulation");
+// function doLoad(e) {
+//   let file = e.target.files[0];
+//   const fileReader = new FileReader();
+//   fileReader.readAsText(file);
+//   fileReader.onload = () => {
+//     loadJSON(JSON.parse(fileReader.result));
+//   };
+// }
 
-  //get svg source.
-  var serializer = new XMLSerializer();
-  var source = serializer.serializeToString(svg);
+// function upload() {
+//   let fileInputElement = document.createElement("input");
 
-  //add name spaces.
-  if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
-    source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
-  }
-  if (!source.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)) {
-    source = source.replace(
-      /^<svg/,
-      '<svg xmlns:xlink="http://www.w3.org/1999/xlink"'
-    );
-  }
+//   fileInputElement.setAttribute("type", "file");
+//   fileInputElement.style.display = "none";
 
-  //add xml declaration
-  source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
-
-  download(
-    "data:image/svg+xml;charset=utf-8," + encodeURIComponent(source),
-    "swatch.svg"
-  );
-}
-
-function downloadPNG() {
-  download(
-    document.getElementById("preview").toDataURL("image/png"),
-    "chart.png"
-  );
-}
-
-function downloadBMP() {
-  download(
-    makeBMP(
-      repeatEditor.state.bitmap,
-      colorChangeEditor.state.bitmap.pixels,
-      colorChangeEditor.state.palette
-    ).src
-  );
-}
-
-function downloadSilverKnitTxt() {
-  const text =
-    "SilverKnit\n" +
-    repeatEditor.state.bitmap
-      .make2d()
-      .map((row) =>
-        row
-          .map((pixel) => {
-            if (pixel == 0 || pixel == 1) return 7;
-            else return 8;
-          })
-          .join("")
-      )
-      .join("\n");
-
-  download(
-    "data:text/plain;charset=utf-8," + encodeURIComponent(text),
-    "pattern.txt"
-  );
-}
-
-function downloadJSON() {
-  const dataStr =
-    "data:text/json;charset=utf-8," +
-    encodeURIComponent(
-      JSON.stringify({
-        yarnPalette: GLOBAL_STATE.yarnPalette,
-        needles: needleEditor.state.bitmap.toJSON(),
-        repeat: repeatEditor.state.bitmap.toJSON(),
-        yarns: colorChangeEditor.state.bitmap.vMirror().toJSON(),
-      })
-    );
-
-  download(dataStr, "pattern.json");
-}
-
-function doLoad(e) {
-  let file = e.target.files[0];
-  const fileReader = new FileReader();
-  fileReader.readAsText(file);
-  fileReader.onload = () => {
-    loadJSON(JSON.parse(fileReader.result));
-  };
-}
-
-function upload() {
-  let fileInputElement = document.createElement("input");
-
-  fileInputElement.setAttribute("type", "file");
-  fileInputElement.style.display = "none";
-
-  document.body.appendChild(fileInputElement);
-  fileInputElement.click();
-  fileInputElement.onchange = doLoad;
-  document.body.removeChild(fileInputElement);
-}
+//   document.body.appendChild(fileInputElement);
+//   fileInputElement.click();
+//   fileInputElement.onchange = (e) => {
+//     let file = e.target.files[0];
+//     const fileReader = new FileReader();
+//     fileReader.readAsText(file);
+//     fileReader.onload = () => {
+//       loadJSON(JSON.parse(fileReader.result));
+//     };
+//   };
+//   document.body.removeChild(fileInputElement);
+// }
 
 function loadJSON(patternJSON) {
   loadWorkspace(patternJSON);
@@ -153,9 +81,9 @@ function loadJSON(patternJSON) {
   GLOBAL_STATE.updateSim = true;
 }
 
-function load(path) {
-  library[path]().then((mod) => loadJSON(mod));
-}
+// function load(path) {
+//   library[path]().then((mod) => loadJSON(mod));
+// }
 
 function widthSpinner() {
   return html`<div class="spinner horizontal">
@@ -215,36 +143,30 @@ function heightSpinner() {
   </div>`;
 }
 
+window.addEventListener("mousedown", (e) => {
+  // close modals if click outside
+  const settings = document.getElementById("settings");
+  const download = document.getElementById("download-modal");
+  const fileMenu = document.getElementById("file-menu");
+  const library = document.getElementById("library-modal");
+
+  if (settings && !settings.contains(e.target))
+    dispatch({ showSettings: false });
+  if (fileMenu && !fileMenu.contains(e.target))
+    dispatch({ showFileMenu: false });
+  if (download && !download.contains(e.target))
+    dispatch({ showDownload: false });
+  if (library && !library.contains(e.target)) dispatch({ showLibrary: false });
+});
+
 function view() {
   return html`
-    <div id="site-content">
-      <div id="site-title" style="grid-area: title;">
-        <span>knitscape</span>
-      </div>
+    ${taskbar(dispatch)}
+    ${when(GLOBAL_STATE.showDownload, () => downloadModal(dispatch, loadJSON))}
+    ${when(GLOBAL_STATE.showLibrary, () => patternLibrary(dispatch, loadJSON))}
+    <div id="site">
+      <div id="download-modal-container"></div>
       <div id="left-controls" style="grid-area: lcontrols;">
-        <button @click=${upload}><i class="fa-solid fa-upload"></i></button>
-
-        <div class="dropdown-container">
-          <i class="fa-solid fa-download"></i>
-          <div class="dropdown">
-            <div @click=${() => downloadJSON()}>Pattern JSON</div>
-            <div @click=${() => downloadPNG()}>Chart PNG</div>
-            <div @click=${() => downloadSVG()}>Simulation SVG</div>
-            <div @click=${() => downloadBMP()}>Windows BMP (Silver Knit)</div>
-            <div @click=${() => downloadSilverKnitTxt()}>TXT (Silver Knit)</div>
-          </div>
-        </div>
-        <div class="dropdown-container">
-          <i class="fa-solid fa-book"></i>
-          <div class="dropdown">
-            ${Object.entries(library).map(
-              ([path, _]) =>
-                html`<div class="dropdown-item ex" @click=${() => load(path)}>
-                  ${path.split("/").at(-1).split(".")[0]}
-                </div>`
-            )}
-          </div>
-        </div>
         <button
           @click=${() => {
             if (devicePixelRatio == 1) {
