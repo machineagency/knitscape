@@ -18,8 +18,6 @@ body {
 }
 
 body {
-  line-height: 1;
-
   background-color: #2d2c2c;
   color: #fafafa;
   height: 100vh;
@@ -48,6 +46,32 @@ body {
   box-shadow: 0 0 10px 3px #0000009e;
 }
 
+#edit-pane {
+  display: flex;
+}
+
+#editors-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#editors-inner {
+  flex: 1;
+  display: flex;
+}
+
+#layers-container {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+}
+
+#canvas-transform-group > canvas {
+  position: absolute;
+  outline: 1px solid black;
+}
+
 /* SPLIT JS STYLES */
 
 .gutter {
@@ -64,35 +88,4 @@ body {
 .gutter.gutter-vertical {
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=");
   cursor: row-resize;
-}
-
-/* #tools-container {
-  background-color: #51326ea3;
-}
-
-#editor-container {
-  background-color: #51326ea3;
-}
-
-#palette-container {
-  background-color: #51326ea3;
-}
-
-#simulation-container {
-  background-color: #51326ea3;
-} */
-
-@media not (max-width: 680px), not screen and (orientation: portrait) {
-  /* if we are in desktop mode */
-
-  /* #tool-container {
-    flex-direction: column;
-  }
-
-  #color-palette {
-    flex-direction: column;
-    padding: 0 4px;
-    overflow-x: initial;
-    overflow-y: auto;
-  } */
 }

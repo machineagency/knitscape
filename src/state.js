@@ -1,38 +1,28 @@
 import { library } from "../patterns/library";
+import { Bimp } from "./lib/Bimp";
 
 let GLOBAL_STATE = {
   editingChart: false,
   editingPalette: false,
 
   activeTool: "brush",
-  activeColor: 0,
+  activeSymbol: 1,
+  activeColor: 1,
 
-  scale: 25,
+  scale: 15,
   pos: { x: -1, y: -1 },
+  chartPan: { x: 0, y: 0 },
 
   updateSim: false,
   simWidth: 30,
   simHeight: 70,
   swatchFlipped: false,
 
-  repeatBitmap: null,
+  repeatBitmap: Bimp.empty(8, 12, 0),
+  chart: Bimp.empty(20, 20, 0),
   colorSequence: null,
   needlePositions: null,
-  yarnPalette: [
-    "#f312ab",
-    "#f51e0f",
-    "#ff7b24",
-    "#ffd500",
-    "#f7dc97",
-    "#9ef5d4",
-    "#006b5f",
-    "#70dbff",
-    "#0f4bff",
-    "#00254d",
-    "#a20dd9",
-    "#858480",
-    "#1d1b1c",
-  ],
+  yarnPalette: ["#f7dc97", "#1d1b1c"],
 
   grid: true,
 
@@ -41,7 +31,7 @@ let GLOBAL_STATE = {
   showLibrary: false,
   showSettings: false,
   showDownload: false,
-  debug: true,
+  debug: false,
 
   snapshots: [],
   heldKeys: new Set(),
@@ -92,8 +82,10 @@ const KnitScape = (() => {
     });
   }
 
-  function register(component) {
-    components.push(component({ GLOBAL_STATE, dispatch }));
+  function register(componentArr) {
+    componentArr.forEach((component) =>
+      components.push(component({ state: GLOBAL_STATE, dispatch }))
+    );
   }
 
   return {

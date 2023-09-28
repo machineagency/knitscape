@@ -1,23 +1,14 @@
-export function outline({ inner = "#000000", outer = "#ffffff", canvas }) {
+import { sizeCanvasToBitmap } from "../actions/zoomFit";
+
+export function outlineCanvas({
+  inner = "#000000",
+  outer = "#ffffff",
+  canvas,
+}) {
   return ({ state }) => {
-    let { scale, pos, bitmap } = state;
-    let width = null;
-    let height = null;
-
-    function sizeCanvas() {
-      width = bitmap.width;
-      height = bitmap.height;
-      const canvasWidth = scale * width;
-      const canvasHeight = scale * height;
-
-      const cssWidth = canvasWidth / devicePixelRatio - devicePixelRatio;
-      const cssHeight = canvasHeight / devicePixelRatio - devicePixelRatio;
-
-      canvas.width = canvasWidth - 1;
-      canvas.height = canvasHeight - 1;
-
-      canvas.style.cssText = `width: ${cssWidth}px; height: ${cssHeight}`;
-    }
+    let { scale, pos, chart } = state;
+    let width = chart.width;
+    let height = chart.height;
 
     function draw() {
       const ctx = canvas.getContext("2d");
@@ -45,18 +36,20 @@ export function outline({ inner = "#000000", outer = "#ffffff", canvas }) {
       );
     }
 
-    sizeCanvas();
+    sizeCanvasToBitmap(canvas, width, height, scale);
 
     return {
       syncState(state) {
         if (
           scale != state.scale ||
-          width != state.bitmap.width ||
-          height != state.bitmap.height
+          width != state.chart.width ||
+          height != state.chart.height
         ) {
           scale = state.scale;
-          bitmap = state.bitmap;
-          sizeCanvas();
+          width = state.chart.width;
+          height = state.chart.height;
+
+          sizeCanvasToBitmap(canvas, width, height, scale);
         }
         if (state.pos != pos) {
           pos = state.pos;

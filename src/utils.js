@@ -1,4 +1,13 @@
-import { bmp_lib } from "./bmp";
+import { bmp_lib } from "./lib/bmp";
+
+export function devicePixelBoundingBox(el) {
+  const bbox = el.getBoundingClientRect();
+
+  return {
+    width: bbox.width * devicePixelRatio,
+    height: bbox.height * devicePixelRatio,
+  };
+}
 
 export function download(dataStr, downloadName) {
   const downloadAnchorNode = document.createElement("a");

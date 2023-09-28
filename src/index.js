@@ -16,8 +16,16 @@ import { GLOBAL_STATE, KnitScape, loadWorkspace, dispatch } from "./state";
 
 // import startState from "../patterns/ovals.json";
 
+import { fitChart } from "./actions/zoomFit";
+
+import { chartCanvas } from "./components/chartCanvas";
+import { gridCanvas } from "./components/gridCanvas";
+import { outlineCanvas } from "./components/outlineCanvas";
+
 import { addKeypressListeners } from "./events/keypressEvents";
+import { chartPointerInteraction } from "./events/chartPointerInteraction";
 import { closeModals } from "./events/closeModals";
+import { trackPointer } from "./events/trackPointer";
 
 import { taskbar } from "./views/taskbar";
 import { downloadModal } from "./views/downloadModal";
@@ -25,7 +33,7 @@ import { libraryModal } from "./views/libraryModal";
 import { settingsModal } from "./views/settingsModal";
 import { debugPane } from "./views/debugPane";
 
-import { isMobile } from "./utils";
+import { isMobile, devicePixelBoundingBox } from "./utils";
 
 // let repeatEditor, colorChangeEditor, needleEditor, preview;
 // let clear, relax, flip;
@@ -396,9 +404,29 @@ function view() {
     <div id="site">
       <div id="edit-pane">
         <div id="tools-container"></div>
-        <div id="color-sequence-container"></div>
-        <div id="canvas-container"></div>
-        <div id="color-sequence-container"></div>
+        <div id="editors-container">
+          <div id="gutter-top"></div>
+          <div id="editors-inner">
+            <div id="gutter-left"></div>
+            <div id="color-sequence-container"></div>
+            <div id="layers-container">
+              <div
+                id="canvas-transform-group"
+                style="transform: translate(${GLOBAL_STATE.chartPan
+                  .x}px, ${GLOBAL_STATE.chartPan.y}px);">
+                <canvas id="chart"></canvas>
+                <!-- <canvas id="preview-symbols"></canvas>
+                <canvas id="preview-needles"></canvas>
+                <canvas id="repeat"></canvas> -->
+                <canvas id="grid"></canvas>
+                <canvas id="outline"></canvas>
+              </div>
+            </div>
+            <div id="color-sequence-container"></div>
+            <div id="gutter-right"></div>
+          </div>
+          <div id="gutter-bottom"></div>
+        </div>
         <div id="palette-container"></div>
       </div>
       <div id="view-pane"></div>
@@ -414,6 +442,11 @@ function r() {
 
 function initKeyboard() {
   addKeypressListeners();
+  trackPointer({ target: document.getElementById("outline") });
+  chartPointerInteraction({
+    target: document.getElementById("outline"),
+    workspace: document.getElementById("layers-container"),
+  });
   closeModals();
 }
 
@@ -443,6 +476,13 @@ function init() {
   r();
   let split = calcSplit();
   isMobile() ? initTouch() : initKeyboard();
+  KnitScape.register([
+    chartCanvas({ canvas: document.getElementById("chart") }),
+    gridCanvas({ canvas: document.getElementById("grid") }),
+    outlineCanvas({ canvas: document.getElementById("outline") }),
+  ]);
+
+  fitChart();
 }
 
 window.onload = init;
