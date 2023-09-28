@@ -13,12 +13,6 @@ const styles = html`<style>
     padding: 4px;
   }
 
-  #taskbar button {
-    border: 0;
-    outline: 0;
-    cursor: pointer;
-  }
-
   #site-title {
     font-weight: 500;
     color: #dfdfdf;
@@ -28,7 +22,6 @@ const styles = html`<style>
 
   .btn-group {
     display: flex;
-    gap: 5px;
   }
 
   .task-btn {
@@ -37,10 +30,10 @@ const styles = html`<style>
 
   .task-btn > button {
     background: none;
+    line-height: 0;
     padding: 0;
     color: #929292;
     border-radius: 4px;
-    line-height: 0;
     height: 35px;
     width: 35px;
     font-size: x-large;
@@ -151,6 +144,13 @@ export function taskbar() {
             @click=${() =>
               dispatch({ showSettings: !GLOBAL_STATE.showSettings })}>
             <i class="fa-solid fa-gear"></i>
+          </button>
+        </div>
+        <div class="task-btn">
+          <button
+            @click=${() =>
+              window.open("https://github.com/branchwelder/knitscape")}>
+            <i class="fa-brands fa-github"></i>
           </button>
         </div>
       </div>

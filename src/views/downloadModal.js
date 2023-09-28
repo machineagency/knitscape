@@ -25,8 +25,6 @@ const styles = html`<style>
   }
 
   .down-btn {
-    outline: 0;
-    border: 0;
     padding: 4px;
     font-size: inherit;
     border-radius: 4px;
@@ -34,7 +32,6 @@ const styles = html`<style>
     background-color: #363636;
     box-shadow: 0 0 2px 0 black;
     color: #bdbdbd;
-    cursor: pointer;
   }
 
   .down-btn:hover {

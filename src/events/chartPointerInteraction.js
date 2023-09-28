@@ -1,6 +1,7 @@
 import { GLOBAL_STATE, dispatch } from "../state";
 import { paintTools } from "../actions/paintTools";
 import { otherTools } from "../actions/otherTools";
+import { zoomAtPoint } from "../actions/zoomFit";
 
 function chartInteraction(target, tool) {
   // tool onMove is not called unless pointer moves into another cell in the chart
@@ -69,27 +70,13 @@ export function chartPointerInteraction({ target, workspace }) {
   });
 
   workspace.addEventListener("wheel", (e) => {
-    const currentScale = GLOBAL_STATE.scale;
-    const pan = GLOBAL_STATE.chartPan;
-
-    let bounds = workspace.getBoundingClientRect();
-    const startX = (e.clientX - bounds.left - pan.x) / currentScale;
-    const startY = (e.clientY - bounds.top - pan.y) / currentScale;
-
-    let newScale;
-
-    if (Math.sign(e.deltaY) < 0 && currentScale > 6)
-      newScale = currentScale - 1;
-    else if (Math.sign(e.deltaY) > 0 && currentScale < 100)
-      newScale = currentScale + 1;
-    else return;
-
-    dispatch({
-      scale: newScale,
-      chartPan: {
-        x: e.clientX - bounds.left - startX * newScale,
-        y: e.clientY - bounds.top - startY * newScale,
+    const bounds = workspace.getBoundingClientRect();
+    zoomAtPoint(
+      {
+        x: e.clientX - bounds.left,
+        y: e.clientY - bounds.top,
       },
-    });
+      Math.sign(e.deltaY) < 0 ? GLOBAL_STATE.scale - 1 : GLOBAL_STATE.scale + 1
+    );
   });
 }

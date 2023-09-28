@@ -1,10 +1,30 @@
 import { GLOBAL_STATE, dispatch } from "../state";
 import { devicePixelBoundingBox } from "../utils";
+import { MIN_SCALE, MAX_SCALE } from "../constants";
 
-function center() {
-  const { width, height } = devicePixelBoundingBox(
-    document.getElementById("layers-container")
-  );
+export function centerZoom(scale) {
+  let bbox = document
+    .getElementById("layers-container")
+    .getBoundingClientRect();
+
+  zoomAtPoint({ x: bbox.width / 2, y: bbox.height / 2 }, scale);
+}
+
+export function zoomAtPoint(pt, scale) {
+  if (scale < MIN_SCALE || scale > MAX_SCALE) return;
+
+  const start = {
+    x: (pt.x - GLOBAL_STATE.chartPan.x) / GLOBAL_STATE.scale,
+    y: (pt.y - GLOBAL_STATE.chartPan.y) / GLOBAL_STATE.scale,
+  };
+
+  dispatch({
+    scale,
+    chartPan: {
+      x: pt.x - start.x * scale,
+      y: pt.y - start.y * scale,
+    },
+  });
 }
 
 export function fitChart() {

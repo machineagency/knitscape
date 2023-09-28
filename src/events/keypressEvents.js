@@ -14,6 +14,7 @@ const hotkeys = {
   l: () => dispatch({ activeTool: "line" }),
   r: () => dispatch({ activeTool: "rect" }),
   s: () => dispatch({ activeTool: "shift" }),
+  p: () => dispatch({ activeTool: "pan" }),
 
   // Misc
   g: () => dispatch({ grid: !GLOBAL_STATE.grid }),
@@ -25,6 +26,10 @@ const hotkeys = {
       showLibrary: false,
       showSettings: false,
       showDownload: false,
+    }),
+  d: () =>
+    dispatch({
+      debug: !GLOBAL_STATE.debug,
     }),
 };
 
