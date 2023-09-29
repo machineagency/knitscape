@@ -1,8 +1,16 @@
 import { sizeCanvasToBitmap } from "../actions/zoomFit";
 
+export function imagePalette(paletteEntry, ctx, scale) {
+  // paletteEntry will be an object with an image field
+  ctx.imageSmoothingQuality = "high";
+
+  ctx.clearRect(0, 0, scale, scale);
+  ctx.drawImage(paletteEntry.image, 0, 0, scale, scale);
+}
+
 export function chartCanvas({ canvas }) {
   return ({ state }) => {
-    let { scale, yarnPalette, chart } = state;
+    let { scale, symbolPalette, symbolMap, chart } = state;
 
     let lastDrawn = null;
     let width = chart.width;
@@ -18,10 +26,12 @@ export function chartCanvas({ canvas }) {
 
           if (lastDrawn == null || lastDrawn.pixel(x, y) != paletteIndex) {
             ctx.translate(x * scale, y * scale);
+            let im = symbolPalette[symbolMap[paletteIndex]];
 
-            ctx.fillStyle = yarnPalette[paletteIndex];
+            if (!im) continue;
             ctx.clearRect(0, 0, scale, scale);
-            ctx.fillRect(0, 0, scale, scale);
+            ctx.drawImage(im, 0, 0, scale, scale);
+
             ctx.setTransform(1, 0, 0, 1, 0, 0);
           }
         }
@@ -49,8 +59,8 @@ export function chartCanvas({ canvas }) {
           lastDrawn = null;
         }
 
-        if (yarnPalette != state.yarnPalette) {
-          yarnPalette = state.yarnPalette;
+        if (symbolPalette != state.symbolPalette) {
+          symbolPalette = state.symbolPalette;
           lastDrawn = null;
         }
 

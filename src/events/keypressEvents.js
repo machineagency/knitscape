@@ -1,5 +1,5 @@
-import { GLOBAL_STATE, dispatch } from "../state";
-import { undo } from "../actions/undoRedo";
+import { GLOBAL_STATE, dispatch, undo } from "../state";
+import { tools } from "../constants";
 
 const ctrlShortcuts = {
   a: () => console.log("select all?"),
@@ -8,13 +8,13 @@ const ctrlShortcuts = {
 };
 
 const hotkeys = {
-  // Tool hotkeys
-  b: () => dispatch({ activeTool: "brush" }),
-  f: () => dispatch({ activeTool: "flood" }),
-  l: () => dispatch({ activeTool: "line" }),
-  r: () => dispatch({ activeTool: "rect" }),
-  s: () => dispatch({ activeTool: "shift" }),
-  p: () => dispatch({ activeTool: "pan" }),
+  // grab the tools from the global tool constants and reformat them for the hotkeymap
+  ...Object.fromEntries(
+    Object.entries(tools).map(([toolId, toolData]) => [
+      toolData.hotkey,
+      () => dispatch({ activeTool: toolId }),
+    ])
+  ),
 
   // Misc
   g: () => dispatch({ grid: !GLOBAL_STATE.grid }),
@@ -33,8 +33,8 @@ const hotkeys = {
     }),
 };
 
-function colorSwitch(index) {
-  if (index < GLOBAL_STATE.yarnPalette.length) dispatch({ activeColor: index });
+function symbolSwitch(index) {
+  if (index <= GLOBAL_STATE.symbolMap.length) dispatch({ activeSymbol: index });
 }
 
 export function addKeypressListeners() {
@@ -50,7 +50,7 @@ export function addKeypressListeners() {
       e.preventDefault();
       ctrlShortcuts[e.key.toLowerCase()]();
     } else if (e.key in hotkeys) hotkeys[e.key]();
-    else if (/^[0-9]$/i.test(e.key)) colorSwitch(Number(e.key));
+    else if (/^[0-9]$/i.test(e.key)) symbolSwitch(Number(e.key) - 1);
     // }
     const newHeldKeys = new Set(GLOBAL_STATE.heldKeys);
     newHeldKeys.add(e.key);

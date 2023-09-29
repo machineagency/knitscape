@@ -11,6 +11,8 @@ const styles = html`<style>
     justify-content: space-between;
     align-items: center;
     padding: 4px;
+    z-index: 2;
+    /* box-shadow: 0 0 5px 0px black; */
   }
 
   #site-title {

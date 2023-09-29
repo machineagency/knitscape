@@ -1,5 +1,22 @@
-import { library } from "../../patterns/library";
-import { dispatch } from "../state";
+import { GLOBAL_STATE, dispatch } from "../state";
+
+export function loadSymbolPalette(symbols) {
+  console.log("asdf");
+  return symbols;
+}
+
+export function loadSymbol(symbolName, url) {
+  let im = new Image();
+  im.src = url;
+
+  im.onload = () =>
+    dispatch({
+      symbolPalette: {
+        ...GLOBAL_STATE.symbolPalette,
+        [symbolName]: im,
+      },
+    });
+}
 
 function loadJSON(patternJSON) {
   console.log("THIS IS WHERE THE JSON WOULD BE LOADED");
@@ -18,9 +35,9 @@ function loadJSON(patternJSON) {
   // GLOBAL_STATE.updateSim = true;
 }
 
-export function load(path) {
+export function loadLibraryPattern(path) {
   dispatch({ showLibrary: false });
-  library[path]().then((mod) => loadJSON(mod));
+  GLOBAL_STATE.patternLibrary[path]().then((mod) => loadJSON(mod));
 }
 
 export function uploadFile() {

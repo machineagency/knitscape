@@ -7,6 +7,8 @@ import { fitChart } from "./actions/zoomFit";
 
 import { view } from "./views/view";
 
+import { DEFAULT_SYMBOLS, SYMBOL_DIR } from "./constants";
+
 import { chartCanvas } from "./components/chartCanvas";
 import { gridCanvas } from "./components/gridCanvas";
 import { outlineCanvas } from "./components/outlineCanvas";
@@ -16,6 +18,8 @@ import { chartPointerInteraction } from "./events/chartPointerInteraction";
 import { closeModals } from "./events/closeModals";
 import { trackPointer } from "./events/trackPointer";
 import { addPointerIcon } from "./events/addPointerIcon";
+
+import { loadSymbol } from "./actions/importers";
 
 import { isMobile } from "./utils";
 
@@ -50,17 +54,23 @@ function calcSplit() {
 
   return portrait
     ? Split(["#edit-pane", "#view-pane"], {
+        sizes: [70, 30],
         minSize: 300,
         gutterSize: 11,
         direction: "vertical",
       })
     : Split(["#edit-pane", "#view-pane"], {
+        sizes: [70, 30],
         minSize: 300,
         gutterSize: 11,
       });
 }
 
 function init() {
+  DEFAULT_SYMBOLS.forEach((symbolName) =>
+    loadSymbol(symbolName, `${SYMBOL_DIR}/${symbolName}.png`)
+  );
+
   r();
 
   calcSplit();

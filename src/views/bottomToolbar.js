@@ -1,7 +1,6 @@
 import { html } from "lit-html";
-import { GLOBAL_STATE, dispatch } from "../state";
+import { GLOBAL_STATE, dispatch, undo } from "../state";
 import { MIN_SCALE, MAX_SCALE } from "../constants";
-
 import { centerZoom, fitChart } from "../actions/zoomFit";
 
 export function bottomToolbar() {
@@ -10,10 +9,12 @@ export function bottomToolbar() {
         display: flex;
         padding: 4px;
         align-items: center;
-        justify-content: right;
-        background-color: #282828;
+        justify-content: space-between;
+        background-color: #212121;
+        box-shadow: 0 0 5px 0px black;
       }
-      #bottom-toolbar > button {
+
+      .ctrl-btn {
         background: none;
         padding: 0;
         color: #929292;
@@ -24,25 +25,40 @@ export function bottomToolbar() {
         font-size: large;
       }
 
-      #bottom-toolbar > button:hover {
+      .ctrl-btn:hover {
         background-color: #333333;
+      }
+
+      #panzoom-controls {
+        display: flex;
+        align-items: center;
       }
     </style>
     <div id="bottom-toolbar">
-      <button @click=${() => centerZoom(GLOBAL_STATE.scale - 1)}>
-        <i class="fa-solid fa-magnifying-glass-minus"></i>
+      <button class="ctrl-btn" @click=${() => undo()}>
+        <i class="fa-solid fa-rotate-left"></i>
       </button>
-      <input
-        type="range"
-        min=${MIN_SCALE}
-        max=${MAX_SCALE}
-        .value=${String(GLOBAL_STATE.scale)}
-        @input=${(e) => centerZoom(Number(e.target.value))} />
-      <button @click=${() => centerZoom(GLOBAL_STATE.scale + 1)}>
-        <i class="fa-solid fa-magnifying-glass-plus"></i>
-      </button>
-      <button @click=${fitChart}>
-        <i class="fa-solid fa-expand"></i>
-      </button>
+
+      <div id="panzoom-controls">
+        <button
+          class="ctrl-btn"
+          @click=${() => centerZoom(GLOBAL_STATE.scale - 1)}>
+          <i class="fa-solid fa-magnifying-glass-minus"></i>
+        </button>
+        <input
+          type="range"
+          min=${MIN_SCALE}
+          max=${MAX_SCALE}
+          .value=${String(GLOBAL_STATE.scale)}
+          @input=${(e) => centerZoom(Number(e.target.value))} />
+        <button
+          class="ctrl-btn"
+          @click=${() => centerZoom(GLOBAL_STATE.scale + 1)}>
+          <i class="fa-solid fa-magnifying-glass-plus"></i>
+        </button>
+        <button class="ctrl-btn" @click=${fitChart}>
+          <i class="fa-solid fa-expand"></i>
+        </button>
+      </div>
     </div>`;
 }

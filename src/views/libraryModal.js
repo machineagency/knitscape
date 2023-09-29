@@ -1,6 +1,6 @@
 import { html } from "lit-html";
-import { library } from "../../patterns/library";
-import { load } from "../actions/importers";
+import { loadLibraryPattern } from "../actions/importers";
+import { GLOBAL_STATE } from "../state";
 
 const styles = html`<style>
   #library-modal {
@@ -44,11 +44,11 @@ export function libraryModal() {
     <div id="library-modal" class="modal">
       <h3>Pattern Library</h3>
       <div id="library-container">
-        ${Object.entries(library).map(
+        ${Object.entries(GLOBAL_STATE.patternLibrary).map(
           ([path, _]) =>
             html`<div class="library-item">
               <span>${path.split("/").at(-1).split(".")[0]}</span>
-              <button @click=${() => load(path)}>
+              <button @click=${() => loadLibraryPattern(path)}>
                 <i class="fa-solid fa-upload"></i>
               </button>
             </div>`

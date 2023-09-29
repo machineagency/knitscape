@@ -1,11 +1,9 @@
-import { GLOBAL_STATE, dispatch } from "../state";
-
 function brush(start, state, dispatch) {
   function onMove(newPos, state) {
     const updated = state.chart.line(
       { x: start.x, y: start.y },
       { x: newPos.x, y: newPos.y },
-      state.activeColor
+      state.activeSymbol
     );
 
     start = newPos;
@@ -18,7 +16,7 @@ function brush(start, state, dispatch) {
 
 function flood(start, state, dispatch) {
   function onMove({ x, y }, state) {
-    dispatch({ chart: state.chart.flood({ x, y }, state.activeColor) });
+    dispatch({ chart: state.chart.flood({ x, y }, state.activeSymbol) });
   }
 
   onMove(start, state);
@@ -32,7 +30,7 @@ function rect(start, state, dispatch) {
     const updated = state.chart.rect(
       { x: start.x, y: start.y },
       { x, y },
-      state.activeColor
+      state.activeSymbol
     );
 
     dispatch({ chart: updated });
@@ -47,7 +45,7 @@ function line(start, state, dispatch) {
       chart: state.chart.line(
         { x: start.x, y: start.y },
         { x, y },
-        state.activeColor
+        state.activeSymbol
       ),
     });
   }

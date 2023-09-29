@@ -1,15 +1,6 @@
 import { html } from "lit-html";
 import { GLOBAL_STATE } from "../state";
-
-const iconMap = {
-  flood: "fa-fill-drip fa-flip-horizontal",
-  brush: "fa-paintbrush",
-  rect: "fa-vector-square",
-  line: "fa-minus",
-  // shift: "fa-up-down-left-right",
-  eyedropper: "fa-eyedropper",
-  pan: "fa-up-down-left-right",
-};
+import { tools } from "../constants";
 
 export function pointerIcon() {
   return html`<style>
@@ -25,6 +16,6 @@ export function pointerIcon() {
       }
     </style>
     <div id="pointer">
-      <i class="fa-solid ${iconMap[GLOBAL_STATE.activeTool]}"></i>
+      <i class="fa-solid ${tools[GLOBAL_STATE.activeTool].icon}"></i>
     </div>`;
 }

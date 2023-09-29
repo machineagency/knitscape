@@ -1,12 +1,30 @@
 import { Bimp } from "./lib/Bimp";
+import {
+  SNAPSHOT_INTERVAL,
+  DEFAULT_PATTERN_LIBRARY,
+  DEFAULT_SYMBOLS,
+} from "./constants";
+
+const snapshotFields = [
+  "chart",
+  "yarnPalette",
+  "colorSequence",
+  "needlePositions",
+  "repeatBitmap",
+];
 
 let GLOBAL_STATE = {
   editingChart: false,
   editingPalette: false,
 
   activeTool: "brush",
-  activeSymbol: 1,
+  activeSymbol: 0,
   activeColor: 1,
+
+  chartBackground: "#fff",
+  symbolPalette: {},
+  symbolMap: DEFAULT_SYMBOLS,
+  patternLibrary: DEFAULT_PATTERN_LIBRARY,
 
   scale: 15,
   pos: { x: -1, y: -1 },
@@ -33,6 +51,7 @@ let GLOBAL_STATE = {
   debug: false,
 
   snapshots: [],
+  lastSnapshot: 0,
   heldKeys: new Set(),
 };
 
@@ -41,30 +60,53 @@ function loadWorkspace(workspace) {
   GLOBAL_STATE.updateSim = true;
 }
 
-function updateState(action) {
+function shouldSnapshot(action) {
+  if (!(GLOBAL_STATE.lastSnapshot < Date.now() - SNAPSHOT_INTERVAL))
+    return false;
+
+  for (const field of snapshotFields) {
+    if (field in action) return true;
+  }
+
+  return false;
+}
+
+function snapshotUpdate(action) {
+  GLOBAL_STATE = {
+    ...GLOBAL_STATE,
+    ...action,
+    snapshots: [
+      Object.fromEntries(
+        snapshotFields.map((field) => [field, GLOBAL_STATE[field]])
+      ),
+      ...GLOBAL_STATE.snapshots,
+    ],
+    lastSnapshot: Date.now(),
+  };
+
+  return GLOBAL_STATE;
+}
+
+function normalUpdate(action) {
   GLOBAL_STATE = { ...GLOBAL_STATE, ...action };
   return GLOBAL_STATE;
-  // if (
-  //   (action.bitmap || action.palette) &&
-  //   state.lastSnapshot < Date.now() - 1000
-  // ) {
-  //   state = {
-  //     ...state,
-  //     ...action,
-  //     snapshots: [
-  //       {
-  //  class=${state.}       bitmap: state.bitmap,
-  //         palette: state.palette,
-  //         width: state.width,
-  //         height: state.height,
-  //       },
-  //       ...state.snapshots,
-  //     ],
-  //     lastSnapshot: Date.now(),
-  //   };
-  // } else {
-  //   state = { ...state, ...action };
-  // }
+}
+
+function updateState(action) {
+  return shouldSnapshot(action) ? snapshotUpdate(action) : normalUpdate(action);
+}
+
+function undo() {
+  const changes = GLOBAL_STATE.snapshots[0];
+
+  GLOBAL_STATE = {
+    ...GLOBAL_STATE,
+    ...GLOBAL_STATE.snapshots[0],
+    lastSnapshot: 0,
+    snapshots: GLOBAL_STATE.snapshots.slice(1),
+  };
+
+  KnitScape.syncState(GLOBAL_STATE, changes);
 }
 
 function dispatch(action) {
@@ -93,4 +135,4 @@ const KnitScape = (() => {
   };
 })();
 
-export { GLOBAL_STATE, dispatch, KnitScape, loadWorkspace };
+export { GLOBAL_STATE, undo, dispatch, KnitScape, loadWorkspace };

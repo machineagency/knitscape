@@ -38,6 +38,7 @@ body {
   display: flex;
   flex-direction: column;
   user-select: none;
+  z-index: 1;
 }
 
 .modal {
@@ -53,6 +54,12 @@ body {
 
 #edit-pane {
   display: flex;
+  overflow: hidden;
+}
+
+#gutter-top {
+  display: flex;
+  justify-content: center;
 }
 
 #editors-container {
@@ -69,7 +76,6 @@ body {
 #layers-container {
   position: relative;
   flex: 1;
-  overflow: hidden;
   cursor: none;
 }
 
@@ -81,9 +87,10 @@ body {
 /* SPLIT JS STYLES */
 
 .gutter {
-  background-color: #282828;
+  background-color: #212121;
   background-repeat: no-repeat;
   background-position: 50%;
+  box-shadow: 0 0 5px 0px black;
 }
 
 .gutter.gutter-horizontal {
