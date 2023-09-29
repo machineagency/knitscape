@@ -3,56 +3,67 @@ import {
   SNAPSHOT_INTERVAL,
   DEFAULT_PATTERN_LIBRARY,
   DEFAULT_SYMBOLS,
+  SNAPSHOT_FIELDS,
 } from "./constants";
 
-const snapshotFields = [
-  "chart",
-  "yarnPalette",
-  "colorSequence",
-  "needlePositions",
-  "repeatBitmap",
-];
-
 let GLOBAL_STATE = {
-  editingChart: false,
-  editingPalette: false,
+  // editingChart: false,
+  // editingPalette: false,
 
   activeTool: "brush",
   activeSymbol: 0,
   activeColor: 1,
 
-  chartBackground: "#fff",
+  chartBackground: "#ffffff",
   symbolPalette: {},
   symbolMap: DEFAULT_SYMBOLS,
   patternLibrary: DEFAULT_PATTERN_LIBRARY,
 
-  scale: 15,
-  pos: { x: -1, y: -1 },
-  chartPan: { x: 0, y: 0 },
+  scale: 15, // Number of pixels for each chart cell
+  pos: { x: -1, y: -1 }, // Mouse position in chart
+  chartPan: { x: 0, y: 0 }, // Pan value for the chart editor view
 
-  updateSim: false,
-  simWidth: 30,
-  simHeight: 70,
-  swatchFlipped: false,
+  yarnPalette: ["#f7dc97", "#1d1b1c"], // Colors of the yarns
 
-  repeatBitmap: Bimp.empty(8, 12, 0),
+  motifLibrary: [
+    {
+      title: "test",
+      bitmap: Bimp.empty(4, 4, 0),
+    },
+    {
+      title: "test",
+      bitmap: Bimp.empty(4, 4, 0),
+    },
+    {
+      title: "test",
+      bitmap: Bimp.empty(4, 4, 0),
+    },
+  ], // Library of motifs which can be used as repeats
+
+  // updateSim: false,
+  // simWidth: 30,
+  // simHeight: 70,
+  // swatchFlipped: false,
+
+  // repeatBitmap: Bimp.empty(8, 12, 0),
   chart: Bimp.empty(20, 20, 0),
-  colorSequence: null,
-  needlePositions: null,
-  yarnPalette: ["#f7dc97", "#1d1b1c"],
+
+  // colorSequence: null,
+  // needlePositions: null,
 
   grid: true,
-
   isMobile: true,
+
+  // Various UI pane states
   showFileMenu: false,
   showLibrary: false,
   showSettings: false,
   showDownload: false,
   debug: false,
 
-  snapshots: [],
-  lastSnapshot: 0,
-  heldKeys: new Set(),
+  snapshots: [], // Array of snapshot history
+  lastSnapshot: 0, // time of last snapshot
+  heldKeys: new Set(), // Keys that are currently held down
 };
 
 function loadWorkspace(workspace) {
@@ -64,7 +75,7 @@ function shouldSnapshot(action) {
   if (!(GLOBAL_STATE.lastSnapshot < Date.now() - SNAPSHOT_INTERVAL))
     return false;
 
-  for (const field of snapshotFields) {
+  for (const field of SNAPSHOT_FIELDS) {
     if (field in action) return true;
   }
 
@@ -77,7 +88,7 @@ function snapshotUpdate(action) {
     ...action,
     snapshots: [
       Object.fromEntries(
-        snapshotFields.map((field) => [field, GLOBAL_STATE[field]])
+        SNAPSHOT_FIELDS.map((field) => [field, GLOBAL_STATE[field]])
       ),
       ...GLOBAL_STATE.snapshots,
     ],
@@ -106,15 +117,15 @@ function undo() {
     snapshots: GLOBAL_STATE.snapshots.slice(1),
   };
 
-  KnitScape.syncState(GLOBAL_STATE, changes);
+  StateMonitor.syncState(GLOBAL_STATE, changes);
 }
 
 function dispatch(action) {
   const changes = Object.keys(action);
-  KnitScape.syncState(updateState(action), changes);
+  StateMonitor.syncState(updateState(action), changes);
 }
 
-const KnitScape = (() => {
+const StateMonitor = (() => {
   const components = [];
 
   function syncState(state, changes) {
@@ -135,4 +146,4 @@ const KnitScape = (() => {
   };
 })();
 
-export { GLOBAL_STATE, undo, dispatch, KnitScape, loadWorkspace };
+export { GLOBAL_STATE, undo, dispatch, StateMonitor, loadWorkspace };

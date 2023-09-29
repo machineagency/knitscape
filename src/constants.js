@@ -3,6 +3,14 @@ export const MIN_SCALE = 5;
 
 export const SNAPSHOT_INTERVAL = 1000;
 
+export const SNAPSHOT_FIELDS = [
+  "chart",
+  "yarnPalette",
+  "colorSequence",
+  "needlePositions",
+  "repeatBitmap",
+];
+
 export const DEFAULT_SYMBOLS = ["knit", "purl", "slip", "tuck"];
 export const SYMBOL_DIR = "../assets/symbols";
 

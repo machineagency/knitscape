@@ -3,6 +3,7 @@ import { when } from "lit-html/directives/when.js";
 import { GLOBAL_STATE } from "../state";
 
 import { taskbar } from "./taskbar";
+import { fileModal } from "./fileModal";
 import { downloadModal } from "./downloadModal";
 import { libraryModal } from "./libraryModal";
 import { settingsModal } from "./settingsModal";
@@ -17,7 +18,7 @@ export function view() {
     ${taskbar()} ${when(GLOBAL_STATE.showDownload, downloadModal)}
     ${when(GLOBAL_STATE.showLibrary, libraryModal)}
     ${when(GLOBAL_STATE.showSettings, settingsModal)}
-
+    ${when(GLOBAL_STATE.showFileMenu, fileModal)}
     <style>
       #chart {
         background: ${GLOBAL_STATE.chartBackground};

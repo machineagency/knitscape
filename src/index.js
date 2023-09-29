@@ -1,7 +1,7 @@
 import { render } from "lit-html";
 import Split from "split.js";
 
-import { GLOBAL_STATE, KnitScape } from "./state";
+import { GLOBAL_STATE, StateMonitor } from "./state";
 
 import { fitChart } from "./actions/zoomFit";
 
@@ -76,7 +76,7 @@ function init() {
   calcSplit();
 
   isMobile() ? initTouch() : initKeyboard();
-  KnitScape.register([
+  StateMonitor.register([
     chartCanvas({ canvas: document.getElementById("chart") }),
     gridCanvas({ canvas: document.getElementById("grid") }),
     outlineCanvas({ canvas: document.getElementById("outline") }),

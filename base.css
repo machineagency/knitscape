@@ -1,0 +1,360 @@
+/*
+
+HANNAH'S BASE CSS
+
+This is intended to be a collection of common styles and CSS design patterns I can easily use across projects.
+
+Shoutouts/best CSS resources:
+- CSS Tricks (RIP), particularly the guides to flexbox and grid [css-tricks.com]
+- Stephanie Eckles [moderncss.dev]
+- Smashing Magazine [smashingmagazine.com]
+- Kevin Powell [kevinpowell.co]
+- Lea Verou [lea.verou.me]
+- Eric Meyer [meyerweb.com]
+- Josh Comeau [joshwcomeau.com]
+
+*/
+
+/***********************************
+
+ROOT STYLES
+
+***********************************/
+
+:root {
+  --base0: #0e0e0e;
+  --base1: #1a1a1a;
+  --base2: #2b2b2b;
+  --base3: #3c3c3c;
+  --base4: #4d4d4d;
+  --base5: #5e5e5e;
+  --base6: #6f6f6f;
+  --base7: #8a8a8a;
+  --base8: #9b9b9b;
+  --base9: #a1a1a1;
+  --base10: #b2b2b2;
+  --base11: #c3c3c3;
+  --base12: #d4d4d4;
+  --base13: #e5e5e5;
+
+  --accH: 316;
+  --accS: 29%;
+  --accL: 64%;
+
+  --accent: hsla(var(--accH), var(--accS), var(--accL));
+
+  --text: var(--base12);
+  --text-highlight: var(--base13);
+  --text-accent: var(--base10);
+  --text-inactive: var(--base8);
+  --disabled: var(--base8);
+
+  --workspace-background: var(--base2);
+
+  --modal-background: var(--base3);
+  --modal-shadow: 0 0 10px 3px #0000009e;
+
+  accent-color: var(--accent);
+}
+
+/***********************************
+
+RESETS
+
+***********************************/
+
+/* A better box-sizing model */
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0; /* Remove default margins */
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--workspace-background);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit; /* Remove built-in form fonts */
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+/***********************************
+
+FORM CONTROL
+
+***********************************/
+
+.form-control {
+  font-weight: bold;
+}
+
+.form-control.toggle {
+  display: grid;
+  gap: 0.5em;
+  grid-template-columns: 1em auto;
+}
+
+.form-control--disabled {
+  color: var(--accent);
+  cursor: not-allowed;
+}
+
+/***********************************
+
+CHECKBOX
+
+***********************************/
+
+input[type="checkbox"] {
+  -webkit-appearance: none; /* Add if not using autoprefixer */
+  appearance: none; /* Remove most all native input styles */
+  background-color: var(--form-background); /* For iOS < 15 */
+  margin: 0; /* Not removed via appearance */
+
+  font: inherit;
+  color: currentColor;
+  width: 1.15em;
+  height: 1.15em;
+  border: 0.15em solid currentColor;
+  border-radius: 0.15em;
+  transform: translateY(-0.075em);
+
+  display: grid;
+  place-content: center;
+}
+
+input[type="checkbox"]::before {
+  content: "";
+  width: 0.65em;
+  height: 0.65em;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+  transform: scale(0);
+  transition: 50ms transform ease-in-out;
+  box-shadow: inset 1em 1em var(--accent);
+}
+
+input[type="checkbox"]:checked::before {
+  transform: scale(1);
+}
+
+input[type="checkbox"]:focus {
+  outline: max(2px, 0.15em) solid currentColor;
+  outline-offset: max(2px, 0.15em);
+}
+
+input[type="checkbox"]:disabled {
+  --accent: var(--disabled);
+
+  color: var(--disabled);
+  cursor: not-allowed;
+}
+
+/***********************************
+
+RANGE
+
+***********************************/
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  width: 15rem;
+}
+
+/***** Track Styles *****/
+
+/***** Chrome, Safari, Opera, and Edge Chromium *****/
+input[type="range"]::-webkit-slider-runnable-track {
+  background: #464646;
+  height: 0.5rem;
+  border-radius: 4px;
+}
+
+/******** Firefox ********/
+input[type="range"]::-moz-range-track {
+  background: #464646;
+  height: 0.5rem;
+  border-radius: 4px;
+}
+
+/***** Thumb Styles *****/
+
+/***** Chrome, Safari, Opera, and Edge Chromium *****/
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; /* Override default look */
+  appearance: none;
+  margin-top: -3px; /* Centers thumb on the track */
+  background-color: #929292;
+  height: 16px;
+  width: 16px;
+  border-radius: 4px;
+}
+
+/***** Firefox *****/
+input[type="range"]::-moz-range-thumb {
+  border: none; /*Removes extra border that FF applies*/
+  border-radius: 0; /*Removes default border-radius that FF applies*/
+  background-color: #929292;
+  height: 1rem;
+  width: 1rem;
+}
+
+/***** Focus Styles *****/
+/* Removes default focus */
+
+input[type="range"]:focus {
+  outline: none;
+}
+
+/***** Chrome, Safari, Opera, and Edge Chromium *****/
+input[type="range"]:focus::-webkit-slider-thumb {
+  border: 1px solid #053a5f;
+  outline: 3px solid #053a5f;
+  outline-offset: 0.125rem;
+}
+
+/******** Firefox ********/
+input[type="range"]:focus::-moz-range-thumb {
+  border: 1px solid #053a5f;
+  outline: 3px solid #053a5f;
+  outline-offset: 0.125rem;
+}
+
+/***********************************
+
+BUTTONS
+
+***********************************/
+
+/* Reset Link style */
+a.btn {
+  text-decoration: none;
+}
+
+/* Reset button style */
+button.btn {
+  border: none;
+  background-color: transparent;
+  font-family: inherit;
+  padding: 0;
+  cursor: pointer;
+}
+
+a.btn,
+button.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 8px;
+  color: var(--text-accent);
+
+  text-align: center;
+  align-self: start;
+
+  padding: 0.5em;
+}
+
+a.btn:hover,
+button.btn:hover {
+  color: var(--text-highlight);
+  background-color: hsla(var(--accH), var(--accS), var(--accL), 0.3);
+}
+
+a.btn:focus,
+button.btn:focus {
+  outline-style: solid;
+  outline-color: transparent;
+  box-shadow: 0 0 0 2px hsla(var(--accH), var(--accS), var(--accL), 0.8);
+}
+
+/* Image button */
+button.btn.img {
+  border-radius: 0;
+  border: 1px solid black;
+  padding: 0;
+}
+
+/* Icon + text button */
+button.btn.icon-text {
+  font-size: 1em;
+  line-height: 1;
+
+  gap: 0.5em;
+}
+
+button.btn.icon-text > i {
+  width: 1em;
+  height: 1em;
+}
+
+/* Icon button */
+button.btn.icon {
+  aspect-ratio: 1;
+  padding: 0.3em;
+  font-size: 1.5em;
+}
+
+/* Solid button */
+button.btn.solid {
+  background-color: #343434;
+  box-shadow: 0 0 2px 0 black;
+}
+
+/***********************************
+
+MODAL
+
+***********************************/
+
+.modal {
+  min-width: 200px;
+
+  position: absolute;
+  margin: 100px;
+  align-self: center;
+  background-color: var(--modal-background);
+  z-index: 100;
+  padding: 0.5em 0.6em;
+  border-radius: 10px;
+  box-shadow: var(--modal-shadow);
+}
+
+.modal > h2 {
+  font-size: 1.2em;
+  margin-bottom: 0.5em;
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+
+  gap: 0.4em;
+}
