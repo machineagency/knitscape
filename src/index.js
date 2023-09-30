@@ -33,11 +33,11 @@ function initKeyboard() {
   trackPointer({ target: document.getElementById("outline") });
   addPointerIcon(
     document.getElementById("pointer"),
-    document.getElementById("layers-container")
+    document.getElementById("desktop")
   );
   chartPointerInteraction({
     target: document.getElementById("outline"),
-    workspace: document.getElementById("layers-container"),
+    desktop: document.getElementById("desktop"),
   });
   closeModals();
 }
@@ -53,15 +53,15 @@ function calcSplit() {
     .style.setProperty("flex-direction", portrait ? "column" : "row");
 
   return portrait
-    ? Split(["#edit-pane", "#view-pane"], {
-        sizes: [70, 30],
-        minSize: 300,
+    ? Split(["#chart-pane", "#sim-pane"], {
+        sizes: [90, 10],
+        minSize: 100,
         gutterSize: 11,
         direction: "vertical",
       })
-    : Split(["#edit-pane", "#view-pane"], {
-        sizes: [70, 30],
-        minSize: 300,
+    : Split(["#chart-pane", "#sim-pane"], {
+        sizes: [90, 10],
+        minSize: 100,
         gutterSize: 11,
       });
 }

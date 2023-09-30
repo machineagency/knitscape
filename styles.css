@@ -23,7 +23,11 @@ body {
   z-index: 1;
 }
 
-/* POINTER */
+/**********************************
+
+POINTER
+
+**********************************/
 
 #pointer {
   display: none;
@@ -32,11 +36,16 @@ body {
   top: -20px;
   z-index: 100;
   text-shadow: 0px 0px 4px black;
-  font-size: larger;
+  font-size: x-large;
   pointer-events: none;
+  color: #fff;
 }
 
-/* TASKBAR */
+/**********************************
+
+TASKBAR
+
+**********************************/
 
 #taskbar {
   display: flex;
@@ -44,7 +53,7 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 0.3em;
-  z-index: 2;
+  z-index: 5;
 }
 
 .site-title {
@@ -62,33 +71,42 @@ body {
   background-color: hsla(var(--accH), var(--accS), var(--accL), 0.3);
 }
 
-/* EDIT PANE */
+/**********************************
 
-#edit-pane {
+SIM PANE
+
+**********************************/
+
+#sim-pane {
+  background-color: var(--base1);
+}
+
+/**********************************
+
+EDIT PANE
+
+**********************************/
+
+#chart-pane {
   display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
-#gutter-top {
-  display: flex;
-  justify-content: center;
-}
-
-#editors-container {
+#chart-layout {
   flex: 1;
   display: flex;
-  flex-direction: column;
+  background-color: var(--base2);
 }
 
-#editors-inner {
+#desktop {
   flex: 1;
-  display: flex;
-}
-
-#layers-container {
+  display: grid;
+  grid-template-rows: min-content 1fr;
   position: relative;
-  flex: 1;
   cursor: none;
+  z-index: 0;
+  box-shadow: inset 0 0 6px 0px rgba(0, 0, 0, 0.5);
 }
 
 #canvas-transform-group > canvas {
@@ -96,20 +114,28 @@ body {
   outline: 1px solid black;
 }
 
-/* TOOL PICKER */
+/**********************************
+
+TOOL PICKER
+
+**********************************/
+
 #tool-picker {
+  justify-self: center;
   display: flex;
   background-color: #212121;
   gap: 0.3em;
-  margin-top: 0.3em;
+  margin-top: 0.5em;
   padding: 0.2em;
   border-radius: 8px;
   box-shadow: 0 0 5px 0px black;
+  z-index: 3;
 }
 
 #tool-picker > button {
-  height: 3rem;
   width: 3rem;
+  height: 3rem;
+  cursor: none;
 }
 
 #tool-picker .current {
@@ -117,19 +143,93 @@ body {
   color: var(--accent);
 }
 
-/* SYMBOL PICKER */
+/**********************************
+
+LEFT BAR
+
+**********************************/
+
+#left-bar {
+  z-index: 3;
+  background-color: var(--base1);
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  padding: 0 0.4em;
+}
+
+/**********************************
+
+LAYER PICKER
+
+**********************************/
+
+#layer-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4em;
+}
+
+#layer-picker > .btn {
+  align-self: auto;
+  font-weight: 800;
+  border: 1px solid black;
+}
+
+#layer-picker > .btn.current {
+  outline: 1px solid white;
+}
+
+/**********************************
+
+MOTIF PICKER
+
+**********************************/
+
+#motif-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4em;
+}
+
+#motif-picker > .btn {
+  align-self: auto;
+  font-weight: 800;
+  border: 1px solid black;
+}
+
+#motif-picker > .btn.current {
+  outline: 1px solid white;
+}
+
+/**********************************
+
+SYMBOL PICKER
+
+**********************************/
 
 #symbol-picker {
   display: flex;
   flex-direction: column;
-  background-color: var(--base1);
-  gap: 0.2em;
-  padding: 0.3em;
-  box-shadow: 0 0 6px 0px rgba(0, 0, 0, 0.5);
+  gap: 0.3em;
+}
+
+#symbol-picker > .btn.img {
+  align-self: stretch;
+  justify-content: space-between;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+#symbol-picker > .btn.img span {
+  writing-mode: vertical-lr;
+  transform: rotate(180deg);
 }
 
 .btn.img.current {
   outline: 1px solid white;
+  background-color: hsla(var(--accH), var(--accS), var(--accL), 0.3);
+  color: var(--text-highlight);
 }
 
 .symbol-img {
@@ -138,7 +238,96 @@ body {
   display: block;
 }
 
-/* BOTTOM TOOLBAR */
+/**********************************
+
+YARN PICKER
+
+**********************************/
+
+#yarn-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4em;
+}
+
+.btn.color-select {
+  align-self: auto;
+  flex: 0 0 50px;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid black;
+  overflow: hidden;
+}
+
+.btn.color-select > div {
+  flex: 1;
+  height: 100%;
+  position: relative;
+  background: var(--current);
+}
+.btn.color-select > span {
+  width: 25px;
+  text-align: center;
+  font-weight: 900;
+}
+
+#yarn-picker .btn.selected {
+  outline: 1px solid white;
+  color: var(--text-highlight);
+  background-color: hsla(var(--accH), var(--accS), var(--accL), 0.3);
+}
+
+.edit-color-btn {
+  border: 0;
+  outline: 0;
+  padding: 0;
+  cursor: pointer;
+  background-color: transparent;
+  height: 100%;
+  width: 100%;
+}
+
+.edit-color-icon {
+  color: var(--text-highlight);
+
+  position: absolute;
+  line-height: 1;
+  top: 5px;
+  left: 5px;
+}
+
+.edit-color-icon > i {
+  line-height: 0;
+  text-shadow: 0px 0px 2px black;
+}
+
+.delete-color-button {
+  position: absolute;
+  display: flex;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background-color: transparent;
+  color: #343434;
+  font-size: x-large;
+  line-height: 1;
+
+  bottom: 2px;
+  right: 2px;
+
+  cursor: pointer;
+}
+
+.delete-color-button:hover {
+  color: red;
+  text-shadow: 0px 0px 3px black;
+}
+
+/**********************************
+
+BOTTOM TOOLBAR
+
+**********************************/
 
 #bottom-toolbar {
   display: flex;
@@ -146,7 +335,7 @@ body {
   align-items: center;
   justify-content: space-between;
   background-color: var(--base1);
-  box-shadow: 0 0 6px 0px rgba(0, 0, 0, 0.5);
+  z-index: 5;
 }
 
 #panzoom-controls {
@@ -189,7 +378,6 @@ body {
   background-color: var(--base1);
   background-repeat: no-repeat;
   background-position: 50%;
-  box-shadow: 0 0 6px 0px rgba(0, 0, 0, 0.5);
 }
 
 .gutter.gutter-horizontal {

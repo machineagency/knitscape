@@ -8,11 +8,13 @@ import {
 
 let GLOBAL_STATE = {
   // editingChart: false,
-  // editingPalette: false,
+  editingPalette: false,
 
   activeTool: "brush",
   activeSymbol: 0,
-  activeColor: 1,
+  activeYarn: 0,
+  activeLayer: "chart",
+  activeMotif: 0,
 
   chartBackground: "#ffffff",
   symbolPalette: {},
@@ -23,16 +25,16 @@ let GLOBAL_STATE = {
   pos: { x: -1, y: -1 }, // Mouse position in chart
   chartPan: { x: 0, y: 0 }, // Pan value for the chart editor view
 
-  yarnPalette: ["#f7dc97", "#1d1b1c"], // Colors of the yarns
+  yarnPalette: ["#416fac", "#a94a7a", "#ffcc44"], // Colors of the yarns
 
   motifLibrary: [
     {
-      title: "test",
-      bitmap: Bimp.empty(4, 4, 0),
+      title: "checks",
+      bitmap: new Bimp(2, 2, [0, 1, 1, 0]),
     },
     {
-      title: "test",
-      bitmap: Bimp.empty(4, 4, 0),
+      title: "stripe",
+      bitmap: Bimp.empty(2, 2, [0, 1, 0, 1]),
     },
     {
       title: "test",
@@ -51,6 +53,7 @@ let GLOBAL_STATE = {
   // colorSequence: null,
   // needlePositions: null,
 
+  reverseScroll: false,
   grid: true,
   isMobile: true,
 

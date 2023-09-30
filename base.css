@@ -49,12 +49,14 @@ ROOT STYLES
   --text-inactive: var(--base8);
   --disabled: var(--base8);
 
-  --workspace-background: var(--base2);
+  --background: var(--base2);
 
   --modal-background: var(--base3);
   --modal-shadow: 0 0 10px 3px #0000009e;
 
   accent-color: var(--accent);
+  --transparency: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill-opacity=".05"><rect width="50" height="50" /><rect x="50" y="50" width="50" height="50" /></svg>')
+    0 0 / 20px 20px #f8f8f8;
 }
 
 /***********************************
@@ -81,7 +83,7 @@ body {
 }
 
 body {
-  background-color: var(--workspace-background);
+  background-color: var(--background);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
 }

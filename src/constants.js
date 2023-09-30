@@ -11,6 +11,8 @@ export const SNAPSHOT_FIELDS = [
   "repeatBitmap",
 ];
 
+export const LAYERS = ["chart", "repeats", "yarn"];
+
 export const DEFAULT_SYMBOLS = ["knit", "purl", "slip", "tuck"];
 export const SYMBOL_DIR = "../assets/symbols";
 
@@ -23,7 +25,6 @@ export const tools = {
   flood: { icon: "fa-solid fa-fill-drip fa-flip-horizontal", hotkey: "f" },
   rect: { icon: "fa-solid fa-vector-square", hotkey: "r" },
   line: { icon: "fa-solid fa-minus", hotkey: "l" },
-  // eyedropper: { icon: "fa-solid fa-eyedropper", hotkey: "i" },
   pan: {
     icon: "fa-solid fa-hand",
     downIcon: "fa-solid fa-hand-back-fist",

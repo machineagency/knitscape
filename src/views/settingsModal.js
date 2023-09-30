@@ -23,6 +23,15 @@ export function settingsModal() {
       <label class="form-control toggle">
         <input
           type="checkbox"
+          name="debug"
+          ?checked=${GLOBAL_STATE.reverseScroll}
+          @change=${(e) => dispatch({ reverseScroll: e.target.checked })} />
+        Invert Scroll
+      </label>
+
+      <label class="form-control toggle">
+        <input
+          type="checkbox"
           name="grid"
           ?checked=${GLOBAL_STATE.grid}
           @change=${(e) => dispatch({ grid: e.target.checked })} />

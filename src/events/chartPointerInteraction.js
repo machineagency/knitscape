@@ -56,7 +56,7 @@ function canvasInteraction(e, target, tool) {
   target.addEventListener("pointerleave", end);
 }
 
-export function chartPointerInteraction({ target, workspace }) {
+export function chartPointerInteraction({ target, desktop }) {
   target.addEventListener("pointerdown", (e) => {
     const activeTool = GLOBAL_STATE.activeTool;
 
@@ -69,8 +69,8 @@ export function chartPointerInteraction({ target, workspace }) {
     }
   });
 
-  workspace.addEventListener("wheel", (e) => {
-    const bounds = workspace.getBoundingClientRect();
+  desktop.addEventListener("wheel", (e) => {
+    const bounds = desktop.getBoundingClientRect();
     zoomAtPoint(
       {
         x: e.clientX - bounds.left,

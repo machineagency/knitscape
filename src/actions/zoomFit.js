@@ -3,9 +3,7 @@ import { devicePixelBoundingBox } from "../utils";
 import { MIN_SCALE, MAX_SCALE } from "../constants";
 
 export function centerZoom(scale) {
-  let bbox = document
-    .getElementById("layers-container")
-    .getBoundingClientRect();
+  let bbox = document.getElementById("available").getBoundingClientRect();
 
   zoomAtPoint({ x: bbox.width / 2, y: bbox.height / 2 }, scale);
 }
@@ -29,7 +27,7 @@ export function zoomAtPoint(pt, scale) {
 
 export function fitChart() {
   const { width, height } = devicePixelBoundingBox(
-    document.getElementById("layers-container")
+    document.getElementById("available")
   );
 
   const scale = Math.min(
