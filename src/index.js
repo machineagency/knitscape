@@ -1,7 +1,7 @@
 import { render } from "lit-html";
 import Split from "split.js";
 
-import { GLOBAL_STATE, StateMonitor } from "./state";
+import { StateMonitor } from "./state";
 
 import { fitChart } from "./actions/zoomFit";
 
@@ -9,6 +9,7 @@ import { view } from "./views/view";
 
 import { DEFAULT_SYMBOLS, SYMBOL_DIR } from "./constants";
 
+import { yarnCanvas } from "./components/yarnCanvas";
 import { chartCanvas } from "./components/chartCanvas";
 import { gridCanvas } from "./components/gridCanvas";
 import { outlineCanvas } from "./components/outlineCanvas";
@@ -96,7 +97,9 @@ function init() {
   calcSplit();
 
   isMobile() ? initTouch() : initKeyboard();
+
   StateMonitor.register([
+    yarnCanvas({ canvas: document.getElementById("yarn") }),
     chartCanvas({ canvas: document.getElementById("chart") }),
     gridCanvas({ canvas: document.getElementById("grid") }),
     outlineCanvas({ canvas: document.getElementById("outline") }),

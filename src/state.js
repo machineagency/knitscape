@@ -11,7 +11,6 @@ let GLOBAL_STATE = {
 
   activeTool: "brush",
   activeSymbol: 0,
-  activeYarn: 0,
   activeLayer: "chart",
   activeMotif: 0,
 
@@ -24,7 +23,9 @@ let GLOBAL_STATE = {
   pos: { x: -1, y: -1 }, // Mouse position in chart
   chartPan: { x: 0, y: 0 }, // Pan value for the chart editor view
 
+  activeYarn: 0,
   yarnPalette: ["#416fac", "#a94a7a", "#ffcc44"], // Colors of the yarns
+  yarnLayer: new Bimp(1, 4, [0, 0, 1, 1, 2, 2]),
 
   motifLibrary: [
     {
@@ -40,11 +41,6 @@ let GLOBAL_STATE = {
       bitmap: Bimp.empty(4, 4, 0),
     },
   ], // Library of motifs which can be used as repeats
-
-  // updateSim: false,
-  // simWidth: 30,
-  // simHeight: 70,
-  // swatchFlipped: false,
 
   chart: Bimp.empty(20, 20, 0),
 

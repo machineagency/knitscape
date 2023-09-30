@@ -1,7 +1,6 @@
 import { GLOBAL_STATE, dispatch } from "../state";
 import { paintTools } from "../actions/paintTools";
 import { otherTools } from "../actions/otherTools";
-import { zoomAtPoint } from "../actions/zoomFit";
 
 function chartInteraction(target, tool) {
   // tool onMove is not called unless pointer moves into another cell in the chart

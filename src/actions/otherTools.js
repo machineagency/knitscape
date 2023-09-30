@@ -1,6 +1,8 @@
-function pan(startPos, state, dispatch) {
-  const startPan = state.chartPan;
-  function onMove(currentPos, { pan, scale }) {
+import { GLOBAL_STATE, dispatch } from "../state";
+
+function pan(startPos) {
+  const startPan = GLOBAL_STATE.chartPan;
+  function onMove(currentPos) {
     const dx = startPos.x - currentPos.x;
     const dy = startPos.y - currentPos.y;
 

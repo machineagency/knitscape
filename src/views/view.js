@@ -19,11 +19,11 @@ export function view() {
     ${when(GLOBAL_STATE.showLibrary, libraryModal)}
     ${when(GLOBAL_STATE.showSettings, settingsModal)}
     ${when(GLOBAL_STATE.showFileMenu, fileModal)}
-    <style>
+    <!-- <style>
       #chart {
         background: ${GLOBAL_STATE.chartBackground};
       }
-    </style>
+    </style> -->
     <div id="site">
       <div id="chart-pane">
         ${taskbar()}
@@ -33,15 +33,19 @@ export function view() {
 
           <div id="desktop">
             ${pointerIcon()} ${toolPicker()}
-            <div id="available">
-              <div
-                id="canvas-transform-group"
-                style="transform: translate(${GLOBAL_STATE.chartPan
-                  .x}px, ${GLOBAL_STATE.chartPan.y}px);">
-                <canvas id="chart"></canvas>
-                <canvas id="grid"></canvas>
-                <canvas id="outline"></canvas>
+            <div
+              id="canvas-transform-group"
+              style="transform: translate(${GLOBAL_STATE.chartPan
+                .x}px, ${GLOBAL_STATE.chartPan.y}px);">
+              <div id="yarn-sequence">
+                <button class="btn solid">
+                  <i class="fa-solid fa-grip"></i>
+                </button>
+                <canvas id="yarn"></canvas>
               </div>
+              <canvas id="chart"></canvas>
+              <canvas id="grid"></canvas>
+              <canvas id="outline"></canvas>
             </div>
           </div>
         </div>

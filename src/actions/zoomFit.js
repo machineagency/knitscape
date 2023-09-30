@@ -30,7 +30,7 @@ export function toggleFullscreen() {
 }
 
 export function centerZoom(scale) {
-  let bbox = document.getElementById("available").getBoundingClientRect();
+  let bbox = document.getElementById("desktop").getBoundingClientRect();
 
   zoomAtPoint({ x: bbox.width / 2, y: bbox.height / 2 }, scale);
 }
@@ -54,13 +54,15 @@ export function zoomAtPoint(pt, scale) {
 
 export function fitChart() {
   const { width, height } = devicePixelBoundingBox(
-    document.getElementById("available")
+    document.getElementById("desktop")
   );
 
-  const scale = Math.min(
-    Math.floor(width / GLOBAL_STATE.chart.width),
-    Math.floor(height / GLOBAL_STATE.chart.height)
-  );
+  const scale =
+    0.9 *
+    Math.min(
+      Math.floor(width / GLOBAL_STATE.chart.width),
+      Math.floor(height / GLOBAL_STATE.chart.height)
+    );
 
   dispatch({
     scale,

@@ -17,6 +17,7 @@ body {
   font-family: "National Park";
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 #site {
@@ -106,18 +107,69 @@ EDIT PANE
   overflow: hidden;
 }
 
-#desktop {
-  flex: 1;
+#desktop-container {
+  /* flex: 1;
   display: grid;
   grid-template-rows: min-content 1fr;
   position: relative;
   cursor: none;
   z-index: 0;
+  box-shadow: inset 0 0 6px 0px rgba(0, 0, 0, 0.5); */
+  flex: 1;
+  display: flex;
+  overflow: hidden;
   box-shadow: inset 0 0 6px 0px rgba(0, 0, 0, 0.5);
 }
 
-#canvas-transform-group > canvas {
+#desktop {
+  box-shadow: inset 0 0 6px 0px rgba(0, 0, 0, 0.5);
+
+  display: flex;
+  overflow: hidden;
+  flex: 1;
+  align-items: flex-start;
+}
+
+canvas {
+  display: block;
+}
+
+#canvas-transform-group {
+  display: block;
+  outline: 1px solid black;
+}
+
+#outline,
+#grid {
   position: absolute;
+  left: 0;
+  top: 0;
+}
+
+#yarn-sequence {
+  position: absolute;
+  right: calc(100% + 10px);
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+#yarn-sequence > button {
+  /* width: auto; */
+  width: 100%;
+  position: absolute;
+  bottom: 100%;
+  cursor: grab;
+  border-radius: 8px 8px 0 0;
+  /* background-color: var(--base4);
+  border: 0;
+  outline: 1px solid black; */
+  color: var(--text-inactive);
+  overflow: hidden;
+  padding: 0;
+}
+
+#yarn-sequence > canvas {
   outline: 1px solid black;
 }
 
@@ -128,7 +180,8 @@ TOOL PICKER
 **********************************/
 
 #tool-picker {
-  justify-self: center;
+  /* justify-self: center; */
+  position: absolute;
   display: flex;
   background-color: #212121;
   gap: 0.3em;
