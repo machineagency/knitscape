@@ -9,7 +9,4 @@ function pan(startPos, state, dispatch) {
   return onMove;
 }
 
-function zoomIn() {}
-function zoomOut() {}
-
 export const otherTools = { pan };

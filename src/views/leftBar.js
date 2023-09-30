@@ -13,7 +13,7 @@ function symbolPicker() {
           ? "current"
           : ""}"
         @click=${() => dispatch({ activeSymbol: index })}>
-        <span>${symbolName}</span>
+        <div>${symbolName}</div>
         <img
           class="symbol-img"
           style="background-color: ${GLOBAL_STATE.chartBackground};"
@@ -108,8 +108,8 @@ function yarnPicker() {
             ? "selected"
             : ""}"
           @click=${() => dispatch({ activeYarn: index })}>
-          <span style="width: 20px; text-align: center;">${index + 1}</span>
-          <div style="--current: ${hexa};">
+          <div class="color-label">${index + 1}</div>
+          <div class="color-preview" style="--current: ${hexa};">
             ${GLOBAL_STATE.editingPalette
               ? html`
                   <button
@@ -152,7 +152,7 @@ function yarnPicker() {
 }
 
 export function leftBar() {
-  return html`<div id="left-bar">
+  return html`<div id="left-bar" class="scroller">
     ${symbolPicker()} ${yarnPicker()} ${motifPicker()} ${layerPicker()}
   </div>`;
 }

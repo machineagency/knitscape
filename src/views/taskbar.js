@@ -1,5 +1,6 @@
 import { html } from "lit-html";
 import { GLOBAL_STATE, dispatch } from "../state";
+import { toggleFullscreen } from "../actions/zoomFit";
 
 export function taskbar() {
   return html`<div id="taskbar">
@@ -25,6 +26,16 @@ export function taskbar() {
         @click=${() =>
           window.open("https://github.com/branchwelder/knitscape")}>
         <i class="fa-brands fa-github"></i>
+      </button>
+
+      <button class="btn icon" @click=${() => toggleFullscreen()}>
+        <i
+          class="fa-solid fa-${!window.document.fullscreenElement &&
+          !window.document.mozFullScreenElement &&
+          !window.document.webkitFullscreenElement &&
+          !window.document.msFullscreenElement
+            ? "up-right-and-down-left-from-center"
+            : "down-left-and-up-right-to-center"}"></i>
       </button>
     </div>
   </div>`;

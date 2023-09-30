@@ -6,8 +6,13 @@
 }
 
 body {
-  height: 100vh;
+  --font-size: 1rem;
   width: 100vw;
+  width: calc(var(--vw, 1vw) * 100);
+  height: 100vh;
+  height: calc(var(--vh, 1vh) * 100);
+
+  font-size: var(--font-size);
 
   font-family: "National Park";
   display: flex;
@@ -21,6 +26,7 @@ body {
   flex-direction: column;
   user-select: none;
   z-index: 1;
+  overflow: hidden;
 }
 
 /**********************************
@@ -90,13 +96,14 @@ EDIT PANE
 #chart-pane {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 
 #chart-layout {
   flex: 1;
   display: flex;
   background-color: var(--base2);
+  overflow: hidden;
 }
 
 #desktop {
@@ -155,7 +162,8 @@ LEFT BAR
   display: flex;
   flex-direction: column;
   gap: 1em;
-  padding: 0 0.4em;
+  padding: 0 0.6em;
+  overflow-y: auto;
 }
 
 /**********************************
@@ -221,9 +229,13 @@ SYMBOL PICKER
   overflow: hidden;
 }
 
-#symbol-picker > .btn.img span {
+#symbol-picker > .btn.img div {
   writing-mode: vertical-lr;
   transform: rotate(180deg);
+  display: flex;
+  align-items: center;
+  line-height: 0;
+  flex: 1;
 }
 
 .btn.img.current {
@@ -257,18 +269,21 @@ YARN PICKER
   border-radius: 8px;
   border: 1px solid black;
   overflow: hidden;
+  justify-content: space-between;
 }
 
-.btn.color-select > div {
-  flex: 1;
+.color-preview {
+  aspect-ratio: 1;
   height: 100%;
   position: relative;
   background: var(--current);
 }
-.btn.color-select > span {
-  width: 25px;
-  text-align: center;
+
+.color-label {
+  font-size: larger;
   font-weight: 900;
+  flex: 1;
+  line-height: 0;
 }
 
 #yarn-picker .btn.selected {

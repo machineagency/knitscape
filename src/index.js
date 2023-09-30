@@ -15,8 +15,11 @@ import { outlineCanvas } from "./components/outlineCanvas";
 
 import { addKeypressListeners } from "./events/keypressEvents";
 import { chartPointerInteraction } from "./events/chartPointerInteraction";
+import { chartTouchInteraction } from "./events/chartTouchInteraction";
+
 import { closeModals } from "./events/closeModals";
 import { trackPointer } from "./events/trackPointer";
+import { trackTouch } from "./events/trackTouch";
 import { addPointerIcon } from "./events/addPointerIcon";
 
 import { loadSymbol } from "./actions/importers";
@@ -43,6 +46,12 @@ function initKeyboard() {
 }
 
 function initTouch() {
+  document.body.style.setProperty("--font-size", "1.2rem");
+  trackTouch({ target: document.getElementById("outline") });
+  chartTouchInteraction({
+    target: document.getElementById("outline"),
+    desktop: document.getElementById("desktop"),
+  });
   closeModals();
 }
 
@@ -66,6 +75,17 @@ function calcSplit() {
       });
 }
 
+function measureWindow() {
+  document.documentElement.style.setProperty(
+    "--vh",
+    `${window.innerHeight * 0.01}px`
+  );
+  document.documentElement.style.setProperty(
+    "--vw",
+    `${window.innerWidth * 0.01}px`
+  );
+}
+
 function init() {
   DEFAULT_SYMBOLS.forEach((symbolName) =>
     loadSymbol(symbolName, `${SYMBOL_DIR}/${symbolName}.png`)
@@ -82,7 +102,9 @@ function init() {
     outlineCanvas({ canvas: document.getElementById("outline") }),
   ]);
 
+  measureWindow();
   fitChart();
 }
 
 window.onload = init;
+window.onresize = measureWindow;

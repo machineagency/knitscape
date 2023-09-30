@@ -107,6 +107,32 @@ h6 {
 
 /***********************************
 
+SCROLLBAR
+
+***********************************/
+
+.scroller {
+  /* firefox scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: #1a1919 transparent;
+}
+
+.scroller::-webkit-scrollbar {
+  width: 10px;
+}
+
+.scroller::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroller::-webkit-scrollbar-thumb {
+  background-color: #000000c9;
+  border-radius: 20px;
+  border: 3px solid transparent;
+}
+
+/***********************************
+
 FORM CONTROL
 
 ***********************************/

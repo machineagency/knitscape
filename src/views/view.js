@@ -38,7 +38,6 @@ export function view() {
                 id="canvas-transform-group"
                 style="transform: translate(${GLOBAL_STATE.chartPan
                   .x}px, ${GLOBAL_STATE.chartPan.y}px);">
-                <canvas id="yarn"></canvas>
                 <canvas id="chart"></canvas>
                 <canvas id="grid"></canvas>
                 <canvas id="outline"></canvas>

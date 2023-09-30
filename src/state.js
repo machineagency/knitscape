@@ -7,7 +7,6 @@ import {
 } from "./constants";
 
 let GLOBAL_STATE = {
-  // editingChart: false,
   editingPalette: false,
 
   activeTool: "brush",
@@ -47,11 +46,7 @@ let GLOBAL_STATE = {
   // simHeight: 70,
   // swatchFlipped: false,
 
-  // repeatBitmap: Bimp.empty(8, 12, 0),
   chart: Bimp.empty(20, 20, 0),
-
-  // colorSequence: null,
-  // needlePositions: null,
 
   reverseScroll: false,
   grid: true,

@@ -1,4 +1,5 @@
 import { bmp_lib } from "./lib/bmp";
+import { GLOBAL_STATE, dispatch } from "./state";
 
 export function devicePixelBoundingBox(el) {
   const bbox = el.getBoundingClientRect();
@@ -7,6 +8,18 @@ export function devicePixelBoundingBox(el) {
     width: bbox.width * devicePixelRatio,
     height: bbox.height * devicePixelRatio,
   };
+}
+
+export function posAtCoords(event, target) {
+  const bounds = target.getBoundingClientRect();
+
+  const x = Math.floor(
+    ((event.clientX - bounds.x) / GLOBAL_STATE.scale) * devicePixelRatio
+  );
+  const y = Math.floor(
+    ((event.clientY - bounds.y) / GLOBAL_STATE.scale) * devicePixelRatio
+  );
+  return { x, y };
 }
 
 export function getRandomColor() {
