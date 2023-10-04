@@ -73,11 +73,14 @@ export function fitChart() {
   });
 }
 
-export function sizeCanvasToBitmap(canvas, bitmapWidth, bitmapHeight, scale) {
-  canvas.width = scale * bitmapWidth;
-  canvas.height = scale * bitmapHeight;
+export function sizeCanvasToBitmap(canvas, bitmapWidth, bitmapHeight) {
+  canvas.width = GLOBAL_STATE.scale * bitmapWidth;
+  canvas.height = GLOBAL_STATE.scale * bitmapHeight;
+  canvas.style.width = `${
+    (GLOBAL_STATE.scale * bitmapWidth) / devicePixelRatio
+  }px`;
 
-  canvas.style.cssText = `width: ${
-    (scale * bitmapWidth) / devicePixelRatio
-  }px; height: ${(scale * bitmapHeight) / devicePixelRatio}px;`;
+  canvas.style.height = `${
+    (GLOBAL_STATE.scale * bitmapHeight) / devicePixelRatio
+  }px`;
 }

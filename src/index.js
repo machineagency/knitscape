@@ -14,6 +14,7 @@ import { chartSymbolCanvas } from "./components/chartSymbolCanvas";
 import { chartYarnColorCanvas } from "./components/chartYarnColorCanvas";
 import { gridCanvas } from "./components/gridCanvas";
 import { outlineCanvas } from "./components/outlineCanvas";
+import { repeatCanvases } from "./components/repeatCanvases";
 
 import { addKeypressListeners } from "./events/keypressEvents";
 import { wheelInteraction } from "./events/wheelInteraction";
@@ -22,6 +23,7 @@ import { addPointerIcon } from "./events/addPointerIcon";
 
 import { chartPointerInteraction } from "./events/chartPointerInteraction";
 import { colorSequencePointerInteraction } from "./events/colorSequencePointerInteraction";
+import { repeatPointerInteraction } from "./events/repeatPointerInteraction";
 
 import { chartTouchInteraction } from "./events/chartTouchInteraction";
 import { colorSequenceTouchInteraction } from "./events/colorSequenceTouchInteraction";
@@ -41,9 +43,10 @@ function initKeyboard() {
   addKeypressListeners();
   addPointerIcon(
     document.getElementById("pointer"),
-    document.getElementById("outline")
+    document.getElementById("chart")
   );
-  chartPointerInteraction(document.getElementById("outline"));
+  repeatPointerInteraction(document.getElementById("repeat-container"));
+  chartPointerInteraction(document.getElementById("chart"));
   wheelInteraction(document.getElementById("desktop"));
   colorSequencePointerInteraction(
     document.getElementById("yarn-sequence-canvas"),
@@ -109,12 +112,12 @@ function init() {
       canvas: document.getElementById("yarn-sequence-canvas"),
     }),
     chartSymbolCanvas({ canvas: document.getElementById("chart") }),
-
     chartYarnColorCanvas({
       canvas: document.getElementById("yarn-color-canvas"),
     }),
     gridCanvas({ canvas: document.getElementById("grid") }),
     outlineCanvas({ canvas: document.getElementById("outline") }),
+    repeatCanvases(),
   ]);
 
   measureWindow();

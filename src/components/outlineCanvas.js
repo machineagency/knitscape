@@ -36,7 +36,7 @@ export function outlineCanvas({
       );
     }
 
-    sizeCanvasToBitmap(canvas, width, height, scale);
+    sizeCanvasToBitmap(canvas, width, height);
 
     return {
       syncState(state) {
@@ -49,7 +49,7 @@ export function outlineCanvas({
           width = state.chart.width;
           height = state.chart.height;
 
-          sizeCanvasToBitmap(canvas, width, height, scale);
+          sizeCanvasToBitmap(canvas, width, height);
         }
         if (state.pos != pos) {
           pos = state.pos;

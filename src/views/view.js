@@ -1,6 +1,6 @@
 import { html } from "lit-html";
 import { when } from "lit-html/directives/when.js";
-import { GLOBAL_STATE } from "../state";
+import { dispatch, GLOBAL_STATE } from "../state";
 
 import { taskbar } from "./taskbar";
 import { fileModal } from "./fileModal";
@@ -12,6 +12,7 @@ import { pointerIcon } from "./pointerIcon";
 import { toolPicker } from "./toolPicker";
 import { bottomToolbar } from "./bottomToolbar";
 import { leftBar } from "./leftBar";
+import { repeatCanvas } from "./repeatCanvas";
 
 export function view() {
   return html`
@@ -40,13 +41,11 @@ export function view() {
                 <canvas id="yarn-sequence-canvas"></canvas>
               </div>
               <canvas id="yarn-color-canvas"></canvas>
-
               <canvas id="chart"></canvas>
-              <!-- <div id="repeat-container">
-                <canvas id="repeat"></canvas>
-              </div> -->
-              <canvas id="grid"></canvas>
 
+              ${repeatCanvas()}
+
+              <canvas id="grid"></canvas>
               <canvas id="outline"></canvas>
             </div>
           </div>

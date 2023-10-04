@@ -31,7 +31,7 @@ export function gridCanvas({ canvas }) {
       ctx.stroke();
     }
 
-    sizeCanvasToBitmap(canvas, width, height, scale);
+    sizeCanvasToBitmap(canvas, width, height);
     draw();
 
     return {
@@ -47,7 +47,7 @@ export function gridCanvas({ canvas }) {
           scale = state.scale;
           grid = state.grid;
 
-          sizeCanvasToBitmap(canvas, width, height, scale);
+          sizeCanvasToBitmap(canvas, width, height);
           draw();
         }
       },
