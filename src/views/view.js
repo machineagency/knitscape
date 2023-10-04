@@ -43,10 +43,9 @@ export function view() {
               <canvas id="yarn-color-canvas"></canvas>
               <canvas id="chart"></canvas>
 
-              ${repeatCanvas()}
-
               <canvas id="grid"></canvas>
               <canvas id="outline"></canvas>
+              ${repeatCanvas()}
             </div>
           </div>
         </div>

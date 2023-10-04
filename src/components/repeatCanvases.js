@@ -1,11 +1,21 @@
 import { sizeCanvasToBitmap } from "../actions/zoomFit";
 import { GLOBAL_STATE } from "../state";
 
+function clearLastDrawn(lastDrawn) {
+  for (const repeat of lastDrawn) {
+    repeat.bitmap = null;
+  }
+}
+
 export function repeatCanvases() {
   return ({ state }) => {
     let { scale, symbolPalette, symbolMap, repeats } = state;
 
-    let lastDrawn = Array(repeats.length).fill(null);
+    let lastDrawn = repeats.map((repeat) => {
+      return { bitmap: null, pos: [...repeat.pos] };
+    });
+
+    clearLastDrawn(lastDrawn);
 
     function draw(repeatIndex) {
       // Draws only the pixels that have changed
@@ -20,8 +30,8 @@ export function repeatCanvases() {
           let paletteIndex = repeat.pixel(x, y);
 
           if (
-            lastDrawn[repeatIndex] == null ||
-            lastDrawn[repeatIndex].pixel(x, y) != paletteIndex
+            lastDrawn[repeatIndex].bitmap == null ||
+            lastDrawn[repeatIndex].bitmap.pixel(x, y) != paletteIndex
           ) {
             let im = symbolPalette[symbolMap[paletteIndex]];
 
@@ -31,7 +41,7 @@ export function repeatCanvases() {
           }
         }
       }
-      lastDrawn[repeatIndex] = repeat;
+      lastDrawn[repeatIndex].bitmap = repeat;
     }
 
     function positionRepeat(repeatIndex) {
@@ -67,12 +77,12 @@ export function repeatCanvases() {
 
         if (symbolPalette != state.symbolPalette) {
           symbolPalette = state.symbolPalette;
-          lastDrawn = Array(repeats.length).fill(null);
+          clearLastDrawn(lastDrawn);
         }
 
         if (scale != state.scale) {
           scale = state.scale;
-          lastDrawn = Array(repeats.length).fill(null);
+          clearLastDrawn(lastDrawn);
 
           for (
             let repeatIndex = 0;
@@ -90,16 +100,18 @@ export function repeatCanvases() {
         for (let repeatIndex = 0; repeatIndex < repeats.length; repeatIndex++) {
           let repeat = repeats[repeatIndex];
           if (
-            lastDrawn[repeatIndex] == null ||
-            repeat.bitmap.width != lastDrawn[repeatIndex].width ||
-            repeat.bitmap.height != lastDrawn[repeatIndex].height
+            lastDrawn[repeatIndex].bitmap == null ||
+            repeat.bitmap.width != lastDrawn[repeatIndex].bitmap.width ||
+            repeat.bitmap.height != lastDrawn[repeatIndex].bitmap.height ||
+            repeat.pos[0] != lastDrawn[repeatIndex].pos[0] ||
+            repeat.pos[1] != lastDrawn[repeatIndex].pos[1]
           ) {
             positionRepeat(repeatIndex);
-
-            lastDrawn[repeatIndex] = null;
+            lastDrawn[repeatIndex].pos = repeat.pos;
+            lastDrawn[repeatIndex].bitmap = null;
           }
 
-          if (lastDrawn[repeatIndex] != repeat.bitmap) {
+          if (lastDrawn[repeatIndex].bitmap != repeat.bitmap) {
             draw(repeatIndex);
           }
         }

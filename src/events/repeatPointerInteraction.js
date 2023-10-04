@@ -57,17 +57,120 @@ function canvasInteraction(e, target, tool) {
   target.addEventListener("pointerleave", end);
 }
 
+function resizeRepeat(e, repeatIndex) {
+  const startRepeat = GLOBAL_STATE.repeats[repeatIndex].bitmap;
+  const startPos = [e.clientX, e.clientY];
+  const resizeDragger = e.target;
+
+  document.body.classList.add("grabbing");
+  resizeDragger.classList.remove("grab");
+
+  const end = () => {
+    document.body.classList.remove("grabbing");
+
+    window.removeEventListener("pointermove", onmove);
+    window.removeEventListener("pointerup", end);
+
+    resizeDragger.classList.add("grab");
+  };
+
+  const onmove = (e) => {
+    let newWidth =
+      startRepeat.width -
+      Math.floor((startPos[0] - e.clientX) / GLOBAL_STATE.scale);
+
+    let newHeight =
+      startRepeat.height +
+      Math.floor((startPos[1] - e.clientY) / GLOBAL_STATE.scale);
+
+    if (newHeight == startRepeat.height && newWidth == startRepeat.width)
+      return;
+
+    if (newHeight < 1 || newWidth < 1) return;
+
+    dispatch({
+      repeats: [
+        ...GLOBAL_STATE.repeats.slice(0, repeatIndex),
+        {
+          ...GLOBAL_STATE.repeats[repeatIndex],
+          bitmap: startRepeat.vFlip().resize(newWidth, newHeight).vFlip(),
+        },
+        ...GLOBAL_STATE.repeats.slice(repeatIndex + 1),
+      ],
+    });
+  };
+
+  window.addEventListener("pointermove", onmove);
+  window.addEventListener("pointerup", end);
+}
+
+function moveRepeat(e, repeatIndex) {
+  const startRepeatPos = GLOBAL_STATE.repeats[repeatIndex].pos;
+  const startPos = [e.clientX, e.clientY];
+  const moveDragger = e.target;
+
+  document.body.classList.add("grabbing");
+  moveDragger.classList.remove("grab");
+
+  const end = () => {
+    document.body.classList.remove("grabbing");
+
+    window.removeEventListener("pointermove", onmove);
+    window.removeEventListener("pointerup", end);
+
+    moveDragger.classList.add("grab");
+  };
+
+  const onmove = (e) => {
+    let newX =
+      startRepeatPos[0] -
+      Math.floor((startPos[0] - e.clientX) / GLOBAL_STATE.scale);
+
+    let newY =
+      startRepeatPos[1] +
+      Math.floor((startPos[1] - e.clientY) / GLOBAL_STATE.scale);
+
+    newX = newX < 0 ? 0 : newX;
+    newY = newY < 0 ? 0 : newY;
+
+    dispatch({
+      repeats: [
+        ...GLOBAL_STATE.repeats.slice(0, repeatIndex),
+        {
+          ...GLOBAL_STATE.repeats[repeatIndex],
+          pos: [newX, newY],
+        },
+        ...GLOBAL_STATE.repeats.slice(repeatIndex + 1),
+      ],
+    });
+  };
+
+  window.addEventListener("pointermove", onmove);
+  window.addEventListener("pointerup", end);
+}
+
 export function repeatPointerInteraction(target) {
   target.addEventListener("pointerdown", (e) => {
-    console.log("EDITING REPEAT", e.target.dataset.repeatindex);
-    const activeTool = GLOBAL_STATE.activeTool;
+    const repeatIndex = e.target.parentNode.dataset.repeatindex;
+    console.log("EDITING REPEAT", repeatIndex);
 
-    if (activeTool in paintTools)
-      chartInteraction(e.target, paintTools[activeTool]);
-    else if (activeTool in canvasTools)
-      canvasInteraction(e, target, canvasTools[activeTool]);
-    else {
-      console.console.warn(`Uh oh, ${activeTool} is not a tool`);
+    if (e.target.classList.contains("resize-repeat")) {
+      // interacting with dragger
+      resizeRepeat(e, repeatIndex);
+    } else if (e.target.classList.contains("move-repeat")) {
+      // interacting with dragger
+      moveRepeat(e, repeatIndex);
+    } else if (e.target.classList.contains("repeat-canvas")) {
+      // interacting with canvas
+      const activeTool = GLOBAL_STATE.activeTool;
+
+      if (activeTool in paintTools)
+        chartInteraction(e.target, paintTools[activeTool]);
+      else if (activeTool in canvasTools)
+        canvasInteraction(e, target, canvasTools[activeTool]);
+      else {
+        console.console.warn(`Uh oh, ${activeTool} is not a tool`);
+      }
     }
   });
 

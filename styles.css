@@ -159,21 +159,31 @@ canvas {
   position: absolute;
 }
 
-.repeat-canvas {
-  background-color: white;
-  outline: 3px solid black;
-  display: block;
-}
-
 /**********************************
+
 REPEAT CANVAS UI
 
 **********************************/
 
+.repeat-canvas {
+  background-color: white;
+  /* outline: 3px solid black; */
+  display: block;
+  box-shadow: 0 0 5px 0 black;
+  z-index: 1;
+}
+
 .repeat-ui {
   position: absolute;
-  bottom: 100%;
+  z-index: 1;
+  bottom: calc(100% + 8px);
+  right: 0;
+  background-color: var(--base2);
+  box-shadow: 0 0 5px 0 black;
+  border-radius: 8px;
   display: flex;
+  padding: 5px;
+  gap: 5px;
 }
 
 .move-repeat-grabber {
@@ -183,10 +193,17 @@ REPEAT CANVAS UI
 .delete-repeat-button {
 }
 
-.resize-repeat-x {
-  position: absolute;
-  left: 100%;
-  bottom: 0;
+.repeat-ui .btn.solid {
+  aspect-ratio: 1;
+}
+
+.resize-repeat {
+  aspect-ratio: 1;
+  cursor: grab !important;
+}
+
+.repeat-ui > button > i {
+  pointer-events: none;
 }
 
 .resize-repeat-y {

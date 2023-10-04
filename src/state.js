@@ -31,16 +31,9 @@ let GLOBAL_STATE = {
   repeats: [
     {
       bitmap: new Bimp(2, 5, [0, 2, 2, 0, 2, 2, 0, 2, 0, 2]),
-      pos: [3, 4],
+      pos: [0, 0],
       xRepeats: 2,
       yRepeats: 3,
-    },
-
-    {
-      bitmap: new Bimp(2, 2, [0, 2, 2, 0]),
-      pos: [10, 10],
-      xRepeats: 1,
-      yRepeats: 1,
     },
   ],
 
