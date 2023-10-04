@@ -1,7 +1,8 @@
 import { GLOBAL_STATE, dispatch } from "../state";
+import { posAtCoords } from "../utils";
+
 import { paintTools } from "../actions/paintTools";
-import { otherTools } from "../actions/otherTools";
-import { zoomAtPoint } from "../actions/zoomFit";
+import { canvasTools } from "../actions/canvasTools";
 
 function chartInteraction(target, tool) {
   // tool onMove is not called unless pointer moves into another cell in the chart
@@ -56,38 +57,27 @@ function canvasInteraction(e, target, tool) {
   target.addEventListener("pointerleave", end);
 }
 
-export function chartPointerInteraction({ target, desktop }) {
+export function chartPointerInteraction(target) {
   target.addEventListener("pointerdown", (e) => {
     const activeTool = GLOBAL_STATE.activeTool;
 
     if (activeTool in paintTools)
       chartInteraction(target, paintTools[activeTool]);
-    else if (activeTool in otherTools)
-      canvasInteraction(e, target, otherTools[activeTool]);
+    else if (activeTool in canvasTools)
+      canvasInteraction(e, target, canvasTools[activeTool]);
     else {
       console.console.warn(`Uh oh, ${activeTool} is not a tool`);
     }
   });
 
-  desktop.addEventListener("wheel", (e) => {
-    const bounds = desktop.getBoundingClientRect();
-    let scale;
-
-    if (Math.sign(e.deltaY) < 0) {
-      scale = GLOBAL_STATE.reverseScroll
-        ? GLOBAL_STATE.scale - 1
-        : GLOBAL_STATE.scale + 1;
-    } else {
-      scale = GLOBAL_STATE.reverseScroll
-        ? GLOBAL_STATE.scale + 1
-        : GLOBAL_STATE.scale - 1;
+  target.addEventListener("pointermove", (e) => {
+    const { x, y } = posAtCoords(e, target);
+    if (GLOBAL_STATE.pos.x != x || GLOBAL_STATE.pos.y != y) {
+      dispatch({ pos: { x, y } });
     }
-    zoomAtPoint(
-      {
-        x: e.clientX - bounds.left,
-        y: e.clientY - bounds.top,
-      },
-      scale
-    );
+  });
+
+  target.addEventListener("pointerleave", (e) => {
+    dispatch({ pos: { x: -1, y: -1 } });
   });
 }

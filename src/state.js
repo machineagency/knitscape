@@ -21,11 +21,12 @@ let GLOBAL_STATE = {
 
   scale: 15, // Number of pixels for each chart cell
   pos: { x: -1, y: -1 }, // Mouse position in chart
+  colorSequencePos: { x: -1, y: -1 },
   chartPan: { x: 0, y: 0 }, // Pan value for the chart editor view
 
   activeYarn: 0,
   yarnPalette: ["#416fac", "#a94a7a", "#ffcc44"], // Colors of the yarns
-  yarnLayer: new Bimp(1, 4, [0, 0, 1, 1, 2, 2]),
+  yarnSequence: new Bimp(1, 6, [0, 0, 1, 1, 2, 2]),
 
   motifLibrary: [
     {
@@ -57,6 +58,7 @@ let GLOBAL_STATE = {
 
   snapshots: [], // Array of snapshot history
   lastSnapshot: 0, // time of last snapshot
+  cursorIcon: "fa-solid fa-paintbrush",
   heldKeys: new Set(), // Keys that are currently held down
 };
 

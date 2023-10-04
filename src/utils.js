@@ -10,6 +10,18 @@ export function devicePixelBoundingBox(el) {
   };
 }
 
+export function colorSequencePosAtCoords(event, target) {
+  const bounds = target.getBoundingClientRect();
+
+  const x = Math.floor(
+    ((event.clientX - bounds.x) / GLOBAL_STATE.scale) * devicePixelRatio
+  );
+  const y = Math.floor(
+    ((event.clientY - bounds.y) / GLOBAL_STATE.scale) * devicePixelRatio
+  );
+  return { x, y: GLOBAL_STATE.yarnSequence.height - y - 1 };
+}
+
 export function posAtCoords(event, target) {
   const bounds = target.getBoundingClientRect();
 

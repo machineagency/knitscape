@@ -3,6 +3,7 @@ import { GLOBAL_STATE, dispatch } from "../state";
 import { LAYERS } from "../constants";
 import { getRandomColor } from "../utils";
 import jscolor from "@eastdesire/jscolor";
+import { Bimp } from "../lib/Bimp";
 
 function symbolPicker() {
   return html` <div id="symbol-picker">
@@ -61,15 +62,19 @@ function deleteColor(index) {
     return;
   }
   const newPalette = GLOBAL_STATE.yarnPalette.filter((color, i) => i != index);
-  const newBitmap = GLOBAL_STATE.bitmap.pixels.map((bit) => {
+  const newBitmap = GLOBAL_STATE.yarnSequence.pixels.map((bit) => {
     if (bit == index) return 0;
     if (bit > index) return bit - 1;
     return bit;
   });
 
   dispatch({
-    palette: newPalette,
-    bitmap: new Bimp(GLOBAL_STATE.width, GLOBAL_STATE.height, newBitmap),
+    yarnPalette: newPalette,
+    yarnSequence: new Bimp(
+      GLOBAL_STATE.yarnSequence.width,
+      GLOBAL_STATE.yarnSequence.height,
+      newBitmap
+    ),
   });
 }
 
@@ -84,12 +89,8 @@ function editColor(index) {
         const newPalette = [...GLOBAL_STATE.yarnPalette];
         newPalette[index] = picker.toRGBAString();
         dispatch({
-          palette: newPalette,
-          bitmap: new Bimp(
-            GLOBAL_STATE.width,
-            GLOBAL_STATE.height,
-            GLOBAL_STATE.bitmap.pixels
-          ),
+          yarnPalette: newPalette,
+          yarnSequence: GLOBAL_STATE.yarnSequence,
         });
       },
       previewElement: null,
@@ -153,6 +154,6 @@ function yarnPicker() {
 
 export function leftBar() {
   return html`<div id="left-bar" class="scroller">
-    ${symbolPicker()} ${yarnPicker()} ${motifPicker()} ${layerPicker()}
+    ${symbolPicker()} ${yarnPicker()}
   </div>`;
 }

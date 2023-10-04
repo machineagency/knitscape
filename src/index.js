@@ -9,19 +9,24 @@ import { view } from "./views/view";
 
 import { DEFAULT_SYMBOLS, SYMBOL_DIR } from "./constants";
 
-import { yarnCanvas } from "./components/yarnCanvas";
-import { chartCanvas } from "./components/chartCanvas";
+import { yarnSequenceCanvas } from "./components/yarnSequenceCanvas";
+import { chartSymbolCanvas } from "./components/chartSymbolCanvas";
+import { chartYarnColorCanvas } from "./components/chartYarnColorCanvas";
 import { gridCanvas } from "./components/gridCanvas";
 import { outlineCanvas } from "./components/outlineCanvas";
 
 import { addKeypressListeners } from "./events/keypressEvents";
+import { wheelInteraction } from "./events/wheelInteraction";
+
+import { addPointerIcon } from "./events/addPointerIcon";
+
 import { chartPointerInteraction } from "./events/chartPointerInteraction";
+import { colorSequencePointerInteraction } from "./events/colorSequencePointerInteraction";
+
 import { chartTouchInteraction } from "./events/chartTouchInteraction";
+import { colorSequenceTouchInteraction } from "./events/colorSequenceTouchInteraction";
 
 import { closeModals } from "./events/closeModals";
-import { trackPointer } from "./events/trackPointer";
-import { trackTouch } from "./events/trackTouch";
-import { addPointerIcon } from "./events/addPointerIcon";
 
 import { loadSymbol } from "./actions/importers";
 
@@ -34,25 +39,26 @@ function r() {
 
 function initKeyboard() {
   addKeypressListeners();
-  trackPointer({ target: document.getElementById("outline") });
   addPointerIcon(
     document.getElementById("pointer"),
-    document.getElementById("desktop")
+    document.getElementById("outline")
   );
-  chartPointerInteraction({
-    target: document.getElementById("outline"),
-    desktop: document.getElementById("desktop"),
-  });
+  chartPointerInteraction(document.getElementById("outline"));
+  wheelInteraction(document.getElementById("desktop"));
+  colorSequencePointerInteraction(
+    document.getElementById("yarn-sequence-canvas"),
+    document.getElementById("color-dragger")
+  );
   closeModals();
 }
 
 function initTouch() {
   document.body.style.setProperty("--font-size", "1.2rem");
-  trackTouch({ target: document.getElementById("outline") });
-  chartTouchInteraction({
-    target: document.getElementById("outline"),
-    desktop: document.getElementById("desktop"),
-  });
+  chartTouchInteraction(document.getElementById("outline"));
+  colorSequenceTouchInteraction(
+    document.getElementById("yarn-sequence-canvas"),
+    document.getElementById("color-dragger")
+  );
   closeModals();
 }
 
@@ -99,8 +105,14 @@ function init() {
   isMobile() ? initTouch() : initKeyboard();
 
   StateMonitor.register([
-    yarnCanvas({ canvas: document.getElementById("yarn") }),
-    chartCanvas({ canvas: document.getElementById("chart") }),
+    yarnSequenceCanvas({
+      canvas: document.getElementById("yarn-sequence-canvas"),
+    }),
+    chartSymbolCanvas({ canvas: document.getElementById("chart") }),
+
+    chartYarnColorCanvas({
+      canvas: document.getElementById("yarn-color-canvas"),
+    }),
     gridCanvas({ canvas: document.getElementById("grid") }),
     outlineCanvas({ canvas: document.getElementById("outline") }),
   ]);

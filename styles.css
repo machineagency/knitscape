@@ -108,13 +108,6 @@ EDIT PANE
 }
 
 #desktop-container {
-  /* flex: 1;
-  display: grid;
-  grid-template-rows: min-content 1fr;
-  position: relative;
-  cursor: none;
-  z-index: 0;
-  box-shadow: inset 0 0 6px 0px rgba(0, 0, 0, 0.5); */
   flex: 1;
   display: flex;
   overflow: hidden;
@@ -123,7 +116,6 @@ EDIT PANE
 
 #desktop {
   box-shadow: inset 0 0 6px 0px rgba(0, 0, 0, 0.5);
-
   display: flex;
   overflow: hidden;
   flex: 1;
@@ -139,12 +131,25 @@ canvas {
   outline: 1px solid black;
 }
 
+#chart {
+  position: relative;
+}
+
+/* All the canvasas that should be overlayed in the main chart view */
 #outline,
+#yarn-color-canvas,
 #grid {
   position: absolute;
   left: 0;
   top: 0;
+  cursor: none;
 }
+
+/**********************************
+
+YARN SEQUENCE
+
+**********************************/
 
 #yarn-sequence {
   position: absolute;
@@ -155,15 +160,11 @@ canvas {
 }
 
 #yarn-sequence > button {
-  /* width: auto; */
   width: 100%;
   position: absolute;
   bottom: 100%;
   cursor: grab;
   border-radius: 8px 8px 0 0;
-  /* background-color: var(--base4);
-  border: 0;
-  outline: 1px solid black; */
   color: var(--text-inactive);
   overflow: hidden;
   padding: 0;
@@ -195,7 +196,6 @@ TOOL PICKER
 #tool-picker > button {
   width: 3rem;
   height: 3rem;
-  cursor: none;
 }
 
 #tool-picker .current {
@@ -456,4 +456,18 @@ BOTTOM TOOLBAR
 .gutter.gutter-vertical {
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=");
   cursor: row-resize;
+}
+
+/**********************************
+
+RESIZE DRAGGER
+
+**********************************/
+
+.grabbing {
+  cursor: grabbing !important;
+}
+
+.grab {
+  cursor: grab;
 }

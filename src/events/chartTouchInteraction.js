@@ -1,6 +1,8 @@
 import { GLOBAL_STATE, dispatch } from "../state";
+import { posAtCoords } from "../utils";
+
 import { paintTools } from "../actions/paintTools";
-import { otherTools } from "../actions/otherTools";
+import { canvasTools } from "../actions/canvasTools";
 
 function chartInteraction(target, tool) {
   // tool onMove is not called unless pointer moves into another cell in the chart
@@ -49,17 +51,38 @@ function canvasInteraction(e, target, tool) {
   target.addEventListener("touchend", end);
 }
 
-export function chartTouchInteraction({ target, desktop }) {
+export function chartTouchInteraction(target) {
   target.addEventListener("touchstart", (e) => {
+    const { x, y } = posAtCoords(e.touches[0], target);
+
+    if (GLOBAL_STATE.pos.x != x || GLOBAL_STATE.pos.y != y) {
+      dispatch({ pos: { x, y } });
+    }
+
     const activeTool = GLOBAL_STATE.activeTool;
     e.preventDefault();
 
     if (activeTool in paintTools)
       chartInteraction(target, paintTools[activeTool]);
-    else if (activeTool in otherTools)
-      canvasInteraction(e, target, otherTools[activeTool]);
+    else if (activeTool in canvasTools)
+      canvasInteraction(e, target, canvasTools[activeTool]);
     else {
       console.console.warn(`Uh oh, ${activeTool} is not a tool`);
     }
+  });
+
+  target.addEventListener("touchmove", (e) => {
+    const { x, y } = posAtCoords(e.touches[0], target);
+    if (GLOBAL_STATE.pos.x != x || GLOBAL_STATE.pos.y != y) {
+      dispatch({ pos: { x, y } });
+    }
+  });
+
+  target.addEventListener("touchend", (e) => {
+    dispatch({ pos: { x: -1, y: -1 } });
+  });
+
+  target.addEventListener("touchcancel", (e) => {
+    dispatch({ pos: { x: -1, y: -1 } });
   });
 }

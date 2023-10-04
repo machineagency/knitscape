@@ -11,4 +11,4 @@ function pan(startPos) {
   return onMove;
 }
 
-export const otherTools = { pan };
+export const canvasTools = { pan };

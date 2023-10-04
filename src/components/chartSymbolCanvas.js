@@ -8,7 +8,7 @@ export function imagePalette(paletteEntry, ctx, scale) {
   ctx.drawImage(paletteEntry.image, 0, 0, scale, scale);
 }
 
-export function chartCanvas({ canvas }) {
+export function chartSymbolCanvas({ canvas }) {
   return ({ state }) => {
     let { scale, symbolPalette, symbolMap, chart } = state;
 

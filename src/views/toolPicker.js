@@ -7,7 +7,8 @@ export function toolPicker() {
     ${Object.entries(tools).map(
       ([toolId, toolData]) => html`<button
         class="btn icon ${GLOBAL_STATE.activeTool == toolId ? "current" : ""}"
-        @click=${() => dispatch({ activeTool: toolId })}>
+        @click=${() =>
+          dispatch({ activeTool: toolId, cursorIcon: tools[toolId].icon })}>
         <i class=${toolData.icon}></i>
       </button>`
     )}
