@@ -198,6 +198,16 @@ function nextCN(i, j, legNode, currentStitchRow, DS) {
   };
 }
 
+function calcLayer(nodes, source, target, linkType) {
+  if (nodes[source].st == "K" && nodes[target].st == "K") {
+    if (linkType == "LHLL" || linkType == "FLFH") return "front";
+    else return "back";
+  } else if (nodes[source].st == "P" && nodes[target].st == "P") {
+    if (linkType == "LHLL" || linkType == "FLFH") return "back";
+    else return "front";
+  } else return "mid";
+}
+
 export class YarnModel {
   // ok. start by making a grid of nodes. these are all of the contact neighborhoods.
   constructor(cns) {
@@ -232,12 +242,14 @@ export class YarnModel {
     this.yarnPath.forEach(([i, j, stitchRow, headOrLeg], index) => {
       if (index == 0) return;
       let target = j * this.width + i;
+      let linkType = last + headOrLeg;
       links.push({
         source: source,
         target: target,
+        linkType,
         row: stitchRow,
-        linkType: last + headOrLeg,
         index: index - 1,
+        layer: calcLayer(this.contactNodes, source, target, linkType),
       });
       source = target;
       last = headOrLeg;

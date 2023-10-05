@@ -8,7 +8,6 @@ import {
 
 let GLOBAL_STATE = {
   editingPalette: false,
-
   transforming: false,
 
   activeTool: "brush",
@@ -37,11 +36,21 @@ let GLOBAL_STATE = {
 
   repeats: [
     {
-      bitmap: new Bimp(2, 2, [0, 0, 2, 0]),
+      bitmap: new Bimp(2, 2, [0, 2, 2, 0]),
       pos: [0, 0],
       xRepeats: 1,
       yRepeats: 1,
     },
+    // {
+    //   bitmap: new Bimp(
+    //     10,
+    //     2,
+    //     [0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0]
+    //   ),
+    //   pos: [0, 0],
+    //   xRepeats: 1,
+    //   yRepeats: 1,
+    // },
   ],
 
   repeatLibrary: [
@@ -59,11 +68,13 @@ let GLOBAL_STATE = {
     },
   ], // Library of motifs which can be used as repeats
 
-  chart: Bimp.empty(40, 80, 0),
+  chart: Bimp.empty(5, 5, 0),
+  // chart: Bimp.empty(80, 80, 0),
 
   reverseScroll: false,
   grid: true,
   symbolLineWidth: 3,
+  flipped: false,
 
   // Various UI pane states
   showFileMenu: false,

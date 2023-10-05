@@ -1,25 +1,38 @@
 import { simulate } from "../simulation/yarnSimulation";
 import { Bimp } from "../lib/Bimp";
-import { GLOBAL_STATE } from "../state";
+import { GLOBAL_STATE, dispatch } from "../state";
 import { html } from "lit-html";
 
-let clear, relax, flip, timeout;
+let stopSim, relax, flip;
 
 export function simulationView() {
   return html`<div id="sim-pane">
     <div id="sim-controls">
       <button @click=${relax} class="btn solid">relax</button>
-      <button @click=${flip} class="btn solid">flip</button>
+      <button
+        @click=${() => dispatch({ flipped: !GLOBAL_STATE.flipped })}
+        class="btn solid">
+        flip
+      </button>
+      <button
+        @click=${() => dispatch({ simPan: { x: 0, y: 0 }, simScale: 1 })}
+        class="btn solid">
+        center
+      </button>
     </div>
     <div id="sim-container">
-      <canvas id="back"></canvas>
-      <canvas id="mid"></canvas>
-      <canvas id="front"></canvas>
-      <!-- <svg
-        id="simulation"
+      <div
         style="transform: translate(${GLOBAL_STATE.simPan.x}px, ${GLOBAL_STATE
-        .simPan
-        .y}px) scale(${GLOBAL_STATE.simScale},${GLOBAL_STATE.simScale});"></svg> -->
+          .simPan.y}px)"
+        class=${GLOBAL_STATE.flipped ? "mirrored" : ""}>
+        <canvas
+          id="back"
+          class=${GLOBAL_STATE.flipped ? "top" : "bottom"}></canvas>
+        <canvas id="mid" class="mid"></canvas>
+        <canvas
+          id="front"
+          class=${GLOBAL_STATE.flipped ? "bottom" : "top"}></canvas>
+      </div>
     </div>
   </div>`;
 }
@@ -34,30 +47,34 @@ const debounce = (callback, wait) => {
   };
 };
 
+export function stopSimulation() {
+  if (stopSim) stopSim();
+}
+
 export function runSimulation() {
   return ({ state }) => {
     let { scale, chart } = state;
     let queueSim = false;
 
     function run() {
-      console.log("RUNNING SIMULATION");
       queueSim = false;
 
-      if (clear) clear();
+      if (stopSim) stopSim();
 
-      ({ clear, relax, flip } = simulate(
+      ({ stopSim, relax, flip } = simulate(
         Bimp.fromTile(
-          chart.width,
-          chart.height,
-          GLOBAL_STATE.repeats[0].bitmap
+          GLOBAL_STATE.chart.width,
+          GLOBAL_STATE.chart.height,
+          GLOBAL_STATE.repeats[0].bitmap.vFlip()
         ),
-        GLOBAL_STATE.yarnSequence.vFlip().pixels,
+        GLOBAL_STATE.yarnSequence.pixels,
         [0],
-        GLOBAL_STATE.yarnPalette
+        GLOBAL_STATE.yarnPalette,
+        GLOBAL_STATE.simScale
       ));
     }
 
-    const debouncedRun = debounce(run, 70);
+    const debouncedRun = debounce(run, 30);
 
     run();
 
@@ -69,13 +86,11 @@ export function runSimulation() {
 
         if (found) {
           debouncedRun();
-
-          // queueSim = true;
         }
 
-        // if (changes.includes("transforming") && !state.transforming) {
-        //   debouncedRun();
-        // }
+        if (changes.includes("simScale")) {
+          run();
+        }
       },
     };
   };
