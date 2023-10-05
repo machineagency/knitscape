@@ -1,92 +1,83 @@
 import { GLOBAL_STATE, dispatch } from "../state";
 import { colorSequencePosAtCoords } from "../utils";
 
-import { colorSequenceTools } from "../actions/colorSequenceTools";
+function brushColor(e, colorCanvas) {
+  let pos = colorSequencePosAtCoords(e.touches[0], colorCanvas);
+  dispatch({
+    yarnSequence: GLOBAL_STATE.yarnSequence.brush(
+      { x: pos.x, y: pos.y },
+      GLOBAL_STATE.activeYarn
+    ),
+  });
 
-function chartInteraction(target, tool) {
-  // tool onMove is not called unless pointer moves into another cell in the chart
-
-  let pos = GLOBAL_STATE.colorSequencePos;
-
-  let onMove = tool(pos, GLOBAL_STATE, dispatch);
-
-  if (!onMove) return;
-
-  function end() {
-    target.removeEventListener("touchmove", move);
-    target.removeEventListener("touchcancel", end);
-    target.removeEventListener("touchend", end);
-  }
-
-  function move() {
-    let newPos = GLOBAL_STATE.colorSequencePos;
+  function move(e) {
+    let newPos = colorSequencePosAtCoords(e.touches[0], colorCanvas);
     if (newPos.x == pos.x && newPos.y == pos.y) return;
-    onMove(GLOBAL_STATE.colorSequencePos, GLOBAL_STATE);
+
+    const updated = GLOBAL_STATE.yarnSequence.line(
+      { x: pos.x, y: pos.y },
+      { x: newPos.x, y: newPos.y },
+      GLOBAL_STATE.activeYarn
+    );
+
+    dispatch({ yarnSequence: updated });
+
     pos = newPos;
   }
-  target.addEventListener("touchmove", move);
-  target.addEventListener("touchcancel", end);
-  target.addEventListener("touchend", end);
+
+  function end() {
+    dispatch({ transforming: false });
+
+    colorCanvas.removeEventListener("touchmove", move);
+    colorCanvas.removeEventListener("touchcancel", end);
+    colorCanvas.removeEventListener("touchend", end);
+  }
+
+  colorCanvas.addEventListener("touchmove", move);
+  colorCanvas.addEventListener("touchcancel", end);
+  colorCanvas.addEventListener("touchend", end);
+}
+
+function resizeColorCanvas(e) {
+  const startSequence = GLOBAL_STATE.yarnSequence;
+  const start = e.touches[0].clientY;
+
+  const end = () => {
+    dispatch({ transforming: false });
+
+    window.removeEventListener("touchmove", onmove);
+    window.removeEventListener("touchend", end);
+    window.removeEventListener("touchcancel", end);
+  };
+
+  const onmove = (e) => {
+    let newSize =
+      startSequence.height +
+      Math.floor(
+        ((start - e.touches[0].clientY) / GLOBAL_STATE.scale) * devicePixelRatio
+      );
+    if (newSize < 1 || newSize == startSequence.height) return;
+
+    dispatch({
+      yarnSequence: startSequence.resize(1, newSize, GLOBAL_STATE.activeYarn),
+    });
+  };
+
+  window.addEventListener("touchmove", onmove);
+  window.addEventListener("touchend", end);
+  window.addEventListener("touchcancel", end);
 }
 
 export function colorSequenceTouchInteraction(canvas, resizeDragger) {
   canvas.addEventListener("touchstart", (e) => {
-    const { x, y } = colorSequencePosAtCoords(e.touches[0], canvas);
+    dispatch({ transforming: true });
 
-    if (
-      GLOBAL_STATE.colorSequencePos.x != x ||
-      GLOBAL_STATE.colorSequencePos.y != y
-    ) {
-      dispatch({ colorSequencePos: { x, y } });
-    }
-
-    e.preventDefault();
-    chartInteraction(canvas, colorSequenceTools["brush"]);
-  });
-
-  canvas.addEventListener("touchmove", (e) => {
-    const { x, y } = colorSequencePosAtCoords(e.touches[0], canvas);
-    if (
-      GLOBAL_STATE.colorSequencePos.x != x ||
-      GLOBAL_STATE.colorSequencePos.y != y
-    ) {
-      dispatch({ colorSequencePos: { x, y } });
-    }
-  });
-
-  canvas.addEventListener("touchend", (e) => {
-    dispatch({ colorSequencePos: { x: -1, y: -1 } });
-  });
-
-  canvas.addEventListener("touchcancel", (e) => {
-    dispatch({ colorSequencePos: { x: -1, y: -1 } });
+    brushColor(e, canvas);
   });
 
   resizeDragger.addEventListener("touchstart", (e) => {
-    const startSequence = GLOBAL_STATE.yarnSequence;
-    const start = e.touches[0].clientY;
+    dispatch({ transforming: true });
 
-    const end = () => {
-      document.body.classList.remove("grabbing");
-
-      window.removeEventListener("touchmove", onmove);
-      window.removeEventListener("touchend", end);
-      window.removeEventListener("touchcancel", end);
-    };
-
-    const onmove = (e) => {
-      let newSize =
-        startSequence.height +
-        Math.floor((start - e.touches[0].clientY) / GLOBAL_STATE.scale);
-      if (newSize < 1 || newSize == startSequence.height) return;
-
-      dispatch({
-        yarnSequence: startSequence.resize(1, newSize),
-      });
-    };
-
-    window.addEventListener("touchmove", onmove);
-    window.addEventListener("touchend", end);
-    window.addEventListener("touchcancel", end);
+    resizeColorCanvas(e);
   });
 }

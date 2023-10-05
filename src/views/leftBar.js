@@ -1,7 +1,7 @@
 import { html } from "lit-html";
 import { GLOBAL_STATE, dispatch } from "../state";
 import { LAYERS } from "../constants";
-import { getRandomColor } from "../utils";
+import { getRandomColor, shuffle } from "../utils";
 import jscolor from "@eastdesire/jscolor";
 import { Bimp } from "../lib/Bimp";
 
@@ -97,6 +97,23 @@ function editColor(index) {
 function yarnPicker() {
   return html`<div id="yarn-picker">
     <h3>Yarns</h3>
+    <div>
+      <button
+        class="btn icon ${GLOBAL_STATE.editingPalette ? "selected" : ""}"
+        @click=${() =>
+          dispatch({ editingPalette: !GLOBAL_STATE.editingPalette })}>
+        <i class="fa-solid fa-pen"></i>
+      </button>
+      <button
+        class="btn icon"
+        @click=${() => {
+          let newPalette = [...GLOBAL_STATE.yarnPalette];
+          newPalette.push(getRandomColor());
+          dispatch({ yarnPalette: newPalette });
+        }}>
+        <i class="fa-solid fa-plus"></i>
+      </button>
+    </div>
     ${GLOBAL_STATE.yarnPalette.map(
       (hexa, index) =>
         html`<button
@@ -127,21 +144,28 @@ function yarnPicker() {
           </div>
         </button>`
     )}
+
     <div>
       <button
-        class="btn icon ${GLOBAL_STATE.editingPalette ? "selected" : ""}"
-        @click=${() =>
-          dispatch({ editingPalette: !GLOBAL_STATE.editingPalette })}>
-        <i class="fa-solid fa-pen"></i>
+        class="btn icon"
+        @click=${() => {
+          dispatch({
+            yarnPalette: [...shuffle(GLOBAL_STATE.yarnPalette)],
+          });
+        }}>
+        <i class="fa-solid fa-arrows-rotate"></i>
       </button>
       <button
         class="btn icon"
         @click=${() => {
-          let newPalette = [...GLOBAL_STATE.yarnPalette];
-          newPalette.push(getRandomColor());
-          dispatch({ yarnPalette: newPalette });
+          dispatch({
+            yarnPalette: Array.from(
+              Array(GLOBAL_STATE.yarnPalette.length),
+              () => getRandomColor()
+            ),
+          });
         }}>
-        <i class="fa-solid fa-plus"></i>
+        <i class="fa-solid fa-dice"></i>
       </button>
     </div>
   </div>`;

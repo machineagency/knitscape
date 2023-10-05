@@ -1,84 +1,85 @@
-import { colorSequenceTools } from "../actions/colorSequenceTools";
 import { GLOBAL_STATE, dispatch } from "../state";
 import { colorSequencePosAtCoords } from "../utils";
 
-function chartInteraction(target, tool) {
-  // tool onMove is not called unless pointer moves into another cell in the chart
-  let pos = GLOBAL_STATE.colorSequencePos;
+function brushColor(e, colorCanvas) {
+  let pos = colorSequencePosAtCoords(e, colorCanvas);
+  dispatch({
+    yarnSequence: GLOBAL_STATE.yarnSequence.brush(
+      { x: pos.x, y: pos.y },
+      GLOBAL_STATE.activeYarn
+    ),
+  });
 
-  let onMove = tool(pos, GLOBAL_STATE, dispatch);
-  if (!onMove) return;
+  function move(e) {
+    let newPos = colorSequencePosAtCoords(e, colorCanvas);
+    if (newPos.x == pos.x && newPos.y == pos.y) return;
 
-  function move(moveEvent) {
-    if (moveEvent.buttons == 0) {
-      end();
-    } else {
-      let newPos = GLOBAL_STATE.colorSequencePos;
-      if (newPos.x == pos.x && newPos.y == pos.y) return;
-      onMove(GLOBAL_STATE.colorSequencePos, GLOBAL_STATE);
-      pos = newPos;
-    }
+    const updated = GLOBAL_STATE.yarnSequence.line(
+      { x: pos.x, y: pos.y },
+      { x: newPos.x, y: newPos.y },
+      GLOBAL_STATE.activeYarn
+    );
+
+    dispatch({ yarnSequence: updated });
+
+    pos = newPos;
   }
 
   function end() {
-    target.removeEventListener("pointermove", move);
-    target.removeEventListener("pointerup", end);
-    target.removeEventListener("pointerleave", end);
+    dispatch({ transforming: false });
+    colorCanvas.removeEventListener("pointermove", move);
+    colorCanvas.removeEventListener("pointerup", end);
+    colorCanvas.removeEventListener("pointerleave", end);
   }
 
-  target.addEventListener("pointermove", move);
-  target.addEventListener("pointerup", end);
-  target.addEventListener("pointerleave", end);
+  colorCanvas.addEventListener("pointermove", move);
+  colorCanvas.addEventListener("pointerup", end);
+  colorCanvas.addEventListener("pointerleave", end);
 }
 
-export function colorSequencePointerInteraction(target, resizeDragger) {
-  target.addEventListener("pointerdown", (e) => {
-    chartInteraction(target, colorSequenceTools["brush"]);
-  });
+function resizeColorCanvas(e) {
+  const startSequence = GLOBAL_STATE.yarnSequence;
+  const start = e.clientY;
 
-  target.addEventListener("pointermove", (e) => {
-    const { x, y } = colorSequencePosAtCoords(e, target);
-    if (
-      GLOBAL_STATE.colorSequencePos.x != x ||
-      GLOBAL_STATE.colorSequencePos.y != y
-    ) {
-      dispatch({ colorSequencePos: { x, y } });
-    }
-  });
+  document.body.classList.add("grabbing");
+  e.target.classList.remove("grab");
 
-  target.addEventListener("pointerleave", (e) => {
-    dispatch({ colorSequencePos: { x: -1, y: -1 } });
+  function end() {
+    document.body.classList.remove("grabbing");
+    dispatch({ transforming: false });
+
+    window.removeEventListener("pointermove", move);
+    window.removeEventListener("pointerup", end);
+
+    e.target.classList.add("grab");
+  }
+
+  function move(e) {
+    let newSize =
+      startSequence.height +
+      Math.floor(((start - e.clientY) / GLOBAL_STATE.scale) * devicePixelRatio);
+
+    if (newSize < 1 || newSize == GLOBAL_STATE.yarnSequence.height) return;
+
+    dispatch({
+      yarnSequence: startSequence.resize(1, newSize, GLOBAL_STATE.activeYarn),
+    });
+  }
+
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", end);
+}
+
+export function colorSequencePointerInteraction(colorCanvas, resizeDragger) {
+  colorCanvas.addEventListener("pointerdown", (e) => {
+    dispatch({ transforming: true });
+
+    brushColor(e, colorCanvas);
   });
 
   resizeDragger.addEventListener("pointerdown", (e) => {
-    const startSequence = GLOBAL_STATE.yarnSequence;
-    const start = e.clientY;
+    dispatch({ transforming: true });
 
-    document.body.classList.add("grabbing");
-    resizeDragger.classList.remove("grab");
-
-    const end = () => {
-      document.body.classList.remove("grabbing");
-
-      window.removeEventListener("pointermove", onmove);
-      window.removeEventListener("pointerup", end);
-
-      resizeDragger.classList.add("grab");
-    };
-
-    const onmove = (e) => {
-      let newSize =
-        startSequence.height +
-        Math.floor((start - e.clientY) / GLOBAL_STATE.scale);
-
-      if (newSize < 1 || newSize == GLOBAL_STATE.yarnSequence.height) return;
-
-      dispatch({
-        yarnSequence: startSequence.resize(1, newSize),
-      });
-    };
-
-    window.addEventListener("pointermove", onmove);
-    window.addEventListener("pointerup", end);
+    resizeColorCanvas(e);
   });
 }

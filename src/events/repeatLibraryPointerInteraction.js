@@ -27,11 +27,9 @@ function pan(e, target) {
   target.addEventListener("pointerleave", end);
 }
 
-export function chartPointerInteraction(target) {
-  target.addEventListener("pointerdown", (e) => {
-    dispatch({ editingRepeat: -1 });
-
-    pan(e, target);
+export function repeatLibraryPointerInteraction(repeatLibraryContainer) {
+  repeatLibraryContainer.addEventListener("pointerdown", (e) => {
+    console.log("whee");
   });
 
   target.addEventListener("pointermove", (e) => {

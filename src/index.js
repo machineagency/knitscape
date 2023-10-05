@@ -17,22 +17,25 @@ import { drawSymbols } from "./components/drawSymbols";
 import { drawGrid } from "./components/drawGrid";
 import { drawOutline } from "./components/drawOutline";
 
+import { drawRepeatLibrary } from "./components/drawRepeatLibrary";
 import { drawRepeats } from "./components/drawRepeats";
 import { resizeCanvases } from "./components/resizeCanvases";
+import { runSimulation } from "./components/runSimulation";
 
 import { addKeypressListeners } from "./events/keypressEvents";
 import { wheelInteraction } from "./events/wheelInteraction";
 
 import { drawSymbolPicker } from "./components/drawSymbolPicker";
-// import { addPointerIcon } from "./events/addPointerIcon";
 
 import { chartPointerInteraction } from "./events/chartPointerInteraction";
 import { colorSequencePointerInteraction } from "./events/colorSequencePointerInteraction";
 import { repeatPointerInteraction } from "./events/repeatPointerInteraction";
+import { simulationPointerInteraction } from "./events/simulationPointerInteraction";
 
 import { chartTouchInteraction } from "./events/chartTouchInteraction";
 import { colorSequenceTouchInteraction } from "./events/colorSequenceTouchInteraction";
 import { repeatTouchInteraction } from "./events/repeatTouchInteraction";
+import { simulationTouchInteraction } from "./events/simulationTouchInteraction";
 
 import { closeModals } from "./events/closeModals";
 
@@ -45,28 +48,27 @@ function r() {
 
 function initKeyboard() {
   addKeypressListeners();
-  // addPointerIcon(
-  //   document.getElementById("pointer"),
-  //   document.getElementById("chart")
-  // );
+
   repeatPointerInteraction(document.getElementById("repeat-container"));
-  chartPointerInteraction(document.getElementById("chart"));
+  chartPointerInteraction(document.getElementById("symbol-canvas"));
   wheelInteraction(document.getElementById("desktop"));
   colorSequencePointerInteraction(
     document.getElementById("yarn-sequence-canvas"),
     document.getElementById("color-dragger")
   );
+  simulationPointerInteraction(document.getElementById("sim-container"));
   closeModals();
 }
 
 function initTouch() {
   document.body.style.setProperty("--font-size", "1.2rem");
-  chartTouchInteraction(document.getElementById("chart"));
+  chartTouchInteraction(document.getElementById("symbol-canvas"));
   repeatTouchInteraction(document.getElementById("repeat-container"));
   colorSequenceTouchInteraction(
     document.getElementById("yarn-sequence-canvas"),
     document.getElementById("color-dragger")
   );
+  simulationTouchInteraction(document.getElementById("sim-container"));
   closeModals();
 }
 
@@ -78,13 +80,13 @@ function calcSplit() {
 
   return portrait
     ? Split(["#chart-pane", "#sim-pane"], {
-        sizes: [90, 10],
+        sizes: [60, 40],
         minSize: 100,
         gutterSize: 11,
         direction: "vertical",
       })
     : Split(["#chart-pane", "#sim-pane"], {
-        sizes: [90, 10],
+        sizes: [60, 40],
         minSize: 100,
         gutterSize: 11,
       });
@@ -108,7 +110,7 @@ function init() {
 
   isMobile() ? initTouch() : initKeyboard();
 
-  const symbolCanvas = document.getElementById("chart");
+  const symbolCanvas = document.getElementById("symbol-canvas");
   const gridCanvas = document.getElementById("grid");
   const outlineCanvas = document.getElementById("outline");
   const yarnColorCanvas = document.getElementById("yarn-color-canvas");
@@ -123,7 +125,9 @@ function init() {
     drawGrid(gridCanvas),
     drawOutline(outlineCanvas),
     drawRepeats(),
+    drawRepeatLibrary(),
     drawSymbolPicker(),
+    runSimulation(),
   ]);
 
   measureWindow();

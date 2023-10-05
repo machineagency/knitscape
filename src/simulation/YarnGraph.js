@@ -8,12 +8,6 @@ import * as d3 from "d3";
 
 const LINK_WIDTH = 7;
 
-// const test = new Bimp(4, 3, [0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0]);
-
-// const test = new Bimp(4, 3, [0, 0, 0, 0, 0, 2, 2, 0, 0, 2, 0, 0]);
-
-// const test = new Bimp(4, 4, [0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 2, 0, 0]);
-
 const test = new Bimp(
   4,
   5,

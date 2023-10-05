@@ -16,6 +16,7 @@ function getRepeatIndex(elem) {
 function editRepeat(repeatIndex, repeatCanvas, tool) {
   // tool onMove is not called unless pointer moves into another cell in the chart
   let pos = GLOBAL_STATE.repeatPos;
+  dispatch({ transforming: true });
 
   let onMove = tool(repeatIndex, pos);
   if (!onMove) return;
@@ -32,6 +33,8 @@ function editRepeat(repeatIndex, repeatCanvas, tool) {
   }
 
   function end() {
+    dispatch({ transforming: false });
+
     repeatCanvas.removeEventListener("pointermove", move);
     repeatCanvas.removeEventListener("pointerup", end);
     repeatCanvas.removeEventListener("pointerleave", end);
@@ -46,11 +49,14 @@ function resizeRepeat(e, repeatIndex) {
   const startRepeat = GLOBAL_STATE.repeats[repeatIndex].bitmap;
   const startPos = [e.clientX, e.clientY];
   const resizeDragger = e.target;
+  dispatch({ transforming: true });
 
   document.body.classList.add("grabbing");
   resizeDragger.classList.remove("grab");
 
   const end = () => {
+    dispatch({ transforming: false });
+
     document.body.classList.remove("grabbing");
 
     window.removeEventListener("pointermove", onmove);
@@ -97,11 +103,14 @@ function moveRepeat(e, repeatIndex) {
   const startRepeatPos = [...GLOBAL_STATE.repeats[repeatIndex].pos];
   const startPos = [e.clientX, e.clientY];
   const moveDragger = e.target;
+  dispatch({ transforming: true });
 
   document.body.classList.add("grabbing");
   moveDragger.classList.remove("grab");
 
   const end = () => {
+    dispatch({ transforming: false });
+
     document.body.classList.remove("grabbing");
 
     window.removeEventListener("pointermove", onmove);
@@ -159,6 +168,7 @@ export function repeatPointerInteraction(repeatContainer) {
 
     if (classList.contains("resize-repeat")) {
       // interacting with dragger
+
       resizeRepeat(e, repeatIndex);
     } else if (classList.contains("move-repeat")) {
       // interacting with dragger

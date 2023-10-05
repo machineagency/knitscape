@@ -25,15 +25,18 @@ const HALF_STITCH_WIDTH = 12;
 const SPREAD = 0.9;
 const LINK_STRENGTH = 0.15;
 
-const YARN_WIDTH = 6;
+const YARN_WIDTH = 5;
 
 // The target link distance when the simulation is run
 const H_SHRINK = 1;
 const V_DIST = 8;
 
+const dpi = devicePixelRatio;
+
 export function simulate(pattern, yarnChanges, needles, color) {
   let rightSide = true;
   let relaxed = false;
+  performance.mark("begin-sim");
 
   let needleArr = Array.from(
     Array(pattern.width),
@@ -48,15 +51,59 @@ export function simulate(pattern, yarnChanges, needles, color) {
   const pat = new Pattern(pattern.pad(X_PADDING, Y_PADDING, 0), needleArr);
 
   const testModel = new ProcessModel(pat);
+
   const yarnGraph = new YarnModel(testModel.cn);
 
-  const svg = d3.select("#simulation");
-  svg.attr(
-    "viewBox",
-    `-10 -10 ${HALF_STITCH_WIDTH * (needleArr.length + 1) * 2} ${
-      STITCH_HEIGHT * (pat.height + 2)
-    }`
-  );
+  ///////////////////////
+  // INIT CANVASES
+  ///////////////////////
+
+  const bbox = document.getElementById("sim-container").getBoundingClientRect();
+
+  const width = bbox.width;
+  const height = bbox.height;
+
+  const backCanvas = document.getElementById("back");
+  const midCanvas = document.getElementById("mid");
+  const frontCanvas = document.getElementById("front");
+
+  backCanvas.width = width;
+  backCanvas.height = height;
+
+  midCanvas.width = width;
+  midCanvas.height = height;
+
+  frontCanvas.width = width;
+  frontCanvas.height = height;
+
+  const backCtx = backCanvas.getContext("2d");
+  const midCtx = midCanvas.getContext("2d");
+  const frontCtx = frontCanvas.getContext("2d");
+
+  // backCtx.scale(dpi, dpi);
+  // midCtx.scale(dpi, dpi);
+  // frontCtx.scale(dpi, dpi);
+  backCtx.filter = "brightness(0.7)";
+
+  backCtx.lineWidth = YARN_WIDTH;
+  midCtx.lineWidth = YARN_WIDTH;
+  frontCtx.lineWidth = YARN_WIDTH;
+
+  // backCtx.lineCap = "round";
+  // midCtx.lineCap = "round";
+  // frontCtx.lineCap = "round";
+
+  // const svg = d3.select("#simulation");
+  // svg.attr(
+  //   "viewBox",
+  //   `-10 -10 ${HALF_STITCH_WIDTH * (needleArr.length + 1) * 2} ${
+  //     STITCH_HEIGHT * (pat.height + 2)
+  //   }`
+  // );
+
+  ///////////////////////
+  // YARNS
+  ///////////////////////
 
   const yarns = yarnChanges.toReversed();
 
@@ -109,12 +156,14 @@ export function simulate(pattern, yarnChanges, needles, color) {
   // Data for simulation
 
   const nodes = layoutNodes(yarnGraph);
+
   const yarnPath = yarnGraph.makeNice();
+
   const yarnPathLinks = yarnGraph.yarnPathToLinks();
 
-  const yarnsBehind = svg.append("g");
-  const yarnsMid = svg.append("g");
-  const yarnsFront = svg.append("g");
+  // const yarnsBehind = svg.append("g");
+  // const yarnsMid = svg.append("g");
+  // const yarnsFront = svg.append("g");
 
   function calcLayer(link) {
     if (nodes[link.source].st == "K" && nodes[link.target].st == "K") {
@@ -125,40 +174,6 @@ export function simulate(pattern, yarnChanges, needles, color) {
       else return "front";
     } else return "mid";
   }
-
-  const backYarns = yarnsBehind
-    .attr("stroke-width", YARN_WIDTH)
-    .attr("stroke-linecap", "round")
-    .selectAll()
-    .data(yarnPathLinks)
-    .join("path")
-    .filter((d) => calcLayer(d) == "back")
-    .attr("data-link", (d) => d.linkType)
-    .attr("fill", "none")
-    .attr("stroke", (d) => yarnColor(d.row));
-
-  const midYarns = yarnsMid
-    .attr("filter", "brightness(0.9)")
-    .attr("stroke-width", YARN_WIDTH)
-    .attr("stroke-linecap", "round")
-    .selectAll()
-    .data(yarnPathLinks)
-    .join("path")
-    .filter((d) => calcLayer(d) == "mid")
-    .attr("data-link", (d) => d.linkType)
-    .attr("fill", "none")
-    .attr("stroke", (d) => yarnColor(d.row));
-
-  const frontYarns = yarnsFront
-    .attr("stroke-width", YARN_WIDTH)
-    .attr("stroke-linecap", "round")
-    .selectAll()
-    .data(yarnPathLinks)
-    .join("path")
-    .filter((d) => calcLayer(d) == "front")
-    .attr("data-link", (d) => d.linkType)
-    .attr("fill", "none")
-    .attr("stroke", (d) => yarnColor(d.row));
 
   function unitNormal(prev, next, flip) {
     if (prev.index === next.index) return [0, 0];
@@ -240,18 +255,86 @@ export function simulate(pattern, yarnChanges, needles, color) {
     return openYarnCurve(linkData);
   }
 
-  function draw() {
-    updateNormals();
-    frontYarns.attr("d", yarnCurve);
-    midYarns.attr("d", yarnCurve);
-    backYarns.attr("d", yarnCurve);
+  performance.mark("setup");
+
+  yarnPathLinks.forEach((link) => {
+    link.layer = calcLayer(link);
+  });
+
+  // const backYarns = yarnsBehind
+  //   .attr("stroke-width", YARN_WIDTH)
+  //   .attr("stroke-linecap", "round")
+  //   .selectAll()
+  //   .data(yarnPathLinks)
+  //   .join("path")
+  //   .filter((d) => calcLayer(d) == "back")
+  //   .attr("data-link", (d) => d.linkType)
+  //   .attr("fill", "none")
+  //   .attr("stroke", (d) => yarnColor(d.row));
+
+  // performance.mark("back-yarns");
+
+  // const midYarns = yarnsMid
+  //   .attr("filter", "brightness(0.9)")
+  //   .attr("stroke-width", YARN_WIDTH)
+  //   .attr("stroke-linecap", "round")
+  //   .selectAll()
+  //   .data(yarnPathLinks)
+  //   .join("path")
+  //   .filter((d) => calcLayer(d) == "mid")
+  //   .attr("data-link", (d) => d.linkType)
+  //   .attr("fill", "none")
+  //   .attr("stroke", (d) => yarnColor(d.row));
+
+  // performance.mark("mid-yarns");
+
+  // const frontYarns = yarnsFront
+  //   .attr("stroke-width", YARN_WIDTH)
+  //   .attr("stroke-linecap", "round")
+  //   .selectAll()
+  //   .data(yarnPathLinks)
+  //   .join("path")
+  //   .filter((d) => calcLayer(d) == "front")
+  //   .attr("data-link", (d) => d.linkType)
+  //   .attr("fill", "none")
+  //   .attr("stroke", (d) => yarnColor(d.row));
+
+  // performance.mark("front-yarns");
+
+  function drawLink(d) {
+    context.moveTo(d.source.x, d.source.y);
+    context.lineTo(d.target.x, d.target.y);
   }
 
-  draw();
-  viewRightSide();
+  function draw() {
+    updateNormals();
+
+    frontCtx.clearRect(0, 0, width, height);
+    midCtx.clearRect(0, 0, width, height);
+    backCtx.clearRect(0, 0, width, height);
+
+    yarnPathLinks.forEach((link) => {
+      const d = yarnCurve(link);
+
+      if (link.layer == "back") {
+        backCtx.strokeStyle = yarnColor(link.row);
+        backCtx.stroke(new Path2D(d));
+      } else if (link.layer == "mid") {
+        midCtx.strokeStyle = yarnColor(link.row);
+        midCtx.stroke(new Path2D(d));
+      } else if (link.layer == "front") {
+        frontCtx.strokeStyle = yarnColor(link.row);
+        frontCtx.stroke(new Path2D(d));
+      }
+    });
+
+    // frontYarns.attr("d", yarnCurve);
+    // midYarns.attr("d", yarnCurve);
+    // backYarns.attr("d", yarnCurve);
+  }
 
   function clear() {
-    svg.selectAll("*").remove();
+    // svg.selectAll("*").remove();
   }
 
   function relax() {
@@ -273,20 +356,19 @@ export function simulate(pattern, yarnChanges, needles, color) {
   }
 
   function viewRightSide() {
-    yarnsMid.raise();
-    yarnsFront.raise();
-    yarnsBehind.attr("filter", "brightness(0.7)");
-    yarnsFront.attr("filter", "none");
-    svg.attr("transform", "scale(-1,1)");
+    // yarnsMid.raise();
+    // yarnsFront.raise();
+    // yarnsBehind.attr("filter", "brightness(0.7)");
+    // yarnsFront.attr("filter", "none");
+    // svg.attr("transform", "scale(-1,1)");
   }
 
   function viewWrongSide() {
-    yarnsMid.raise();
-    yarnsBehind.raise();
-    yarnsFront.attr("filter", "brightness(0.7)");
-    yarnsBehind.attr("filter", "none");
-
-    svg.attr("transform", null);
+    //   yarnsMid.raise();
+    //   yarnsBehind.raise();
+    //   yarnsFront.attr("filter", "brightness(0.7)");
+    //   yarnsBehind.attr("filter", "none");
+    //   svg.attr("transform", null);
   }
 
   function flip() {
@@ -294,5 +376,19 @@ export function simulate(pattern, yarnChanges, needles, color) {
     rightSide = !rightSide;
     rightSide ? viewRightSide() : viewWrongSide();
   }
+
+  draw();
+  performance.mark("draw");
+
+  viewRightSide();
+
+  // performance.measure("simulation", "begin-sim", "setup");
+
+  // performance.measure("simulation", "setup", "draw");
+
+  // performance
+  //   .getEntriesByName("simulation")
+  //   .forEach((entry) => console.log(entry.duration));
+
   return { clear, relax, flip };
 }

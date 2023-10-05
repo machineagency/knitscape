@@ -7,12 +7,14 @@ import { fileModal } from "./fileModal";
 import { downloadModal } from "./downloadModal";
 import { libraryModal } from "./libraryModal";
 import { settingsModal } from "./settingsModal";
+import { repeatLibrary } from "./repeatLibrary";
 import { debugPane } from "./debugPane";
-// import { pointerIcon } from "./pointerIcon";
-// import { toolPicker } from "./toolPicker";
 import { bottomToolbar } from "./bottomToolbar";
 import { leftBar } from "./leftBar";
 import { repeatCanvas } from "./repeatCanvas";
+import { Bimp } from "../lib/Bimp";
+
+import { simulationView } from "../components/runSimulation";
 
 export function view() {
   return html`
@@ -40,18 +42,18 @@ export function view() {
                 <canvas id="yarn-sequence-canvas"></canvas>
               </div>
               <canvas id="yarn-color-canvas"></canvas>
-              <canvas id="chart"></canvas>
-
+              <canvas id="symbol-canvas"></canvas>
               <canvas id="grid" class="grid-canvas"></canvas>
               <canvas id="outline" class="outline-canvas"></canvas>
               ${repeatCanvas()}
             </div>
           </div>
+          ${repeatLibrary()}
         </div>
 
         ${bottomToolbar()}
       </div>
-      <div id="sim-pane"></div>
+      ${simulationView()}
     </div>
     ${when(GLOBAL_STATE.debug, debugPane)}
   `;

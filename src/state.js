@@ -9,6 +9,8 @@ import {
 let GLOBAL_STATE = {
   editingPalette: false,
 
+  transforming: false,
+
   activeTool: "brush",
   activeSymbol: 0,
   activeLayer: "chart",
@@ -21,55 +23,43 @@ let GLOBAL_STATE = {
 
   scale: 15, // Number of pixels for each chart cell
   pos: { x: -1, y: -1 }, // Mouse position in chart
-  colorSequencePos: { x: -1, y: -1 },
   chartPan: { x: 0, y: 0 }, // Pan value for the chart editor view
+
+  simScale: 1,
+  simPan: { x: 0, y: 0 },
 
   activeYarn: 0,
   yarnPalette: ["#416fac", "#a94a7a", "#ffcc44"], // Colors of the yarns
   yarnSequence: new Bimp(1, 6, [0, 0, 1, 1, 2, 2]),
 
-  editingRepeat: 1,
+  editingRepeat: -1,
   repeatPos: [-1, -1],
 
   repeats: [
     {
-      bitmap: new Bimp(2, 2, [0, 2, 2, 0]),
-      pos: [6, 0],
-      xRepeats: 1,
-      yRepeats: 1,
-    },
-
-    {
-      bitmap: new Bimp(2, 5, [0, 2, 2, 0, 2, 2, 0, 2, 0, 2]),
-      pos: [10, 10],
-      xRepeats: 1,
-      yRepeats: 1,
-    },
-
-    {
-      bitmap: new Bimp(2, 7, [0, 2, 2, 0, 2, 2, 0, 2, 0, 2, 0, 2, 0, 2]),
-      pos: [10, 0],
+      bitmap: new Bimp(2, 2, [0, 0, 2, 0]),
+      pos: [0, 0],
       xRepeats: 1,
       yRepeats: 1,
     },
   ],
 
-  motifLibrary: [
+  repeatLibrary: [
+    {
+      title: "blank",
+      bitmap: new Bimp(2, 2, [0, 0, 0, 0]),
+    },
     {
       title: "checks",
-      bitmap: new Bimp(2, 2, [0, 1, 1, 0]),
+      bitmap: new Bimp(2, 2, [0, 2, 2, 0]),
     },
     {
       title: "stripe",
-      bitmap: Bimp.empty(2, 2, [0, 1, 0, 1]),
-    },
-    {
-      title: "test",
-      bitmap: Bimp.empty(4, 4, 0),
+      bitmap: new Bimp(2, 2, [0, 2, 0, 2]),
     },
   ], // Library of motifs which can be used as repeats
 
-  chart: Bimp.empty(20, 20, 0),
+  chart: Bimp.empty(40, 80, 0),
 
   reverseScroll: false,
   grid: true,
@@ -80,6 +70,7 @@ let GLOBAL_STATE = {
   showLibrary: false,
   showSettings: false,
   showDownload: false,
+  showRepeatLibrary: false,
   debug: false,
 
   snapshots: [], // Array of snapshot history

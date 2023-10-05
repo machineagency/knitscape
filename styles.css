@@ -32,24 +32,6 @@ body {
 
 /**********************************
 
-POINTER
-
-**********************************/
-
-#pointer {
-  display: none;
-  position: fixed;
-  left: 0;
-  top: -20px;
-  z-index: 100;
-  text-shadow: 0px 0px 4px black;
-  font-size: x-large;
-  pointer-events: none;
-  color: #fff;
-}
-
-/**********************************
-
 TASKBAR
 
 **********************************/
@@ -85,6 +67,37 @@ SIM PANE
 **********************************/
 
 #sim-pane {
+  display: flex;
+  flex-direction: column;
+  /* padding: 0.5em; */
+}
+
+#sim-container {
+  position: relative;
+  flex: 1 1 0;
+  display: flex;
+  overflow: hidden;
+  padding: 0.5em;
+  box-shadow: inset 0 0 6px 0px rgba(0, 0, 0, 0.5);
+}
+
+#back,
+#mid,
+#front {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#simulation {
+  pointer-events: none;
+}
+
+#sim-controls {
+  display: flex;
+  gap: 0.3em;
+  justify-content: end;
+  padding: 0.5em;
   background-color: var(--base1);
 }
 
@@ -97,10 +110,10 @@ EDIT PANE
 #chart-pane {
   display: flex;
   flex-direction: column;
-  /* overflow: hidden; */
 }
 
 #chart-layout {
+  position: relative;
   flex: 1;
   display: flex;
   background-color: var(--base2);
@@ -115,6 +128,7 @@ EDIT PANE
 }
 
 #desktop {
+  position: relative;
   box-shadow: inset 0 0 6px 0px rgba(0, 0, 0, 0.5);
   display: flex;
   overflow: hidden;
@@ -131,30 +145,17 @@ canvas {
   outline: 1px solid black;
 }
 
-#chart {
-  /* cursor: none; */
+#symbol-canvas {
   position: relative;
 }
 
 .grid-canvas,
-.outline-canvas {
+.outline-canvas,
+#yarn-color-canvas {
   pointer-events: none;
   position: absolute;
   left: 0;
   top: 0;
-}
-
-/* All the canvasas that should be overlayed in the main chart view */
-
-#yarn-color-canvas,
-#repeat-container {
-  position: absolute;
-  left: 0;
-  top: 0;
-}
-
-.repeat-canvas-container {
-  position: absolute;
 }
 
 /**********************************
@@ -162,6 +163,14 @@ canvas {
 REPEAT CANVAS UI
 
 **********************************/
+#repeat-container {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.repeat-canvas-container {
+  position: absolute;
+}
 
 .repeat-canvas {
   display: block;
@@ -246,34 +255,6 @@ YARN SEQUENCE
 
 /**********************************
 
-TOOL PICKER
-
-**********************************/
-
-#tool-picker {
-  position: absolute;
-  display: flex;
-  background-color: #212121;
-  gap: 0.3em;
-  margin-top: 0.5em;
-  padding: 0.2em;
-  border-radius: 8px;
-  box-shadow: 0 0 5px 0px black;
-  z-index: 3;
-}
-
-#tool-picker > button {
-  width: 3rem;
-  height: 3rem;
-}
-
-#tool-picker .current {
-  background-color: var(--base3);
-  color: var(--accent);
-}
-
-/**********************************
-
 LEFT BAR
 
 **********************************/
@@ -286,50 +267,6 @@ LEFT BAR
   gap: 1em;
   padding: 0 0.6em;
   overflow-y: auto;
-}
-
-/**********************************
-
-LAYER PICKER
-
-**********************************/
-
-#layer-picker {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4em;
-}
-
-#layer-picker > .btn {
-  align-self: auto;
-  font-weight: 800;
-  border: 1px solid black;
-}
-
-#layer-picker > .btn.current {
-  outline: 1px solid white;
-}
-
-/**********************************
-
-MOTIF PICKER
-
-**********************************/
-
-#motif-picker {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4em;
-}
-
-#motif-picker > .btn {
-  align-self: auto;
-  font-weight: 800;
-  border: 1px solid black;
-}
-
-#motif-picker > .btn.current {
-  outline: 1px solid white;
 }
 
 /**********************************
@@ -534,8 +471,95 @@ SETTINGS MODAL
   color: black;
 }
 
-/* SPLIT JS STYLES */
+/**********************************
 
+REPEAT LIBRARY
+
+**********************************/
+
+#repeat-library-button {
+  font-size: inherit;
+  aspect-ratio: 1;
+}
+
+#repeat-library {
+  position: absolute;
+  box-shadow: var(--modal-shadow);
+  right: 10px;
+  bottom: 10px;
+  background-color: var(--base1);
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+#repeat-library > h2 {
+  font-size: 1.2em;
+  padding: 0.4em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5em;
+}
+
+#repeat-library-content {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  grid-auto-rows: 40px;
+  grid-row-gap: 1px;
+  overflow-y: auto;
+  height: 100%;
+  transition: 150ms;
+}
+
+#repeat-library-content.open {
+  height: 400px;
+  min-width: 150px;
+}
+
+#repeat-library-content.closed {
+  height: 0px;
+  width: 0px;
+}
+
+.repeat-title {
+  font-weight: 600;
+  text-align: end;
+  display: flex;
+  background-color: var(--modal-background);
+  align-items: center;
+  justify-content: end;
+  padding: 0 5px;
+}
+
+.repeat-size {
+  font-family: monospace;
+  display: flex;
+  background-color: var(--modal-background);
+  align-items: center;
+  justify-content: end;
+  padding: 0 8px;
+}
+
+.repeat-library-canvas {
+  display: flex;
+  justify-content: center;
+  background-color: var(--modal-background);
+}
+
+.repeat-library-canvas > canvas {
+  height: 100%;
+  image-rendering: pixelated;
+  outline: 1px solid black;
+  cursor: grab;
+}
+
+/**********************************
+
+SPLIT JS STYLES
+
+**********************************/
 .gutter {
   background-color: var(--base1);
   background-repeat: no-repeat;

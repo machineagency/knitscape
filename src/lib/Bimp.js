@@ -52,12 +52,12 @@ export class Bimp {
     ]);
   }
 
-  resize(width, height) {
+  resize(width, height, emptyColor = 0) {
     let resized = [];
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         if (y >= this.height || x >= this.width) {
-          resized.push(0);
+          resized.push(emptyColor);
         } else {
           resized.push(this.pixel(x, y));
         }

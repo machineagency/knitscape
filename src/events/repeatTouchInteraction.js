@@ -16,6 +16,7 @@ function getRepeatIndex(elem) {
 function editRepeat(repeatIndex, repeatCanvas, tool) {
   // tool onMove is not called unless pointer moves into another cell in the chart
   let pos = GLOBAL_STATE.repeatPos;
+  dispatch({ transforming: true });
 
   let onMove = tool(repeatIndex, pos);
   if (!onMove) return;
@@ -28,6 +29,8 @@ function editRepeat(repeatIndex, repeatCanvas, tool) {
   }
 
   function end() {
+    dispatch({ transforming: false });
+
     repeatCanvas.removeEventListener("touchmove", move);
     repeatCanvas.removeEventListener("touchend", end);
     repeatCanvas.removeEventListener("touchcancel", end);
@@ -42,11 +45,14 @@ function resizeRepeat(e, repeatIndex) {
   const startRepeat = GLOBAL_STATE.repeats[repeatIndex].bitmap;
   const startPos = [e.clientX, e.clientY];
   const resizeDragger = e.target;
+  dispatch({ transforming: true });
 
   document.body.classList.add("grabbing");
   resizeDragger.classList.remove("grab");
 
   const end = () => {
+    dispatch({ transforming: false });
+
     window.removeEventListener("touchmove", onmove);
     window.removeEventListener("touchend", end);
     window.removeEventListener("touchcancel", end);
@@ -93,8 +99,11 @@ function moveRepeat(e, repeatIndex) {
   const startRepeatPos = [...GLOBAL_STATE.repeats[repeatIndex].pos];
   const startPos = [e.clientX, e.clientY];
   const moveDragger = e.target;
+  dispatch({ transforming: true });
 
   const end = () => {
+    dispatch({ transforming: false });
+
     window.removeEventListener("touchmove", onmove);
     window.removeEventListener("touchend", end);
     window.removeEventListener("touchcancel", end);
