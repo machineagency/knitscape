@@ -71,7 +71,7 @@ export function colorSequencePointerInteraction(target, resizeDragger) {
         startSequence.height +
         Math.floor((start - e.clientY) / GLOBAL_STATE.scale);
 
-      if (newSize < 1 || newSize == startSequence.height) return;
+      if (newSize < 1 || newSize == GLOBAL_STATE.yarnSequence.height) return;
 
       dispatch({
         yarnSequence: startSequence.resize(1, newSize),

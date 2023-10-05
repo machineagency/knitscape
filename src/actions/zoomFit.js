@@ -57,12 +57,13 @@ export function fitChart() {
     document.getElementById("desktop")
   );
 
-  const scale =
+  const scale = Math.floor(
     0.9 *
-    Math.min(
-      Math.floor(width / GLOBAL_STATE.chart.width),
-      Math.floor(height / GLOBAL_STATE.chart.height)
-    );
+      Math.min(
+        Math.floor(width / GLOBAL_STATE.chart.width),
+        Math.floor(height / GLOBAL_STATE.chart.height)
+      )
+  );
 
   dispatch({
     scale,

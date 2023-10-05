@@ -1,24 +1,24 @@
-import { sizeCanvasToBitmap } from "../actions/zoomFit";
+import { GLOBAL_STATE } from "../state";
 
-export function outlineCanvas({
-  inner = "#000000",
-  outer = "#ffffff",
-  canvas,
-}) {
+export function drawOutline(outlineCanvas, inner = "#000", outer = "#fff") {
   return ({ state }) => {
     let { scale, pos, chart } = state;
     let width = chart.width;
     let height = chart.height;
 
     function draw() {
-      const ctx = canvas.getContext("2d");
+      const ctx = outlineCanvas.getContext("2d");
+
+      if (pos.x < 0 || pos.y < 0 || GLOBAL_STATE.editingRepeat >= 0) {
+        ctx.clearRect(0, 0, outlineCanvas.width, outlineCanvas.height);
+        return;
+      }
+
       ctx.resetTransform();
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, outlineCanvas.width, outlineCanvas.height);
 
-      if (pos.x < 0 || pos.y < 0) return;
       ctx.translate(-0.5, -0.5);
-      ctx.imageSmoothingEnabled = false;
 
       ctx.strokeStyle = outer;
       ctx.strokeRect(
@@ -27,6 +27,7 @@ export function outlineCanvas({
         scale - 2,
         scale - 2
       );
+
       ctx.strokeStyle = inner;
       ctx.strokeRect(
         pos.x * scale + 2,
@@ -36,8 +37,6 @@ export function outlineCanvas({
       );
     }
 
-    sizeCanvasToBitmap(canvas, width, height);
-
     return {
       syncState(state) {
         if (
@@ -45,15 +44,14 @@ export function outlineCanvas({
           width != state.chart.width ||
           height != state.chart.height
         ) {
+          // if the scale, width, or height have changed, we'll want to redraw
           scale = state.scale;
           width = state.chart.width;
           height = state.chart.height;
-
-          sizeCanvasToBitmap(canvas, width, height);
+          pos = null;
         }
         if (state.pos != pos) {
           pos = state.pos;
-
           draw();
         }
       },

@@ -1,6 +1,6 @@
 import { sizeCanvasToBitmap } from "../actions/zoomFit";
 
-export function gridCanvas({ canvas }) {
+export function drawGrid(gridCanvas) {
   return ({ state }) => {
     let { scale, chart, grid } = state;
 
@@ -9,12 +9,17 @@ export function gridCanvas({ canvas }) {
 
     function draw() {
       if (!grid) return;
-      const ctx = canvas.getContext("2d");
-      ctx.resetTransform();
+      const ctx = gridCanvas.getContext("2d");
+
+      if (scale < 15) {
+        ctx.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
+        return;
+      }
+      ctx.save();
 
       ctx.translate(-0.5, -0.5);
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
 
       ctx.beginPath();
 
@@ -29,9 +34,10 @@ export function gridCanvas({ canvas }) {
       }
 
       ctx.stroke();
+      ctx.restore();
     }
 
-    sizeCanvasToBitmap(canvas, width, height);
+    sizeCanvasToBitmap(gridCanvas, width, height);
     draw();
 
     return {
@@ -47,7 +53,7 @@ export function gridCanvas({ canvas }) {
           scale = state.scale;
           grid = state.grid;
 
-          sizeCanvasToBitmap(canvas, width, height);
+          sizeCanvasToBitmap(gridCanvas, width, height);
           draw();
         }
       },

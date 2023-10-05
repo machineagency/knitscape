@@ -28,12 +28,29 @@ let GLOBAL_STATE = {
   yarnPalette: ["#416fac", "#a94a7a", "#ffcc44"], // Colors of the yarns
   yarnSequence: new Bimp(1, 6, [0, 0, 1, 1, 2, 2]),
 
+  editingRepeat: 1,
+  repeatPos: [-1, -1],
+
   repeats: [
     {
+      bitmap: new Bimp(2, 2, [0, 2, 2, 0]),
+      pos: [6, 0],
+      xRepeats: 1,
+      yRepeats: 1,
+    },
+
+    {
       bitmap: new Bimp(2, 5, [0, 2, 2, 0, 2, 2, 0, 2, 0, 2]),
-      pos: [0, 0],
-      xRepeats: 2,
-      yRepeats: 3,
+      pos: [10, 10],
+      xRepeats: 1,
+      yRepeats: 1,
+    },
+
+    {
+      bitmap: new Bimp(2, 7, [0, 2, 2, 0, 2, 2, 0, 2, 0, 2, 0, 2, 0, 2]),
+      pos: [10, 0],
+      xRepeats: 1,
+      yRepeats: 1,
     },
   ],
 
@@ -56,7 +73,7 @@ let GLOBAL_STATE = {
 
   reverseScroll: false,
   grid: true,
-  isMobile: true,
+  symbolLineWidth: 3,
 
   // Various UI pane states
   showFileMenu: false,

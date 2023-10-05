@@ -2,19 +2,6 @@ import { html } from "lit-html";
 import { GLOBAL_STATE, dispatch } from "../state";
 import jscolor from "@eastdesire/jscolor";
 
-function editBackgroundColor(target) {
-  if (!target.jscolor) {
-    const picker = new jscolor(target, {
-      preset: "dark large",
-      format: "hex",
-      value: GLOBAL_STATE.chartBackground,
-      onInput: () => dispatch({ chartBackground: picker.toRGBString() }),
-      previewElement: null,
-    });
-  }
-  target.jscolor.show();
-}
-
 export function settingsModal() {
   return html` <div id="settings-modal" class="modal">
     <h2>Settings</h2>
@@ -47,7 +34,36 @@ export function settingsModal() {
         Debug
       </label>
 
-      <label class="form-control">
+      <label class="form-control range">
+        Symbol Line Width
+        <input
+          type="range"
+          name="line-width"
+          min="1"
+          max="10"
+          .value=${String(GLOBAL_STATE.symbolLineWidth)}
+          ?checked=${GLOBAL_STATE.debug}
+          @input=${(e) =>
+            dispatch({ symbolLineWidth: Number(e.target.value) })} />
+      </label>
+    </div>
+  </div>`;
+}
+
+// function editBackgroundColor(target) {
+//   if (!target.jscolor) {
+//     const picker = new jscolor(target, {
+//       preset: "dark large",
+//       format: "hex",
+//       value: GLOBAL_STATE.chartBackground,
+//       onInput: () => dispatch({ chartBackground: picker.toRGBString() }),
+//       previewElement: null,
+//     });
+//   }
+//   target.jscolor.show();
+// }
+
+/* <label class="form-control">
         <button
           id="background-color-edit"
           name="chart-background"
@@ -57,7 +73,4 @@ export function settingsModal() {
           <i class="fa-solid fa-palette"></i>
           Background Color
         </button>
-      </label>
-    </div>
-  </div>`;
-}
+      </label> */

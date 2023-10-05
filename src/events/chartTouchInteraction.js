@@ -59,6 +59,9 @@ export function chartTouchInteraction(target) {
       dispatch({ pos: { x, y } });
     }
 
+    console.log("CHART");
+    dispatch({ editingRepeat: -1 });
+
     const activeTool = GLOBAL_STATE.activeTool;
     e.preventDefault();
 

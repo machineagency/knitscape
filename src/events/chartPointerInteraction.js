@@ -59,15 +59,17 @@ function canvasInteraction(e, target, tool) {
 
 export function chartPointerInteraction(target) {
   target.addEventListener("pointerdown", (e) => {
-    const activeTool = GLOBAL_STATE.activeTool;
+    console.log("CHART");
+    dispatch({ editingRepeat: -1 });
+    // const activeTool = GLOBAL_STATE.activeTool;
 
-    if (activeTool in paintTools)
-      chartInteraction(target, paintTools[activeTool]);
-    else if (activeTool in canvasTools)
-      canvasInteraction(e, target, canvasTools[activeTool]);
-    else {
-      console.console.warn(`Uh oh, ${activeTool} is not a tool`);
-    }
+    // if (activeTool in paintTools)
+    //   chartInteraction(target, paintTools[activeTool]);
+    // else if (activeTool in canvasTools)
+    //   canvasInteraction(e, target, canvasTools[activeTool]);
+    // else {
+    //   console.console.warn(`Uh oh, ${activeTool} is not a tool`);
+    // }
   });
 
   target.addEventListener("pointermove", (e) => {

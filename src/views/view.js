@@ -8,8 +8,8 @@ import { downloadModal } from "./downloadModal";
 import { libraryModal } from "./libraryModal";
 import { settingsModal } from "./settingsModal";
 import { debugPane } from "./debugPane";
-import { pointerIcon } from "./pointerIcon";
-import { toolPicker } from "./toolPicker";
+// import { pointerIcon } from "./pointerIcon";
+// import { toolPicker } from "./toolPicker";
 import { bottomToolbar } from "./bottomToolbar";
 import { leftBar } from "./leftBar";
 import { repeatCanvas } from "./repeatCanvas";
@@ -21,7 +21,6 @@ export function view() {
     ${when(GLOBAL_STATE.showSettings, settingsModal)}
     ${when(GLOBAL_STATE.showFileMenu, fileModal)}
     <div id="site">
-      ${pointerIcon()}
       <div id="chart-pane">
         ${taskbar()}
 
@@ -29,11 +28,11 @@ export function view() {
           ${leftBar()}
 
           <div id="desktop">
-            ${toolPicker()}
             <div
               id="canvas-transform-group"
-              style="transform: translate(${GLOBAL_STATE.chartPan
-                .x}px, ${GLOBAL_STATE.chartPan.y}px);">
+              style="transform: translate(${Math.floor(
+                GLOBAL_STATE.chartPan.x
+              )}px, ${Math.floor(GLOBAL_STATE.chartPan.y)}px);">
               <div id="yarn-sequence">
                 <button id="color-dragger" class="btn solid grab">
                   <i class="fa-solid fa-grip"></i>
@@ -43,8 +42,8 @@ export function view() {
               <canvas id="yarn-color-canvas"></canvas>
               <canvas id="chart"></canvas>
 
-              <canvas id="grid"></canvas>
-              <canvas id="outline"></canvas>
+              <canvas id="grid" class="grid-canvas"></canvas>
+              <canvas id="outline" class="outline-canvas"></canvas>
               ${repeatCanvas()}
             </div>
           </div>

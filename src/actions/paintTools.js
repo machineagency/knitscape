@@ -54,12 +54,4 @@ function line(start, state, dispatch) {
   return onMove;
 }
 
-// function shift(start, state, dispatch) {
-//   function onMove({ x, y }) {
-//     dispatch({ chart: state.chart.shift(start.x - x, start.y - y) });
-//   }
-//   onMove(start);
-//   return onMove;
-// }
-
 export const paintTools = { brush, flood, line, rect };

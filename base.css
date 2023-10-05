@@ -37,11 +37,16 @@ ROOT STYLES
   --base12: #d4d4d4;
   --base13: #e5e5e5;
 
-  --accH: 316;
-  --accS: 29%;
-  --accL: 64%;
+  --accent-h: 316;
+  --accent-s: 29%;
+  --accent-l: 64%;
 
-  --accent: hsla(var(--accH), var(--accS), var(--accL));
+  --accent: hsla(var(--accent-h), var(--accent-s), var(--accent-l));
+
+  --input-border: var(--base7);
+  --input-focus-h: var(--accent-h);
+  --input-focus-s: 60%;
+  --input-focus-l: 42%;
 
   --text: var(--base12);
   --text-highlight: var(--base13);
@@ -145,6 +150,13 @@ FORM CONTROL
   display: grid;
   gap: 0.5em;
   grid-template-columns: 1em auto;
+}
+
+.form-control.range {
+  display: flex;
+  gap: 0.5em;
+  flex-direction: column;
+  margin-bottom: 0.5em;
 }
 
 .form-control--disabled {
@@ -313,14 +325,20 @@ button.btn {
 a.btn:hover,
 button.btn:hover {
   color: var(--text-highlight);
-  background-color: hsla(var(--accH), var(--accS), var(--accL), 0.3);
+  background-color: hsla(
+    var(--accent-h),
+    var(--accent-s),
+    var(--accent-l),
+    0.3
+  );
 }
 
 a.btn:focus,
 button.btn:focus {
   outline-style: solid;
   outline-color: transparent;
-  box-shadow: 0 0 0 2px hsla(var(--accH), var(--accS), var(--accL), 0.8);
+  box-shadow: 0 0 0 2px
+    hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.8);
 }
 
 /* Image button */
@@ -385,4 +403,71 @@ MODAL
   flex-direction: column;
 
   gap: 0.4em;
+}
+
+/***********************************
+
+TEXT INPUT
+
+***********************************/
+.input {
+  font-size: 16px;
+  font-size: max(16px, 1em);
+  font-family: inherit;
+  padding: 0.25em 0.5em;
+  background-color: var(--base3);
+  border: 2px solid var(--input-border);
+  border-radius: 7px;
+  color: var(--text-inactive);
+  transition: 100ms ease-in-out;
+}
+
+.input:not(textarea) {
+  line-height: 1;
+  height: 1.5rem;
+}
+
+/* .input[disabled] {
+  --input-border: #ccc;
+
+  background-color: #eee;
+  cursor: not-allowed;
+} */
+
+.input:focus {
+  border-color: hsl(
+    var(--input-focus-h),
+    var(--input-focus-s),
+    var(--input-focus-l)
+  );
+
+  color: var(--text-highlight);
+
+  box-shadow: 0 0 0 3px
+    hsla(
+      var(--input-focus-h),
+      var(--input-focus-s),
+      calc(var(--input-focus-l) + 40%),
+      0.8
+    );
+
+  outline: 3px solid transparent;
+}
+
+/***********************************
+
+NUMBER INPUT
+
+***********************************/
+
+.input[type="number"]::-webkit-inner-spin-button,
+.input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.input[type="number"] {
+  text-align: center;
+  font-family: monospace;
+  -moz-appearance: textfield;
 }

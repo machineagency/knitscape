@@ -20,26 +20,22 @@ function editRepeat(repeatIndex, repeatCanvas, tool) {
   let onMove = tool(repeatIndex, pos);
   if (!onMove) return;
 
-  function move(moveEvent) {
-    if (moveEvent.buttons == 0) {
-      end();
-    } else {
-      let newPos = GLOBAL_STATE.repeatPos;
-      if (newPos.x == pos.x && newPos.y == pos.y) return;
-      onMove(newPos);
-      pos = newPos;
-    }
+  function move() {
+    let newPos = GLOBAL_STATE.repeatPos;
+    if (newPos.x == pos.x && newPos.y == pos.y) return;
+    onMove(newPos);
+    pos = newPos;
   }
 
   function end() {
-    repeatCanvas.removeEventListener("pointermove", move);
-    repeatCanvas.removeEventListener("pointerup", end);
-    repeatCanvas.removeEventListener("pointerleave", end);
+    repeatCanvas.removeEventListener("touchmove", move);
+    repeatCanvas.removeEventListener("touchend", end);
+    repeatCanvas.removeEventListener("touchcancel", end);
   }
 
-  repeatCanvas.addEventListener("pointermove", move);
-  repeatCanvas.addEventListener("pointerup", end);
-  repeatCanvas.addEventListener("pointerleave", end);
+  repeatCanvas.addEventListener("touchmove", move);
+  repeatCanvas.addEventListener("touchend", end);
+  repeatCanvas.addEventListener("touchcancel", end);
 }
 
 function resizeRepeat(e, repeatIndex) {
@@ -51,25 +47,24 @@ function resizeRepeat(e, repeatIndex) {
   resizeDragger.classList.remove("grab");
 
   const end = () => {
-    document.body.classList.remove("grabbing");
-
-    window.removeEventListener("pointermove", onmove);
-    window.removeEventListener("pointerup", end);
-
-    resizeDragger.classList.add("grab");
+    window.removeEventListener("touchmove", onmove);
+    window.removeEventListener("touchend", end);
+    window.removeEventListener("touchcancel", end);
   };
 
   const onmove = (e) => {
     let newWidth =
       startRepeat.width -
       Math.floor(
-        (startPos[0] - e.clientX) / (GLOBAL_STATE.scale / devicePixelRatio)
+        (startPos[0] - e.touches[0].clientX) /
+          (GLOBAL_STATE.scale / devicePixelRatio)
       );
 
     let newHeight =
       startRepeat.height +
       Math.floor(
-        (startPos[1] - e.clientY) / (GLOBAL_STATE.scale / devicePixelRatio)
+        (startPos[1] - e.touches[0].clientY) /
+          (GLOBAL_STATE.scale / devicePixelRatio)
       );
 
     if (newHeight == startRepeat.height && newWidth == startRepeat.width)
@@ -89,8 +84,9 @@ function resizeRepeat(e, repeatIndex) {
     });
   };
 
-  window.addEventListener("pointermove", onmove);
-  window.addEventListener("pointerup", end);
+  window.addEventListener("touchmove", onmove);
+  window.addEventListener("touchcancel", end);
+  window.addEventListener("touchend", end);
 }
 
 function moveRepeat(e, repeatIndex) {
@@ -98,29 +94,25 @@ function moveRepeat(e, repeatIndex) {
   const startPos = [e.clientX, e.clientY];
   const moveDragger = e.target;
 
-  document.body.classList.add("grabbing");
-  moveDragger.classList.remove("grab");
-
   const end = () => {
-    document.body.classList.remove("grabbing");
-
-    window.removeEventListener("pointermove", onmove);
-    window.removeEventListener("pointerup", end);
-
-    moveDragger.classList.add("grab");
+    window.removeEventListener("touchmove", onmove);
+    window.removeEventListener("touchend", end);
+    window.removeEventListener("touchcancel", end);
   };
 
   const onmove = (e) => {
     let newX =
       startRepeatPos[0] -
       Math.floor(
-        (startPos[0] - e.clientX) / (GLOBAL_STATE.scale / devicePixelRatio)
+        (startPos[0] - e.touches[0].clientX) /
+          (GLOBAL_STATE.scale / devicePixelRatio)
       );
 
     let newY =
       startRepeatPos[1] +
       Math.floor(
-        (startPos[1] - e.clientY) / (GLOBAL_STATE.scale / devicePixelRatio)
+        (startPos[1] - e.touches[0].clientY) /
+          (GLOBAL_STATE.scale / devicePixelRatio)
       );
 
     newX = newX < 0 ? 0 : newX;
@@ -138,12 +130,31 @@ function moveRepeat(e, repeatIndex) {
     });
   };
 
-  window.addEventListener("pointermove", onmove);
-  window.addEventListener("pointerup", end);
+  window.addEventListener("touchmove", onmove);
+  window.addEventListener("touchcancel", end);
+  window.addEventListener("touchend", end);
 }
 
-export function repeatPointerInteraction(repeatContainer) {
-  repeatContainer.addEventListener("pointerdown", (e) => {
+function calcRepeatCoords(e, repeatContainer) {
+  if (GLOBAL_STATE.editingRepeat < 0) {
+    const { x, y } = posAtCoords(e, repeatContainer);
+
+    if (GLOBAL_STATE.pos.x != x || GLOBAL_STATE.pos.y != y) {
+      dispatch({ pos: { x, y } });
+    }
+  } else {
+    const { x, y } = posAtCoords(e, e.target);
+
+    if (GLOBAL_STATE.pos.x != x || GLOBAL_STATE.pos.y != y) {
+      dispatch({ repeatPos: { x, y } });
+    }
+  }
+}
+
+export function repeatTouchInteraction(repeatContainer) {
+  repeatContainer.addEventListener("touchstart", (e) => {
+    calcRepeatCoords(e.touches[0], repeatContainer);
+
     const repeatIndex = getRepeatIndex(e.target);
     let classList = e.target.classList;
 
@@ -159,10 +170,10 @@ export function repeatPointerInteraction(repeatContainer) {
 
     if (classList.contains("resize-repeat")) {
       // interacting with dragger
-      resizeRepeat(e, repeatIndex);
+      resizeRepeat(e.touches[0], repeatIndex);
     } else if (classList.contains("move-repeat")) {
       // interacting with dragger
-      moveRepeat(e, repeatIndex);
+      moveRepeat(e.touches[0], repeatIndex);
     } else if (classList.contains("repeat-canvas")) {
       // interacting with canvas
       const activeTool = GLOBAL_STATE.activeTool;
@@ -175,19 +186,7 @@ export function repeatPointerInteraction(repeatContainer) {
     }
   });
 
-  repeatContainer.addEventListener("pointermove", (e) => {
-    if (GLOBAL_STATE.editingRepeat < 0) {
-      const { x, y } = posAtCoords(e, repeatContainer);
-
-      if (GLOBAL_STATE.pos.x != x || GLOBAL_STATE.pos.y != y) {
-        dispatch({ pos: { x, y } });
-      }
-    } else {
-      const { x, y } = posAtCoords(e, e.target);
-
-      if (GLOBAL_STATE.pos.x != x || GLOBAL_STATE.pos.y != y) {
-        dispatch({ repeatPos: { x, y } });
-      }
-    }
+  repeatContainer.addEventListener("touchmove", (e) => {
+    calcRepeatCoords(e.touches[0], repeatContainer);
   });
 }

@@ -1,23 +1,5 @@
 import { GLOBAL_STATE, dispatch } from "../state";
 
-export function loadSymbolPalette(symbols) {
-  console.log("asdf");
-  return symbols;
-}
-
-export function loadSymbol(symbolName, url) {
-  let im = new Image();
-  im.src = url;
-
-  im.onload = () =>
-    dispatch({
-      symbolPalette: {
-        ...GLOBAL_STATE.symbolPalette,
-        [symbolName]: im,
-      },
-    });
-}
-
 function loadJSON(patternJSON) {
   console.log("THIS IS WHERE THE JSON WOULD BE LOADED");
   // loadWorkspace(patternJSON);

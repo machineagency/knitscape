@@ -15,12 +15,7 @@ function symbolPicker() {
           : ""}"
         @click=${() => dispatch({ activeSymbol: index })}>
         <div>${symbolName}</div>
-        <img
-          class="symbol-img"
-          style="background-color: ${GLOBAL_STATE.chartBackground};"
-          src=${GLOBAL_STATE.symbolPalette[symbolName]
-            ? GLOBAL_STATE.symbolPalette[symbolName].src
-            : ""} />
+        <canvas class="symbol-preview" data-symbol=${symbolName}></canvas>
       </button>`
     )}
   </div>`;

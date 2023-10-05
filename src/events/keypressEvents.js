@@ -1,5 +1,5 @@
 import { GLOBAL_STATE, dispatch, undo } from "../state";
-import { tools } from "../constants";
+import { toolData } from "../constants";
 
 const ctrlShortcuts = {
   a: () => console.log("select all?"),
@@ -10,7 +10,7 @@ const ctrlShortcuts = {
 const hotkeys = {
   // grab the tools from the global tool constants and reformat them for the hotkeymap
   ...Object.fromEntries(
-    Object.entries(tools).map(([toolId, toolData]) => [
+    Object.entries(toolData).map(([toolId, toolData]) => [
       toolData.hotkey,
       () => dispatch({ activeTool: toolId }),
     ])

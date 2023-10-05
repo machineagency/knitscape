@@ -132,29 +132,27 @@ canvas {
 }
 
 #chart {
-  cursor: none;
+  /* cursor: none; */
   position: relative;
 }
 
-#outline,
-#grid {
+.grid-canvas,
+.outline-canvas {
   pointer-events: none;
-}
-
-/* All the canvasas that should be overlayed in the main chart view */
-#outline,
-#yarn-color-canvas,
-#repeat-container,
-#grid {
   position: absolute;
   left: 0;
   top: 0;
 }
-/*
+
+/* All the canvasas that should be overlayed in the main chart view */
+
+#yarn-color-canvas,
 #repeat-container {
-  width: 100%;
-  height: 100%;
-} */
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
 .repeat-canvas-container {
   position: absolute;
 }
@@ -166,18 +164,13 @@ REPEAT CANVAS UI
 **********************************/
 
 .repeat-canvas {
-  background-color: white;
-  /* outline: 3px solid black; */
   display: block;
-  box-shadow: 0 0 5px 0 black;
-  z-index: 1;
+  outline: 1px solid black;
+  outline-offset: -1px;
 }
 
 .repeat-ui {
   position: absolute;
-  z-index: 1;
-  bottom: calc(100% + 8px);
-  right: 0;
   background-color: var(--base2);
   box-shadow: 0 0 5px 0 black;
   border-radius: 8px;
@@ -186,11 +179,19 @@ REPEAT CANVAS UI
   gap: 5px;
 }
 
-.move-repeat-grabber {
-  cursor: move;
+.repeat-controls {
+  bottom: calc(100% + 8px);
+  right: 0;
 }
 
-.delete-repeat-button {
+.repeat-tool-picker {
+  flex-direction: column;
+  top: 0;
+  right: calc(100% + 8px);
+}
+
+.move-repeat-grabber {
+  cursor: move;
 }
 
 .repeat-ui .btn.solid {
@@ -202,13 +203,16 @@ REPEAT CANVAS UI
   cursor: grab !important;
 }
 
+.repeat-ui > button {
+  align-self: stretch;
+}
 .repeat-ui > button > i {
   pointer-events: none;
 }
 
-.resize-repeat-y {
-  left: 0;
-  bottom: 100%;
+.repeat-tool-picker .current {
+  background-color: var(--base3);
+  color: var(--accent);
 }
 
 /**********************************
@@ -247,7 +251,6 @@ TOOL PICKER
 **********************************/
 
 #tool-picker {
-  /* justify-self: center; */
   position: absolute;
   display: flex;
   background-color: #212121;
@@ -363,10 +366,12 @@ SYMBOL PICKER
   color: var(--text-highlight);
 }
 
-.symbol-img {
+.symbol-preview {
   width: 50px;
   height: 50px;
   display: block;
+  background-color: #fff;
+  image-rendering: pixelated;
 }
 
 /**********************************
@@ -472,6 +477,21 @@ BOTTOM TOOLBAR
   z-index: 5;
 }
 
+#cursor-position {
+  font-family: monospace;
+}
+
+#chart-size-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  font-size: 1em;
+}
+
+#chart-size-controls .input {
+  width: 4em;
+}
+
 #panzoom-controls {
   display: flex;
   gap: 0.2em;
@@ -481,7 +501,11 @@ BOTTOM TOOLBAR
   font-size: 1em;
 }
 
-/* LIBRARY MODAL */
+/**********************************
+
+LIBRARY MODAL
+
+**********************************/
 
 #library-modal {
   max-width: 700px;
@@ -493,7 +517,11 @@ BOTTOM TOOLBAR
   align-items: center;
 }
 
-/* SETTINGS MODAL */
+/**********************************
+
+SETTINGS MODAL
+
+**********************************/
 
 #settings-modal {
   max-width: 700px;
@@ -535,5 +563,5 @@ RESIZE DRAGGER
 }
 
 .grab {
-  cursor: grab;
+  cursor: grab !important;
 }

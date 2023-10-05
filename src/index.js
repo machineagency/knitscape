@@ -10,16 +10,21 @@ import { view } from "./views/view";
 import { DEFAULT_SYMBOLS, SYMBOL_DIR } from "./constants";
 
 import { yarnSequenceCanvas } from "./components/yarnSequenceCanvas";
-import { chartSymbolCanvas } from "./components/chartSymbolCanvas";
-import { chartYarnColorCanvas } from "./components/chartYarnColorCanvas";
-import { gridCanvas } from "./components/gridCanvas";
-import { outlineCanvas } from "./components/outlineCanvas";
-import { repeatCanvases } from "./components/repeatCanvases";
+
+// Chart View Canvas Layers
+import { drawYarnColors } from "./components/drawYarnColors";
+import { drawSymbols } from "./components/drawSymbols";
+import { drawGrid } from "./components/drawGrid";
+import { drawOutline } from "./components/drawOutline";
+
+import { drawRepeats } from "./components/drawRepeats";
+import { resizeCanvases } from "./components/resizeCanvases";
 
 import { addKeypressListeners } from "./events/keypressEvents";
 import { wheelInteraction } from "./events/wheelInteraction";
 
-import { addPointerIcon } from "./events/addPointerIcon";
+import { drawSymbolPicker } from "./components/drawSymbolPicker";
+// import { addPointerIcon } from "./events/addPointerIcon";
 
 import { chartPointerInteraction } from "./events/chartPointerInteraction";
 import { colorSequencePointerInteraction } from "./events/colorSequencePointerInteraction";
@@ -27,10 +32,9 @@ import { repeatPointerInteraction } from "./events/repeatPointerInteraction";
 
 import { chartTouchInteraction } from "./events/chartTouchInteraction";
 import { colorSequenceTouchInteraction } from "./events/colorSequenceTouchInteraction";
+import { repeatTouchInteraction } from "./events/repeatTouchInteraction";
 
 import { closeModals } from "./events/closeModals";
-
-import { loadSymbol } from "./actions/importers";
 
 import { isMobile } from "./utils";
 
@@ -41,10 +45,10 @@ function r() {
 
 function initKeyboard() {
   addKeypressListeners();
-  addPointerIcon(
-    document.getElementById("pointer"),
-    document.getElementById("chart")
-  );
+  // addPointerIcon(
+  //   document.getElementById("pointer"),
+  //   document.getElementById("chart")
+  // );
   repeatPointerInteraction(document.getElementById("repeat-container"));
   chartPointerInteraction(document.getElementById("chart"));
   wheelInteraction(document.getElementById("desktop"));
@@ -57,7 +61,8 @@ function initKeyboard() {
 
 function initTouch() {
   document.body.style.setProperty("--font-size", "1.2rem");
-  chartTouchInteraction(document.getElementById("outline"));
+  chartTouchInteraction(document.getElementById("chart"));
+  repeatTouchInteraction(document.getElementById("repeat-container"));
   colorSequenceTouchInteraction(
     document.getElementById("yarn-sequence-canvas"),
     document.getElementById("color-dragger")
@@ -97,27 +102,28 @@ function measureWindow() {
 }
 
 function init() {
-  DEFAULT_SYMBOLS.forEach((symbolName) =>
-    loadSymbol(symbolName, `${SYMBOL_DIR}/${symbolName}.png`)
-  );
-
   r();
 
   calcSplit();
 
   isMobile() ? initTouch() : initKeyboard();
 
+  const symbolCanvas = document.getElementById("chart");
+  const gridCanvas = document.getElementById("grid");
+  const outlineCanvas = document.getElementById("outline");
+  const yarnColorCanvas = document.getElementById("yarn-color-canvas");
+
   StateMonitor.register([
+    resizeCanvases([symbolCanvas, gridCanvas, outlineCanvas, yarnColorCanvas]),
     yarnSequenceCanvas({
       canvas: document.getElementById("yarn-sequence-canvas"),
     }),
-    chartSymbolCanvas({ canvas: document.getElementById("chart") }),
-    chartYarnColorCanvas({
-      canvas: document.getElementById("yarn-color-canvas"),
-    }),
-    gridCanvas({ canvas: document.getElementById("grid") }),
-    outlineCanvas({ canvas: document.getElementById("outline") }),
-    repeatCanvases(),
+    drawSymbols(symbolCanvas),
+    drawYarnColors(yarnColorCanvas),
+    drawGrid(gridCanvas),
+    drawOutline(outlineCanvas),
+    drawRepeats(),
+    drawSymbolPicker(),
   ]);
 
   measureWindow();
