@@ -26,7 +26,7 @@ export function drawSymbols(symbolCanvas) {
             const symbol = symbolMap[paletteIndex];
 
             ctx.save();
-            ctx.translate(x * scale, y * scale);
+            ctx.translate(x * scale, (height - y - 1) * scale);
             ctx.scale(scale, scale);
 
             ctx.clearRect(0, 0, 1, 1);

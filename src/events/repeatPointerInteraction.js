@@ -46,7 +46,7 @@ function editRepeat(repeatIndex, repeatCanvas, tool) {
 }
 
 function resizeRepeat(e, repeatIndex) {
-  const startRepeat = GLOBAL_STATE.repeats[repeatIndex].bitmap;
+  const startRepeat = GLOBAL_STATE.repeats[repeatIndex];
   const startPos = [e.clientX, e.clientY];
   const resizeDragger = e.target;
   dispatch({ transforming: true });
@@ -67,28 +67,34 @@ function resizeRepeat(e, repeatIndex) {
 
   const onmove = (e) => {
     let newWidth =
-      startRepeat.width -
+      startRepeat.bitmap.width -
       Math.floor(
         (startPos[0] - e.clientX) / (GLOBAL_STATE.scale / devicePixelRatio)
       );
 
     let newHeight =
-      startRepeat.height +
+      startRepeat.bitmap.height +
       Math.floor(
         (startPos[1] - e.clientY) / (GLOBAL_STATE.scale / devicePixelRatio)
       );
 
-    if (newHeight == startRepeat.height && newWidth == startRepeat.width)
-      return;
-
+    // console.log(newHeight, new)
     if (newHeight < 1 || newWidth < 1) return;
+
+    let pos = [...startRepeat.pos];
+    if (newWidth + startRepeat.pos[0] < 1) pos[0] = -newWidth + 1;
+    if (newHeight + startRepeat.pos[1] < 1) pos[1] = -newHeight + 1;
 
     dispatch({
       repeats: [
         ...GLOBAL_STATE.repeats.slice(0, repeatIndex),
         {
           ...GLOBAL_STATE.repeats[repeatIndex],
-          bitmap: startRepeat.vFlip().resize(newWidth, newHeight).vFlip(),
+          bitmap: startRepeat.bitmap
+            .vFlip()
+            .resize(newWidth, newHeight)
+            .vFlip(),
+          pos,
         },
         ...GLOBAL_STATE.repeats.slice(repeatIndex + 1),
       ],
@@ -99,8 +105,10 @@ function resizeRepeat(e, repeatIndex) {
   window.addEventListener("pointerup", end);
 }
 
-function moveRepeat(e, repeatIndex) {
-  const startRepeatPos = [...GLOBAL_STATE.repeats[repeatIndex].pos];
+export function moveRepeat(e, repeatIndex) {
+  let repeat = GLOBAL_STATE.repeats[repeatIndex];
+
+  const startRepeatPos = [...repeat.pos];
   const startPos = [e.clientX, e.clientY];
   const moveDragger = e.target;
   dispatch({ transforming: true });
@@ -132,16 +140,89 @@ function moveRepeat(e, repeatIndex) {
         (startPos[1] - e.clientY) / (GLOBAL_STATE.scale / devicePixelRatio)
       );
 
-    newX = newX < 0 ? 0 : newX;
-    newY = newY < 0 ? 0 : newY;
+    newX =
+      newX < -(repeat.bitmap.width - 1) ? -(repeat.bitmap.width - 1) : newX;
+    newY =
+      newY < -(repeat.bitmap.height - 1) ? -(repeat.bitmap.height - 1) : newY;
+
+    newX =
+      newX > GLOBAL_STATE.chart.width - 1 ? GLOBAL_STATE.chart.width - 1 : newX;
+    newY =
+      newY > GLOBAL_STATE.chart.height - 1
+        ? GLOBAL_STATE.chart.height - 1
+        : newY;
 
     dispatch({
       repeats: [
         ...GLOBAL_STATE.repeats.slice(0, repeatIndex),
         {
-          ...GLOBAL_STATE.repeats[repeatIndex],
+          ...repeat,
           pos: [newX, newY],
         },
+        ...GLOBAL_STATE.repeats.slice(repeatIndex + 1),
+      ],
+    });
+  };
+
+  window.addEventListener("pointermove", onmove);
+  window.addEventListener("pointerup", end);
+}
+
+function editRepeatArea(e, repeatIndex, direction) {
+  let repeat = GLOBAL_STATE.repeats[repeatIndex];
+  const startSize = direction == "x" ? repeat.xRepeats : repeat.yRepeats;
+  const startPos = [e.clientX, e.clientY];
+  const moveDragger = e.target;
+
+  dispatch({ transforming: true });
+
+  document.body.classList.add("grabbing");
+  moveDragger.classList.remove("grab");
+
+  const end = () => {
+    dispatch({ transforming: false });
+
+    document.body.classList.remove("grabbing");
+
+    window.removeEventListener("pointermove", onmove);
+    window.removeEventListener("pointerup", end);
+
+    moveDragger.classList.add("grab");
+  };
+
+  const onmove = (e) => {
+    let newSize, updated;
+    if (direction == "x") {
+      newSize =
+        startSize -
+        Math.floor(
+          (startPos[0] - e.clientX) / (GLOBAL_STATE.scale / devicePixelRatio)
+        );
+
+      newSize = newSize < 0 ? 0 : newSize;
+
+      updated = {
+        ...GLOBAL_STATE.repeats[repeatIndex],
+        xRepeats: newSize,
+      };
+    } else {
+      newSize =
+        startSize +
+        Math.floor(
+          (startPos[1] - e.clientY) / (GLOBAL_STATE.scale / devicePixelRatio)
+        );
+
+      newSize = newSize < 0 ? 0 : newSize;
+      updated = {
+        ...GLOBAL_STATE.repeats[repeatIndex],
+        yRepeats: newSize,
+      };
+    }
+
+    dispatch({
+      repeats: [
+        ...GLOBAL_STATE.repeats.slice(0, repeatIndex),
+        updated,
         ...GLOBAL_STATE.repeats.slice(repeatIndex + 1),
       ],
     });
@@ -168,11 +249,17 @@ export function repeatPointerInteraction(repeatContainer) {
 
     if (classList.contains("resize-repeat")) {
       // interacting with dragger
-
       resizeRepeat(e, repeatIndex);
     } else if (classList.contains("move-repeat")) {
       // interacting with dragger
       moveRepeat(e, repeatIndex);
+    } else if (classList.contains("repeat-area-dragger")) {
+      // interacting with dragger
+      if (classList.contains("x-axis")) {
+        editRepeatArea(e, repeatIndex, "x");
+      } else {
+        editRepeatArea(e, repeatIndex, "y");
+      }
     } else if (classList.contains("repeat-canvas")) {
       // interacting with canvas
       const activeTool = GLOBAL_STATE.activeTool;

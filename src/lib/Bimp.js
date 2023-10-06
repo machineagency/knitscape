@@ -28,6 +28,21 @@ export class Bimp {
     return new Bimp(width, height, tiled);
   }
 
+  overlay(overlayBimp, pos) {
+    const changes = [];
+    for (let y = 0; y < overlayBimp.height; y++) {
+      for (let x = 0; x < overlayBimp.width; x++) {
+        changes.push({
+          x: pos[0] + x,
+          y: pos[1] + overlayBimp.height - y - 1,
+          color: overlayBimp.pixel(x, y),
+        });
+      }
+    }
+
+    return this.draw(changes);
+  }
+
   toJSON() {
     return {
       pixels: Array.from(this.pixels),

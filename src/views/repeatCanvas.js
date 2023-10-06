@@ -62,11 +62,31 @@ export function repeatCanvas() {
         html`<div
           data-repeatindex=${index}
           class="repeat-canvas-container"
-          style="transform: translate(${xPos(repeat)}px, ${yPos(repeat)}px)"
+          style="transform: translate(${xPos(repeat)}px, ${yPos(
+            repeat
+          )}px); ${GLOBAL_STATE.editingRepeat == index
+            ? "z-index: 3"
+            : "z-index: 1"}"
           id="repeat-${index}-container">
           ${when(GLOBAL_STATE.editingRepeat == index, () =>
             repeatUI(repeat, index)
           )}
+          <div
+            class="repeat-bounds"
+            style="width: calc(100% + ${(repeat.xRepeats * GLOBAL_STATE.scale) /
+            devicePixelRatio}px); height: calc(100% + ${(repeat.yRepeats *
+              GLOBAL_STATE.scale) /
+            devicePixelRatio}px);">
+            ${when(
+              GLOBAL_STATE.editingRepeat == index,
+              () =>
+                html`<button class="repeat-area-dragger y-axis">
+                    <i class="fa-solid fa-angles-up"></i></button
+                  ><button class="repeat-area-dragger x-axis">
+                    <i class="fa-solid fa-angles-right"></i>
+                  </button>`
+            )}
+          </div>
           <canvas id="repeat-${index}" class="repeat-canvas"></canvas>
           <canvas id="repeat-${index}-grid" class="grid-canvas"></canvas>
           <canvas id="repeat-${index}-outline" class="outline-canvas"></canvas>

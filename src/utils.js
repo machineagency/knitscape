@@ -1,5 +1,13 @@
 import { bmp_lib } from "./lib/bmp";
-import { GLOBAL_STATE, dispatch } from "./state";
+import { GLOBAL_STATE } from "./state";
+
+export function generateChart(repeats) {
+  let chart = GLOBAL_STATE.chart;
+  for (const repeat of repeats) {
+    chart = chart.overlay(repeat.bitmap, repeat.pos);
+  }
+  return chart;
+}
 
 export function devicePixelBoundingBox(el) {
   const bbox = el.getBoundingClientRect();

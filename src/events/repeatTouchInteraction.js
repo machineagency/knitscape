@@ -42,7 +42,7 @@ function editRepeat(repeatIndex, repeatCanvas, tool) {
 }
 
 function resizeRepeat(e, repeatIndex) {
-  const startRepeat = GLOBAL_STATE.repeats[repeatIndex].bitmap;
+  const startRepeat = GLOBAL_STATE.repeats[repeatIndex];
   const startPos = [e.clientX, e.clientY];
   const resizeDragger = e.target;
   dispatch({ transforming: true });
@@ -60,14 +60,14 @@ function resizeRepeat(e, repeatIndex) {
 
   const onmove = (e) => {
     let newWidth =
-      startRepeat.width -
+      startRepeat.bitmap.width -
       Math.floor(
         (startPos[0] - e.touches[0].clientX) /
           (GLOBAL_STATE.scale / devicePixelRatio)
       );
 
     let newHeight =
-      startRepeat.height +
+      startRepeat.bitmap.height +
       Math.floor(
         (startPos[1] - e.touches[0].clientY) /
           (GLOBAL_STATE.scale / devicePixelRatio)
@@ -78,12 +78,20 @@ function resizeRepeat(e, repeatIndex) {
 
     if (newHeight < 1 || newWidth < 1) return;
 
+    let pos = [...startRepeat.pos];
+    if (newWidth + startRepeat.pos[0] < 1) pos[0] = -newWidth + 1;
+    if (newHeight + startRepeat.pos[1] < 1) pos[1] = -newHeight + 1;
+
     dispatch({
       repeats: [
         ...GLOBAL_STATE.repeats.slice(0, repeatIndex),
         {
           ...GLOBAL_STATE.repeats[repeatIndex],
-          bitmap: startRepeat.vFlip().resize(newWidth, newHeight).vFlip(),
+          bitmap: startRepeat.bitmap
+            .vFlip()
+            .resize(newWidth, newHeight)
+            .vFlip(),
+          pos,
         },
         ...GLOBAL_STATE.repeats.slice(repeatIndex + 1),
       ],
@@ -96,6 +104,8 @@ function resizeRepeat(e, repeatIndex) {
 }
 
 function moveRepeat(e, repeatIndex) {
+  let repeat = GLOBAL_STATE.repeats[repeatIndex];
+
   const startRepeatPos = [...GLOBAL_STATE.repeats[repeatIndex].pos];
   const startPos = [e.clientX, e.clientY];
   const moveDragger = e.target;
@@ -124,14 +134,23 @@ function moveRepeat(e, repeatIndex) {
           (GLOBAL_STATE.scale / devicePixelRatio)
       );
 
-    newX = newX < 0 ? 0 : newX;
-    newY = newY < 0 ? 0 : newY;
+    newX =
+      newX < -(repeat.bitmap.width - 1) ? -(repeat.bitmap.width - 1) : newX;
+    newY =
+      newY < -(repeat.bitmap.height - 1) ? -(repeat.bitmap.height - 1) : newY;
+
+    newX =
+      newX > GLOBAL_STATE.chart.width - 1 ? GLOBAL_STATE.chart.width - 1 : newX;
+    newY =
+      newY > GLOBAL_STATE.chart.height - 1
+        ? GLOBAL_STATE.chart.height - 1
+        : newY;
 
     dispatch({
       repeats: [
         ...GLOBAL_STATE.repeats.slice(0, repeatIndex),
         {
-          ...GLOBAL_STATE.repeats[repeatIndex],
+          ...repeat,
           pos: [newX, newY],
         },
         ...GLOBAL_STATE.repeats.slice(repeatIndex + 1),
@@ -160,6 +179,65 @@ function calcRepeatCoords(e, repeatContainer) {
   }
 }
 
+function editRepeatArea(e, repeatIndex, direction) {
+  let repeat = GLOBAL_STATE.repeats[repeatIndex];
+  const startSize = direction == "x" ? repeat.xRepeats : repeat.yRepeats;
+  const startPos = [e.clientX, e.clientY];
+
+  dispatch({ transforming: true });
+  const end = () => {
+    dispatch({ transforming: false });
+
+    window.removeEventListener("touchmove", onmove);
+    window.removeEventListener("touchend", end);
+    window.removeEventListener("touchcancel", end);
+  };
+
+  const onmove = (e) => {
+    let newSize, updated;
+    if (direction == "x") {
+      newSize =
+        startSize -
+        Math.floor(
+          (startPos[0] - e.touches[0].clientX) /
+            (GLOBAL_STATE.scale / devicePixelRatio)
+        );
+
+      newSize = newSize < 0 ? 0 : newSize;
+
+      updated = {
+        ...GLOBAL_STATE.repeats[repeatIndex],
+        xRepeats: newSize,
+      };
+    } else {
+      newSize =
+        startSize +
+        Math.floor(
+          (startPos[1] - e.touches[0].clientY) /
+            (GLOBAL_STATE.scale / devicePixelRatio)
+        );
+
+      newSize = newSize < 0 ? 0 : newSize;
+      updated = {
+        ...GLOBAL_STATE.repeats[repeatIndex],
+        yRepeats: newSize,
+      };
+    }
+
+    dispatch({
+      repeats: [
+        ...GLOBAL_STATE.repeats.slice(0, repeatIndex),
+        updated,
+        ...GLOBAL_STATE.repeats.slice(repeatIndex + 1),
+      ],
+    });
+  };
+
+  window.addEventListener("touchmove", onmove);
+  window.addEventListener("touchcancel", end);
+  window.addEventListener("touchend", end);
+}
+
 export function repeatTouchInteraction(repeatContainer) {
   repeatContainer.addEventListener("touchstart", (e) => {
     calcRepeatCoords(e.touches[0], repeatContainer);
@@ -183,6 +261,13 @@ export function repeatTouchInteraction(repeatContainer) {
     } else if (classList.contains("move-repeat")) {
       // interacting with dragger
       moveRepeat(e.touches[0], repeatIndex);
+    } else if (classList.contains("repeat-area-dragger")) {
+      // interacting with dragger
+      if (classList.contains("x-axis")) {
+        editRepeatArea(e.touches[0], repeatIndex, "x");
+      } else {
+        editRepeatArea(e.touches[0], repeatIndex, "y");
+      }
     } else if (classList.contains("repeat-canvas")) {
       // interacting with canvas
       const activeTool = GLOBAL_STATE.activeTool;

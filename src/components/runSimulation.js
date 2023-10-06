@@ -3,7 +3,7 @@ import { Bimp } from "../lib/Bimp";
 import { GLOBAL_STATE, dispatch } from "../state";
 import { html } from "lit-html";
 
-let stopSim, relax, flip;
+let stopSim, relax;
 
 export function simulationView() {
   return html`<div id="sim-pane">
@@ -53,7 +53,6 @@ export function stopSimulation() {
 
 export function runSimulation() {
   return ({ state }) => {
-    let { scale, chart } = state;
     let queueSim = false;
 
     function run() {
@@ -61,12 +60,8 @@ export function runSimulation() {
 
       if (stopSim) stopSim();
 
-      ({ stopSim, relax, flip } = simulate(
-        Bimp.fromTile(
-          GLOBAL_STATE.chart.width,
-          GLOBAL_STATE.chart.height,
-          GLOBAL_STATE.repeats[0].bitmap.vFlip()
-        ),
+      ({ stopSim, relax } = simulate(
+        GLOBAL_STATE.chart,
         GLOBAL_STATE.yarnSequence.pixels,
         [0],
         GLOBAL_STATE.yarnPalette,

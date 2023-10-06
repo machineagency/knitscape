@@ -12,8 +12,6 @@ let GLOBAL_STATE = {
 
   activeTool: "brush",
   activeSymbol: 0,
-  activeLayer: "chart",
-  activeMotif: 0,
 
   chartBackground: "#ffffff",
   symbolPalette: {},
@@ -31,26 +29,16 @@ let GLOBAL_STATE = {
   yarnPalette: ["#416fac", "#a94a7a", "#ffcc44"], // Colors of the yarns
   yarnSequence: new Bimp(1, 6, [0, 0, 1, 1, 2, 2]),
 
-  editingRepeat: -1,
+  editingRepeat: 0,
   repeatPos: [-1, -1],
 
   repeats: [
     {
       bitmap: new Bimp(2, 2, [0, 2, 2, 0]),
       pos: [0, 0],
-      xRepeats: 1,
-      yRepeats: 1,
+      xRepeats: 4,
+      yRepeats: 4,
     },
-    // {
-    //   bitmap: new Bimp(
-    //     10,
-    //     2,
-    //     [0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0]
-    //   ),
-    //   pos: [0, 0],
-    //   xRepeats: 1,
-    //   yRepeats: 1,
-    // },
   ],
 
   repeatLibrary: [
@@ -68,8 +56,8 @@ let GLOBAL_STATE = {
     },
   ], // Library of motifs which can be used as repeats
 
-  chart: Bimp.empty(5, 5, 0),
-  // chart: Bimp.empty(80, 80, 0),
+  // chart: Bimp.empty(5, 5, 0),
+  chart: Bimp.empty(20, 20, 0),
 
   reverseScroll: false,
   grid: true,
@@ -86,7 +74,6 @@ let GLOBAL_STATE = {
 
   snapshots: [], // Array of snapshot history
   lastSnapshot: 0, // time of last snapshot
-  cursorIcon: "fa-solid fa-paintbrush",
   heldKeys: new Set(), // Keys that are currently held down
 };
 
@@ -132,7 +119,8 @@ function updateState(action) {
 }
 
 function undo() {
-  const changes = GLOBAL_STATE.snapshots[0];
+  if (GLOBAL_STATE.snapshots.length < 1) return;
+  const changes = Object.keys(GLOBAL_STATE.snapshots[0]);
 
   GLOBAL_STATE = {
     ...GLOBAL_STATE,

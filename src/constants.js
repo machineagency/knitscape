@@ -6,12 +6,7 @@ export const MIN_SIM_SCALE = 0.6;
 
 export const SNAPSHOT_INTERVAL = 1000;
 
-export const SNAPSHOT_FIELDS = [
-  "chart",
-  "yarnPalette",
-  "yarnSequence",
-  "repeats",
-];
+export const SNAPSHOT_FIELDS = ["yarnPalette", "yarnSequence", "repeats"];
 
 export const LAYERS = ["chart", "repeats", "yarn"];
 

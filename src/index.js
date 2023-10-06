@@ -31,6 +31,7 @@ import { chartPointerInteraction } from "./events/chartPointerInteraction";
 import { colorSequencePointerInteraction } from "./events/colorSequencePointerInteraction";
 import { repeatPointerInteraction } from "./events/repeatPointerInteraction";
 import { simulationPointerInteraction } from "./events/simulationPointerInteraction";
+import { repeatLibraryDragInteraction } from "./events/repeatLibraryDragInteraction";
 
 import { chartTouchInteraction } from "./events/chartTouchInteraction";
 import { colorSequenceTouchInteraction } from "./events/colorSequenceTouchInteraction";
@@ -38,7 +39,7 @@ import { repeatTouchInteraction } from "./events/repeatTouchInteraction";
 import { simulationTouchInteraction } from "./events/simulationTouchInteraction";
 
 import { closeModals } from "./events/closeModals";
-
+import { generateChart } from "./components/generateChart";
 import { isMobile } from "./utils";
 
 function r() {
@@ -57,6 +58,7 @@ function initKeyboard() {
     document.getElementById("color-dragger")
   );
   simulationPointerInteraction(document.getElementById("sim-container"));
+  repeatLibraryDragInteraction(document.getElementById("repeat-library"));
   closeModals();
 }
 
@@ -69,6 +71,7 @@ function initTouch() {
     document.getElementById("color-dragger")
   );
   simulationTouchInteraction(document.getElementById("sim-container"));
+  repeatLibraryDragInteraction(document.getElementById("repeat-library"));
   closeModals();
 }
 
@@ -128,6 +131,7 @@ function init() {
     drawRepeatLibrary(),
     drawSymbolPicker(),
     runSimulation(),
+    generateChart(),
   ]);
 
   measureWindow();

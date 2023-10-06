@@ -26,6 +26,8 @@ const hotkeys = {
       showLibrary: false,
       showSettings: false,
       showDownload: false,
+      editingRepeat: -1,
+      showRepeatLibrary: false,
     }),
   d: () =>
     dispatch({

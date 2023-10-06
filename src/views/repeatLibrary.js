@@ -22,14 +22,16 @@ export function repeatLibrary() {
       id="repeat-library-content"
       class="scroller ${GLOBAL_STATE.showRepeatLibrary ? "open" : "closed"}">
       ${GLOBAL_STATE.repeatLibrary.map(
-        (repeat) => html`
+        (repeat, index) => html`
           <div class="repeat-library-canvas">
-            <canvas data-repeattitle=${repeat.title}></canvas>
+            <canvas
+              data-repeattitle=${repeat.title}
+              draggable="true"
+              data-repeatlibraryindex=${index}></canvas>
           </div>
           <div class="repeat-size">
             ${repeat.bitmap.width}x${repeat.bitmap.height}
           </div>
-
           <div class="repeat-title">${repeat.title}</div>
         `
       )}
