@@ -117,14 +117,6 @@ SIM PANE
   left: 0;
 }
 
-#sim-controls {
-  display: flex;
-  gap: 0.3em;
-  padding: 0.5em;
-  align-items: center;
-  background-color: var(--base1);
-}
-
 /**********************************
 
 EDIT PANE
@@ -353,6 +345,7 @@ LEFT BAR
 **********************************/
 
 #left-bar {
+  width: min-content;
   z-index: 3;
   background-color: var(--base1);
   display: flex;
@@ -505,10 +498,6 @@ BOTTOM TOOLBAR
   font-size: 1em;
 }
 
-#chart-size-controls .input {
-  width: 4em;
-}
-
 /**********************************
 
 PAN-ZOOM CONTROLS
@@ -517,8 +506,9 @@ PAN-ZOOM CONTROLS
 
 .panzoom-controls {
   position: absolute;
+  align-items: center;
   display: flex;
-  gap: 0.2em;
+  gap: 0.3em;
   right: 10px;
   bottom: 10px;
   background-color: var(--base1);
@@ -530,6 +520,10 @@ PAN-ZOOM CONTROLS
 .panzoom-controls button {
   align-self: unset;
   cursor: pointer;
+}
+
+.panzoom-controls input[type="range"] {
+  width: 5em;
 }
 
 /**********************************

@@ -29,8 +29,7 @@ const HEIGHT_SHRINK = 0.8;
 
 const dpi = devicePixelRatio;
 
-export function simulate(pattern, yarnSequence, needles, palette, scale) {
-  let rightSide = true;
+export function simulate(pattern, yarnSequence, palette, scale) {
   let relaxed = false;
   let yarnWidth, stitchHeight, sim;
   let yarnSet = new Set(yarnSequence);

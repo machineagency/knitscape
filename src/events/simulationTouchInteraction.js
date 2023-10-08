@@ -1,5 +1,4 @@
 import { GLOBAL_STATE, dispatch } from "../state";
-import { zoomSimulationAtPoint } from "../actions/zoomFit";
 
 function pan(e, sim) {
   const startPos = { x: e.clientX, y: e.clientY };

@@ -80,7 +80,6 @@ export function runSimulation() {
       ({ stopSim, relax } = simulate(
         GLOBAL_STATE.chart,
         GLOBAL_STATE.yarnSequence.pixels,
-        [0],
         GLOBAL_STATE.yarnPalette,
         GLOBAL_STATE.simScale
       ));

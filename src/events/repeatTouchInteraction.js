@@ -256,7 +256,6 @@ export function repeatTouchInteraction(repeatContainer) {
       classList.contains("repeat-canvas")
     ) {
       // If we're not editing this repeat, begin editing it
-      console.log("NOW EDITING REPEAT", repeatIndex);
       dispatch({ editingRepeat: repeatIndex });
       return;
     }

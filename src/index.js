@@ -17,15 +17,14 @@ import { drawRepeats } from "./components/drawRepeats";
 
 // Pointer/keyboard interaction
 import { addKeypressListeners } from "./events/keypressEvents";
-import { wheelInteraction } from "./events/wheelInteraction";
-import { chartPointerInteraction } from "./events/chartPointerInteraction";
+import { desktopPointerPanZoom } from "./events/desktopPointerPanZoom";
 import { colorSequencePointerInteraction } from "./events/colorSequencePointerInteraction";
 import { repeatPointerInteraction } from "./events/repeatPointerInteraction";
 import { simulationPointerInteraction } from "./events/simulationPointerInteraction";
 import { repeatLibraryDragInteraction } from "./events/repeatLibraryDragInteraction";
 
 // Touch interaction
-import { chartTouchInteraction } from "./events/chartTouchInteraction";
+import { desktopTouchPanZoom } from "./events/desktopTouchPanZoom";
 import { colorSequenceTouchInteraction } from "./events/colorSequenceTouchInteraction";
 import { repeatTouchInteraction } from "./events/repeatTouchInteraction";
 import { simulationTouchInteraction } from "./events/simulationTouchInteraction";
@@ -56,9 +55,8 @@ function r() {
 function initKeyboard() {
   addKeypressListeners();
 
+  desktopPointerPanZoom(desktop);
   repeatPointerInteraction(repeatContainer);
-  chartPointerInteraction(symbolCanvas);
-  wheelInteraction(desktop);
   colorSequencePointerInteraction(yarnSequenceEditorCanvas, colorDragger);
   simulationPointerInteraction(simContainer);
   repeatLibraryDragInteraction(repeatLibrary);
@@ -66,9 +64,9 @@ function initKeyboard() {
 }
 
 function initTouch() {
-  document.body.style.setProperty("--font-size", "1.2rem");
+  document.body.style.setProperty("--font-size", "1.1rem");
 
-  chartTouchInteraction(symbolCanvas);
+  desktopTouchPanZoom(desktop);
   repeatTouchInteraction(repeatContainer);
   colorSequenceTouchInteraction(yarnSequenceEditorCanvas, colorDragger);
   simulationTouchInteraction(simContainer);
