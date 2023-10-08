@@ -8,6 +8,7 @@ export function desktopTouchPanZoom(desktop) {
   let didZoom = false;
 
   function pan(e, target) {
+    if (didZoom) return;
     const startPos = { x: e.clientX, y: e.clientY };
     const startPan = GLOBAL_STATE.chartPan;
 
