@@ -1,28 +1,11 @@
 import { GLOBAL_STATE, dispatch } from "../state";
 import { posAtCoords } from "../utils";
-import { zoomAtPoint } from "../actions/zoomFit";
+import { centerZoom, zoomAtPoint } from "../actions/zoomFit";
 
 export function desktopTouchPanZoom(desktop) {
-  const evCache = [];
+  const pointerCache = [];
   let prevDiff = -1;
-
-  function removeEvent(ev) {
-    // Remove this event from the target's cache
-    const index = evCache.findIndex(
-      (cachedEv) => cachedEv.pointerId === ev.pointerId
-    );
-    evCache.splice(index, 1);
-  }
-
-  function endPointer(e) {
-    dispatch({ pos: { x: -1, y: -1 } });
-
-    removeEvent(e);
-
-    if (evCache.length < 2) {
-      prevDiff = -1;
-    }
-  }
+  let didZoom = false;
 
   function pan(e, target) {
     const startPos = { x: e.clientX, y: e.clientY };
@@ -49,8 +32,11 @@ export function desktopTouchPanZoom(desktop) {
   }
 
   desktop.addEventListener("pointerdown", (e) => {
+    pointerCache.push(e);
+  });
+
+  desktop.addEventListener("touchstart", (e) => {
     const { x, y } = posAtCoords(e, desktop);
-    evCache.push(e);
 
     if (GLOBAL_STATE.pos.x != x || GLOBAL_STATE.pos.y != y) {
       dispatch({ pos: { x, y } });
@@ -58,50 +44,46 @@ export function desktopTouchPanZoom(desktop) {
 
     if (e.target == desktop || e.target.id == "symbol-canvas") {
       dispatch({ editingRepeat: -1 });
-      pan(e, desktop);
+      pan(e.touches[0], desktop);
     }
   });
 
-  desktop.addEventListener("pointermove", (e) => {
+  desktop.addEventListener("touchmove", (e) => {
     const { x, y } = posAtCoords(e, desktop);
 
     if (GLOBAL_STATE.pos.x != x || GLOBAL_STATE.pos.y != y) {
       dispatch({ pos: { x, y } });
     }
+  });
 
-    const index = evCache.findIndex(
+  desktop.addEventListener("pointermove", (e) => {
+    if (pointerCache.length === 0) return;
+
+    const pointerIndex = pointerCache.findIndex(
       (cachedEv) => cachedEv.pointerId === e.pointerId
     );
+    pointerCache[pointerIndex] = e;
 
-    evCache[index] = e;
-
-    console.log(evCache);
-
-    if (evCache.length === 2) {
-      console.log("zoom");
-      // Calculate the distance between the two pointers
-      const curDiff = Math.sqrt(
-        Math.pow(evCache[0].clientX - evCache[1].clientX, 2) +
-          Math.pow(evCache[0].clientY - evCache[1].clientY, 2)
+    if (pointerCache.length === 2) {
+      didZoom = true;
+      const curDiff = Math.abs(
+        pointerCache[0].clientX - pointerCache[1].clientX
       );
-      let scale;
+
+      let scale = GLOBAL_STATE.scale;
 
       if (prevDiff > 0) {
         if (curDiff > prevDiff) {
           // The distance between the two pointers has increased
-          scale = GLOBAL_STATE.scale - 1;
+          scale--;
         }
         if (curDiff < prevDiff) {
           // The distance between the two pointers has decreased
-          scale = GLOBAL_STATE.scale + 1;
+          scale++;
         }
       }
 
-      zoomAtPoint({
-        x: evCache[0].clientX + evCache[0].clientX - evCache[1].clientX,
-        y: evCache[0].clientY + evCache[0].clientY - evCache[1].clientY,
-        scale,
-      });
+      centerZoom(scale);
 
       // Cache the distance for the next move event
       prevDiff = curDiff;
@@ -109,18 +91,15 @@ export function desktopTouchPanZoom(desktop) {
   });
 
   desktop.addEventListener("pointerup", (e) => {
-    endPointer(e);
-  });
-
-  desktop.addEventListener("pointercancel", (e) => {
-    endPointer(e);
-  });
-
-  desktop.addEventListener("pointerleave", (e) => {
-    endPointer(e);
-  });
-
-  desktop.addEventListener("pointerout", (e) => {
-    endPointer(e);
+    const pointerIndex = pointerCache.findIndex(
+      (cachedEv) => cachedEv.pointerId === e.pointerId
+    );
+    pointerCache.splice(pointerIndex, 1);
+    if (pointerCache.length === 0) {
+      didZoom = false;
+    }
+    if (pointerCache.length < 2) {
+      prevDiff = -1;
+    }
   });
 }

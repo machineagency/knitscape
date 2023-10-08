@@ -20,7 +20,7 @@ suitable for hand-knitting as well.
   - Export to JSON, PNG, and SilverKnit's TXT format
   - Import patterns from JSON and pattern library
 
-## todo
+<!-- ## todo
 
 - sim update optimizations
 - settings
@@ -41,4 +41,4 @@ ideas/icebox
 - some sort of tuck/slip verification - tuck always must have knit on either
   side, slip can't be more than 4/6 rows
 - overlay operation chart on knit sim/make it editable
-- different repeat operations: mirror, offset per repeat
+- different repeat operations: mirror, offset per repeat -->

@@ -165,6 +165,6 @@ function yarnPicker() {
 
 export function leftBar() {
   return html`<div id="left-bar" class="scroller">
-    ${symbolPicker()} ${yarnPicker()} ${motifLibrary()}
+    ${symbolPicker()} ${yarnPicker()}
   </div>`;
 }
