@@ -7,8 +7,6 @@ import { fitChart } from "./actions/zoomFit";
 
 import { view } from "./views/view";
 
-import { DEFAULT_SYMBOLS, SYMBOL_DIR } from "./constants";
-
 import { yarnSequenceCanvas } from "./components/yarnSequenceCanvas";
 
 // Chart View Canvas Layers
@@ -75,26 +73,6 @@ function initTouch() {
   closeModals();
 }
 
-function calcSplit() {
-  const portrait = screen.availHeight > screen.availWidth;
-  document
-    .getElementById("site")
-    .style.setProperty("flex-direction", portrait ? "column" : "row");
-
-  return portrait
-    ? Split(["#chart-pane", "#sim-pane"], {
-        sizes: [60, 40],
-        minSize: 100,
-        gutterSize: 11,
-        direction: "vertical",
-      })
-    : Split(["#chart-pane", "#sim-pane"], {
-        sizes: [60, 40],
-        minSize: 100,
-        gutterSize: 11,
-      });
-}
-
 function measureWindow() {
   document.documentElement.style.setProperty(
     "--vh",
@@ -109,7 +87,11 @@ function measureWindow() {
 function init() {
   r();
 
-  calcSplit();
+  Split(["#chart-pane", "#sim-pane"], {
+    sizes: [60, 40],
+    minSize: 100,
+    gutterSize: 11,
+  });
 
   isMobile() ? initTouch() : initKeyboard();
 

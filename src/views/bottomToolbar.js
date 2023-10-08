@@ -34,7 +34,7 @@ export function bottomToolbar() {
       <input
         class="input"
         type="number"
-        value=${GLOBAL_STATE.chart.width}
+        .value=${GLOBAL_STATE.chart.width}
         @change=${(e) => updateChartWidth(Number(e.target.value))}
         min="5"
         max="1000" />
@@ -42,7 +42,7 @@ export function bottomToolbar() {
       <input
         class="input"
         type="number"
-        value=${GLOBAL_STATE.chart.height}
+        .value=${GLOBAL_STATE.chart.height}
         @change=${(e) => updateChartHeight(Number(e.target.value))}
         min="5"
         max="1000" />

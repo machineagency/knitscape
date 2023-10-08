@@ -10,13 +10,14 @@ function dragInRepeat(e, repeatLibraryIndex) {
 
     let pos = posAtCoords(e, canvas);
 
+    const newBitmap = GLOBAL_STATE.repeatLibrary[repeatLibraryIndex].bitmap;
+
     dispatch({
       repeats: [
         ...GLOBAL_STATE.repeats,
         {
-          bitmap: GLOBAL_STATE.repeatLibrary[repeatLibraryIndex].bitmap,
-          xRepeats: 0,
-          yRepeats: 0,
+          bitmap: newBitmap,
+          area: [newBitmap.width, newBitmap.height],
           pos: [pos.x, GLOBAL_STATE.chart.height - pos.y],
         },
       ],
@@ -34,7 +35,6 @@ function dragInRepeat(e, repeatLibraryIndex) {
 
 export function repeatLibraryDragInteraction(repeatLibraryContainer) {
   repeatLibraryContainer.addEventListener("dragstart", (e) => {
-    console.log("whee");
     dragInRepeat(e, Number(e.target.dataset.repeatlibraryindex));
   });
 }

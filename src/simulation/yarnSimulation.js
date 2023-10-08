@@ -11,7 +11,7 @@ const X_PADDING = 1;
 
 // Number of rows to add to the top and bottom of the pattern
 // (will be drawn in a different transparent color)
-const Y_PADDING = 4;
+const Y_PADDING = 0;
 
 const STITCH_RATIO = 5 / 3; // Row height / stitch width
 const YARN_RATIO = 0.23;
@@ -283,7 +283,7 @@ export function simulate(pattern, yarnSequence, needles, palette, scale) {
 
   const yarnPath = yarnGraph.makeNice();
 
-  const yarnPathLinks = yarnGraph.yarnPathToLinks().reverse();
+  const yarnPathLinks = yarnGraph.yarnPathToLinks();
   draw();
 
   return { relax, stopSim };

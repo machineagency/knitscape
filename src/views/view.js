@@ -13,6 +13,8 @@ import { bottomToolbar } from "./bottomToolbar";
 import { leftBar } from "./leftBar";
 import { repeatCanvas } from "./repeatCanvas";
 import { Bimp } from "../lib/Bimp";
+import { toolData } from "../constants";
+import { repeatEditingTools } from "../actions/repeatEditingTools";
 
 import { simulationView } from "../components/runSimulation";
 
@@ -21,15 +23,42 @@ export function view() {
     ${when(GLOBAL_STATE.showDownload, downloadModal)}
     ${when(GLOBAL_STATE.showLibrary, libraryModal)}
     ${when(GLOBAL_STATE.showSettings, settingsModal)}
-    ${when(GLOBAL_STATE.showFileMenu, fileModal)}
+    ${when(GLOBAL_STATE.showFileMenu, fileModal)} ${taskbar()}
+
     <div id="site">
       <div id="chart-pane">
-        ${taskbar()}
-
         <div id="chart-layout">
           ${leftBar()}
 
           <div id="desktop">
+            ${when(
+              GLOBAL_STATE.editingRepeat > -1,
+              () => html` <div class="tool-picker">
+                ${Object.keys(repeatEditingTools).map(
+                  (toolName) => html`<button
+                    class="btn solid ${GLOBAL_STATE.activeTool == toolName
+                      ? "current"
+                      : ""}"
+                    @click=${() =>
+                      dispatch({
+                        activeTool: toolName,
+                      })}>
+                    <i class=${toolData[toolName].icon}></i>
+                  </button>`
+                )}
+                <button
+                  class="btn solid move-repeat ${GLOBAL_STATE.activeTool ==
+                  "move"
+                    ? "current"
+                    : ""}"
+                  @click=${() =>
+                    dispatch({
+                      activeTool: "move",
+                    })}>
+                  <i class="fa-solid fa-up-down-left-right"></i>
+                </button>
+              </div>`
+            )}
             <div
               id="canvas-transform-group"
               style="transform: translate(${Math.floor(
@@ -50,11 +79,9 @@ export function view() {
           </div>
           ${repeatLibrary()}
         </div>
-
-        ${bottomToolbar()}
       </div>
       ${simulationView()}
     </div>
-    ${when(GLOBAL_STATE.debug, debugPane)}
+    ${bottomToolbar()} ${when(GLOBAL_STATE.debug, debugPane)}
   `;
 }

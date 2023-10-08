@@ -24,7 +24,6 @@ body {
   position: relative;
   flex: 1;
   display: flex;
-  flex-direction: column;
   user-select: none;
   z-index: 1;
   overflow: hidden;
@@ -188,8 +187,11 @@ REPEAT CANVAS UI
   left: 0;
   top: 0;
 }
+
 .repeat-canvas-container {
   position: absolute;
+  display: flex;
+  justify-content: center;
 }
 
 .repeat-bounds {
@@ -222,13 +224,11 @@ REPEAT CANVAS UI
 
 .repeat-area-dragger.y-axis {
   bottom: calc(100% + 4px);
-  /* left: -4px; */
   border-radius: 12px 12px 0 0;
   padding: 0.3em 0.7em 0.2em 0.7em;
 }
 
 .repeat-area-dragger.x-axis {
-  /* bottom: -4px; */
   left: calc(100% + 4px);
   border-radius: 0 12px 12px 0;
   padding: 0.7em 0.3em 0.7em 0.2em;
@@ -258,14 +258,25 @@ REPEAT CANVAS UI
   right: 0;
 }
 
-.repeat-tool-picker {
-  flex-direction: column;
-  top: 0;
-  right: calc(100% + 8px);
+.move-repeat {
+  cursor: move;
 }
 
-.move-repeat-grabber {
+.delete-repeat {
+  position: absolute;
+  z-index: 10;
+  top: 100%;
+}
+
+.resize-repeat {
   cursor: move;
+  bottom: 100%;
+  left: 100%;
+  position: absolute;
+}
+
+.resize-repeat > i {
+  pointer-events: none;
 }
 
 .repeat-ui .btn.solid {
@@ -273,20 +284,32 @@ REPEAT CANVAS UI
 }
 
 .resize-repeat {
-  aspect-ratio: 1;
-  cursor: grab !important;
+  cursor: unset;
 }
 
-.repeat-ui > button {
-  align-self: stretch;
-}
-.repeat-ui > button > i {
-  pointer-events: none;
+/**********************************
+
+TOOL PICKER
+
+**********************************/
+
+.tool-picker {
+  top: 8px;
+  left: 20px;
+  position: absolute;
+  display: flex;
+  gap: 0.4em;
+  padding: 0.4em;
+  border-radius: 12px;
+  box-shadow: 0 0 4px 0 black;
+  background-color: var(--base2);
+  z-index: 10;
+  font-size: larger;
 }
 
-.repeat-tool-picker .current {
-  background-color: var(--base3);
-  color: var(--accent);
+.tool-picker .btn.current {
+  background-color: var(--accent);
+  color: var(--base2);
 }
 
 /**********************************

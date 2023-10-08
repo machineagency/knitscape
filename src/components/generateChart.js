@@ -5,14 +5,14 @@ export function generateChart() {
     let repeats = state.repeats;
     function regen() {
       let chart = Bimp.empty(
-        GLOBAL_STATE.chart.height,
         GLOBAL_STATE.chart.width,
+        GLOBAL_STATE.chart.height,
         0
       );
       for (const repeat of repeats) {
         let tiled = Bimp.fromTile(
-          repeat.bitmap.width + repeat.xRepeats,
-          repeat.bitmap.height + repeat.yRepeats,
+          repeat.area[0],
+          repeat.area[1],
           repeat.bitmap.vFlip()
         ).vFlip();
         chart = chart.overlay(tiled, repeat.pos);

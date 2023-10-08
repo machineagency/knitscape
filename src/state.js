@@ -36,8 +36,7 @@ let GLOBAL_STATE = {
     {
       bitmap: new Bimp(2, 2, [0, 2, 2, 0]),
       pos: [0, 0],
-      xRepeats: 4,
-      yRepeats: 4,
+      area: [4, 4],
     },
   ],
 

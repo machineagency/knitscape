@@ -1,47 +1,6 @@
-import { dispatch, GLOBAL_STATE } from "../state";
+import { GLOBAL_STATE, dispatch } from "../state";
 import { html } from "lit-html";
 import { when } from "lit-html/directives/when.js";
-import { toolData } from "../constants";
-import { repeatEditingTools } from "../actions/repeatEditingTools";
-
-function repeatUI(repeat, index) {
-  return html`
-    <div class="repeat-ui repeat-controls">
-      <button
-        class="btn solid delete-repeat"
-        @click=${() =>
-          dispatch({
-            editingRepeat: -1,
-            repeats: [
-              ...GLOBAL_STATE.repeats.slice(0, index),
-              ...GLOBAL_STATE.repeats.slice(index + 1),
-            ],
-          })}>
-        <i class="fa-solid fa-circle-xmark"></i>
-      </button>
-      <button class="btn solid move-repeat">
-        <i class="fa-solid fa-grip"></i>
-      </button>
-      <button class="btn solid resize-repeat">
-        <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
-      </button>
-    </div>
-    <div class="repeat-ui repeat-tool-picker">
-      ${Object.keys(repeatEditingTools).map(
-        (toolName) => html`<button
-          class="btn solid ${GLOBAL_STATE.activeTool == toolName
-            ? "current"
-            : ""}"
-          @click=${() =>
-            dispatch({
-              activeTool: toolName,
-            })}>
-          <i class=${toolData[toolName].icon}></i>
-        </button>`
-      )}
-    </div>
-  `;
-}
 
 function xPos(repeat) {
   return Math.floor((repeat.pos[0] * GLOBAL_STATE.scale) / devicePixelRatio);
@@ -68,15 +27,36 @@ export function repeatCanvas() {
             ? "z-index: 3"
             : "z-index: 1"}"
           id="repeat-${index}-container">
-          ${when(GLOBAL_STATE.editingRepeat == index, () =>
-            repeatUI(repeat, index)
+          ${when(
+            GLOBAL_STATE.editingRepeat == index,
+            () =>
+              html`<button class="btn solid resize-repeat grab">
+                  <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+                </button>
+                <button
+                  class="btn solid delete-repeat"
+                  @click=${() =>
+                    dispatch({
+                      editingRepeat: -1,
+                      repeats: [
+                        ...GLOBAL_STATE.repeats.slice(
+                          0,
+                          GLOBAL_STATE.editingRepeat
+                        ),
+                        ...GLOBAL_STATE.repeats.slice(
+                          GLOBAL_STATE.editingRepeat + 1
+                        ),
+                      ],
+                    })}>
+                  <i class="fa-solid fa-circle-xmark"></i>
+                </button>`
           )}
           <div
             class="repeat-bounds"
-            style="width: calc(100% + ${(repeat.xRepeats * GLOBAL_STATE.scale) /
-            devicePixelRatio}px); height: calc(100% + ${(repeat.yRepeats *
+            style="width: ${(repeat.area[0] * GLOBAL_STATE.scale) /
+            devicePixelRatio}px; height: ${(repeat.area[1] *
               GLOBAL_STATE.scale) /
-            devicePixelRatio}px);">
+            devicePixelRatio}px;">
             ${when(
               GLOBAL_STATE.editingRepeat == index,
               () =>
