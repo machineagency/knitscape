@@ -345,7 +345,6 @@ LEFT BAR
 **********************************/
 
 #left-bar {
-  width: min-content;
   z-index: 3;
   background-color: var(--base1);
   display: flex;
@@ -353,6 +352,10 @@ LEFT BAR
   gap: 1em;
   padding: 0 0.6em;
   overflow-y: auto;
+}
+
+.btn.add-repeat {
+  align-self: stretch;
 }
 
 /**********************************

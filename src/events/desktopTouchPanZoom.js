@@ -3,12 +3,12 @@ import { posAtCoords } from "../utils";
 import { centerZoom, zoomAtPoint } from "../actions/zoomFit";
 
 export function desktopTouchPanZoom(desktop) {
-  const pointerCache = [];
-  let prevDiff = -1;
-  let didZoom = false;
+  // const pointerCache = [];
+  // let prevDiff = -1;
+  // let didZoom = false;
 
   function pan(e, target) {
-    if (didZoom) return;
+    // if (didZoom) return;
     const startPos = { x: e.clientX, y: e.clientY };
     const startPan = GLOBAL_STATE.chartPan;
 
@@ -32,9 +32,9 @@ export function desktopTouchPanZoom(desktop) {
     target.addEventListener("pointerout", end);
   }
 
-  desktop.addEventListener("pointerdown", (e) => {
-    pointerCache.push(e);
-  });
+  // desktop.addEventListener("pointerdown", (e) => {
+  //   pointerCache.push(e);
+  // });
 
   desktop.addEventListener("touchstart", (e) => {
     const { x, y } = posAtCoords(e, desktop);
@@ -57,50 +57,50 @@ export function desktopTouchPanZoom(desktop) {
     }
   });
 
-  desktop.addEventListener("pointermove", (e) => {
-    if (pointerCache.length === 0) return;
+  // desktop.addEventListener("pointermove", (e) => {
+  //   if (pointerCache.length === 0) return;
 
-    const pointerIndex = pointerCache.findIndex(
-      (cachedEv) => cachedEv.pointerId === e.pointerId
-    );
-    pointerCache[pointerIndex] = e;
+  //   const pointerIndex = pointerCache.findIndex(
+  //     (cachedEv) => cachedEv.pointerId === e.pointerId
+  //   );
+  //   pointerCache[pointerIndex] = e;
 
-    if (pointerCache.length === 2) {
-      didZoom = true;
-      const curDiff = Math.abs(
-        pointerCache[0].clientX - pointerCache[1].clientX
-      );
+  //   if (pointerCache.length === 2) {
+  //     didZoom = true;
+  //     const curDiff = Math.abs(
+  //       pointerCache[0].clientX - pointerCache[1].clientX
+  //     );
 
-      let scale = GLOBAL_STATE.scale;
+  //     let scale = GLOBAL_STATE.scale;
 
-      if (prevDiff > 0) {
-        if (curDiff > prevDiff) {
-          // The distance between the two pointers has increased
-          scale--;
-        }
-        if (curDiff < prevDiff) {
-          // The distance between the two pointers has decreased
-          scale++;
-        }
-      }
+  //     if (prevDiff > 0) {
+  //       if (curDiff > prevDiff) {
+  //         // The distance between the two pointers has increased
+  //         scale--;
+  //       }
+  //       if (curDiff < prevDiff) {
+  //         // The distance between the two pointers has decreased
+  //         scale++;
+  //       }
+  //     }
 
-      centerZoom(scale);
+  //     centerZoom(scale);
 
-      // Cache the distance for the next move event
-      prevDiff = curDiff;
-    }
-  });
+  //     // Cache the distance for the next move event
+  //     prevDiff = curDiff;
+  //   }
+  // });
 
-  desktop.addEventListener("pointerup", (e) => {
-    const pointerIndex = pointerCache.findIndex(
-      (cachedEv) => cachedEv.pointerId === e.pointerId
-    );
-    pointerCache.splice(pointerIndex, 1);
-    if (pointerCache.length === 0) {
-      didZoom = false;
-    }
-    if (pointerCache.length < 2) {
-      prevDiff = -1;
-    }
-  });
+  // desktop.addEventListener("pointerup", (e) => {
+  //   const pointerIndex = pointerCache.findIndex(
+  //     (cachedEv) => cachedEv.pointerId === e.pointerId
+  //   );
+  //   pointerCache.splice(pointerIndex, 1);
+  //   if (pointerCache.length === 0) {
+  //     didZoom = false;
+  //   }
+  //   if (pointerCache.length < 2) {
+  //     prevDiff = -1;
+  //   }
+  // });
 }

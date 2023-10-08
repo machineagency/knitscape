@@ -40,4 +40,5 @@ export const toolData = {
   rect: { icon: "fa-solid fa-vector-square", hotkey: "r" },
   line: { icon: "fa-solid fa-minus", hotkey: "l" },
   shift: { icon: "fa-solid fa-right-left", hotkey: "s" },
+  move: { hotkey: "h" },
 };

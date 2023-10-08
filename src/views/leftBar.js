@@ -163,8 +163,27 @@ function yarnPicker() {
   </div>`;
 }
 
+function addRepeat() {
+  const newBitmap = Bimp.empty(2, 2, [0, 0, 0, 0]);
+
+  dispatch({
+    repeats: [
+      ...GLOBAL_STATE.repeats,
+      {
+        bitmap: newBitmap,
+        area: [newBitmap.width, newBitmap.height],
+        pos: [0, 0],
+      },
+    ],
+    editingRepeat: GLOBAL_STATE.repeats.length,
+  });
+}
+
 export function leftBar() {
   return html`<div id="left-bar" class="scroller">
+    <button class="btn solid add-repeat" @click=${() => addRepeat()}>
+      <i class="fa-solid fa-plus"></i>
+    </button>
     ${symbolPicker()} ${yarnPicker()}
   </div>`;
 }

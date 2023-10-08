@@ -73,15 +73,15 @@ export function taskbar() {
         <i class="fa-brands fa-github"></i>
       </button>
 
-      <button class="btn icon" @click=${() => toggleFullscreen()}>
+      <!-- <button class="btn icon" @click=${() => toggleFullscreen()}>
         <i
           class="fa-solid fa-${!window.document.fullscreenElement &&
-          !window.document.mozFullScreenElement &&
-          !window.document.webkitFullscreenElement &&
-          !window.document.msFullscreenElement
-            ? "up-right-and-down-left-from-center"
-            : "down-left-and-up-right-to-center"}"></i>
-      </button>
+      !window.document.mozFullScreenElement &&
+      !window.document.webkitFullscreenElement &&
+      !window.document.msFullscreenElement
+        ? "up-right-and-down-left-from-center"
+        : "down-left-and-up-right-to-center"}"></i>
+      </button> -->
     </div>
   </div>`;
 }
