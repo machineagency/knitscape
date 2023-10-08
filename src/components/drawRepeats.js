@@ -19,23 +19,6 @@ function sizeCanvasToBitmap(canvas, bitmapWidth, bitmapHeight) {
   }px`;
 }
 
-function scaleAll(repeatIndex, width, height) {
-  let canvases = [
-    document.getElementById(`repeat-${repeatIndex}`),
-    document.getElementById(`repeat-${repeatIndex}-grid`),
-    document.getElementById(`repeat-${repeatIndex}-outline`),
-  ];
-
-  canvases.forEach((canvas) => {
-    canvas.width = GLOBAL_STATE.scale * width;
-    canvas.height = GLOBAL_STATE.scale * height;
-    canvas.style.width = `${(GLOBAL_STATE.scale * width) / devicePixelRatio}px`;
-    canvas.style.height = `${
-      (GLOBAL_STATE.scale * height) / devicePixelRatio
-    }px`;
-  });
-}
-
 export function drawRepeats() {
   return ({ state }) => {
     let { scale, symbolMap, repeats, symbolLineWidth } = state;
@@ -43,6 +26,29 @@ export function drawRepeats() {
     let lastDrawn = repeats.map((repeat) => {
       return { bitmap: null, pos: [...repeat.pos] };
     });
+
+    function scaleAll(repeatIndex, width, height) {
+      let canvases = [
+        document.getElementById(`repeat-${repeatIndex}`),
+        document.getElementById(`repeat-${repeatIndex}-grid`),
+        document.getElementById(`repeat-${repeatIndex}-outline`),
+      ];
+
+      canvases.forEach((canvas) => {
+        if (canvas == null) {
+          lastDrawn[repeatIndex].bitmap = null;
+          return;
+        }
+        canvas.width = GLOBAL_STATE.scale * width;
+        canvas.height = GLOBAL_STATE.scale * height;
+        canvas.style.width = `${
+          (GLOBAL_STATE.scale * width) / devicePixelRatio
+        }px`;
+        canvas.style.height = `${
+          (GLOBAL_STATE.scale * height) / devicePixelRatio
+        }px`;
+      });
+    }
 
     function drawGrid(repeatIndex) {
       if (!GLOBAL_STATE.grid) return;

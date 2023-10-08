@@ -31,7 +31,7 @@ function pan(e, target) {
 export function desktopPointerPanZoom(desktop) {
   desktop.addEventListener("pointerdown", (e) => {
     if (e.target == desktop || e.target.id == "symbol-canvas") {
-      dispatch({ editingRepeat: -1 });
+      // dispatch({ editingRepeat: -1 });
       pan(e, desktop);
     }
   });

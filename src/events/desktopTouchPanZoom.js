@@ -44,7 +44,7 @@ export function desktopTouchPanZoom(desktop) {
     }
 
     if (e.target == desktop || e.target.id == "symbol-canvas") {
-      dispatch({ editingRepeat: -1 });
+      // dispatch({ editingRepeat: -1 });
       pan(e.touches[0], desktop);
     }
   });

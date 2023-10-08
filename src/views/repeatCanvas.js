@@ -31,25 +31,8 @@ export function repeatCanvas() {
             GLOBAL_STATE.editingRepeat == index,
             () =>
               html`<button class="btn solid resize-repeat grab">
-                  <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
-                </button>
-                <button
-                  class="btn solid delete-repeat"
-                  @click=${() =>
-                    dispatch({
-                      editingRepeat: -1,
-                      repeats: [
-                        ...GLOBAL_STATE.repeats.slice(
-                          0,
-                          GLOBAL_STATE.editingRepeat
-                        ),
-                        ...GLOBAL_STATE.repeats.slice(
-                          GLOBAL_STATE.editingRepeat + 1
-                        ),
-                      ],
-                    })}>
-                  <i class="fa-solid fa-circle-xmark"></i>
-                </button>`
+                <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+              </button> `
           )}
           <div
             class="repeat-bounds"

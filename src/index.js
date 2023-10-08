@@ -115,7 +115,6 @@ function init() {
     drawYarnColors(yarnColorCanvas),
     drawGrid(gridCanvas),
     drawRepeats(),
-    // drawRepeatLibrary(),
     drawSymbolPicker(),
     runSimulation(),
     generateChart(),

@@ -10,8 +10,7 @@ import { chartTools } from "./chartTools";
 import { debugPane } from "./debugPane";
 import { leftBar } from "./leftBar";
 import { repeatCanvas } from "./repeatCanvas";
-import { toolData } from "../constants";
-import { repeatEditingTools } from "../actions/repeatEditingTools";
+import { repeatTools } from "./repeatTools";
 
 import { simulationView } from "../components/runSimulation";
 
@@ -27,41 +26,7 @@ export function view() {
           ${leftBar()}
 
           <div id="desktop">
-            ${when(
-              GLOBAL_STATE.editingRepeat > -1,
-              () => html` <div class="tool-picker">
-                <span
-                  >${GLOBAL_STATE.repeats[GLOBAL_STATE.editingRepeat].bitmap
-                    .width}
-                  x
-                  ${GLOBAL_STATE.repeats[GLOBAL_STATE.editingRepeat].bitmap
-                    .height}
-                </span>
-                ${Object.keys(repeatEditingTools).map(
-                  (toolName) => html`<button
-                    class="btn solid ${GLOBAL_STATE.activeTool == toolName
-                      ? "current"
-                      : ""}"
-                    @click=${() =>
-                      dispatch({
-                        activeTool: toolName,
-                      })}>
-                    <i class=${toolData[toolName].icon}></i>
-                  </button>`
-                )}
-                <button
-                  class="btn solid move-repeat ${GLOBAL_STATE.activeTool ==
-                  "move"
-                    ? "current"
-                    : ""}"
-                  @click=${() =>
-                    dispatch({
-                      activeTool: "move",
-                    })}>
-                  <i class="fa-solid fa-hand"></i>
-                </button>
-              </div>`
-            )}
+            ${when(GLOBAL_STATE.editingRepeat > -1, repeatTools)}
             <div
               id="canvas-transform-group"
               style="transform: translate(${Math.floor(
@@ -76,7 +41,6 @@ export function view() {
               <canvas id="yarn-color-canvas"></canvas>
               <canvas id="symbol-canvas"></canvas>
               <canvas id="grid" class="grid-canvas"></canvas>
-              <!-- <canvas id="outline" class="outline-canvas"></canvas> -->
               ${repeatCanvas()}
             </div>
           </div>
