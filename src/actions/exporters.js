@@ -36,14 +36,6 @@ export function downloadPNG() {
 }
 
 export function downloadBMP() {
-  // download(
-  //   makeBMP(
-  //     repeatEditor.state.bitmap,
-  //     colorChangeEditor.state.bitmap.pixels,
-  //     colorChangeEditor.state.palette
-  //   ).src
-  // );
-
   download(
     makeBMP(
       GLOBAL_STATE.repeatBitmap,
@@ -56,7 +48,7 @@ export function downloadBMP() {
 export function downloadSilverKnitTxt() {
   const text =
     "SilverKnit\n" +
-    GLOBAL_STATE.repeatBitmap
+    GLOBAL_STATE.chart
       .make2d()
       .map((row) =>
         row
@@ -79,10 +71,13 @@ export function downloadJSON() {
     "data:text/json;charset=utf-8," +
     encodeURIComponent(
       JSON.stringify({
+        width: GLOBAL_STATE.chart.width,
+        height: GLOBAL_STATE.chart.height,
+        repeats: GLOBAL_STATE.repeats.map(({ bitmap, pos, area }) => {
+          return { bitmap: bitmap.toJSON(), pos, area };
+        }),
         yarnPalette: GLOBAL_STATE.yarnPalette,
-        needles: needleEditor.state.bitmap.toJSON(),
-        repeat: repeatEditor.state.bitmap.toJSON(),
-        yarns: colorChangeEditor.state.bitmap.vMirror().toJSON(),
+        yarnSequence: GLOBAL_STATE.yarnSequence.toJSON(),
       })
     );
 

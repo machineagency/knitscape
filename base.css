@@ -304,7 +304,7 @@ button.btn {
   background-color: transparent;
   font-family: inherit;
   padding: 0;
-  cursor: pointer;
+  cursor: inherit;
 }
 
 a.btn,
@@ -426,13 +426,6 @@ TEXT INPUT
   line-height: 1;
   height: 1.5rem;
 }
-
-/* .input[disabled] {
-  --input-border: #ccc;
-
-  background-color: #eee;
-  cursor: not-allowed;
-} */
 
 .input:focus {
   border-color: hsl(

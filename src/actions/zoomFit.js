@@ -40,6 +40,12 @@ export function centerZoom(scale) {
   zoomAtPoint({ x: bbox.width / 2, y: bbox.height / 2 }, scale);
 }
 
+export function centerZoomSimulation(scale) {
+  let bbox = document.getElementById("sim-container").getBoundingClientRect();
+
+  zoomSimulationAtPoint({ x: bbox.width / 2, y: bbox.height / 2 }, scale);
+}
+
 export function zoomSimulationAtPoint(pt, simScale) {
   if (simScale < MIN_SIM_SCALE || simScale > MAX_SIM_SCALE) return;
 

@@ -42,6 +42,11 @@ TASKBAR
   align-items: center;
   padding: 0.3em;
   z-index: 5;
+  cursor: default;
+}
+
+#taskbar button {
+  cursor: pointer;
 }
 
 .site-title {
@@ -115,8 +120,8 @@ SIM PANE
 #sim-controls {
   display: flex;
   gap: 0.3em;
-  justify-content: end;
   padding: 0.5em;
+  align-items: center;
   background-color: var(--base1);
 }
 
@@ -210,7 +215,6 @@ REPEAT CANVAS UI
 
 .repeat-area-dragger {
   position: absolute;
-  cursor: grab;
   border: 0;
   display: flex;
   align-items: center;
@@ -295,16 +299,17 @@ TOOL PICKER
 
 .tool-picker {
   top: 8px;
-  left: 20px;
+  right: 8px;
   position: absolute;
   display: flex;
   gap: 0.4em;
   padding: 0.4em;
   border-radius: 12px;
   box-shadow: 0 0 4px 0 black;
-  background-color: var(--base2);
+  background-color: var(--base1);
   z-index: 10;
   font-size: larger;
+  align-items: center;
 }
 
 .tool-picker .btn.current {
@@ -331,7 +336,6 @@ YARN SEQUENCE
   width: 100%;
   position: absolute;
   bottom: 100%;
-  cursor: grab;
   border-radius: 8px 8px 0 0;
   color: var(--text-inactive);
   overflow: hidden;
@@ -494,19 +498,6 @@ BOTTOM TOOLBAR
 
 **********************************/
 
-#bottom-toolbar {
-  display: flex;
-  padding: 0.2em;
-  align-items: center;
-  justify-content: space-between;
-  background-color: var(--base1);
-  z-index: 5;
-}
-
-#cursor-position {
-  font-family: monospace;
-}
-
 #chart-size-controls {
   display: flex;
   align-items: center;
@@ -518,13 +509,27 @@ BOTTOM TOOLBAR
   width: 4em;
 }
 
-#panzoom-controls {
+/**********************************
+
+PAN-ZOOM CONTROLS
+
+**********************************/
+
+.panzoom-controls {
+  position: absolute;
   display: flex;
   gap: 0.2em;
+  right: 10px;
+  bottom: 10px;
+  background-color: var(--base1);
+  border-radius: 10px;
+  padding: 0.4em;
+  box-shadow: 0 0 4px 0 black;
 }
 
-#bottom-toolbar .btn.icon {
-  font-size: 1em;
+.panzoom-controls button {
+  align-self: unset;
+  cursor: pointer;
 }
 
 /**********************************
@@ -572,14 +577,14 @@ REPEAT LIBRARY
 }
 
 #repeat-library {
-  position: absolute;
+  /* position: absolute;
   box-shadow: var(--modal-shadow);
   right: 10px;
   bottom: 10px;
   background-color: var(--base1);
-  display: flex;
+  display: flex; */
   flex-direction: column;
-  border-radius: 10px;
+  /* border-radius: 10px; */
   overflow: hidden;
 }
 

@@ -14,11 +14,13 @@ const X_PADDING = 1;
 const Y_PADDING = 0;
 
 const STITCH_RATIO = 5 / 3; // Row height / stitch width
-const YARN_RATIO = 0.23;
+const YARN_RATIO = 0.24;
 
 const SPREAD = 0.88;
 
-// Number of iterations for relaxation
+// Sim constants
+const ALPHA_DECAY = 0.05;
+const ALPHA_MIN = 0.3;
 const ITERATIONS = 1;
 const LINK_STRENGTH = 0.15;
 
@@ -214,6 +216,8 @@ export function simulate(pattern, yarnSequence, needles, palette, scale) {
     if (relaxed) return;
     sim = d3
       .forceSimulation(nodes)
+      .alphaMin(ALPHA_MIN)
+      .alphaDecay(ALPHA_DECAY)
       .force(
         "link",
         yarnLinkForce(yarnPathLinks)

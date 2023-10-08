@@ -13,32 +13,40 @@ import { yarnSequenceCanvas } from "./components/yarnSequenceCanvas";
 import { drawYarnColors } from "./components/drawYarnColors";
 import { drawSymbols } from "./components/drawSymbols";
 import { drawGrid } from "./components/drawGrid";
-import { drawOutline } from "./components/drawOutline";
-
-import { drawRepeatLibrary } from "./components/drawRepeatLibrary";
 import { drawRepeats } from "./components/drawRepeats";
-import { resizeCanvases } from "./components/resizeCanvases";
-import { runSimulation } from "./components/runSimulation";
 
+// Pointer/keyboard interaction
 import { addKeypressListeners } from "./events/keypressEvents";
 import { wheelInteraction } from "./events/wheelInteraction";
-
-import { drawSymbolPicker } from "./components/drawSymbolPicker";
-
 import { chartPointerInteraction } from "./events/chartPointerInteraction";
 import { colorSequencePointerInteraction } from "./events/colorSequencePointerInteraction";
 import { repeatPointerInteraction } from "./events/repeatPointerInteraction";
 import { simulationPointerInteraction } from "./events/simulationPointerInteraction";
 import { repeatLibraryDragInteraction } from "./events/repeatLibraryDragInteraction";
 
+// Touch interaction
 import { chartTouchInteraction } from "./events/chartTouchInteraction";
 import { colorSequenceTouchInteraction } from "./events/colorSequenceTouchInteraction";
 import { repeatTouchInteraction } from "./events/repeatTouchInteraction";
 import { simulationTouchInteraction } from "./events/simulationTouchInteraction";
 
+import { drawSymbolPicker } from "./components/drawSymbolPicker";
+import { drawRepeatLibrary } from "./components/drawRepeatLibrary";
+import { resizeCanvases } from "./components/resizeCanvases";
+import { runSimulation } from "./components/runSimulation";
 import { closeModals } from "./events/closeModals";
 import { generateChart } from "./components/generateChart";
 import { isMobile } from "./utils";
+
+let symbolCanvas,
+  gridCanvas,
+  yarnColorCanvas,
+  desktop,
+  repeatContainer,
+  yarnSequenceEditorCanvas,
+  colorDragger,
+  simContainer,
+  repeatLibrary;
 
 function r() {
   render(view(), document.body);
@@ -48,28 +56,23 @@ function r() {
 function initKeyboard() {
   addKeypressListeners();
 
-  repeatPointerInteraction(document.getElementById("repeat-container"));
-  chartPointerInteraction(document.getElementById("symbol-canvas"));
-  wheelInteraction(document.getElementById("desktop"));
-  colorSequencePointerInteraction(
-    document.getElementById("yarn-sequence-canvas"),
-    document.getElementById("color-dragger")
-  );
-  simulationPointerInteraction(document.getElementById("sim-container"));
-  repeatLibraryDragInteraction(document.getElementById("repeat-library"));
+  repeatPointerInteraction(repeatContainer);
+  chartPointerInteraction(symbolCanvas);
+  wheelInteraction(desktop);
+  colorSequencePointerInteraction(yarnSequenceEditorCanvas, colorDragger);
+  simulationPointerInteraction(simContainer);
+  repeatLibraryDragInteraction(repeatLibrary);
   closeModals();
 }
 
 function initTouch() {
   document.body.style.setProperty("--font-size", "1.2rem");
-  chartTouchInteraction(document.getElementById("symbol-canvas"));
-  repeatTouchInteraction(document.getElementById("repeat-container"));
-  colorSequenceTouchInteraction(
-    document.getElementById("yarn-sequence-canvas"),
-    document.getElementById("color-dragger")
-  );
-  simulationTouchInteraction(document.getElementById("sim-container"));
-  repeatLibraryDragInteraction(document.getElementById("repeat-library"));
+
+  chartTouchInteraction(symbolCanvas);
+  repeatTouchInteraction(repeatContainer);
+  colorSequenceTouchInteraction(yarnSequenceEditorCanvas, colorDragger);
+  simulationTouchInteraction(simContainer);
+  repeatLibraryDragInteraction(repeatLibrary);
   closeModals();
 }
 
@@ -87,6 +90,16 @@ function measureWindow() {
 function init() {
   r();
 
+  symbolCanvas = document.getElementById("symbol-canvas");
+  gridCanvas = document.getElementById("grid");
+  yarnColorCanvas = document.getElementById("yarn-color-canvas");
+  yarnSequenceEditorCanvas = document.getElementById("yarn-sequence-canvas");
+  desktop = document.getElementById("desktop");
+  repeatContainer = document.getElementById("repeat-container");
+  simContainer = document.getElementById("sim-container");
+  repeatLibrary = document.getElementById("repeat-library");
+  colorDragger = document.getElementById("color-dragger");
+
   Split(["#chart-pane", "#sim-pane"], {
     sizes: [60, 40],
     minSize: 100,
@@ -95,20 +108,14 @@ function init() {
 
   isMobile() ? initTouch() : initKeyboard();
 
-  const symbolCanvas = document.getElementById("symbol-canvas");
-  const gridCanvas = document.getElementById("grid");
-  const outlineCanvas = document.getElementById("outline");
-  const yarnColorCanvas = document.getElementById("yarn-color-canvas");
-
   StateMonitor.register([
-    resizeCanvases([symbolCanvas, gridCanvas, outlineCanvas, yarnColorCanvas]),
+    resizeCanvases([symbolCanvas, gridCanvas, yarnColorCanvas]),
     yarnSequenceCanvas({
-      canvas: document.getElementById("yarn-sequence-canvas"),
+      canvas: yarnSequenceEditorCanvas,
     }),
     drawSymbols(symbolCanvas),
     drawYarnColors(yarnColorCanvas),
     drawGrid(gridCanvas),
-    drawOutline(outlineCanvas),
     drawRepeats(),
     drawRepeatLibrary(),
     drawSymbolPicker(),

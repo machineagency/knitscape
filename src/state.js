@@ -29,7 +29,7 @@ let GLOBAL_STATE = {
   yarnPalette: ["#416fac", "#a94a7a", "#ffcc44"], // Colors of the yarns
   yarnSequence: new Bimp(1, 6, [0, 0, 1, 1, 2, 2]),
 
-  editingRepeat: 0,
+  editingRepeat: -1,
   repeatPos: [-1, -1],
 
   repeats: [
@@ -56,7 +56,7 @@ let GLOBAL_STATE = {
   ], // Library of motifs which can be used as repeats
 
   // chart: Bimp.empty(5, 5, 0),
-  chart: Bimp.empty(20, 20, 0),
+  chart: Bimp.empty(30, 40, 0),
 
   reverseScroll: false,
   grid: true,
@@ -64,7 +64,6 @@ let GLOBAL_STATE = {
   flipped: false,
 
   // Various UI pane states
-  showFileMenu: false,
   showLibrary: false,
   showSettings: false,
   showDownload: false,

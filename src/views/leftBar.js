@@ -21,33 +21,25 @@ function symbolPicker() {
   </div>`;
 }
 
-function motifPicker() {
-  return html` <div id="motif-picker">
-    <h3>Motifs</h3>
-    ${GLOBAL_STATE.motifLibrary.map(
-      (motif, index) => html`<button
-        class="btn text solid ${GLOBAL_STATE.activeMotif == index
-          ? "current"
-          : ""}"
-        @click=${() => dispatch({ activeMotif: index })}>
-        ${motif.title}
-      </button>`
-    )}
-  </div>`;
-}
-
-function layerPicker() {
-  return html` <div id="layer-picker">
-    <h3>Editing</h3>
-    ${LAYERS.map(
-      (layer) => html`<button
-        class="btn text solid ${GLOBAL_STATE.activeLayer == layer
-          ? "current"
-          : ""}"
-        @click=${() => dispatch({ activeLayer: layer })}>
-        ${layer}
-      </button>`
-    )}
+function motifLibrary() {
+  return html`<div id="repeat-library">
+    <h2>Motifs</h2>
+    <div id="repeat-library-content" class="scroller">
+      ${GLOBAL_STATE.repeatLibrary.map(
+        (repeat, index) => html`
+          <div class="repeat-library-canvas">
+            <canvas
+              data-repeattitle=${repeat.title}
+              draggable="true"
+              data-repeatlibraryindex=${index}></canvas>
+          </div>
+          <div class="repeat-size">
+            ${repeat.bitmap.width}x${repeat.bitmap.height}
+          </div>
+          <div class="repeat-title">${repeat.title}</div>
+        `
+      )}
+    </div>
   </div>`;
 }
 
@@ -173,6 +165,6 @@ function yarnPicker() {
 
 export function leftBar() {
   return html`<div id="left-bar" class="scroller">
-    ${symbolPicker()} ${yarnPicker()}
+    ${symbolPicker()} ${yarnPicker()} ${motifLibrary()}
   </div>`;
 }

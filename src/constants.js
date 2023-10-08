@@ -32,9 +32,7 @@ export const SYMBOL_BITS = {
 
 export const DEFAULT_SYMBOLS = ["knit", "purl", "slip", "tuck"];
 
-export const DEFAULT_PATTERN_LIBRARY = import.meta.glob(
-  "../assets/patterns/*.json"
-);
+export const DEFAULT_PATTERN_LIBRARY = import.meta.glob("../examples/*.json");
 
 export const toolData = {
   brush: { icon: "fa-solid fa-paintbrush", hotkey: "b" },
@@ -42,14 +40,4 @@ export const toolData = {
   rect: { icon: "fa-solid fa-vector-square", hotkey: "r" },
   line: { icon: "fa-solid fa-minus", hotkey: "l" },
   shift: { icon: "fa-solid fa-right-left", hotkey: "s" },
-  pan: {
-    icon: "fa-solid fa-hand",
-    downIcon: "fa-solid fa-hand-back-fist",
-    hotkey: "h",
-  },
-  move: {
-    icon: "fa-solid fa-hand",
-    downIcon: "fa-solid fa-up-down-left-right",
-    hotkey: "m",
-  },
 };

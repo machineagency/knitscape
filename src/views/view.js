@@ -3,16 +3,13 @@ import { when } from "lit-html/directives/when.js";
 import { dispatch, GLOBAL_STATE } from "../state";
 
 import { taskbar } from "./taskbar";
-import { fileModal } from "./fileModal";
 import { downloadModal } from "./downloadModal";
 import { libraryModal } from "./libraryModal";
 import { settingsModal } from "./settingsModal";
-import { repeatLibrary } from "./repeatLibrary";
+import { chartTools } from "./chartTools";
 import { debugPane } from "./debugPane";
-import { bottomToolbar } from "./bottomToolbar";
 import { leftBar } from "./leftBar";
 import { repeatCanvas } from "./repeatCanvas";
-import { Bimp } from "../lib/Bimp";
 import { toolData } from "../constants";
 import { repeatEditingTools } from "../actions/repeatEditingTools";
 
@@ -22,8 +19,7 @@ export function view() {
   return html`
     ${when(GLOBAL_STATE.showDownload, downloadModal)}
     ${when(GLOBAL_STATE.showLibrary, libraryModal)}
-    ${when(GLOBAL_STATE.showSettings, settingsModal)}
-    ${when(GLOBAL_STATE.showFileMenu, fileModal)} ${taskbar()}
+    ${when(GLOBAL_STATE.showSettings, settingsModal)} ${taskbar()}
 
     <div id="site">
       <div id="chart-pane">
@@ -34,6 +30,13 @@ export function view() {
             ${when(
               GLOBAL_STATE.editingRepeat > -1,
               () => html` <div class="tool-picker">
+                <span
+                  >${GLOBAL_STATE.repeats[GLOBAL_STATE.editingRepeat].bitmap
+                    .width}
+                  x
+                  ${GLOBAL_STATE.repeats[GLOBAL_STATE.editingRepeat].bitmap
+                    .height}
+                </span>
                 ${Object.keys(repeatEditingTools).map(
                   (toolName) => html`<button
                     class="btn solid ${GLOBAL_STATE.activeTool == toolName
@@ -55,7 +58,7 @@ export function view() {
                     dispatch({
                       activeTool: "move",
                     })}>
-                  <i class="fa-solid fa-up-down-left-right"></i>
+                  <i class="fa-solid fa-hand"></i>
                 </button>
               </div>`
             )}
@@ -73,15 +76,15 @@ export function view() {
               <canvas id="yarn-color-canvas"></canvas>
               <canvas id="symbol-canvas"></canvas>
               <canvas id="grid" class="grid-canvas"></canvas>
-              <canvas id="outline" class="outline-canvas"></canvas>
+              <!-- <canvas id="outline" class="outline-canvas"></canvas> -->
               ${repeatCanvas()}
             </div>
           </div>
-          ${repeatLibrary()}
+          ${chartTools()}
         </div>
       </div>
       ${simulationView()}
     </div>
-    ${bottomToolbar()} ${when(GLOBAL_STATE.debug, debugPane)}
+    ${when(GLOBAL_STATE.debug, debugPane)}
   `;
 }

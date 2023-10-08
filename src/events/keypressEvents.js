@@ -22,7 +22,6 @@ const hotkeys = {
   // UI
   Escape: () =>
     dispatch({
-      showFileMenu: false,
       showLibrary: false,
       showSettings: false,
       showDownload: false,

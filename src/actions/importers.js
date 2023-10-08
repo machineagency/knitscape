@@ -1,20 +1,48 @@
+import { Bimp } from "../lib/Bimp";
 import { GLOBAL_STATE, dispatch } from "../state";
+import { fitChart } from "./zoomFit";
+import { getRandomColor } from "../utils";
 
 function loadJSON(patternJSON) {
-  console.log("THIS IS WHERE THE JSON WOULD BE LOADED");
-  // loadWorkspace(patternJSON);
-  // syncScale();
-  // regenPreview();
-  // repeatEditor.dispatch({ bitmap: Bimp.fromJSON(patternJSON.repeat) });
-  // needleEditor.dispatch({ bitmap: Bimp.fromJSON(patternJSON.needles) });
-  // colorChangeEditor.dispatch({
-  //   bitmap: Bimp.fromJSON(patternJSON.yarns).vMirror(),
-  // });
-  // colorChangeEditor.dispatch({ palette: patternJSON.yarnPalette });
-  // colorChangeEditor.dispatch({ scale });
-  // needleEditor.dispatch({ scale });
-  // preview.dispatch({ scale });
-  // GLOBAL_STATE.updateSim = true;
+  let { yarnSequence, yarnPalette, repeats, width, height } = patternJSON;
+
+  dispatch({
+    yarnPalette,
+    width,
+    height,
+    yarnSequence: Bimp.fromJSON(yarnSequence),
+    chart: Bimp.empty(width, height, 0),
+    repeats: repeats.map(({ bitmap, pos, area }) => {
+      return {
+        bitmap: Bimp.fromJSON(bitmap),
+        pos,
+        area,
+      };
+    }),
+  });
+
+  fitChart();
+}
+
+export function newPattern() {
+  dispatch({
+    repeats: [],
+    yarnSequence: new Bimp(1, 4, [0, 0, 1, 1]),
+    yarnPalette: [getRandomColor(), getRandomColor()],
+    chart: Bimp.empty(30, 40, 0),
+    repeats: [
+      {
+        bitmap: new Bimp(
+          4,
+          4,
+          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        ),
+        area: [30, 40],
+        pos: [0, 0],
+      },
+    ],
+  });
+  fitChart();
 }
 
 export function loadLibraryPattern(path) {
