@@ -58,10 +58,10 @@
         <i class="fa-brands fa-github"></i>
       </button>
 
-      <!-- <button class="btn icon" @click=${()=>yi()}>
+      <button class="btn icon" @click=${()=>yi()}>
         <i
           class="fa-solid fa-${!window.document.fullscreenElement&&!window.document.mozFullScreenElement&&!window.document.webkitFullscreenElement&&!window.document.msFullscreenElement?"up-right-and-down-left-from-center":"down-left-and-up-right-to-center"}"></i>
-      </button> -->
+      </button>
     </div>
   </div>`}function ki(){const n=document.getElementById("simulation");let r=new XMLSerializer().serializeToString(n);r.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)||(r=r.replace(/^<svg/,'<svg xmlns="http://www.w3.org/2000/svg"')),r.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)||(r=r.replace(/^<svg/,'<svg xmlns:xlink="http://www.w3.org/1999/xlink"')),r=`<?xml version="1.0" standalone="no"?>\r
 `+r,We("data:image/svg+xml;charset=utf-8,"+encodeURIComponent(r),"swatch.svg")}function Ci(){We(document.getElementById("preview").toDataURL("image/png"),"chart.png")}function Pi(){We(mi(h.repeatBitmap,h.colorSequence.pixels,h.yarnPalette).src)}function Ai(){const n=`SilverKnit
