@@ -9,45 +9,57 @@ export function desktopTouchPanZoom(desktop) {
 
   function pan(e, target) {
     // if (didZoom) return;
-    const startPos = { x: e.clientX, y: e.clientY };
+    const startPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     const startPan = GLOBAL_STATE.chartPan;
 
     function move(e) {
-      const dx = startPos.x - e.clientX;
-      const dy = startPos.y - e.clientY;
+      const dx = startPos.x - e.touches[0].clientX;
+      const dy = startPos.y - e.touches[0].clientY;
 
       dispatch({ chartPan: { x: startPan.x - dx, y: startPan.y - dy } });
     }
 
     function end() {
-      target.removeEventListener("pointermove", move);
-      target.removeEventListener("pointercancel", end);
-      target.removeEventListener("pointerleave", end);
-      target.removeEventListener("pointerout", end);
+      target.removeEventListener("touchmove", move);
+      target.removeEventListener("touchcancel", end);
+      target.removeEventListener("touchend", end);
     }
 
-    target.addEventListener("pointermove", move);
-    target.addEventListener("pointercancel", end);
-    target.addEventListener("pointerleave", end);
-    target.addEventListener("pointerout", end);
+    target.addEventListener("touchmove", move);
+    target.addEventListener("touchcancel", end);
+    target.addEventListener("touchend", end);
   }
 
-  // desktop.addEventListener("pointerdown", (e) => {
-  //   pointerCache.push(e);
-  // });
-
   desktop.addEventListener("touchstart", (e) => {
-    const { x, y } = posAtCoords(e, desktop);
+    const { x, y } = posAtCoords(e.touches[0], desktop);
 
     if (GLOBAL_STATE.pos.x != x || GLOBAL_STATE.pos.y != y) {
       dispatch({ pos: { x, y } });
     }
 
-    if (e.target == desktop || e.target.id == "symbol-canvas") {
-      // dispatch({ editingRepeat: -1 });
-      pan(e.touches[0], desktop);
-    }
+    // console.log(e.target);
+
+    if (e.target.id == "symbol-canvas" || e.target.id == "desktop")
+      pan(e, desktop);
+    // dispatch({ editingRepeat: -1 });
   });
+
+  // desktop.addEventListener("pointerdown", (e) => {
+  //   pointerCache.push(e);
+  // });
+
+  // desktop.addEventListener("touchstart", (e) => {
+  //   const { x, y } = posAtCoords(e, desktop);
+
+  //   if (GLOBAL_STATE.pos.x != x || GLOBAL_STATE.pos.y != y) {
+  //     dispatch({ pos: { x, y } });
+  //   }
+
+  //   if (e.target == desktop || e.target.id == "symbol-canvas") {
+  //     // dispatch({ editingRepeat: -1 });
+  //     pan(e.touches[0], desktop);
+  //   }
+  // });
 
   desktop.addEventListener("touchmove", (e) => {
     const { x, y } = posAtCoords(e, desktop);
@@ -57,6 +69,20 @@ export function desktopTouchPanZoom(desktop) {
     }
   });
 
+  desktop.addEventListener("touchmove", (e) => {
+    const { x, y } = posAtCoords(e.touches[0], desktop);
+    if (GLOBAL_STATE.pos.x != x || GLOBAL_STATE.pos.y != y) {
+      dispatch({ pos: { x, y } });
+    }
+  });
+
+  desktop.addEventListener("touchend", (e) => {
+    dispatch({ pos: { x: -1, y: -1 } });
+  });
+
+  desktop.addEventListener("touchcancel", (e) => {
+    dispatch({ pos: { x: -1, y: -1 } });
+  });
   // desktop.addEventListener("pointermove", (e) => {
   //   if (pointerCache.length === 0) return;
 

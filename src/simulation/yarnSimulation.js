@@ -22,10 +22,10 @@ const SPREAD = 0.88;
 const ALPHA_DECAY = 0.05;
 const ALPHA_MIN = 0.3;
 const ITERATIONS = 1;
-const LINK_STRENGTH = 0.15;
+const LINK_STRENGTH = 0.2;
 
 // The target link distance when the simulation is run
-const HEIGHT_SHRINK = 0.8;
+const HEIGHT_SHRINK = 0.7;
 
 const dpi = devicePixelRatio;
 
