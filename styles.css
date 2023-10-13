@@ -59,9 +59,14 @@ TASKBAR
   color: var(--text-inactive);
 }
 
-.taskbar-buttons button.open {
-  color: hsl(var(--accH), var(--accS), 80%);
-  background-color: hsla(var(--accH), var(--accS), var(--accL), 0.3);
+.btn.highlight {
+  color: hsl(var(--accent-h), var(--accent-s), 80%);
+  background-color: hsla(
+    var(--accent-h),
+    var(--accent-s),
+    var(--accent-l),
+    0.3
+  );
 }
 
 /**********************************
@@ -88,15 +93,12 @@ SIM PANE
 
 .mid {
   z-index: 2;
+  filter: brightness(0.8);
 }
 
 .bottom {
   z-index: 0;
-  filter: brightness(0.7);
-}
-
-.mirrored > canvas {
-  transform: scaleX(-1);
+  filter: brightness(0.6);
 }
 
 .sim-transform-group.right-side {
@@ -109,9 +111,7 @@ SIM PANE
   flex-direction: column-reverse;
 }
 
-#back,
-#mid,
-#front {
+.sim-canvas {
   position: absolute;
   top: 0;
   left: 0;
@@ -236,6 +236,7 @@ REPEAT CANVAS UI
   outline: 1px solid black;
   outline-offset: -1px;
   z-index: 1;
+  background: black;
 }
 
 .repeat-ui {
@@ -503,34 +504,6 @@ BOTTOM TOOLBAR
 
 /**********************************
 
-PAN-ZOOM CONTROLS
-
-**********************************/
-
-.panzoom-controls {
-  position: absolute;
-  align-items: center;
-  display: flex;
-  gap: 0.3em;
-  right: 10px;
-  bottom: 10px;
-  background-color: var(--base1);
-  border-radius: 10px;
-  padding: 0.4em;
-  box-shadow: 0 0 4px 0 black;
-}
-
-.panzoom-controls button {
-  align-self: unset;
-  cursor: pointer;
-}
-
-.panzoom-controls input[type="range"] {
-  width: 5em;
-}
-
-/**********************************
-
 LIBRARY MODAL
 
 **********************************/
@@ -559,7 +532,7 @@ SETTINGS MODAL
   width: 100%;
   height: 30px;
   font-size: 0.9em;
-  color: black;
+  color: var(--text-highlight);
 }
 
 /**********************************

@@ -4,6 +4,10 @@ import { YarnModel } from "./YarnModel";
 import { yarnLinkForce } from "./YarnForce";
 import * as d3 from "d3";
 
+import { GLOBAL_STATE } from "../state";
+import { yarnSpline } from "./yarnSpline";
+import { Vec2D } from "./Vec2D";
+
 // Number of stitches to add to the left and right of the pattern
 // (need to do this because tuck / slip stitches can't be on the
 // end of the row)
@@ -11,31 +15,43 @@ const X_PADDING = 1;
 
 // Number of rows to add to the top and bottom of the pattern
 // (will be drawn in a different transparent color)
-const Y_PADDING = 0;
-
-const STITCH_RATIO = 5 / 3; // Row height / stitch width
-const YARN_RATIO = 0.24;
-
-const SPREAD = 0.88;
-
-// Sim constants
-const ALPHA_DECAY = 0.05;
-const ALPHA_MIN = 0.3;
-const ITERATIONS = 1;
-const LINK_STRENGTH = 0.2;
+const Y_PADDING = 3;
 
 // The target link distance when the simulation is run
 const HEIGHT_SHRINK = 0.7;
 
 const dpi = devicePixelRatio;
 
-export function simulate(pattern, yarnSequence, palette, scale) {
+function sortSegments(yarnSet) {
+  const sortedSegments = {
+    front: { border: [] },
+    back: { border: [] },
+    mid: { border: [] },
+  };
+
+  for (const color of yarnSet) {
+    sortedSegments.front[color] = [];
+    sortedSegments.back[color] = [];
+    sortedSegments.mid[color] = [];
+  }
+
+  return sortedSegments;
+}
+
+export function simulate(pattern) {
   let relaxed = false;
-  let yarnWidth, stitchHeight, sim;
-  let yarnSet = new Set(yarnSequence);
-  let yarnPalette = { ...palette, border: "#00000033" };
-  performance.clearMeasures();
-  performance.mark("start");
+  let currScale,
+    currPan,
+    currFlip = null;
+  let stitchHeight, stitchWidth, sim;
+
+  function yarnWidth() {
+    return stitchWidth * GLOBAL_STATE.yarnWidth;
+  }
+
+  function yarnPalette() {
+    return { ...GLOBAL_STATE.yarnPalette, border: "#00000033" };
+  }
 
   ///////////////////////
   // INITIALIZE NODES
@@ -44,20 +60,18 @@ export function simulate(pattern, yarnSequence, palette, scale) {
   function layoutNodes(yarnGraph) {
     // calculates the x,y values for the i,j
 
-    const stitchWidth = Math.min(
+    stitchWidth = Math.min(
       (canvasWidth * 0.9) / stitchPattern.width,
-      ((canvasHeight * 0.9) / stitchPattern.height) * STITCH_RATIO
+      ((canvasHeight * 0.9) / stitchPattern.height) * GLOBAL_STATE.stitchRatio
     );
 
     const halfStitch = stitchWidth / 2;
-    stitchHeight = stitchWidth / STITCH_RATIO;
-
-    yarnWidth = stitchWidth * YARN_RATIO;
+    stitchHeight = stitchWidth / GLOBAL_STATE.stitchRatio;
 
     const offsetX =
-      yarnWidth + (canvasWidth - stitchPattern.width * stitchWidth) / 2;
+      (canvasWidth - stitchPattern.width * stitchWidth) / 2 + 2 * yarnWidth();
     const offsetY =
-      -yarnWidth + (canvasHeight - stitchPattern.height * stitchHeight) / 2;
+      (canvasHeight - (stitchPattern.height + 2) * stitchHeight) / 2;
 
     yarnGraph.contactNodes.forEach((node, index) => {
       const i = index % yarnGraph.width;
@@ -76,7 +90,7 @@ export function simulate(pattern, yarnSequence, palette, scale) {
     const x = prev.x - next.x;
     const y = prev.y - next.y;
 
-    const mag = SPREAD * Math.sqrt(x ** 2 + y ** 2);
+    const mag = GLOBAL_STATE.yarnSpread * Math.sqrt(x ** 2 + y ** 2);
 
     if (flip) {
       return [-y / mag, x / mag];
@@ -128,44 +142,32 @@ export function simulate(pattern, yarnSequence, palette, scale) {
     );
   }
 
-  const openYarnCurve = d3
-    .line()
-    .x((d) => nodes[d.cnIndex].x + (yarnWidth / 2) * d.normal[0])
-    .y((d) => nodes[d.cnIndex].y + (yarnWidth / 2) * d.normal[1])
-    .curve(d3.curveCatmullRomOpen);
-
-  function yarnCurve(yarnLink) {
-    const index = yarnLink.index;
-
-    if (index == 0 || index > yarnPathLinks.length - 3) {
-      // if is the first or last link, just draw a line
-      return `M ${yarnLink.source.x} ${yarnLink.source.y} ${yarnLink.target.x} ${yarnLink.target.y}`;
-    }
-
-    const linkData = [
-      yarnPath[index - 1],
-      yarnPath[index],
-      yarnPath[index + 1],
-      yarnPath[index + 2],
-    ];
-
-    return openYarnCurve(linkData);
+  function segmentPath({ p0, p1, p2, p3 }) {
+    return `M ${p0.x} ${p0.y} C${p1.x} ${p1.y} ${p2.x} ${p2.y} ${p3.x} ${p3.y}`;
   }
 
-  function sortSegments() {
-    const sortedSegments = {
-      front: { border: [] },
-      back: { border: [] },
-      mid: { border: [] },
-    };
+  function calculateSplineControlPoints() {
+    yarnPath.forEach((controlPoint) => {
+      controlPoint.pt = new Vec2D(
+        nodes[controlPoint.cnIndex].x +
+          (yarnWidth() / 2) * controlPoint.normal[0],
+        nodes[controlPoint.cnIndex].y +
+          (yarnWidth() / 2) * controlPoint.normal[1]
+      );
+    });
+  }
 
-    for (const color of yarnSet) {
-      sortedSegments.front[color] = [];
-      sortedSegments.back[color] = [];
-      sortedSegments.mid[color] = [];
-    }
+  function calculateSegmentControlPoints() {
+    yarnSegments.forEach((segment, index) => {
+      if (index == 0 || index > yarnSegments.length - 3) return;
 
-    return sortedSegments;
+      segment.ctrlPts = yarnSpline(
+        yarnPath[index - 1].pt,
+        yarnPath[index].pt,
+        yarnPath[index + 1].pt,
+        yarnPath[index + 2].pt
+      );
+    });
   }
 
   ///////////////////////
@@ -175,35 +177,86 @@ export function simulate(pattern, yarnSequence, palette, scale) {
   function yarnColor(rowNum) {
     if (rowNum < Y_PADDING || rowNum >= stitchPattern.height - Y_PADDING)
       return "border"; // show border rows as transparent black
-    return yarnSequence[(rowNum - Y_PADDING) % yarnSequence.length];
+    return GLOBAL_STATE.yarnSequence.pixels[
+      (rowNum - Y_PADDING) % GLOBAL_STATE.yarnSequence.pixels.length
+    ];
   }
 
   ///////////////////////
   // DRAW
   ///////////////////////
   function drawSegmentsToLayer(context, layer) {
-    context.lineWidth = yarnWidth;
+    context.lineWidth = yarnWidth();
 
     Object.entries(layer).forEach(([colorIndex, paths]) => {
-      context.strokeStyle = yarnPalette[colorIndex];
+      context.strokeStyle = yarnPalette()[colorIndex];
       context.stroke(new Path2D(paths.join()));
     });
   }
 
-  function draw() {
-    frontCtx.clearRect(0, 0, canvasWidth, canvasHeight);
-    midCtx.clearRect(0, 0, canvasWidth, canvasHeight);
-    backCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+  function setTransform() {
+    if (
+      currScale == GLOBAL_STATE.simScale &&
+      currPan == GLOBAL_STATE.simPan &&
+      currFlip == GLOBAL_STATE.flipped
+    )
+      return;
 
-    updateNormals();
+    let scale = GLOBAL_STATE.simScale;
+    let pan = GLOBAL_STATE.simPan;
 
-    const layers = sortSegments();
+    frontCtx.resetTransform();
+    midCtx.resetTransform();
+    backCtx.resetTransform();
 
-    yarnPathLinks.forEach((link, index) => {
-      if (index == 0 || index > yarnPathLinks.length - 3) return;
-      const colorIndex = yarnColor(link.row);
+    if (GLOBAL_STATE.flipped) {
+      frontCtx.translate((width / 2) * scale, 0);
+      midCtx.translate((width / 2) * scale, 0);
+      backCtx.translate((width / 2) * scale, 0);
 
-      layers[link.layer][colorIndex].push(yarnCurve(link));
+      frontCtx.scale(-1, 1);
+      midCtx.scale(-1, 1);
+      backCtx.scale(-1, 1);
+
+      frontCtx.translate((-width / 2) * scale - pan.x, pan.y);
+      midCtx.translate((-width / 2) * scale - pan.x, pan.y);
+      backCtx.translate((-width / 2) * scale - pan.x, pan.y);
+    } else {
+      frontCtx.translate(pan.x, pan.y);
+      midCtx.translate(pan.x, pan.y);
+      backCtx.translate(pan.x, pan.y);
+    }
+
+    frontCtx.scale(scale, scale);
+    midCtx.scale(scale, scale);
+    backCtx.scale(scale, scale);
+
+    currScale = scale;
+    currPan = pan;
+    currFlip = GLOBAL_STATE.flipped;
+    drawYarns();
+  }
+
+  function clear() {
+    [frontCtx, backCtx, midCtx].forEach((ctx) => {
+      ctx.save();
+      ctx.resetTransform();
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+      ctx.restore();
+    });
+  }
+
+  function drawYarns() {
+    clear();
+    const yarnSet = new Set(GLOBAL_STATE.yarnSequence.pixels);
+
+    const layers = sortSegments(yarnSet);
+
+    yarnSegments.forEach((segment, index) => {
+      if (index == 0 || index > yarnSegments.length - 3) return;
+      const colorIndex = yarnColor(segment.row);
+
+      layers[segment.layer][colorIndex].push(segmentPath(segment.ctrlPts));
     });
 
     drawSegmentsToLayer(backCtx, layers.back);
@@ -211,17 +264,22 @@ export function simulate(pattern, yarnSequence, palette, scale) {
     drawSegmentsToLayer(midCtx, layers.mid);
   }
 
+  function update() {
+    updateNormals();
+    calculateSplineControlPoints();
+    calculateSegmentControlPoints();
+    drawYarns();
+  }
+
   function relax() {
     if (relaxed) return;
     sim = d3
       .forceSimulation(nodes)
-      .alphaMin(ALPHA_MIN)
-      .alphaDecay(ALPHA_DECAY)
       .force(
         "link",
-        yarnLinkForce(yarnPathLinks)
-          .strength(LINK_STRENGTH)
-          .iterations(ITERATIONS)
+        yarnLinkForce(yarnSegments)
+          .strength(GLOBAL_STATE.linkStrength)
+          .iterations(GLOBAL_STATE.iterations)
           .distance((l) => {
             if (l.linkType == "FLFH" || l.linkType == "LHLL")
               return stitchHeight * HEIGHT_SHRINK;
@@ -229,7 +287,7 @@ export function simulate(pattern, yarnSequence, palette, scale) {
           })
       )
 
-      .on("tick", draw);
+      .on("tick", update);
     relaxed = true;
   }
 
@@ -249,8 +307,8 @@ export function simulate(pattern, yarnSequence, palette, scale) {
 
   const bbox = document.getElementById("sim-container").getBoundingClientRect();
 
-  const width = bbox.width * scale;
-  const height = bbox.height * scale;
+  const width = bbox.width;
+  const height = bbox.height;
   const canvasWidth = dpi * width;
   const canvasHeight = dpi * height;
 
@@ -286,8 +344,10 @@ export function simulate(pattern, yarnSequence, palette, scale) {
 
   const yarnPath = yarnGraph.makeNice();
 
-  const yarnPathLinks = yarnGraph.yarnPathToLinks();
-  draw();
+  const yarnSegments = yarnGraph.yarnPathToLinks();
 
-  return { relax, stopSim };
+  update();
+  setTransform();
+
+  return { relax, stopSim, update, setTransform };
 }

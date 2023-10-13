@@ -13,7 +13,6 @@ let GLOBAL_STATE = {
   activeTool: "brush",
   activeSymbol: 0,
 
-  chartBackground: "#ffffff",
   symbolPalette: {},
   symbolMap: DEFAULT_SYMBOLS,
   patternLibrary: DEFAULT_PATTERN_LIBRARY,
@@ -26,7 +25,7 @@ let GLOBAL_STATE = {
   simPan: { x: 0, y: 0 },
 
   activeYarn: 0,
-  yarnPalette: ["rgba(16,18,189,1)", "rgba(235,233,187,1)"], // Colors of the yarns
+  yarnPalette: ["rgb(84 137 174)", "rgba(235,233,187,1)"], // Colors of the yarns
   yarnSequence: new Bimp(1, 4, [0, 0, 1, 1]),
 
   editingRepeat: -1,
@@ -34,35 +33,9 @@ let GLOBAL_STATE = {
 
   repeats: [
     {
-      bitmap: new Bimp(
-        24,
-        20,
-        [
-          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3,
-          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-          3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-          3, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0,
-          0, 3, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 3, 0, 3, 0, 3, 0, 0, 0, 0, 0, 0,
-          0, 3, 0, 3, 0, 3, 0, 0, 0, 0, 0, 0, 0, 3, 0, 3, 0, 3, 0, 0, 0, 0, 0,
-          0, 0, 3, 0, 3, 0, 0, 3, 0, 0, 0, 0, 0, 3, 0, 3, 0, 3, 0, 3, 0, 0, 0,
-          0, 0, 3, 0, 3, 0, 3, 0, 3, 0, 0, 0, 0, 0, 3, 0, 3, 0, 3, 0, 3, 0, 0,
-          0, 0, 0, 3, 0, 3, 0, 3, 3, 0, 3, 0, 0, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3,
-          0, 0, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 0, 0, 3, 0, 3, 0, 3, 0, 3, 0,
-          3, 0, 0, 0, 3, 0, 3, 0, 3, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0,
-          0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0,
-          0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 2, 0, 0, 0, 0, 0,
-          0, 0, 0, 0, 3, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 2, 0, 0, 0, 0,
-          0, 0, 0, 0, 0, 3, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 3, 0, 3, 0, 0,
-          0, 0, 0, 0, 0, 3, 0, 3, 0, 3, 0, 0, 0, 0, 0, 0, 0, 3, 0, 3, 0, 3, 0,
-          0, 0, 0, 0, 0, 0, 3, 0, 3, 0, 3, 0, 0, 0, 0, 0, 0, 3, 0, 3, 0, 3, 0,
-          3, 0, 0, 0, 0, 0, 3, 0, 3, 0, 3, 0, 3, 0, 0, 0, 0, 0, 3, 0, 3, 0, 3,
-          0, 3, 0, 0, 0, 0, 0, 3, 0, 3, 0, 3, 0, 3, 0, 0, 0, 0, 3, 0, 3, 0, 3,
-          0, 3, 0, 3, 0, 0, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 0, 0, 3, 0, 3, 0,
-          3, 0, 3, 0, 3, 0, 0, 0, 3, 0, 3, 0, 3, 0, 3, 0, 3, 0, 0, 0,
-        ]
-      ),
+      bitmap: new Bimp(2, 4, [2, 0, 2, 0, 0, 0, 0, 0]),
       pos: [0, 0],
-      area: [48, 60],
+      area: [35, 60],
     },
   ],
 
@@ -81,8 +54,7 @@ let GLOBAL_STATE = {
     },
   ], // Library of motifs which can be used as repeats
 
-  // chart: Bimp.empty(5, 5, 0),
-  chart: Bimp.empty(48, 60, 0),
+  chart: Bimp.empty(35, 60, 0),
 
   reverseScroll: false,
   grid: true,
@@ -92,6 +64,7 @@ let GLOBAL_STATE = {
   // Various UI pane states
   showLibrary: false,
   showSettings: false,
+  showSimSettings: false,
   showDownload: false,
   showRepeatLibrary: false,
   debug: false,
@@ -99,6 +72,14 @@ let GLOBAL_STATE = {
   snapshots: [], // Array of snapshot history
   lastSnapshot: 0, // time of last snapshot
   heldKeys: new Set(), // Keys that are currently held down
+
+  // Simulation Settings
+  simBackground: "rgb(37,37,37)",
+  yarnWidth: 0.24,
+  stitchRatio: 1.9, // Row height / stitch width
+  yarnSpread: 0.95,
+  linkStrength: 0.1,
+  iterations: 1,
 };
 
 function loadWorkspace(workspace) {

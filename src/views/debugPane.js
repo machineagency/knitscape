@@ -101,6 +101,10 @@ export function debugPane() {
           <span class="number-field">${GLOBAL_STATE.scale}</span> pixels per
           pixel
         </span>
+        <h4>Sim Scale</h4>
+        <span>
+          <span class="number-field">${GLOBAL_STATE.simScale}x</span>
+        </span>
         <h4>x pos</h4>
         <span class="number-field">${GLOBAL_STATE.pos.x}</span>
         <h4>y pos</h4>
@@ -108,7 +112,7 @@ export function debugPane() {
         <h4>Active Tool</h4>
         <span class="text-field">${GLOBAL_STATE.activeTool}</span>
         <h4>Active Color</h4>
-        <span class="number-field">${GLOBAL_STATE.activeColor}</span>
+        <span class="number-field">${GLOBAL_STATE.activeYarn}</span>
         <h4>Device Pixel Ratio</h4>
         <span>
           <span class="number-field">${devicePixelRatio}</span> device pixel(s)

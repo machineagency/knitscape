@@ -48,6 +48,7 @@ export function centerZoomSimulation(scale) {
 
 export function zoomSimulationAtPoint(pt, simScale) {
   if (simScale < MIN_SIM_SCALE || simScale > MAX_SIM_SCALE) return;
+  simScale = Number.parseFloat(simScale).toFixed(2);
 
   const start = {
     x: (pt.x - GLOBAL_STATE.simPan.x) / GLOBAL_STATE.simScale,

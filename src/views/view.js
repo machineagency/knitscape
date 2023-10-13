@@ -1,12 +1,12 @@
 import { html } from "lit-html";
 import { when } from "lit-html/directives/when.js";
-import { dispatch, GLOBAL_STATE } from "../state";
+import { GLOBAL_STATE } from "../state";
 
 import { taskbar } from "./taskbar";
 import { downloadModal } from "./downloadModal";
 import { libraryModal } from "./libraryModal";
 import { settingsModal } from "./settingsModal";
-import { chartTools } from "./chartTools";
+import { chartControls } from "./chartControls";
 import { debugPane } from "./debugPane";
 import { leftBar } from "./leftBar";
 import { repeatCanvas } from "./repeatCanvas";
@@ -44,7 +44,7 @@ export function view() {
               ${repeatCanvas()}
             </div>
           </div>
-          ${chartTools()}
+          ${chartControls()}
         </div>
       </div>
       ${simulationView()}

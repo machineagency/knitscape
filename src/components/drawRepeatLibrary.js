@@ -1,4 +1,3 @@
-import { sizeCanvasToBitmap } from "../actions/zoomFit";
 import { SYMBOL_BITS } from "../constants";
 
 export function drawRepeatLibrary() {
