@@ -3,6 +3,7 @@ import { Pattern } from "./Pattern";
 import { YarnModel } from "./YarnModel";
 import { yarnLinkForce } from "./YarnForce";
 import * as d3 from "d3";
+import { cssHSL } from "../utils";
 
 import { GLOBAL_STATE } from "../state";
 import { yarnSpline } from "./yarnSpline";
@@ -15,7 +16,7 @@ const X_PADDING = 1;
 
 // Number of rows to add to the top and bottom of the pattern
 // (will be drawn in a different transparent color)
-const Y_PADDING = 3;
+const Y_PADDING = 0;
 
 // The target link distance when the simulation is run
 const HEIGHT_SHRINK = 0.7;
@@ -194,6 +195,121 @@ export function simulate(pattern) {
     });
   }
 
+  function shadeLeg(ctx, segment) {
+    const base = yarnPalette()[yarnColor(segment.row)];
+    const pts = segment.ctrlPts;
+    const path = new Path2D(segmentPath(segment.ctrlPts));
+
+    const bottomGradient = ctx.createLinearGradient(
+      pts.p0.x,
+      pts.p0.y,
+      pts.p3.x,
+      pts.p3.y
+    );
+
+    bottomGradient.addColorStop(0, `hsl(${base.h} ${base.s}% ${base.l - 20}%)`);
+    bottomGradient.addColorStop(
+      0.5,
+      `hsl(${base.h} ${base.s}% ${base.l - 10}%)`
+    );
+    bottomGradient.addColorStop(1, `hsl(${base.h} ${base.s}% ${base.l - 20}%)`);
+
+    const topGradient = ctx.createLinearGradient(
+      pts.p0.x,
+      pts.p0.y,
+      pts.p3.x,
+      pts.p3.y
+    );
+
+    topGradient.addColorStop(0, `hsl(${base.h} ${base.s}% ${base.l - 15}%)`);
+    topGradient.addColorStop(0.5, `hsl(${base.h} ${base.s}% ${base.l}%)`);
+    topGradient.addColorStop(1, `hsl(${base.h} ${base.s}% ${base.l - 15}%)`);
+
+    ctx.save();
+
+    ctx.lineWidth = yarnWidth();
+    ctx.strokeStyle = bottomGradient;
+
+    ctx.stroke(path);
+
+    ctx.shadowBlur = yarnWidth();
+    ctx.shadowColor = `hsl(${base.h} ${base.s}% ${base.l}%)`;
+
+    ctx.strokeStyle = topGradient;
+    ctx.lineWidth = yarnWidth() / 3;
+
+    ctx.stroke(path);
+    ctx.restore();
+  }
+
+  function shadeLoop(ctx, segment) {
+    const base = yarnPalette()[yarnColor(segment.row)];
+    const pts = segment.ctrlPts;
+    const path = new Path2D(segmentPath(segment.ctrlPts));
+
+    const bottomGradient = ctx.createLinearGradient(
+      pts.p0.x,
+      pts.p0.y,
+      pts.p3.x,
+      pts.p3.y
+    );
+
+    bottomGradient.addColorStop(0, `hsl(${base.h} ${base.s}% ${base.l - 20}%)`);
+    bottomGradient.addColorStop(
+      0.5,
+      `hsl(${base.h} ${base.s}% ${base.l - 25}%)`
+    );
+    bottomGradient.addColorStop(1, `hsl(${base.h} ${base.s}% ${base.l - 20}%)`);
+
+    const topGradient = ctx.createLinearGradient(
+      pts.p0.x,
+      pts.p0.y,
+      pts.p3.x,
+      pts.p3.y
+    );
+
+    topGradient.addColorStop(0, `hsl(${base.h} ${base.s}% ${base.l - 15}%)`);
+    topGradient.addColorStop(0.5, `hsl(${base.h} ${base.s}% ${base.l - 20}%)`);
+    topGradient.addColorStop(1, `hsl(${base.h} ${base.s}% ${base.l - 15}%)`);
+
+    ctx.save();
+
+    ctx.lineWidth = yarnWidth();
+    ctx.strokeStyle = bottomGradient;
+
+    ctx.stroke(path);
+
+    ctx.shadowBlur = yarnWidth();
+    ctx.shadowColor = `hsl(${base.h} ${base.s}% ${base.l - 15}%)`;
+
+    ctx.strokeStyle = topGradient;
+    ctx.lineWidth = yarnWidth() / 3;
+
+    ctx.stroke(path);
+    ctx.restore();
+  }
+
+  function drawShaded() {
+    yarnSegments.forEach((segment, index) => {
+      if (index == 0 || index > yarnSegments.length - 3) return;
+
+      let ctx;
+      if (segment.layer == "front") {
+        ctx = frontCtx;
+      } else if (segment.layer == "mid") {
+        ctx = midCtx;
+      } else if (segment.layer == "back") {
+        ctx = backCtx;
+      }
+
+      if (segment.linkType == "LHLL" || segment.linkType == "FLFH") {
+        shadeLeg(ctx, segment);
+      } else {
+        shadeLoop(ctx, segment);
+      }
+    });
+  }
+
   function setTransform() {
     if (
       currScale == GLOBAL_STATE.simScale &&
@@ -243,6 +359,7 @@ export function simulate(pattern) {
       ctx.resetTransform();
       ctx.clearRect(0, 0, canvasWidth, canvasHeight);
       ctx.restore();
+      ctx.lineWidth = yarnWidth();
     });
   }
 
@@ -250,18 +367,20 @@ export function simulate(pattern) {
     clear();
     const yarnSet = new Set(GLOBAL_STATE.yarnSequence.pixels);
 
-    const layers = sortSegments(yarnSet);
+    // const layers = sortSegments(yarnSet);
 
-    yarnSegments.forEach((segment, index) => {
-      if (index == 0 || index > yarnSegments.length - 3) return;
-      const colorIndex = yarnColor(segment.row);
+    // yarnSegments.forEach((segment, index) => {
+    //   if (index == 0 || index > yarnSegments.length - 3) return;
+    //   const colorIndex = yarnColor(segment.row);
 
-      layers[segment.layer][colorIndex].push(segmentPath(segment.ctrlPts));
-    });
+    //   layers[segment.layer][colorIndex].push(segmentPath(segment.ctrlPts));
+    // });
 
-    drawSegmentsToLayer(backCtx, layers.back);
-    drawSegmentsToLayer(frontCtx, layers.front);
-    drawSegmentsToLayer(midCtx, layers.mid);
+    // drawSegmentsToLayer(backCtx, layers.back);
+    // drawSegmentsToLayer(frontCtx, layers.front);
+    // drawSegmentsToLayer(midCtx, layers.mid);
+
+    drawShaded();
   }
 
   function update() {

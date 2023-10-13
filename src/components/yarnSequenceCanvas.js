@@ -1,4 +1,5 @@
 import { sizeCanvasToBitmap } from "../actions/zoomFit";
+import { cssHSL } from "../utils";
 
 export function yarnSequenceCanvas({ canvas }) {
   return ({ state }) => {
@@ -21,7 +22,7 @@ export function yarnSequenceCanvas({ canvas }) {
           ) {
             ctx.translate(x * scale, y * scale);
 
-            ctx.fillStyle = yarnPalette[paletteIndex];
+            ctx.fillStyle = cssHSL(yarnPalette[paletteIndex]);
 
             ctx.clearRect(0, 0, scale, scale);
             ctx.fillRect(0, 0, scale, scale);

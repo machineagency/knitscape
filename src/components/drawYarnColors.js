@@ -1,4 +1,4 @@
-import { sizeCanvasToBitmap } from "../actions/zoomFit";
+import { cssHSL } from "../utils";
 
 export function drawYarnColors(yarnColorCanvas) {
   return ({ state }) => {
@@ -24,7 +24,7 @@ export function drawYarnColors(yarnColorCanvas) {
           lastDrawn == null ||
           lastDrawn.pixel(0, (chartHeight - y - 1) % yarnHeight) != paletteIndex
         ) {
-          ctx.fillStyle = yarnPalette[paletteIndex];
+          ctx.fillStyle = cssHSL(yarnPalette[paletteIndex]);
           ctx.fillRect(0, y * scale, chartWidth * scale, scale);
         }
       }

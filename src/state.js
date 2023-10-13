@@ -25,18 +25,21 @@ let GLOBAL_STATE = {
   simPan: { x: 0, y: 0 },
 
   activeYarn: 0,
-  yarnPalette: ["rgb(84 137 174)", "rgba(235,233,187,1)"], // Colors of the yarns
+  yarnPalette: [
+    { h: 200, s: 100, l: 50 },
+    { h: 40, s: 80, l: 50 },
+  ], // Colors of the yarns
   yarnSequence: new Bimp(1, 4, [0, 0, 1, 1]),
 
   editingRepeat: -1,
   repeatPos: [-1, -1],
 
   repeats: [
-    {
-      bitmap: new Bimp(2, 4, [2, 0, 2, 0, 0, 0, 0, 0]),
-      pos: [0, 0],
-      area: [35, 60],
-    },
+    // {
+    //   bitmap: new Bimp(2, 4, [2, 0, 2, 0, 0, 0, 0, 0]),
+    //   pos: [0, 0],
+    //   area: [35, 60],
+    // },
   ],
 
   repeatLibrary: [
@@ -54,7 +57,8 @@ let GLOBAL_STATE = {
     },
   ], // Library of motifs which can be used as repeats
 
-  chart: Bimp.empty(35, 60, 0),
+  // chart: Bimp.empty(35, 60, 0),
+  chart: Bimp.empty(10, 10, 0),
 
   reverseScroll: false,
   grid: true,
@@ -77,7 +81,7 @@ let GLOBAL_STATE = {
   simBackground: "rgb(37,37,37)",
   yarnWidth: 0.24,
   stitchRatio: 1.9, // Row height / stitch width
-  yarnSpread: 0.95,
+  yarnSpread: 0.9,
   linkStrength: 0.1,
   iterations: 1,
 };
