@@ -20,7 +20,7 @@ const SPREAD = 0.88;
 
 // Sim constants
 const ALPHA_DECAY = 0.05;
-const ALPHA_MIN = 0.3;
+const ALPHA_MIN = 0.2;
 const ITERATIONS = 1;
 const LINK_STRENGTH = 0.2;
 
