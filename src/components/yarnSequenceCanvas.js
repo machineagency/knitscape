@@ -22,7 +22,9 @@ export function yarnSequenceCanvas({ canvas }) {
           ) {
             ctx.translate(x * scale, y * scale);
 
-            ctx.fillStyle = cssHSL(yarnPalette[paletteIndex]);
+            // ctx.fillStyle = cssHSL(yarnPalette[paletteIndex]);
+
+            ctx.fillStyle = yarnPalette[paletteIndex];
 
             ctx.clearRect(0, 0, scale, scale);
             ctx.fillRect(0, 0, scale, scale);

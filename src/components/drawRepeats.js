@@ -86,6 +86,8 @@ export function drawRepeats() {
 
     function draw(repeatIndex) {
       // Draws only the pixels that have changed
+      console.log(`repeat-${repeatIndex}`);
+
       const ctx = document
         .getElementById(`repeat-${repeatIndex}`)
         .getContext("2d");

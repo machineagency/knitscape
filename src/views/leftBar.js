@@ -1,6 +1,7 @@
 import { html } from "lit-html";
 import { GLOBAL_STATE, dispatch } from "../state";
-import { getRandomColor, shuffle, cssHSL } from "../utils";
+import { LAYERS } from "../constants";
+import { getRandomColor, shuffle } from "../utils";
 import jscolor from "@eastdesire/jscolor";
 import { Bimp } from "../lib/Bimp";
 
@@ -66,17 +67,14 @@ function deleteColor(index) {
 
 function editColor(index) {
   const target = document.getElementById(`color-${index}`);
-  const curr = GLOBAL_STATE.yarnPalette[index];
   if (!target.jscolor) {
     const picker = new jscolor(target, {
       preset: "dark large",
+      format: "hexa",
+      value: GLOBAL_STATE.yarnPalette[index],
       onInput: () => {
         const newPalette = [...GLOBAL_STATE.yarnPalette];
-        newPalette[index] = {
-          h: picker.channel("H"),
-          s: picker.channel("S"),
-          l: picker.channel("V"),
-        };
+        newPalette[index] = picker.toRGBAString();
         dispatch({
           yarnPalette: newPalette,
           yarnSequence: GLOBAL_STATE.yarnSequence,
@@ -84,7 +82,6 @@ function editColor(index) {
       },
       previewElement: null,
     });
-    picker.fromHSVA(curr.h, curr.s, curr.l, 1);
   }
   target.jscolor.show();
 }
@@ -110,14 +107,14 @@ function yarnPicker() {
       </button>
     </div>
     ${GLOBAL_STATE.yarnPalette.map(
-      (color, index) =>
+      (hexa, index) =>
         html`<button
           class="btn solid color-select ${index == GLOBAL_STATE.activeYarn
             ? "selected"
             : ""}"
           @click=${() => dispatch({ activeYarn: index })}>
           <div class="color-label">${index + 1}</div>
-          <div class="color-preview" style="--current: ${cssHSL(color)};">
+          <div class="color-preview" style="--current: ${hexa};">
             ${GLOBAL_STATE.editingPalette
               ? html`
                   <button

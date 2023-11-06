@@ -24,7 +24,9 @@ export function drawYarnColors(yarnColorCanvas) {
           lastDrawn == null ||
           lastDrawn.pixel(0, (chartHeight - y - 1) % yarnHeight) != paletteIndex
         ) {
-          ctx.fillStyle = cssHSL(yarnPalette[paletteIndex]);
+          // ctx.fillStyle = cssHSL(yarnPalette[paletteIndex]);
+          ctx.fillStyle = yarnPalette[paletteIndex];
+
           ctx.fillRect(0, y * scale, chartWidth * scale, scale);
         }
       }

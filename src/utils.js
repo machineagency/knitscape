@@ -51,6 +51,40 @@ export function getRandomColor() {
   return color;
 }
 
+export function randomHSL() {
+  return {
+    h: Math.floor(Math.random() * 360),
+    s: Math.floor(Math.random() * 100),
+    l: Math.floor(Math.random() * 100),
+  };
+}
+
+export function hsl2hsv({ h, s, l }) {
+  const hsv1 = (s * (l < 50 ? l : 100 - l)) / 100;
+  const hsvS = hsv1 === 0 ? 0 : ((2 * hsv1) / (l + hsv1)) * 100;
+  const hsvV = l + hsv1;
+  return {
+    h,
+    s: hsvS,
+    v: hsvV,
+  };
+}
+
+export function hsv2hsl({ h, s, v }) {
+  const hslL = ((200 - s) * v) / 100;
+  const [hslS, hslV] = [
+    hslL === 0 || hslL === 200
+      ? 0
+      : ((s * v) / 100 / (hslL <= 100 ? hslL : 200 - hslL)) * 100,
+    (hslL * 5) / 10,
+  ];
+  return {
+    h,
+    s: hslS,
+    l: hslL,
+  };
+}
+
 export function download(dataStr, downloadName) {
   const downloadAnchorNode = document.createElement("a");
 

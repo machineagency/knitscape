@@ -188,127 +188,130 @@ export function simulate(pattern) {
   ///////////////////////
   function drawSegmentsToLayer(context, layer) {
     context.lineWidth = yarnWidth();
+    const palette = yarnPalette();
 
     Object.entries(layer).forEach(([colorIndex, paths]) => {
-      context.strokeStyle = yarnPalette()[colorIndex];
+      // context.strokeStyle = cssHSL(palette[colorIndex]);
+      context.strokeStyle = palette[colorIndex];
+
       context.stroke(new Path2D(paths.join()));
     });
   }
 
-  function shadeLeg(ctx, segment) {
-    const base = yarnPalette()[yarnColor(segment.row)];
-    const pts = segment.ctrlPts;
-    const path = new Path2D(segmentPath(segment.ctrlPts));
+  // function shadeLeg(ctx, segment) {
+  //   const base = yarnPalette()[yarnColor(segment.row)];
+  //   const pts = segment.ctrlPts;
+  //   const path = new Path2D(segmentPath(segment.ctrlPts));
 
-    const bottomGradient = ctx.createLinearGradient(
-      pts.p0.x,
-      pts.p0.y,
-      pts.p3.x,
-      pts.p3.y
-    );
+  //   const bottomGradient = ctx.createLinearGradient(
+  //     pts.p0.x,
+  //     pts.p0.y,
+  //     pts.p3.x,
+  //     pts.p3.y
+  //   );
 
-    bottomGradient.addColorStop(0, `hsl(${base.h} ${base.s}% ${base.l - 20}%)`);
-    bottomGradient.addColorStop(
-      0.5,
-      `hsl(${base.h} ${base.s}% ${base.l - 10}%)`
-    );
-    bottomGradient.addColorStop(1, `hsl(${base.h} ${base.s}% ${base.l - 20}%)`);
+  //   bottomGradient.addColorStop(0, `hsl(${base.h} ${base.s}% ${base.l - 20}%)`);
+  //   bottomGradient.addColorStop(
+  //     0.5,
+  //     `hsl(${base.h} ${base.s}% ${base.l - 10}%)`
+  //   );
+  //   bottomGradient.addColorStop(1, `hsl(${base.h} ${base.s}% ${base.l - 20}%)`);
 
-    const topGradient = ctx.createLinearGradient(
-      pts.p0.x,
-      pts.p0.y,
-      pts.p3.x,
-      pts.p3.y
-    );
+  //   const topGradient = ctx.createLinearGradient(
+  //     pts.p0.x,
+  //     pts.p0.y,
+  //     pts.p3.x,
+  //     pts.p3.y
+  //   );
 
-    topGradient.addColorStop(0, `hsl(${base.h} ${base.s}% ${base.l - 15}%)`);
-    topGradient.addColorStop(0.5, `hsl(${base.h} ${base.s}% ${base.l}%)`);
-    topGradient.addColorStop(1, `hsl(${base.h} ${base.s}% ${base.l - 15}%)`);
+  //   topGradient.addColorStop(0, `hsl(${base.h} ${base.s}% ${base.l - 15}%)`);
+  //   topGradient.addColorStop(0.5, `hsl(${base.h} ${base.s}% ${base.l}%)`);
+  //   topGradient.addColorStop(1, `hsl(${base.h} ${base.s}% ${base.l - 15}%)`);
 
-    ctx.save();
+  //   ctx.save();
 
-    ctx.lineWidth = yarnWidth();
-    ctx.strokeStyle = bottomGradient;
+  //   ctx.lineWidth = yarnWidth();
+  //   ctx.strokeStyle = bottomGradient;
 
-    ctx.stroke(path);
+  //   ctx.stroke(path);
 
-    ctx.shadowBlur = yarnWidth();
-    ctx.shadowColor = `hsl(${base.h} ${base.s}% ${base.l}%)`;
+  //   ctx.shadowBlur = yarnWidth();
+  //   ctx.shadowColor = `hsl(${base.h} ${base.s}% ${base.l}%)`;
 
-    ctx.strokeStyle = topGradient;
-    ctx.lineWidth = yarnWidth() / 3;
+  //   ctx.strokeStyle = topGradient;
+  //   ctx.lineWidth = yarnWidth() / 3;
 
-    ctx.stroke(path);
-    ctx.restore();
-  }
+  //   ctx.stroke(path);
+  //   ctx.restore();
+  // }
 
-  function shadeLoop(ctx, segment) {
-    const base = yarnPalette()[yarnColor(segment.row)];
-    const pts = segment.ctrlPts;
-    const path = new Path2D(segmentPath(segment.ctrlPts));
+  // function shadeLoop(ctx, segment) {
+  //   const base = yarnPalette()[yarnColor(segment.row)];
+  //   const pts = segment.ctrlPts;
+  //   const path = new Path2D(segmentPath(segment.ctrlPts));
 
-    const bottomGradient = ctx.createLinearGradient(
-      pts.p0.x,
-      pts.p0.y,
-      pts.p3.x,
-      pts.p3.y
-    );
+  //   const bottomGradient = ctx.createLinearGradient(
+  //     pts.p0.x,
+  //     pts.p0.y,
+  //     pts.p3.x,
+  //     pts.p3.y
+  //   );
 
-    bottomGradient.addColorStop(0, `hsl(${base.h} ${base.s}% ${base.l - 20}%)`);
-    bottomGradient.addColorStop(
-      0.5,
-      `hsl(${base.h} ${base.s}% ${base.l - 25}%)`
-    );
-    bottomGradient.addColorStop(1, `hsl(${base.h} ${base.s}% ${base.l - 20}%)`);
+  //   bottomGradient.addColorStop(0, `hsl(${base.h} ${base.s}% ${base.l - 20}%)`);
+  //   bottomGradient.addColorStop(
+  //     0.5,
+  //     `hsl(${base.h} ${base.s}% ${base.l - 25}%)`
+  //   );
+  //   bottomGradient.addColorStop(1, `hsl(${base.h} ${base.s}% ${base.l - 20}%)`);
 
-    const topGradient = ctx.createLinearGradient(
-      pts.p0.x,
-      pts.p0.y,
-      pts.p3.x,
-      pts.p3.y
-    );
+  //   const topGradient = ctx.createLinearGradient(
+  //     pts.p0.x,
+  //     pts.p0.y,
+  //     pts.p3.x,
+  //     pts.p3.y
+  //   );
 
-    topGradient.addColorStop(0, `hsl(${base.h} ${base.s}% ${base.l - 15}%)`);
-    topGradient.addColorStop(0.5, `hsl(${base.h} ${base.s}% ${base.l - 20}%)`);
-    topGradient.addColorStop(1, `hsl(${base.h} ${base.s}% ${base.l - 15}%)`);
+  //   topGradient.addColorStop(0, `hsl(${base.h} ${base.s}% ${base.l - 15}%)`);
+  //   topGradient.addColorStop(0.5, `hsl(${base.h} ${base.s}% ${base.l - 20}%)`);
+  //   topGradient.addColorStop(1, `hsl(${base.h} ${base.s}% ${base.l - 15}%)`);
 
-    ctx.save();
+  //   ctx.save();
 
-    ctx.lineWidth = yarnWidth();
-    ctx.strokeStyle = bottomGradient;
+  //   ctx.lineWidth = yarnWidth();
+  //   ctx.strokeStyle = bottomGradient;
 
-    ctx.stroke(path);
+  //   ctx.stroke(path);
 
-    ctx.shadowBlur = yarnWidth();
-    ctx.shadowColor = `hsl(${base.h} ${base.s}% ${base.l - 15}%)`;
+  //   ctx.shadowBlur = yarnWidth();
+  //   ctx.shadowColor = `hsl(${base.h} ${base.s}% ${base.l - 15}%)`;
 
-    ctx.strokeStyle = topGradient;
-    ctx.lineWidth = yarnWidth() / 3;
+  //   ctx.strokeStyle = topGradient;
+  //   ctx.lineWidth = yarnWidth() / 3;
 
-    ctx.stroke(path);
-    ctx.restore();
-  }
+  //   ctx.stroke(path);
+  //   ctx.restore();
+  // }
 
-  function drawShaded() {
-    yarnSegments.forEach((segment, index) => {
-      if (index == 0 || index > yarnSegments.length - 3) return;
+  // function drawShaded() {
+  //   yarnSegments.forEach((segment, index) => {
+  //     if (index == 0 || index > yarnSegments.length - 3) return;
 
-      let ctx;
-      if (segment.layer == "front") {
-        ctx = frontCtx;
-      } else if (segment.layer == "mid") {
-        ctx = midCtx;
-      } else if (segment.layer == "back") {
-        ctx = backCtx;
-      }
+  //     let ctx;
+  //     if (segment.layer == "front") {
+  //       ctx = frontCtx;
+  //     } else if (segment.layer == "mid") {
+  //       ctx = midCtx;
+  //     } else if (segment.layer == "back") {
+  //       ctx = backCtx;
+  //     }
 
-      if (segment.linkType == "LHLL" || segment.linkType == "FLFH") {
-        shadeLeg(ctx, segment);
-      } else {
-        shadeLoop(ctx, segment);
-      }
-    });
-  }
+  //     if (segment.linkType == "LHLL" || segment.linkType == "FLFH") {
+  //       shadeLeg(ctx, segment);
+  //     } else {
+  //       shadeLoop(ctx, segment);
+  //     }
+  //   });
+  // }
 
   function setTransform() {
     if (
@@ -367,20 +370,20 @@ export function simulate(pattern) {
     clear();
     const yarnSet = new Set(GLOBAL_STATE.yarnSequence.pixels);
 
-    // const layers = sortSegments(yarnSet);
+    const layers = sortSegments(yarnSet);
 
-    // yarnSegments.forEach((segment, index) => {
-    //   if (index == 0 || index > yarnSegments.length - 3) return;
-    //   const colorIndex = yarnColor(segment.row);
+    yarnSegments.forEach((segment, index) => {
+      if (index == 0 || index > yarnSegments.length - 3) return;
+      const colorIndex = yarnColor(segment.row);
 
-    //   layers[segment.layer][colorIndex].push(segmentPath(segment.ctrlPts));
-    // });
+      layers[segment.layer][colorIndex].push(segmentPath(segment.ctrlPts));
+    });
 
-    // drawSegmentsToLayer(backCtx, layers.back);
-    // drawSegmentsToLayer(frontCtx, layers.front);
-    // drawSegmentsToLayer(midCtx, layers.mid);
+    drawSegmentsToLayer(backCtx, layers.back);
+    drawSegmentsToLayer(frontCtx, layers.front);
+    drawSegmentsToLayer(midCtx, layers.mid);
 
-    drawShaded();
+    // drawShaded();
   }
 
   function update() {

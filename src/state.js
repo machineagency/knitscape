@@ -26,8 +26,9 @@ let GLOBAL_STATE = {
 
   activeYarn: 0,
   yarnPalette: [
-    { h: 200, s: 100, l: 50 },
-    { h: 40, s: 80, l: 50 },
+    "rgba(255,246,183,1)",
+    "rgba(219,71,187,1)",
+    "rgba(255,113,3,1)",
   ], // Colors of the yarns
   yarnSequence: new Bimp(1, 4, [0, 0, 1, 1]),
 

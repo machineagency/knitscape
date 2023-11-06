@@ -93,12 +93,12 @@ SIM PANE
 
 .mid {
   z-index: 2;
-  /* filter: brightness(0.8); */
+  filter: brightness(0.8);
 }
 
 .bottom {
   z-index: 0;
-  /* filter: brightness(0.6); */
+  filter: brightness(0.6);
 }
 
 .sim-transform-group.right-side {
