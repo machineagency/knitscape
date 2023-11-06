@@ -38,8 +38,8 @@ export function downloadPNG() {
 export function downloadBMP() {
   download(
     makeBMP(
-      GLOBAL_STATE.repeatBitmap,
-      GLOBAL_STATE.colorSequence.pixels,
+      GLOBAL_STATE.repeats[0].bitmap,
+      GLOBAL_STATE.yarnSequence.pixels,
       GLOBAL_STATE.yarnPalette
     ).src
   );
@@ -48,7 +48,7 @@ export function downloadBMP() {
 export function downloadSilverKnitTxt() {
   const text =
     "SilverKnit\n" +
-    GLOBAL_STATE.chart
+    GLOBAL_STATE.repeats[0].bitmap
       .make2d()
       .map((row) =>
         row

@@ -119,6 +119,7 @@ export function shuffle(arr) {
 }
 
 export function makeBMP(repeatBimp, colorRepeat, palette) {
+  console.log(repeatBimp, colorRepeat, palette);
   const height = leastCommonMultiple(repeatBimp.height, colorRepeat.length);
   const bmp2d = repeatBimp.make2d();
   const bits = [];
