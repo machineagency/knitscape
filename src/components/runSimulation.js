@@ -191,6 +191,7 @@ export function runSimulation() {
         } else if (redraw) {
           update();
         } else if (updateTransform) {
+          console.log("transform");
           if (setTransform) setTransform();
         }
       },
