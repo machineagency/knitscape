@@ -5,6 +5,7 @@ import {
   downloadJSON,
   downloadSilverKnitTxt,
   downloadPNG,
+  downloadKniterate,
 } from "../actions/exporters";
 
 export function downloadModal() {
@@ -24,6 +25,9 @@ export function downloadModal() {
       </button> -->
       <button class="btn solid" @click=${() => downloadSilverKnitTxt()}>
         TXT (Silver Knit)
+      </button>
+      <button class="btn solid" @click=${() => downloadKniterate()}>
+        Kniterate TXT Import
       </button>
     </div>
   </div>`;

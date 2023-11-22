@@ -66,6 +66,43 @@ export function downloadSilverKnitTxt() {
   );
 }
 
+export function downloadKniterate() {
+  const width = GLOBAL_STATE.chart.width;
+  const chartHeight = GLOBAL_STATE.chart.height;
+  const colors = [];
+
+  for (let y = 0; y < chartHeight; y++) {
+    let paletteIndex = GLOBAL_STATE.yarnSequence.pixel(
+      0,
+      (chartHeight - y - 1) % GLOBAL_STATE.yarnSequence.height
+    );
+
+    colors.push(new Array(width).fill(paletteIndex).join(""));
+  }
+
+  const text =
+    "FILE FORMAT : DAK\nYARNS\n" +
+    colors.join("\n") +
+    "\nYARN PALETTE\nSTITCH SYMBOLS\n" +
+    GLOBAL_STATE.chart
+      .make2d()
+      .map((row) =>
+        row
+          .map((pixel) => {
+            if (pixel == 0 || pixel == 1) return ".";
+            else return "-";
+          })
+          .join("")
+      )
+      .join("\n") +
+    "\nEND";
+
+  download(
+    "data:text/plain;charset=utf-8," + encodeURIComponent(text),
+    "pattern.txt"
+  );
+}
+
 export function downloadJSON() {
   const dataStr =
     "data:text/json;charset=utf-8," +
