@@ -70,6 +70,13 @@ let GLOBAL_STATE = {
   symbolLineWidth: 3,
   flipped: false,
 
+  // PUNCH CARD
+  punchcardMode: false, // constrains repeat width to a punchcard-friendly width
+  machine: "th860",
+  punchVerticalRepeats: 5,
+  rows: 40, //punchcard rows
+  numSides: 8, //number of punch sides
+
   // Various UI pane states
   showLibrary: false,
   showSettings: false,

@@ -6,7 +6,12 @@ import {
   downloadSilverKnitTxt,
   downloadPNG,
   downloadKniterate,
+  downloadPunchcard,
 } from "../actions/exporters";
+
+import { punchCardSVG } from "../punchcard";
+
+import { GLOBAL_STATE, dispatch } from "../state";
 
 export function downloadModal() {
   return html` <div class="modal">
@@ -29,6 +34,30 @@ export function downloadModal() {
       <button class="btn solid" @click=${() => downloadKniterate()}>
         Kniterate TXT Import
       </button>
+
+      <h3>Punchcard</h3>
+
+      <label class="form-control range">
+        Vertical Repeats
+        <input
+          type="range"
+          name="line-width"
+          min="1"
+          max="10"
+          .value=${String(GLOBAL_STATE.punchVerticalRepeats)}
+          @input=${(e) =>
+            dispatch({
+              punchVerticalRepeats: Number(e.target.value),
+              rows:
+                Number(e.target.value) * GLOBAL_STATE.repeats[0].bitmap.height,
+            })} />
+      </label>
+
+      <button class="btn solid" @click=${() => downloadPunchcard()}>
+        Download Punchcard SVG
+      </button>
+
+      <div class="punchcard-preview">${punchCardSVG()}</div>
     </div>
   </div>`;
 }

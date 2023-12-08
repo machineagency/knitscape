@@ -680,3 +680,13 @@ RESIZE DRAGGER
 .grab {
   cursor: grab !important;
 }
+
+.punchcard-preview {
+  height: 15rem;
+  position: relative;
+}
+
+#punchcard {
+  height: 100%;
+  background-color: #fff;
+}
