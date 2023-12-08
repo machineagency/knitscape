@@ -112,6 +112,7 @@ export function punchCardSVG() {
     width="${cardWidth()}mm"
     height="${cardHeight()}mm">
     <g stroke="black" stroke-width="0.5" fill="none">
+      <rect width="${cardWidth()}" height="${cardHeight()}" />
       ${overlap()}${belt()}${loop()}${pattern()}
     </g>
   </svg>`;
