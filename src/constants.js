@@ -10,6 +10,7 @@ export const SNAPSHOT_FIELDS = ["yarnPalette", "yarnSequence", "repeats"];
 
 export const LAYERS = ["chart", "repeats", "yarn"];
 
+// Paths made in https://yqnn.github.io/svg-path-editor/
 export const SYMBOL_PATHS = {
   KNIT: new Path2D(
     "M 0 0.5 L 0.4 0.5 C 0.7 0.5 0.7 0.2 0.5 0.2 C 0.3 0.2 0.3 0.5 0.6 0.5 L 1 0.5"
@@ -26,6 +27,9 @@ export const SYMBOL_PATHS = {
   BT: new Path2D(
     "M 0 0.5 L 0.2 0.5 C 0.3 0.5 0.35 0.5 0.4 0.45 C 0.45 0.4 0.4 0.2 0.5 0.2 C 0.6 0.2 0.55 0.4 0.6 0.45 C 0.65 0.5 0.7 0.5 0.8 0.5 L 1 0.5"
   ),
+
+  FXL1: new Path2D("M 0.5 0.5 L 0.2 0.9 Z M 0.2 0.1 L 0.8 0.9"),
+  FXR1: new Path2D("M 0.5 0.5 L 0.8 0.9 Z M 0.2 0.9 L 0.8 0.1"),
 };
 
 export const SYMBOL_BITS = {

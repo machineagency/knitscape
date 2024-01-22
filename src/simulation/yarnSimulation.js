@@ -226,8 +226,6 @@ export function simulate(pattern, yarnSequence, palette, scale) {
   const stitchPattern = new Pattern(pattern);
 
   function init() {
-    // calculates the x,y values for the i,j
-
     stitchWidth = Math.min(
       (canvasWidth * 0.9) / stitchPattern.width,
       ((canvasHeight * 0.9) / stitchPattern.height) * STITCH_RATIO
@@ -248,6 +246,7 @@ export function simulate(pattern, yarnSequence, palette, scale) {
       };
     });
   }
+
   init();
 
   const DS = populateDS(stitchPattern);
