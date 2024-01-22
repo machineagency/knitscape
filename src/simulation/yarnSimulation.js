@@ -1,35 +1,17 @@
 import { Pattern } from "./Pattern";
-import { yarnLinkForce } from "./YarnForce";
-import * as d3 from "d3";
 import { Vec2D } from "./Vec2D";
 import { GLOBAL_STATE } from "../state";
 import { yarnSpline } from "./yarnSpline";
-import { yarnSim } from "./yarnSim";
 
-import {
-  populateDS,
-  followTheYarn,
-  layoutNodes,
-  yarnPathToLinks,
-} from "./topology";
+import { yarnRelaxation } from "./relaxation";
 
-// Number of rows to add to the top and bottom of the pattern
-// (will be drawn in a different transparent color)
-const Y_PADDING = 0;
+import { populateDS, followTheYarn, yarnPathToLinks } from "./topology";
+
+import { layoutNodes } from "./yarn3d";
 
 const STITCH_RATIO = 5 / 3; // Row height / stitch width
-const YARN_RATIO = 0.24;
 
 const SPREAD = 0.88;
-
-// Sim constants
-const ALPHA_DECAY = 0.05;
-const ALPHA_MIN = 0.2;
-const ITERATIONS = 1;
-const LINK_STRENGTH = 0.2;
-
-// The target link distance when the simulation is run
-const HEIGHT_SHRINK = 0.7;
 
 const dpi = devicePixelRatio;
 
@@ -38,6 +20,7 @@ export function simulate(pattern, yarnSequence, palette, scale) {
   let stitchHeight, stitchWidth, sim;
   let yarnSet = new Set(yarnSequence);
   let yarnPalette = { ...palette, border: "#00000033" };
+
   performance.clearMeasures();
   performance.mark("start");
 
@@ -157,9 +140,7 @@ export function simulate(pattern, yarnSequence, palette, scale) {
   ///////////////////////
 
   function yarnColor(rowNum) {
-    if (rowNum < Y_PADDING || rowNum >= stitchPattern.height - Y_PADDING)
-      return "border"; // show border rows as transparent black
-    return yarnSequence[(rowNum - Y_PADDING) % yarnSequence.length];
+    return yarnSequence[rowNum % yarnSequence.length];
   }
 
   ///////////////////////
@@ -169,56 +150,9 @@ export function simulate(pattern, yarnSequence, palette, scale) {
     context.lineWidth = yarnWidth();
 
     Object.entries(layer).forEach(([colorIndex, paths]) => {
-      // console.log(paths);
       context.strokeStyle = yarnPalette[colorIndex];
       context.stroke(new Path2D(paths.join()));
     });
-  }
-
-  // function draw() {
-  //   frontCtx.clearRect(0, 0, canvasWidth, canvasHeight);
-  //   midCtx.clearRect(0, 0, canvasWidth, canvasHeight);
-  //   backCtx.clearRect(0, 0, canvasWidth, canvasHeight);
-
-  //   updateNormals();
-
-  //   const layers = sortSegments();
-
-  //   yarnSegments.forEach((link, index) => {
-  //     if (index == 0 || index > yarnSegments.length - 3) return;
-  //     const colorIndex = yarnColor(link.row);
-  //     layers[link.layer][colorIndex].push(yarnCurve(link, index));
-  //   });
-
-  //   drawSegmentsToLayer(backCtx, layers.back);
-  //   drawSegmentsToLayer(frontCtx, layers.front);
-  //   drawSegmentsToLayer(midCtx, layers.mid);
-  // }
-
-  function relax() {
-    if (relaxed) return;
-    sim = d3
-      .forceSimulation(nodes)
-      .alphaMin(ALPHA_MIN)
-      .alphaDecay(ALPHA_DECAY)
-      .force(
-        "link",
-        yarnLinkForce(yarnSegments)
-          .strength(LINK_STRENGTH)
-          .iterations(ITERATIONS)
-          .distance((l) => {
-            if (l.linkType == "FLFH" || l.linkType == "LHLL")
-              return stitchHeight * HEIGHT_SHRINK;
-            return Math.abs(l.source.pos.x - l.target.pos.x);
-          })
-      )
-
-      .on("tick", drawYarns);
-    relaxed = true;
-  }
-
-  function stopSim() {
-    if (sim) sim.stop();
   }
 
   ///////////////////////
@@ -304,14 +238,12 @@ export function simulate(pattern, yarnSequence, palette, scale) {
 
   function yarnPathLayout(yp, DS) {
     return yp.map(([i, j, stitchRow, headOrLeg]) => {
-      // [flat CN index, stitchrow, headOrLeg, angle]
       return {
         cnIndex: j * DS.width + i,
         i: i,
         j: j,
         row: stitchRow,
         cnType: headOrLeg,
-        angle: null,
         normal: [0, 0],
       };
     });
@@ -324,9 +256,29 @@ export function simulate(pattern, yarnSequence, palette, scale) {
   const yarnSegments = yarnPathToLinks(DS, initialYarnPath, nodes, 50);
   const yarnPath = yarnPathLayout(initialYarnPath, DS);
 
-  // console.log(nodes);
-
   update();
+
+  function simLoop() {
+    if (sim && sim.running()) {
+      sim.tick(yarnSegments, nodes);
+      update();
+      requestAnimationFrame(simLoop);
+    }
+  }
+
+  function relax() {
+    if (relaxed) return;
+
+    sim = yarnRelaxation();
+
+    simLoop();
+
+    relaxed = true;
+  }
+
+  function stopSim() {
+    if (sim) sim.stop();
+  }
 
   return { relax, stopSim };
 }

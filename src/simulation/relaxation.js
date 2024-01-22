@@ -1,12 +1,13 @@
 import { Vec2 } from "../utils";
 
-export function yarnSim({
-  yarns,
+const K_YARN = 0.06;
+
+export function yarnRelaxation(
   alphaMin = 0.001,
   alphaTarget = 0,
   iterations = 5,
-  velocityDecay = 0.5,
-}) {
+  velocityDecay = 0.5
+) {
   let ALPHA = 1;
   let ALPHA_MIN = alphaMin;
 
@@ -45,12 +46,7 @@ export function yarnSim({
       ALPHA += (ALPHA_TARGET - ALPHA) * ALPHA_DECAY;
       // Accumulate forces to nodes
       yarnSegments.forEach(({ source, target, restLength, yarnIndex }) => {
-        applyYarnForce(
-          nodes[source],
-          nodes[target],
-          restLength,
-          yarns[yarnIndex].kYarn
-        );
+        applyYarnForce(nodes[source], nodes[target], restLength, K_YARN);
       });
 
       // Update node positions
@@ -67,8 +63,6 @@ export function yarnSim({
         node.f.y = 0;
       });
     }
-
-    // console.log(total);
 
     if (ALPHA < ALPHA_MIN) {
       stop();

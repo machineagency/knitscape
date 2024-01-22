@@ -1,31 +1,6 @@
 import { stitches, cnStates, MAX_HORIZONTAL_SHIFT } from "../constants";
 import { Vec2 } from "../utils";
 
-export function layoutNodes(DS, stitchWidth = 1, stitchAspect = 0.75) {
-  // calculates the x,y values for the i,j
-  const HALF_STITCH = stitchWidth / 2;
-  const STITCH_HEIGHT = stitchWidth * stitchAspect;
-
-  return DS.data.map((node, index) => {
-    const i = index % DS.width;
-    const j = (index - i) / DS.width;
-    return {
-      pos: {
-        x: i * HALF_STITCH,
-        y: (DS.height - j - 1) * STITCH_HEIGHT,
-      },
-      f: {
-        x: 0,
-        y: 0,
-      },
-      v: {
-        x: 0,
-        y: 0,
-      },
-    };
-  });
-}
-
 function calcLayer(nodes, source, target, linkType) {
   if (nodes[source][0] == stitches.KNIT && nodes[target][0] == stitches.KNIT) {
     if (linkType == "LHLL" || linkType == "FLFH") return "front";
