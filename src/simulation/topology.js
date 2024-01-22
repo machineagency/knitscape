@@ -3,15 +3,15 @@ import { Vec2 } from "../utils";
 
 function calcLayer(nodes, source, target, linkType) {
   if (nodes[source][0] == stitches.KNIT && nodes[target][0] == stitches.KNIT) {
-    if (linkType == "LHLL" || linkType == "FLFH") return "front";
-    else return "back";
+    if (linkType == "LHLL" || linkType == "FLFH") return 4;
+    else return 1;
   } else if (
     nodes[source][0] == stitches.PURL &&
     nodes[target][0] == stitches.PURL
   ) {
-    if (linkType == "LHLL" || linkType == "FLFH") return "back";
-    else return "front";
-  } else return "mid";
+    if (linkType == "LHLL" || linkType == "FLFH") return 0;
+    else return 3;
+  } else return 2;
 }
 
 export function yarnPathToLinks(

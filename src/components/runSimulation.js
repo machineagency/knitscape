@@ -9,16 +9,15 @@ export function simulationView() {
   return html`<div id="sim-pane">
     <div id="sim-container">
       <div
+        id="canvas-container"
         style="transform: translate(${GLOBAL_STATE.simPan.x}px, ${GLOBAL_STATE
           .simPan.y}px)"
         class=${GLOBAL_STATE.flipped ? "mirrored" : ""}>
-        <canvas
-          id="back"
-          class=${GLOBAL_STATE.flipped ? "top" : "bottom"}></canvas>
-        <canvas id="mid" class="mid"></canvas>
-        <canvas
-          id="front"
-          class=${GLOBAL_STATE.flipped ? "bottom" : "top"}></canvas>
+        <canvas data-layer="0"></canvas>
+        <canvas data-layer="1"></canvas>
+        <canvas data-layer="2"></canvas>
+        <canvas data-layer="3"></canvas>
+        <canvas data-layer="4"></canvas>
       </div>
     </div>
     <div id="sim-controls" class="panzoom-controls">

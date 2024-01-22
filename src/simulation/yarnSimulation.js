@@ -17,8 +17,7 @@ const dpi = devicePixelRatio;
 
 export function simulate(pattern, yarnSequence, palette, scale) {
   let relaxed = false;
-  let stitchHeight, stitchWidth, sim;
-  let yarnSet = new Set(yarnSequence);
+  let stitchHeight, stitchWidth, sim, offsetX, offsetY;
   let yarnPalette = { ...palette, border: "#00000033" };
 
   performance.clearMeasures();
@@ -86,29 +85,12 @@ export function simulate(pattern, yarnSequence, palette, scale) {
     );
   }
 
-  function sortSegments() {
-    const sortedSegments = {
-      front: { border: [] },
-      back: { border: [] },
-      mid: { border: [] },
-    };
-
-    for (const color of yarnSet) {
-      sortedSegments.front[color] = [];
-      sortedSegments.back[color] = [];
-      sortedSegments.mid[color] = [];
-    }
-
-    return sortedSegments;
-  }
-
   ///////////////////////
   // SPLINE STUFF
   ///////////////////////
 
   function calculateSplineControlPoints() {
     yarnPath.forEach((controlPoint) => {
-      // console.log(controlPoint.normal[1]);
       controlPoint.pt = new Vec2D(
         nodes[controlPoint.cnIndex].pos.x +
           (yarnWidth() / 2) * controlPoint.normal[0],
@@ -146,19 +128,46 @@ export function simulate(pattern, yarnSequence, palette, scale) {
   ///////////////////////
   // DRAW
   ///////////////////////
-  function drawSegmentsToLayer(context, layer) {
-    context.lineWidth = yarnWidth();
-
-    Object.entries(layer).forEach(([colorIndex, paths]) => {
-      context.strokeStyle = yarnPalette[colorIndex];
-      context.stroke(new Path2D(paths.join()));
+  function drawSegmentsToLayer(layer, layerData) {
+    let ctx = layers[layer].getContext("2d");
+    ctx.shadowColor = "black";
+    ctx.shadowBlur = 2;
+    Object.entries(layerData).forEach(([colorIndex, paths]) => {
+      ctx.strokeStyle = yarnPalette[colorIndex];
+      paths.reverse().forEach((path) => ctx.stroke(new Path2D(path)));
+      // ctx.stroke(new Path2D(paths.join()));
     });
+  }
+
+  function segments(yarnSet) {
+    return Object.fromEntries(
+      Object.entries(layers).map(([index, canvas]) => {
+        return [index, Object.fromEntries(yarnSet.map((color) => [color, []]))];
+      })
+    );
+  }
+
+  function drawYarns() {
+    const yarnSet = new Set(GLOBAL_STATE.yarnSequence.pixels);
+
+    const segs = segments(Array.from(yarnSet));
+
+    yarnSegments.forEach((segment, index) => {
+      if (index == 0 || index > yarnSegments.length - 3) return;
+      const colorIndex = yarnColor(segment.row);
+      segs[segment.layer][colorIndex].push(segmentPath(segment.ctrlPts));
+    });
+
+    Object.entries(segs).forEach(([layer, layerData]) =>
+      drawSegmentsToLayer(layer, layerData)
+    );
   }
 
   ///////////////////////
   // INIT CANVASES
   ///////////////////////
 
+  const parentEl = document.getElementById("canvas-container");
   const bbox = document.getElementById("sim-container").getBoundingClientRect();
 
   const width = bbox.width * scale;
@@ -166,8 +175,11 @@ export function simulate(pattern, yarnSequence, palette, scale) {
   const canvasWidth = dpi * width;
   const canvasHeight = dpi * height;
 
+  const layers = {};
+
   function clear() {
-    [frontCtx, backCtx, midCtx].forEach((ctx) => {
+    Object.values(layers).forEach((canvas) => {
+      const ctx = canvas.getContext("2d");
       ctx.save();
       ctx.resetTransform();
       ctx.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -176,48 +188,13 @@ export function simulate(pattern, yarnSequence, palette, scale) {
     });
   }
 
-  function drawYarns() {
-    clear();
-    const yarnSet = new Set(GLOBAL_STATE.yarnSequence.pixels);
-    const layers = sortSegments(yarnSet);
-
-    yarnSegments.forEach((segment, index) => {
-      if (index == 0 || index > yarnSegments.length - 3) return;
-      const colorIndex = yarnColor(segment.row);
-      layers[segment.layer][colorIndex].push(segmentPath(segment.ctrlPts));
-    });
-
-    drawSegmentsToLayer(backCtx, layers.back);
-    drawSegmentsToLayer(frontCtx, layers.front);
-    drawSegmentsToLayer(midCtx, layers.mid);
-  }
-
   function update() {
     updateNormals();
     calculateSplineControlPoints();
     calculateSegmentControlPoints();
+    clear();
     drawYarns();
   }
-
-  function getCanvases(canvasIDs) {
-    return canvasIDs.map((canvasID) => {
-      let canvas = document.getElementById(canvasID);
-      canvas.width = canvasWidth;
-      canvas.height = canvasHeight;
-      canvas.style.cssText = `width: ${width}px; height: ${height}px;`;
-      return canvas;
-    });
-  }
-
-  let [backCanvas, midCanvas, frontCanvas] = getCanvases([
-    "back",
-    "mid",
-    "front",
-  ]);
-
-  const backCtx = backCanvas.getContext("2d");
-  const midCtx = midCanvas.getContext("2d");
-  const frontCtx = frontCanvas.getContext("2d");
 
   ///////////////////////
   // INIT PATTERN
@@ -232,6 +209,24 @@ export function simulate(pattern, yarnSequence, palette, scale) {
     );
 
     stitchHeight = stitchWidth / STITCH_RATIO;
+
+    offsetX =
+      yarnWidth() + (canvasWidth - stitchPattern.width * stitchWidth) / 2;
+    offsetY =
+      -yarnWidth() + (canvasHeight - stitchPattern.height * stitchHeight) / 2;
+
+    const TOTAL_LAYERS = 5;
+    for (const canvas of parentEl.children) {
+      let layer = Number(canvas.dataset.layer);
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+      canvas.style.cssText = `width: ${width}px; height: ${height}px; z-index: ${layer}; filter: brightness(${
+        0.6 + 0.4 * (layer / (TOTAL_LAYERS - 1))
+      });`;
+      let ctx = canvas.getContext("2d");
+      ctx.translate(offsetX, offsetY);
+      layers[layer] = canvas;
+    }
   }
 
   function yarnPathLayout(yp, DS) {

@@ -82,36 +82,11 @@ SIM PANE
   box-shadow: inset 0 0 6px 0px rgba(0, 0, 0, 0.5);
 }
 
-.top {
-  z-index: 5;
-}
-
-.mid {
-  z-index: 2;
-}
-
-.bottom {
-  z-index: 0;
-  filter: brightness(0.7);
-}
-
 .mirrored > canvas {
   transform: scaleX(-1);
 }
 
-.sim-transform-group.right-side {
-  display: flex;
-  flex-direction: column;
-}
-
-.sim-transform-group.wrong-side {
-  display: flex;
-  flex-direction: column-reverse;
-}
-
-#back,
-#mid,
-#front {
+#canvas-container > canvas {
   position: absolute;
   top: 0;
   left: 0;
