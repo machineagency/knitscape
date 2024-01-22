@@ -1,5 +1,6 @@
 import { GLOBAL_STATE, dispatch } from "../state";
 import { Bimp } from "../lib/Bimp";
+
 export function generateChart() {
   return ({ state }) => {
     let repeats = state.repeats;
@@ -7,7 +8,7 @@ export function generateChart() {
       let chart = Bimp.empty(
         GLOBAL_STATE.chart.width,
         GLOBAL_STATE.chart.height,
-        0
+        1
       );
       for (const repeat of repeats) {
         let tiled = Bimp.fromTile(

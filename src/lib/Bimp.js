@@ -67,7 +67,7 @@ export class Bimp {
     ]);
   }
 
-  resize(width, height, emptyColor = 0) {
+  resize(width, height, emptyColor = 1) {
     let resized = [];
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {

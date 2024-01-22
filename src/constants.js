@@ -11,23 +11,30 @@ export const SNAPSHOT_FIELDS = ["yarnPalette", "yarnSequence", "repeats"];
 export const LAYERS = ["chart", "repeats", "yarn"];
 
 export const SYMBOL_PATHS = {
-  knit: new Path2D(
+  KNIT: new Path2D(
     "M 0 0.5 L 0.4 0.5 C 0.7 0.5 0.7 0.2 0.5 0.2 C 0.3 0.2 0.3 0.5 0.6 0.5 L 1 0.5"
   ),
-  purl: new Path2D(
+  PURL: new Path2D(
     "M 1 0.5 L 0.6 0.5 C 0.3 0.5 0.3 0.8 0.5 0.8 C 0.7 0.8 0.7 0.5 0.4 0.5 L 0 0.5"
   ),
-  slip: new Path2D("M 0 0.5 L 1 0.5"),
-  tuck: new Path2D(
+  FM: new Path2D("M 0 0.5 L 1 0.5"),
+  BM: new Path2D("M 0 0.5 L 1 0.5"),
+
+  FT: new Path2D(
+    "M 0 0.5 L 0.2 0.5 C 0.3 0.5 0.35 0.5 0.4 0.45 C 0.45 0.4 0.4 0.2 0.5 0.2 C 0.6 0.2 0.55 0.4 0.6 0.45 C 0.65 0.5 0.7 0.5 0.8 0.5 L 1 0.5"
+  ),
+  BT: new Path2D(
     "M 0 0.5 L 0.2 0.5 C 0.3 0.5 0.35 0.5 0.4 0.45 C 0.45 0.4 0.4 0.2 0.5 0.2 C 0.6 0.2 0.55 0.4 0.6 0.45 C 0.65 0.5 0.7 0.5 0.8 0.5 L 1 0.5"
   ),
 };
 
 export const SYMBOL_BITS = {
-  knit: false,
-  purl: false,
-  slip: true,
-  tuck: true,
+  KNIT: false,
+  PURL: false,
+  FM: true,
+  BM: true,
+  FT: true,
+  BT: true,
 };
 
 export const DEFAULT_SYMBOLS = ["knit", "purl", "slip", "tuck"];
@@ -42,3 +49,34 @@ export const toolData = {
   shift: { icon: "fa-solid fa-right-left", hotkey: "s" },
   move: { hotkey: "h" },
 };
+
+export const stitches = {
+  EMPTY: 0,
+  KNIT: 1,
+  PURL: 2,
+  FM: 3, // Front miss
+  BM: 4, // Back miss
+  FT: 5, // Front tuck
+  BT: 6, // Back tuck
+  FXR1: 7, // Front right transfers
+  FXR2: 8,
+  FXR3: 9,
+  FXL1: 10, // Front Left transfers
+  FXL2: 11,
+  FXL3: 12,
+  BXR1: 13, // Back right transfers
+  BXR2: 14,
+  BXR3: 15,
+  BXL1: 16, // Back left transfers
+  BXL2: 17,
+  BXL3: 18,
+};
+
+export const cnStates = {
+  ECN: 0, // Empty
+  PCN: 1, // Potential
+  ACN: 2, // Actualized
+  UACN: 3, // Unanchored
+};
+
+export const MAX_HORIZONTAL_SHIFT = 6;

@@ -4,6 +4,7 @@ import {
   DEFAULT_PATTERN_LIBRARY,
   DEFAULT_SYMBOLS,
   SNAPSHOT_FIELDS,
+  stitches,
 } from "./constants";
 
 let GLOBAL_STATE = {
@@ -11,11 +12,12 @@ let GLOBAL_STATE = {
   transforming: false,
 
   activeTool: "brush",
-  activeSymbol: 0,
+  activeSymbol: 1,
 
   chartBackground: "#ffffff",
   symbolPalette: {},
-  symbolMap: DEFAULT_SYMBOLS,
+
+  symbolMap: Object.keys(stitches),
   patternLibrary: DEFAULT_PATTERN_LIBRARY,
 
   scale: 15, // Number of pixels for each chart cell
@@ -34,16 +36,9 @@ let GLOBAL_STATE = {
 
   repeats: [
     {
-      bitmap: new Bimp(
-        4,
-        8,
-        [
-          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 3, 0, 0, 0, 3, 0,
-          0, 0, 3, 0, 0, 0, 3, 0, 0,
-        ]
-      ),
+      bitmap: new Bimp(2, 2, [1, 1, 1, 1]),
       pos: [0, 0],
-      area: [48, 60],
+      area: [2, 2],
     },
   ],
 
@@ -63,7 +58,7 @@ let GLOBAL_STATE = {
   ], // Library of motifs which can be used as repeats
 
   // chart: Bimp.empty(5, 5, 0),
-  chart: Bimp.empty(48, 60, 0),
+  chart: Bimp.empty(10, 10, 1),
 
   reverseScroll: false,
   grid: true,
@@ -87,6 +82,8 @@ let GLOBAL_STATE = {
   snapshots: [], // Array of snapshot history
   lastSnapshot: 0, // time of last snapshot
   heldKeys: new Set(), // Keys that are currently held down
+
+  yarnWidth: 0.24,
 };
 
 function loadWorkspace(workspace) {

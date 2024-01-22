@@ -39,7 +39,9 @@ export function drawSymbols(symbolCanvas) {
               ctx.fillRect(0, 0, 1, 1);
             }
 
-            ctx.stroke(SYMBOL_PATHS[symbol]);
+            const path = SYMBOL_PATHS[symbol];
+
+            if (path) ctx.stroke(path);
 
             ctx.restore();
           }

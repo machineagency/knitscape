@@ -7,17 +7,20 @@ export function drawSymbolPicker(symbolCanvas) {
 
     function draw() {
       symbolMap.forEach((symbol) => {
-        const canvas = document.querySelector(`[data-symbol=${symbol}]`);
-        canvas.width = 50;
-        canvas.height = 50;
-        const ctx = canvas.getContext("2d");
+        const path = SYMBOL_PATHS[symbol];
+        if (path) {
+          const canvas = document.querySelector(`[data-symbol=${symbol}]`);
+          canvas.width = 50;
+          canvas.height = 50;
+          const ctx = canvas.getContext("2d");
 
-        ctx.scale(50, 50);
-        ctx.imageSmoothingEnabled = false;
+          ctx.scale(50, 50);
+          ctx.imageSmoothingEnabled = false;
 
-        ctx.lineWidth = 0.01 * symbolLineWidth;
+          ctx.lineWidth = 0.01 * symbolLineWidth;
 
-        ctx.stroke(SYMBOL_PATHS[symbol]);
+          ctx.stroke(path);
+        }
       });
     }
 

@@ -1,13 +1,17 @@
-import { ProcessModel } from "./ProcessModel";
 import { Pattern } from "./Pattern";
-import { YarnModel } from "./YarnModel";
 import { yarnLinkForce } from "./YarnForce";
 import * as d3 from "d3";
+import { Vec2D } from "./Vec2D";
+import { GLOBAL_STATE } from "../state";
+import { yarnSpline } from "./yarnSpline";
+import { yarnSim } from "./yarnSim";
 
-// Number of stitches to add to the left and right of the pattern
-// (need to do this because tuck / slip stitches can't be on the
-// end of the row)
-const X_PADDING = 1;
+import {
+  populateDS,
+  followTheYarn,
+  layoutNodes,
+  yarnPathToLinks,
+} from "./topology";
 
 // Number of rows to add to the top and bottom of the pattern
 // (will be drawn in a different transparent color)
@@ -31,52 +35,23 @@ const dpi = devicePixelRatio;
 
 export function simulate(pattern, yarnSequence, palette, scale) {
   let relaxed = false;
-  let yarnWidth, stitchHeight, sim;
+  let stitchHeight, stitchWidth, sim;
   let yarnSet = new Set(yarnSequence);
   let yarnPalette = { ...palette, border: "#00000033" };
   performance.clearMeasures();
   performance.mark("start");
 
-  ///////////////////////
-  // INITIALIZE NODES
-  ///////////////////////
-
-  function layoutNodes(yarnGraph) {
-    // calculates the x,y values for the i,j
-
-    const stitchWidth = Math.min(
-      (canvasWidth * 0.9) / stitchPattern.width,
-      ((canvasHeight * 0.9) / stitchPattern.height) * STITCH_RATIO
-    );
-
-    const halfStitch = stitchWidth / 2;
-    stitchHeight = stitchWidth / STITCH_RATIO;
-
-    yarnWidth = stitchWidth * YARN_RATIO;
-
-    const offsetX =
-      yarnWidth + (canvasWidth - stitchPattern.width * stitchWidth) / 2;
-    const offsetY =
-      -yarnWidth + (canvasHeight - stitchPattern.height * stitchHeight) / 2;
-
-    yarnGraph.contactNodes.forEach((node, index) => {
-      const i = index % yarnGraph.width;
-      const j = (index - i) / yarnGraph.width;
-      node.i = i;
-      node.j = j;
-      node.x = offsetX + i * halfStitch;
-      node.y = offsetY + (yarnGraph.height - j) * stitchHeight;
-    });
-
-    return yarnGraph.contactNodes;
+  function yarnWidth() {
+    return stitchWidth * GLOBAL_STATE.yarnWidth;
   }
 
   function unitNormal(prev, next, flip) {
-    if (prev.index === next.index) return [0, 0];
-    const x = prev.x - next.x;
-    const y = prev.y - next.y;
+    const x = prev.pos.x - next.pos.x;
+    const y = prev.pos.y - next.pos.y;
 
     const mag = SPREAD * Math.sqrt(x ** 2 + y ** 2);
+
+    if (mag == 0) return [0, 0];
 
     if (flip) {
       return [-y / mag, x / mag];
@@ -128,30 +103,6 @@ export function simulate(pattern, yarnSequence, palette, scale) {
     );
   }
 
-  const openYarnCurve = d3
-    .line()
-    .x((d) => nodes[d.cnIndex].x + (yarnWidth / 2) * d.normal[0])
-    .y((d) => nodes[d.cnIndex].y + (yarnWidth / 2) * d.normal[1])
-    .curve(d3.curveCatmullRomOpen);
-
-  function yarnCurve(yarnLink) {
-    const index = yarnLink.index;
-
-    if (index == 0 || index > yarnPathLinks.length - 3) {
-      // if is the first or last link, just draw a line
-      return `M ${yarnLink.source.x} ${yarnLink.source.y} ${yarnLink.target.x} ${yarnLink.target.y}`;
-    }
-
-    const linkData = [
-      yarnPath[index - 1],
-      yarnPath[index],
-      yarnPath[index + 1],
-      yarnPath[index + 2],
-    ];
-
-    return openYarnCurve(linkData);
-  }
-
   function sortSegments() {
     const sortedSegments = {
       front: { border: [] },
@@ -169,6 +120,39 @@ export function simulate(pattern, yarnSequence, palette, scale) {
   }
 
   ///////////////////////
+  // SPLINE STUFF
+  ///////////////////////
+
+  function calculateSplineControlPoints() {
+    yarnPath.forEach((controlPoint) => {
+      // console.log(controlPoint.normal[1]);
+      controlPoint.pt = new Vec2D(
+        nodes[controlPoint.cnIndex].pos.x +
+          (yarnWidth() / 2) * controlPoint.normal[0],
+        nodes[controlPoint.cnIndex].pos.y +
+          (yarnWidth() / 2) * controlPoint.normal[1]
+      );
+    });
+  }
+
+  function segmentPath({ p0, p1, p2, p3 }) {
+    return `M ${p0.x} ${p0.y} C${p1.x} ${p1.y} ${p2.x} ${p2.y} ${p3.x} ${p3.y}`;
+  }
+
+  function calculateSegmentControlPoints() {
+    yarnSegments.forEach((segment, index) => {
+      if (index == 0 || index > yarnSegments.length - 3) return;
+
+      segment.ctrlPts = yarnSpline(
+        yarnPath[index - 1].pt,
+        yarnPath[index].pt,
+        yarnPath[index + 1].pt,
+        yarnPath[index + 2].pt
+      );
+    });
+  }
+
+  ///////////////////////
   // YARN COLOR
   ///////////////////////
 
@@ -182,34 +166,34 @@ export function simulate(pattern, yarnSequence, palette, scale) {
   // DRAW
   ///////////////////////
   function drawSegmentsToLayer(context, layer) {
-    context.lineWidth = yarnWidth;
+    context.lineWidth = yarnWidth();
 
     Object.entries(layer).forEach(([colorIndex, paths]) => {
+      // console.log(paths);
       context.strokeStyle = yarnPalette[colorIndex];
       context.stroke(new Path2D(paths.join()));
     });
   }
 
-  function draw() {
-    frontCtx.clearRect(0, 0, canvasWidth, canvasHeight);
-    midCtx.clearRect(0, 0, canvasWidth, canvasHeight);
-    backCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+  // function draw() {
+  //   frontCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+  //   midCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+  //   backCtx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-    updateNormals();
+  //   updateNormals();
 
-    const layers = sortSegments();
+  //   const layers = sortSegments();
 
-    yarnPathLinks.forEach((link, index) => {
-      if (index == 0 || index > yarnPathLinks.length - 3) return;
-      const colorIndex = yarnColor(link.row);
+  //   yarnSegments.forEach((link, index) => {
+  //     if (index == 0 || index > yarnSegments.length - 3) return;
+  //     const colorIndex = yarnColor(link.row);
+  //     layers[link.layer][colorIndex].push(yarnCurve(link, index));
+  //   });
 
-      layers[link.layer][colorIndex].push(yarnCurve(link));
-    });
-
-    drawSegmentsToLayer(backCtx, layers.back);
-    drawSegmentsToLayer(frontCtx, layers.front);
-    drawSegmentsToLayer(midCtx, layers.mid);
-  }
+  //   drawSegmentsToLayer(backCtx, layers.back);
+  //   drawSegmentsToLayer(frontCtx, layers.front);
+  //   drawSegmentsToLayer(midCtx, layers.mid);
+  // }
 
   function relax() {
     if (relaxed) return;
@@ -219,29 +203,23 @@ export function simulate(pattern, yarnSequence, palette, scale) {
       .alphaDecay(ALPHA_DECAY)
       .force(
         "link",
-        yarnLinkForce(yarnPathLinks)
+        yarnLinkForce(yarnSegments)
           .strength(LINK_STRENGTH)
           .iterations(ITERATIONS)
           .distance((l) => {
             if (l.linkType == "FLFH" || l.linkType == "LHLL")
               return stitchHeight * HEIGHT_SHRINK;
-            return Math.abs(l.source.x - l.target.x);
+            return Math.abs(l.source.pos.x - l.target.pos.x);
           })
       )
 
-      .on("tick", draw);
+      .on("tick", drawYarns);
     relaxed = true;
   }
 
   function stopSim() {
     if (sim) sim.stop();
   }
-
-  ///////////////////////
-  // INIT PATTERN
-  ///////////////////////
-
-  const stitchPattern = new Pattern(pattern.pad(X_PADDING, Y_PADDING, 0));
 
   ///////////////////////
   // INIT CANVASES
@@ -253,6 +231,39 @@ export function simulate(pattern, yarnSequence, palette, scale) {
   const height = bbox.height * scale;
   const canvasWidth = dpi * width;
   const canvasHeight = dpi * height;
+
+  function clear() {
+    [frontCtx, backCtx, midCtx].forEach((ctx) => {
+      ctx.save();
+      ctx.resetTransform();
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+      ctx.restore();
+      ctx.lineWidth = yarnWidth();
+    });
+  }
+
+  function drawYarns() {
+    clear();
+    const yarnSet = new Set(GLOBAL_STATE.yarnSequence.pixels);
+    const layers = sortSegments(yarnSet);
+
+    yarnSegments.forEach((segment, index) => {
+      if (index == 0 || index > yarnSegments.length - 3) return;
+      const colorIndex = yarnColor(segment.row);
+      layers[segment.layer][colorIndex].push(segmentPath(segment.ctrlPts));
+    });
+
+    drawSegmentsToLayer(backCtx, layers.back);
+    drawSegmentsToLayer(frontCtx, layers.front);
+    drawSegmentsToLayer(midCtx, layers.mid);
+  }
+
+  function update() {
+    updateNormals();
+    calculateSplineControlPoints();
+    calculateSegmentControlPoints();
+    drawYarns();
+  }
 
   function getCanvases(canvasIDs) {
     return canvasIDs.map((canvasID) => {
@@ -275,19 +286,47 @@ export function simulate(pattern, yarnSequence, palette, scale) {
   const frontCtx = frontCanvas.getContext("2d");
 
   ///////////////////////
-  // BUILD SIMULATION DATA
+  // INIT PATTERN
   ///////////////////////
 
-  const testModel = new ProcessModel(stitchPattern);
+  const stitchPattern = new Pattern(pattern);
 
-  const yarnGraph = new YarnModel(testModel.cn);
+  function init() {
+    // calculates the x,y values for the i,j
 
-  const nodes = layoutNodes(yarnGraph);
+    stitchWidth = Math.min(
+      (canvasWidth * 0.9) / stitchPattern.width,
+      ((canvasHeight * 0.9) / stitchPattern.height) * STITCH_RATIO
+    );
 
-  const yarnPath = yarnGraph.makeNice();
+    stitchHeight = stitchWidth / STITCH_RATIO;
+  }
 
-  const yarnPathLinks = yarnGraph.yarnPathToLinks();
-  draw();
+  function yarnPathLayout(yp, DS) {
+    return yp.map(([i, j, stitchRow, headOrLeg]) => {
+      // [flat CN index, stitchrow, headOrLeg, angle]
+      return {
+        cnIndex: j * DS.width + i,
+        i: i,
+        j: j,
+        row: stitchRow,
+        cnType: headOrLeg,
+        angle: null,
+        normal: [0, 0],
+      };
+    });
+  }
+  init();
+
+  const DS = populateDS(stitchPattern);
+  const initialYarnPath = followTheYarn(DS, stitchPattern);
+  const nodes = layoutNodes(DS, stitchWidth);
+  const yarnSegments = yarnPathToLinks(DS, initialYarnPath, nodes, 50);
+  const yarnPath = yarnPathLayout(initialYarnPath, DS);
+
+  // console.log(nodes);
+
+  update();
 
   return { relax, stopSim };
 }
