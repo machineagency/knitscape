@@ -28,17 +28,17 @@ let GLOBAL_STATE = {
   simPan: { x: 0, y: 0 },
 
   activeYarn: 0,
-  yarnPalette: ["rgba(16,18,189,1)", "rgba(235,233,187,1)", "rgba(247,85,0,1)"], // Colors of the yarns
-  yarnSequence: new Bimp(1, 8, [1, 1, 1, 1, 2, 2, 0, 0]),
+  yarnPalette: ["rgba(235,233,187,1)", "rgba(247,85,0,1)"], // Colors of the yarns
+  yarnSequence: new Bimp(1, 10, [0, 0, 1, 1, 0, 0, 1, 1, 0, 0]),
 
   editingRepeat: -1,
   repeatPos: [-1, -1],
 
   repeats: [
     {
-      bitmap: new Bimp(2, 2, [1, 1, 1, 1]),
+      bitmap: new Bimp(2, 4, [1, 5, 1, 5, 1, 1, 1, 1]),
       pos: [0, 0],
-      area: [2, 2],
+      area: [7, 10],
     },
   ],
 
@@ -57,8 +57,7 @@ let GLOBAL_STATE = {
     },
   ], // Library of motifs which can be used as repeats
 
-  // chart: Bimp.empty(5, 5, 0),
-  chart: Bimp.empty(10, 10, 1),
+  chart: Bimp.empty(7, 10, 1),
 
   reverseScroll: false,
   grid: true,

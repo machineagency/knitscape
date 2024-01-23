@@ -112,6 +112,19 @@ export class Bimp {
     return new Bimp(this.width, this.height, copy);
   }
 
+  indexedDraw(changes) {
+    let copy = this.pixels.slice();
+    for (let { index, color } of changes) {
+      if (index >= this.pixels.length) continue;
+      copy[index] = color;
+    }
+    return new Bimp(this.width, this.height, copy);
+  }
+
+  indexedBrush(index, color) {
+    return this.indexedDraw([{ index, color: color }]);
+  }
+
   brush({ x, y }, color) {
     let drawn = { x, y, color: color };
     return this.draw([drawn]);

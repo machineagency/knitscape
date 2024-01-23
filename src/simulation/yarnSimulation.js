@@ -7,11 +7,11 @@ import { yarnRelaxation } from "./relaxation";
 
 import { populateDS, followTheYarn, yarnPathToLinks } from "./topology";
 
-import { layoutNodes } from "./yarn3d";
+import { layoutNodes, layeredYarnSegmentData } from "./yarn3d";
 
 const STITCH_RATIO = 5 / 3; // Row height / stitch width
 
-const SPREAD = 0.88;
+const SPREAD = 0.93;
 
 const dpi = devicePixelRatio;
 
@@ -131,7 +131,9 @@ export function simulate(pattern, yarnSequence, palette, scale) {
   function drawSegmentsToLayer(layer, layerData) {
     let ctx = layers[layer].getContext("2d");
     ctx.shadowColor = "black";
-    ctx.shadowBlur = 2;
+    ctx.shadowBlur = 1;
+    // ctx.lineCap = "round";
+
     Object.entries(layerData).forEach(([colorIndex, paths]) => {
       ctx.strokeStyle = yarnPalette[colorIndex];
       paths.reverse().forEach((path) => ctx.stroke(new Path2D(path)));
@@ -200,7 +202,7 @@ export function simulate(pattern, yarnSequence, palette, scale) {
   // INIT PATTERN
   ///////////////////////
 
-  const stitchPattern = new Pattern(pattern);
+  const stitchPattern = new Pattern(pattern, yarnSequence);
 
   function init() {
     stitchWidth = Math.min(
@@ -250,6 +252,12 @@ export function simulate(pattern, yarnSequence, palette, scale) {
   const yarnSegments = yarnPathToLinks(DS, initialYarnPath, nodes, 50);
   const yarnPath = yarnPathLayout(initialYarnPath, DS);
 
+  // const segmentData = layeredYarnSegmentData(
+  //   stitchPattern,
+  //   nodes,
+  //   DS,
+  //   initialYarnPath
+  // );
   update();
 
   function simLoop() {

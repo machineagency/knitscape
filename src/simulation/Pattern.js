@@ -1,8 +1,12 @@
 export class Pattern {
-  constructor(bitmap) {
+  constructor(bitmap, yarnSequence) {
     this.ops = bitmap.pixels;
     this.width = bitmap.width;
     this.height = bitmap.height;
+    this.yarnSequence = yarnSequence;
+    this.yarns = Array.from(
+      yarnSequence.filter((value, index, arr) => arr.indexOf(value) === index)
+    );
   }
 
   op(x, y) {

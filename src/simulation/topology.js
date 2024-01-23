@@ -1,4 +1,4 @@
-import { stitches, cnStates, MAX_HORIZONTAL_SHIFT } from "../constants";
+import { stitches, cnStates, MAX_H_SHIFT, MAX_V_SHIFT } from "../constants";
 import { Vec2 } from "../utils";
 
 function calcLayer(nodes, source, target, linkType) {
@@ -50,11 +50,8 @@ export function yarnPathToLinks(
 }
 
 function checkForTransfers(i, j, DS) {
-  let iMin = i - MAX_HORIZONTAL_SHIFT < 0 ? 0 : i - MAX_HORIZONTAL_SHIFT;
-  let iMax =
-    i + MAX_HORIZONTAL_SHIFT >= DS.width
-      ? DS.width - 1
-      : i + MAX_HORIZONTAL_SHIFT;
+  let iMin = i - MAX_H_SHIFT < 0 ? 0 : i - MAX_H_SHIFT;
+  let iMax = i + MAX_H_SHIFT >= DS.width ? DS.width - 1 : i + MAX_H_SHIFT;
 
   const transferredCNs = [];
   for (let ii = iMin; ii <= iMax; ii++) {
@@ -354,6 +351,7 @@ export function populateDS(pattern, populateFirstRow = true) {
     [null, null], // MV, Movement vector
     [], // CNL, CN List
     [], // YP, Yarn path index list
+    [], // CNO, the order of all CNs at this location
   ]);
 
   if (populateFirstRow) {
@@ -393,6 +391,9 @@ export function populateDS(pattern, populateFirstRow = true) {
     YPI(i, j) {
       return this.CN(i, j)[4];
     },
+    CNO(i, j) {
+      return this.CN(i, j)[5];
+    },
     setST(i, j, st) {
       this.CN(i, j)[0] = st;
     },
@@ -406,7 +407,10 @@ export function populateDS(pattern, populateFirstRow = true) {
       this.CN(i, j)[3] = cnl;
     },
     setYPI(i, j, ypi) {
-      this.CN(i, j)[3] = ypi;
+      this.CN(i, j)[4] = ypi;
+    },
+    setCNO(i, j, cno) {
+      this.CN(i, j)[5] = cno;
     },
   };
 
@@ -679,12 +683,14 @@ function nextCN(i, j, legNode, currentStitchRow, DS) {
   };
 }
 
-function determineRule(row, pattern) {
+function determineRule(rowJ, pattern) {
   let rule = [];
-  let currentRow = pattern.ops.slice(
-    row * pattern.width,
-    (row + 1) * pattern.width
+  let currentRow = Array.from(
+    pattern.ops.slice((rowJ - 1) * pattern.width, rowJ * pattern.width)
   );
+  // let currentRow = Array.from(
+  //   pattern.ops.slice(rowJ * pattern.width, (rowJ + 1) * pattern.width)
+  // );
 
   const frontTransfers = [
     stitches.FXL1,
@@ -740,79 +746,86 @@ function determineRule(row, pattern) {
 
   if (currentRow.includes(stitches.FT)) {
     // Front tuck has highest precedence
-    rule.shift(stitches.FT);
-  } else if (currentRow.includes(stitches.BT)) {
+    rule.splice(0, 0, stitches.FT);
+  }
+
+  if (currentRow.includes(stitches.BT)) {
     // Back tuck has lowest precedence
     rule.push(stitches.BT);
   }
-
   return rule;
 }
 
 function cnsAt(i, j, DS) {
   // determines which CNS are positioned at location (i,j) in the CN grid
-
   if (i >= DS.width || j >= DS.height) return [];
 
-  const maxHorizontal = 6; // 3 needles * 2 CNs/needle
-  const maxVertical = 4; // vertical shift
-
-  let iMin = i - maxHorizontal < 0 ? 0 : i - maxHorizontal;
-  let iMax = i + maxHorizontal >= DS.width ? DS.width - 1 : i + maxHorizontal;
-  let jMin = j - maxVertical < 0 ? 0 : j - maxVertical;
+  let iMin = i - MAX_H_SHIFT < 0 ? 0 : i - MAX_H_SHIFT;
+  let iMax = i + MAX_H_SHIFT >= DS.width ? DS.width - 1 : i + MAX_H_SHIFT;
+  let jMin = j - MAX_V_SHIFT < 0 ? 0 : j - MAX_V_SHIFT;
   let jMax = j;
 
-  const ACNList = [];
-  for (let jCurrent = jMin; jCurrent <= jMax; jCurrent++) {
-    for (let iCurrent = iMin; iCurrent <= iMax; iCurrent++) {
-      let [iFinal, jFinal] = finalLocation(iCurrent, jCurrent, DS);
-      if (
-        iFinal == i &&
-        jFinal == j &&
-        DS.cns[jCurrent * DS.width + iCurrent][1] != cnStates.ECN
-      ) {
-        ACNList.push([iCurrent, jCurrent]);
+  const cnList = [];
+  for (let jj = jMin; jj <= jMax; jj++) {
+    for (let ii = iMin; ii <= iMax; ii++) {
+      let [iFinal, jFinal] = finalLocation(ii, jj, DS);
+      if (iFinal == i && jFinal == j && DS.AV(ii, jj) != cnStates.ECN) {
+        cnList.push([ii, jj]);
       }
     }
   }
-  return ACNList;
+  return cnList;
 }
 
-function yarnOrder(i, j, pattern, DS) {
+export function orderLoops(DS, pattern) {
+  for (let jj = 0; jj < DS.height; jj++) {
+    for (let ii = 0; ii < DS.width; ii++) {
+      DS.setCNO(ii, jj, yarnOrder(ii, jj, pattern, DS));
+    }
+  }
+}
+
+export function yarnOrder(i, j, pattern, DS) {
   let orderedCNs = [];
   let CNList = cnsAt(i, j, DS);
   if (CNList.length == 0) {
-    console.log(`No CNs at location ${i}, ${j}`);
+    // console.debug(`No CNs at location ${i}, ${j}`);
     return orderedCNs;
   }
+  // console.log("-------------------------------------------------------");
 
-  let pairs = cnStitchPairs(CNList, pattern);
-  let sortedCNStitchPairs = sortPairsByJ(pairs);
-  return yarnOrderRecursive(sortedCNStitchPairs, pattern, orderedCNs);
+  let pairs = cnStitchPairs(CNList, pattern); // Get the stitches that create each CN at location (i,j)
+  pairs.toSorted((a, b) => a[1] - b[1]); // sort pairs by J
+  return yarnOrderRecursive(pairs, pattern, orderedCNs);
 }
 
 function yarnOrderRecursive(sortedCNStitchPairs, pattern, orderedCNs) {
   if (sortedCNStitchPairs.length != 0) {
-    let currentRow;
-    let smallestJ = sortedCNStitchPairs[0].CNj;
+    let currentRow = [];
+    let smallestJ = sortedCNStitchPairs[0][1];
     let rule = determineRule(smallestJ, pattern);
+    // console.log("sorted cn stitch pairs", JSON.stringify(sortedCNStitchPairs));
+    // console.log("smallestJ", smallestJ);
+    // console.log("RULE", rule);
 
-    for (const [cnij, stitch] of sortedCNStitchPairs) {
+    let processed = 0;
+
+    for (const [i, j, stitch] of sortedCNStitchPairs) {
       if (j == smallestJ) {
-        currentRow[cnij] = stitch;
+        currentRow.push([i, j, stitch]);
+        processed++;
       } else break;
     }
 
-    for (const cnij of Object.keys(currentRow)) {
-      delete sortedCNStitchPairs[cnij];
-    }
+    // console.log("ORDERED CNS BEFORE", JSON.stringify(orderedCNs));
 
+    sortedCNStitchPairs.splice(0, processed); // delete the CN stitch pairs about to be processed
     if (rule.at(-1) == stitches.BT) {
       orderedCNs = orderRowCNs(currentRow, rule).concat(orderedCNs);
     } else {
       orderedCNs = orderedCNs.concat(orderRowCNs(currentRow, rule));
     }
-
+    // console.log("ORDERED CNS AFTer", JSON.stringify(orderedCNs));
     return yarnOrderRecursive(sortedCNStitchPairs, pattern, orderedCNs);
   }
 
@@ -822,20 +835,28 @@ function yarnOrderRecursive(sortedCNStitchPairs, pattern, orderedCNs) {
 function orderRowCNs(currentRow, rule) {
   let stitchIndexCNPairs = [];
   let orderedCNs = [];
-  for (const [cnij, stitch] of Object.entries(currentRow)) {
-    stitchIndexCNPairs.push([rule.indexOf(stitch), cnij]);
+
+  for (const [i, j, stitch] of currentRow) {
+    // console.log(stitch);
+    // console.log(i, j, rule.indexOf(stitch));
+    stitchIndexCNPairs.push([rule.indexOf(stitch), i, j]);
   }
 
-  let sortedStitchIndexCNPairs = stitchIndexCNPairs.sort((a, b) => a[0] - b[0]);
+  // Order by the index of stitches in the precedence rule
+  let sortedStitchIndexCNPairs = stitchIndexCNPairs.toSorted(
+    (a, b) => a[0] - b[0]
+  );
 
-  for (const [index, cnij] of sortedStitchIndexCNPairs) {
-    orderedCNs.push(cnij);
+  // console.log("SORTED", JSON.stringify(sortedStitchIndexCNPairs));
+
+  for (const [index, i, j] of sortedStitchIndexCNPairs) {
+    orderedCNs.push([i, j]);
   }
   return orderedCNs;
 }
 
 function cnStitchPairs(cnList, pattern) {
-  let pairs = {};
+  let pairs = [];
 
   for (const [cnI, cnJ] of cnList) {
     let n = cnJ - 1;
@@ -845,7 +866,7 @@ function cnStitchPairs(cnList, pattern) {
     } else {
       m = (cnI - 1) / 2;
     }
-    pairs[`${cnI},${cnJ}`] = pattern.op(m, n);
+    pairs.push([cnI, cnJ, pattern.op(m, n)]);
   }
 
   return pairs;
