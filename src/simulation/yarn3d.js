@@ -108,7 +108,7 @@ export function layeredYarnSegmentData(pattern, nodes, DS, yarnPath) {
       return;
     }
 
-    console.log(yarnOrder(i, j, pattern, DS));
+    console.log(DS.CNO(i, j));
 
     const prevCNPos = nodes[prev[0] + prev[1] * DS.width].pos;
     const nextCNPos = nodes[next[0] + next[1] * DS.width].pos;

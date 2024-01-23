@@ -5,7 +5,12 @@ import { yarnSpline } from "./yarnSpline";
 
 import { yarnRelaxation } from "./relaxation";
 
-import { populateDS, followTheYarn, yarnPathToLinks } from "./topology";
+import {
+  populateDS,
+  followTheYarn,
+  yarnPathToLinks,
+  orderLoops,
+} from "./topology";
 
 import { layoutNodes, layeredYarnSegmentData } from "./yarn3d";
 
@@ -251,13 +256,14 @@ export function simulate(pattern, yarnSequence, palette, scale) {
   const nodes = layoutNodes(DS, stitchWidth);
   const yarnSegments = yarnPathToLinks(DS, initialYarnPath, nodes, 50);
   const yarnPath = yarnPathLayout(initialYarnPath, DS);
+  orderLoops(DS, stitchPattern);
 
-  // const segmentData = layeredYarnSegmentData(
-  //   stitchPattern,
-  //   nodes,
-  //   DS,
-  //   initialYarnPath
-  // );
+  const segmentData = layeredYarnSegmentData(
+    stitchPattern,
+    nodes,
+    DS,
+    initialYarnPath
+  );
   update();
 
   function simLoop() {
