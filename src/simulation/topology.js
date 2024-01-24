@@ -115,7 +115,7 @@ function lowerNeighborIsAnchored(i, j, DS) {
       cnLeft[2][1] == 0 &&
       i > 0)
   ) {
-    // if it holds an ACN that wasn't moved, it is actually anchored. return true
+    // if lower neighbor is an ACN that wasn't moved, it is actually anchored. return true
     return true;
   }
   return false;
@@ -144,7 +144,6 @@ function kpLower(i, j, st, DS) {
   } else if (AV == cnStates.UACN) {
     // Find any PCNS on the needle and anchor them
     const held = heldCNS(i, j, DS);
-
     for (const [ii, jj] of held) {
       if (DS.AV(ii, jj) == cnStates.PCN) DS.setAV(ii, jj, cnStates.ACN);
     }
@@ -198,9 +197,11 @@ function kpUpper(i, j, DS) {
   // Initialize MV to [0,0]
   DS.setMV(i, j + 1, [0, 0]);
 
+  const [_, AV, MV] = DS.CN(i, j);
+
   // Figure out the AV
-  if (DS.AV(i, j) == cnStates.ACN) {
-    // if the j cell has an ACN, the j+1 cell becomes a PCN
+  if (AV == cnStates.ACN && MV[0] == 0 && MV[1] == 0) {
+    // if the j cell has an ACN and has not moved, the j+1 cell becomes a PCN
     DS.setAV(i, j + 1, cnStates.PCN);
   } else {
     DS.setAV(i, j + 1, cnStates.UACN);
@@ -362,6 +363,7 @@ export function populateDS(pattern, populateFirstRow = true) {
       ) {
         grid[i][1] = cnStates.PCN;
         grid[i][2] = [0, 0];
+        grid[i][4] = [-1];
       }
     }
   }
@@ -428,6 +430,9 @@ export function followTheYarn(DS, pattern) {
   let yarnPathIndex = 0;
 
   const yarnPath = [];
+  const layeredYarnPath = [];
+
+  let highestLayer = 0;
 
   while (j < DS.height) {
     const movingRight = currentStitchRow % 2 == 0;
@@ -439,10 +444,12 @@ export function followTheYarn(DS, pattern) {
       DS.setCNL(i, j, CNL);
 
       let location;
+      let cnLoc;
 
       if (legNode) {
         // leg nodes do not move, use the current i,j
         location = [i, j, currentStitchRow, side + "L"];
+        cnLoc = [i, j];
 
         // Add the current yarn path index to all ACNs at this node.
         for (const [ii, jj] of CNL) {
@@ -450,14 +457,27 @@ export function followTheYarn(DS, pattern) {
         }
       } else {
         // head nodes might move, find final (i,j) location of the node
-        let [iFinal, jFinal] = finalLocation(i, j, DS);
-
-        location = [iFinal, jFinal, currentStitchRow, side + "H"];
+        cnLoc = finalLocation(i, j, DS);
+        location = [cnLoc[0], cnLoc[1], currentStitchRow, side + "H"];
 
         // Add the current yarn path index to the head node
         DS.YPI(i, j).push(yarnPathIndex);
       }
 
+      let layer = -1;
+
+      for (const [index, [ii, jj]] of DS.CNO(...cnLoc).entries()) {
+        if (ii == i && jj == j) {
+          layer = index;
+          break;
+        }
+      }
+
+      // console.log(layer);
+      if (layer < 0) console.error("Couldn't find the stack index");
+      if (layer > highestLayer) highestLayer = layer;
+
+      layeredYarnPath.push([...cnLoc, currentStitchRow, layer]);
       yarnPath.push(location);
       yarnPathIndex++;
     }
@@ -472,7 +492,8 @@ export function followTheYarn(DS, pattern) {
     ));
   }
 
-  return yarnPath;
+  DS.maxCNStack = highestLayer + 1;
+  return [yarnPath, layeredYarnPath];
 }
 
 function addToList(i, j, legNode, yarnPath, DS) {
@@ -537,8 +558,7 @@ function addToList(i, j, legNode, yarnPath, DS) {
 
       if (n < jFinal) {
         // if this CN is anchored, update it to ACN
-        if (j == DS.height - 1) {
-        } else {
+        if (j < DS.height - 1) {
           DS.setAV(i, j, cnStates.ACN);
         }
         return true;
@@ -777,15 +797,15 @@ function cnsAt(i, j, DS) {
   return cnList;
 }
 
-export function orderLoops(DS, pattern) {
+export function orderCNs(DS, pattern) {
   for (let jj = 0; jj < DS.height; jj++) {
     for (let ii = 0; ii < DS.width; ii++) {
-      DS.setCNO(ii, jj, yarnOrder(ii, jj, pattern, DS));
+      DS.setCNO(ii, jj, cnOrderAt(ii, jj, pattern, DS));
     }
   }
 }
 
-export function yarnOrder(i, j, pattern, DS) {
+export function cnOrderAt(i, j, pattern, DS) {
   let orderedCNs = [];
   let CNList = cnsAt(i, j, DS);
   if (CNList.length == 0) {

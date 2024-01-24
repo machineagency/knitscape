@@ -14,6 +14,7 @@ let GLOBAL_STATE = {
   activeTool: "brush",
   activeStitch: 0,
   yarnSequence: [0],
+  // Fig 7
   // pattern: new Bimp(
   //   5,
   //   6,
@@ -23,6 +24,7 @@ let GLOBAL_STATE = {
   //   ]
   // ),
 
+  // Fig 6
   // pattern: new Bimp(
   //   6,
   //   6,
@@ -45,23 +47,25 @@ let GLOBAL_STATE = {
   // ),
 
   // Loop order analysis example
-  pattern: new Bimp(
-    6,
-    6,
-    [
-      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-      1, 13, 1, 16, 1, 1, 1, 1, 1, 1, 1,
-    ]
-  ),
+  // pattern: new Bimp(
+  //   6,
+  //   6,
+  //   [
+  //     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  //     1, 13, 1, 16, 1, 1, 1, 1, 1, 1, 1,
+  //   ]
+  // ),
 
-  pattern: new Bimp(
-    6,
-    6,
-    [
-      2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 2, 3, 6, 5, 17, 1, 1, 1, 1, 1, 1, 1,
-      2, 7, 7, 2, 2, 2, 1, 1, 1, 1, 1, 1,
-    ]
-  ),
+  // pattern: new Bimp(
+  //   6,
+  //   6,
+  //   [
+  //     2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 2, 3, 6, 5, 17, 1, 1, 1, 1, 1, 1, 1,
+  //     2, 7, 7, 2, 2, 2, 1, 1, 1, 1, 1, 1,
+  //   ]
+  // ),
+
+  pattern: new Bimp(4, 4, [1, 1, 1, 1, 1, 5, 10, 1, 1, 1, 1, 1, 1, 1, 1, 1]),
 };
 function uploadFile() {
   let fileInputElement = document.createElement("input");

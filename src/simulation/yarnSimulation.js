@@ -9,10 +9,10 @@ import {
   populateDS,
   followTheYarn,
   yarnPathToLinks,
-  orderLoops,
+  orderCNs,
 } from "./topology";
 
-import { layoutNodes, layeredYarnSegmentData } from "./yarn3d";
+import { layoutNodes, layerDS, linkData } from "./yarn3d";
 
 const STITCH_RATIO = 5 / 3; // Row height / stitch width
 
@@ -109,10 +109,9 @@ export function simulate(pattern, yarnSequence, palette, scale) {
     return `M ${p0.x} ${p0.y} C${p1.x} ${p1.y} ${p2.x} ${p2.y} ${p3.x} ${p3.y}`;
   }
 
-  function calculateSegmentControlPoints() {
-    yarnSegments.forEach((segment, index) => {
-      if (index == 0 || index > yarnSegments.length - 3) return;
-
+  function calculateSegmentControlPoints(yarnLinkSegments) {
+    yarnLinkSegments.forEach((segment, index) => {
+      if (index == 0 || index > yarnLinkSegments.length - 3) return;
       segment.ctrlPts = yarnSpline(
         yarnPath[index - 1].pt,
         yarnPath[index].pt,
@@ -133,8 +132,8 @@ export function simulate(pattern, yarnSequence, palette, scale) {
   ///////////////////////
   // DRAW
   ///////////////////////
-  function drawSegmentsToLayer(layer, layerData) {
-    let ctx = layers[layer].getContext("2d");
+  function drawSegmentsToCanvasLayer(layer, layerData) {
+    let ctx = canvasLayers[layer].getContext("2d");
     ctx.shadowColor = "black";
     ctx.shadowBlur = 1;
     // ctx.lineCap = "round";
@@ -146,28 +145,43 @@ export function simulate(pattern, yarnSequence, palette, scale) {
     });
   }
 
-  function segments(yarnSet) {
-    return Object.fromEntries(
-      Object.entries(layers).map(([index, canvas]) => {
-        return [index, Object.fromEntries(yarnSet.map((color) => [color, []]))];
-      })
-    );
-  }
+  // function segments(yarnSet) {
+  //   return Object.fromEntries(
+  //     Object.entries(layers).map(([index, canvas]) => {
+  //       return [index, Object.fromEntries(yarnSet.map((color) => [color, []]))];
+  //     })
+  //   );
+  // }
 
-  function drawYarns() {
-    const yarnSet = new Set(GLOBAL_STATE.yarnSequence.pixels);
+  // function drawYarns() {
+  //   const yarnSet = new Set(GLOBAL_STATE.yarnSequence.pixels);
 
-    const segs = segments(Array.from(yarnSet));
+  //   const segs = segments(Array.from(yarnSet));
 
-    yarnSegments.forEach((segment, index) => {
-      if (index == 0 || index > yarnSegments.length - 3) return;
+  //   yarnSegments.forEach((segment, index) => {
+  //     if (index == 0 || index > yarnSegments.length - 3) return;
+  //     const colorIndex = yarnColor(segment.row);
+  //     segs[segment.layer][colorIndex].push(segmentPath(segment.ctrlPts));
+  //   });
+
+  //   Object.entries(segs).forEach(([layer, layerData]) =>
+  //     drawSegmentsToLayer(layer, layerData)
+  //   );
+  // }
+
+  function drawYarns(yarnLinkSegments, layers) {
+    yarnLinkSegments.forEach((segment, index) => {
+      if (index == 0 || index > yarnLinkSegments.length - 3) return;
       const colorIndex = yarnColor(segment.row);
-      segs[segment.layer][colorIndex].push(segmentPath(segment.ctrlPts));
+      const [st, isLoop, layer] = segment.layer;
+
+      let layerZIndex = layers[st][isLoop][layer];
+      layerYarnData[layerZIndex][colorIndex].push(segmentPath(segment.ctrlPts));
     });
 
-    Object.entries(segs).forEach(([layer, layerData]) =>
-      drawSegmentsToLayer(layer, layerData)
-    );
+    layerYarnData.forEach((colordata, index) => {
+      drawSegmentsToCanvasLayer(index, colordata);
+    });
   }
 
   ///////////////////////
@@ -182,10 +196,11 @@ export function simulate(pattern, yarnSequence, palette, scale) {
   const canvasWidth = dpi * width;
   const canvasHeight = dpi * height;
 
-  const layers = {};
+  const canvasLayers = [];
+  let layerYarnData = [];
 
   function clear() {
-    Object.values(layers).forEach((canvas) => {
+    canvasLayers.forEach((canvas) => {
       const ctx = canvas.getContext("2d");
       ctx.save();
       ctx.resetTransform();
@@ -193,14 +208,20 @@ export function simulate(pattern, yarnSequence, palette, scale) {
       ctx.restore();
       ctx.lineWidth = yarnWidth();
     });
+    layerYarnData = [];
+    for (let layer = 0; layer < numLayers; layer++) {
+      layerYarnData.push(
+        Object.fromEntries(stitchPattern.yarns.map((yarnID) => [yarnID, []]))
+      );
+    }
   }
 
   function update() {
     updateNormals();
     calculateSplineControlPoints();
-    calculateSegmentControlPoints();
+    calculateSegmentControlPoints(links);
     clear();
-    drawYarns();
+    drawYarns(links, layerData);
   }
 
   ///////////////////////
@@ -209,7 +230,7 @@ export function simulate(pattern, yarnSequence, palette, scale) {
 
   const stitchPattern = new Pattern(pattern, yarnSequence);
 
-  function init() {
+  function init(numLayers) {
     stitchWidth = Math.min(
       (canvasWidth * 0.9) / stitchPattern.width,
       ((canvasHeight * 0.9) / stitchPattern.height) * STITCH_RATIO
@@ -221,18 +242,26 @@ export function simulate(pattern, yarnSequence, palette, scale) {
       yarnWidth() + (canvasWidth - stitchPattern.width * stitchWidth) / 2;
     offsetY =
       -yarnWidth() + (canvasHeight - stitchPattern.height * stitchHeight) / 2;
+  }
 
-    const TOTAL_LAYERS = 5;
-    for (const canvas of parentEl.children) {
-      let layer = Number(canvas.dataset.layer);
+  function canvasSetup(numLayers) {
+    while (parentEl.firstChild) {
+      parentEl.removeChild(parentEl.firstChild);
+    }
+    for (let layer = 0; layer < numLayers; layer++) {
+      let canvas = document.createElement("canvas");
       canvas.width = canvasWidth;
       canvas.height = canvasHeight;
       canvas.style.cssText = `width: ${width}px; height: ${height}px; z-index: ${layer}; filter: brightness(${
-        0.6 + 0.4 * (layer / (TOTAL_LAYERS - 1))
+        0.6 + 0.4 * (layer / (numLayers - 1))
       });`;
       let ctx = canvas.getContext("2d");
       ctx.translate(offsetX, offsetY);
-      layers[layer] = canvas;
+      canvasLayers.push(canvas);
+      layerYarnData.push(
+        Object.fromEntries(stitchPattern.yarns.map((yarnID) => [yarnID, []]))
+      );
+      parentEl.appendChild(canvas);
     }
   }
 
@@ -248,27 +277,24 @@ export function simulate(pattern, yarnSequence, palette, scale) {
       };
     });
   }
-
   init();
-
   const DS = populateDS(stitchPattern);
-  const initialYarnPath = followTheYarn(DS, stitchPattern);
-  const nodes = layoutNodes(DS, stitchWidth);
-  const yarnSegments = yarnPathToLinks(DS, initialYarnPath, nodes, 50);
-  const yarnPath = yarnPathLayout(initialYarnPath, DS);
-  orderLoops(DS, stitchPattern);
+  orderCNs(DS, stitchPattern);
 
-  const segmentData = layeredYarnSegmentData(
-    stitchPattern,
-    nodes,
-    DS,
-    initialYarnPath
-  );
+  const [initialYarnPath, layeredYarnPath] = followTheYarn(DS, stitchPattern);
+  const nodes = layoutNodes(DS, stitchWidth);
+  // const yarnSegments = yarnPathToLinks(DS, initialYarnPath, nodes, 50);
+  const yarnPath = yarnPathLayout(initialYarnPath, DS);
+
+  const links = linkData(DS, layeredYarnPath, nodes, stitchWidth);
+  const [layerData, numLayers] = layerDS(DS, stitchPattern);
+
+  canvasSetup(numLayers);
   update();
 
   function simLoop() {
     if (sim && sim.running()) {
-      sim.tick(yarnSegments, nodes);
+      sim.tick(links, nodes);
       update();
       requestAnimationFrame(simLoop);
     }

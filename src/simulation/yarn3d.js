@@ -1,5 +1,5 @@
 import { stitches } from "../constants";
-import { yarnOrder } from "./topology";
+import { Vec2 } from "../utils";
 
 const STITCH_ASPECT = 5 / 3; // Row height / stitch width
 
@@ -87,44 +87,107 @@ function yarnOffset(cnType, cnPos, prev, next, ltr, stitchType, yarnData) {
   ];
 }
 
-export function layeredYarnSegmentData(pattern, nodes, DS, yarnPath) {
-  const layers = [];
+export function linkData(
+  DS,
+  yarnPath,
+  nodes,
+  stitchWidth = 1,
+  stitchAspect = 0.75
+) {
+  const links = [];
 
-  for (let i = 0; i < 5; i++)
-    layers.push(
-      Object.fromEntries(pattern.yarns.map((yarnID) => [yarnID, []]))
-    );
+  for (let index = 0; index < yarnPath.length - 1; index++) {
+    const [sourceI, sourceJ, sourceRow, sourceLayer] = yarnPath[index];
+    const [targetI, targetJ, targetRow, targetLayer] = yarnPath[index + 1];
 
-  yarnPath.forEach(([i, j, row, cnType], index) => {
-    const currentPos = nodes[i + j * DS.width].pos;
-    const prev = yarnPath[index - 1];
-    const next = yarnPath[index + 1];
+    let sourceIndex = sourceI + sourceJ * DS.width;
+    let targetIndex = targetI + targetJ * DS.width;
 
-    const currentYarn = pattern.yarnSequence[row];
+    const source = DS.CN(sourceI, sourceJ);
+    const target = DS.CN(targetI, targetJ);
 
-    if (!prev || !next) {
-      // it's the first or last CN
-      layers[2][currentYarn].push([currentPos.x, currentPos.y, 0]);
-      return;
+    let sourceLegParity = source[4][1] === index;
+    let targetLegParity = target[4][1] === index + 1;
+
+    const biggestLayer = sourceLayer > targetLayer ? sourceLayer : targetLayer;
+    const isLoop = sourceLegParity == targetLegParity ? "loop" : "leg";
+
+    let st;
+    if (source[0] == target[0]) {
+      st = source[0] == stitches.KNIT ? "knit" : "purl";
+    } else {
+      st = "mid";
     }
 
-    console.log(DS.CNO(i, j));
+    if (sourceRow != targetRow) {
+      // literal edge case
+      // console.debug("hit edge!");
+    }
 
-    const prevCNPos = nodes[prev[0] + prev[1] * DS.width].pos;
-    const nextCNPos = nodes[next[0] + next[1] * DS.width].pos;
+    const restLength = isLoop
+      ? Vec2.mag(Vec2.sub(nodes[sourceIndex].pos, nodes[targetIndex].pos))
+      : stitchWidth * stitchAspect;
 
-    const yarn2D = yarnOffset(
-      cnType,
-      currentPos,
-      prevCNPos,
-      nextCNPos,
-      row % 2 == 0, //moving left or right
-      DS.ST(i, j),
-      currentYarn
-    );
+    links.push({
+      source: sourceIndex,
+      target: targetIndex,
+      restLength,
+      row: sourceRow,
+      layer: [st, isLoop, biggestLayer],
+    });
+  }
+  return links;
+}
 
-    layers[2][currentYarn].push([currentPos.x, currentPos.y, 0]);
-  });
+export function layerDS(DS, pattern) {
+  const layers = {
+    knit: {
+      loop: [],
+      leg: [],
+    },
+    purl: {
+      loop: [],
+      leg: [],
+    },
+    mid: {
+      loop: [],
+      leg: [],
+    },
+  };
+
+  let currZ = 0;
+
+  for (let i = 0; i < DS.maxCNStack; i++) {
+    layers.purl.leg.push(currZ);
+    currZ++;
+  }
+  for (let i = 0; i < DS.maxCNStack; i++) {
+    layers.knit.loop.push(currZ);
+    currZ++;
+  }
+
+  for (let i = 0; i < DS.maxCNStack; i++) {
+    layers.mid.loop.push(currZ);
+    currZ++;
+  }
+
+  for (let i = 0; i < DS.maxCNStack; i++) {
+    layers.mid.leg.push(currZ);
+    currZ++;
+  }
+
+  for (let i = 0; i < DS.maxCNStack; i++) {
+    layers.purl.loop.push(currZ);
+    currZ++;
+  }
+
+  for (let i = 0; i < DS.maxCNStack; i++) {
+    layers.knit.leg.push(currZ);
+    currZ++;
+  }
+
+  let numLayers = currZ;
+  return [layers, numLayers];
 }
 
 // export function calculateYarnPoints(chart, nodes, cnGrid, yarnPath, PARAMS) {

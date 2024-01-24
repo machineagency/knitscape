@@ -5,8 +5,8 @@ import {
   populateDS,
   followTheYarn,
   yarnPathToLinks,
-  orderLoops,
-  yarnOrder,
+  cnOrderAt,
+  orderCNs,
 } from "../topology";
 import { layoutNodes } from "../yarn3d";
 import * as d3 from "d3";
@@ -27,7 +27,8 @@ export function drawGraph(pattern, parentID) {
   const chart = new Pattern(pattern, [0, 0, 0]);
 
   const DS = populateDS(chart);
-  const yarnPath = followTheYarn(DS, chart);
+  orderCNs(DS, chart);
+  const [yarnPath, layeredYarnPath] = followTheYarn(DS, chart);
   const nodes = layoutNodes(DS, STITCH_WIDTH);
   // orderLoops(DS, chart);
   const links = yarnPathToLinks(DS, yarnPath, nodes, chart, STITCH_WIDTH);
@@ -184,7 +185,7 @@ export function drawGraph(pattern, parentID) {
           <br />MV: ${JSON.stringify(d.MV)}
           <br />CNL: ${JSON.stringify(d.CNL)}
           <br />YPI: ${JSON.stringify(d.YPI)}
-          <br />CNO: ${JSON.stringify(yarnOrder(d.i, d.j, chart, DS))}`
+          <br />CNO: ${JSON.stringify(cnOrderAt(d.i, d.j, chart, DS))}`
         )
         .style("left", `${e.pageX + 10}px`)
         .style("top", `${e.pageY + 10}px`);

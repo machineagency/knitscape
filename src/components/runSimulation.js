@@ -12,13 +12,7 @@ export function simulationView() {
         id="canvas-container"
         style="transform: translate(${GLOBAL_STATE.simPan.x}px, ${GLOBAL_STATE
           .simPan.y}px)"
-        class=${GLOBAL_STATE.flipped ? "mirrored" : ""}>
-        <canvas data-layer="0"></canvas>
-        <canvas data-layer="1"></canvas>
-        <canvas data-layer="2"></canvas>
-        <canvas data-layer="3"></canvas>
-        <canvas data-layer="4"></canvas>
-      </div>
+        class=${GLOBAL_STATE.flipped ? "mirrored" : ""}></div>
     </div>
     <div id="sim-controls" class="panzoom-controls">
       <button @click=${relax} class="btn solid">relax</button>
