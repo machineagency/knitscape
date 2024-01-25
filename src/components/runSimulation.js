@@ -1,4 +1,6 @@
 import { simulate } from "../simulation/yarnSimulation";
+import { Pattern } from "../simulation/Pattern";
+
 import { GLOBAL_STATE, dispatch } from "../state";
 import { html } from "lit-html";
 import { MIN_SIM_SCALE, MAX_SIM_SCALE } from "../constants";
@@ -71,9 +73,7 @@ export function runSimulation() {
       if (stopSim) stopSim();
 
       ({ stopSim, relax } = simulate(
-        GLOBAL_STATE.chart,
-        GLOBAL_STATE.yarnSequence.pixels,
-        GLOBAL_STATE.yarnPalette,
+        new Pattern(GLOBAL_STATE.chart, GLOBAL_STATE.yarnSequence.pixels),
         GLOBAL_STATE.simScale
       ));
     }

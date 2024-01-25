@@ -421,7 +421,7 @@ export function populateDS(pattern, populateFirstRow = true) {
   return DS;
 }
 
-export function followTheYarn(DS, pattern) {
+export function followTheYarn(DS) {
   let i = 0,
     j = 0,
     legNode = true,
@@ -430,7 +430,6 @@ export function followTheYarn(DS, pattern) {
   let yarnPathIndex = 0;
 
   const yarnPath = [];
-  const layeredYarnPath = [];
 
   let highestLayer = 0;
 
@@ -474,11 +473,11 @@ export function followTheYarn(DS, pattern) {
       }
 
       // console.log(layer);
-      if (layer < 0) console.error("Couldn't find the stack index");
+      if (layer < 0)
+        console.log(`Couldn't find the stack index for cn (${i},${j})`);
       if (layer > highestLayer) highestLayer = layer;
 
-      layeredYarnPath.push([...cnLoc, currentStitchRow, layer]);
-      yarnPath.push(location);
+      yarnPath.push([...cnLoc, currentStitchRow, layer]);
       yarnPathIndex++;
     }
 
@@ -493,7 +492,7 @@ export function followTheYarn(DS, pattern) {
   }
 
   DS.maxCNStack = highestLayer + 1;
-  return [yarnPath, layeredYarnPath];
+  return yarnPath;
 }
 
 function addToList(i, j, legNode, yarnPath, DS) {

@@ -1,8 +1,6 @@
 import { stitches } from "../constants";
 import { Vec2 } from "../utils";
 
-const STITCH_ASPECT = 5 / 3; // Row height / stitch width
-
 export function layoutNodes(DS, stitchWidth = 1, stitchAspect = 0.75) {
   // calculates the x,y values for the i,j
   const HALF_STITCH = stitchWidth / 2;
@@ -28,66 +26,58 @@ export function layoutNodes(DS, stitchWidth = 1, stitchAspect = 0.75) {
   });
 }
 
-function calcZ(stitchType, cnType) {
-  let zs;
+export function layerDS(DS) {
+  const layers = {
+    knit: {
+      loop: [],
+      leg: [],
+    },
+    purl: {
+      loop: [],
+      leg: [],
+    },
+    mid: {
+      loop: [],
+      leg: [],
+    },
+  };
 
-  if (cnType == "FL") {
-    zs = [-1, 1];
-  } else if (cnType == "LH") {
-    zs = [-1, 1];
-  } else if (cnType == "FH") {
-    zs = [1, -1];
-  } else if (cnType == "LL") {
-    zs = [1, -1];
+  let currZ = 0;
+
+  for (let i = 0; i < DS.maxCNStack; i++) {
+    layers.purl.leg.unshift(currZ);
+    currZ++;
+  }
+  for (let i = 0; i < DS.maxCNStack; i++) {
+    layers.knit.loop.unshift(currZ);
+    currZ++;
   }
 
-  if (isPurl(stitchType)) zs = [-zs[0], -zs[1]];
+  for (let i = 0; i < DS.maxCNStack; i++) {
+    layers.mid.loop.unshift(currZ);
+    currZ++;
+  }
 
-  return zs;
+  for (let i = 0; i < DS.maxCNStack; i++) {
+    layers.mid.leg.unshift(currZ);
+    currZ++;
+  }
+
+  for (let i = 0; i < DS.maxCNStack; i++) {
+    layers.purl.loop.unshift(currZ);
+    currZ++;
+  }
+
+  for (let i = 0; i < DS.maxCNStack; i++) {
+    layers.knit.leg.unshift(currZ);
+    currZ++;
+  }
+
+  let numLayers = currZ;
+  return [layers, numLayers];
 }
 
-function isHead(cnType) {
-  return cnType == "FH" || cnType == "LH";
-}
-
-function isPurl(stitchType) {
-  return stitchType === stitches.PURL;
-}
-
-function yarnOffset(cnType, cnPos, prev, next, ltr, stitchType, yarnData) {
-  const dist = yarnData.radius;
-  const dx = prev.x - next.x;
-  const dy = prev.y - next.y;
-
-  const [zFirst, zLast] = calcZ(stitchType, cnType);
-
-  let yarnSide = cnType == "FH" || cnType == "LL" ? ltr : !ltr;
-
-  const alpha = yarnSide
-    ? Math.atan2(dy * STITCH_ASPECT, -dx)
-    : Math.atan2(-dy * STITCH_ASPECT, dx);
-
-  const beta = Math.PI / 4;
-
-  const signAlpha = ltr ? -1 : 1;
-  const signBeta = isHead(cnType) ? 1 : -1;
-  const signPurl = isPurl(stitchType) ? -1 : 1;
-
-  return [
-    cnPos.x + signAlpha * dist * Math.cos(alpha),
-    cnPos.y +
-      signAlpha * dist * Math.sin(alpha) -
-      signBeta * signPurl * zFirst * dist * Math.sin(beta),
-    dist * Math.sin(zFirst * beta),
-    cnPos.x + signAlpha * dist * Math.cos(alpha),
-    cnPos.y +
-      signAlpha * dist * Math.sin(alpha) -
-      signBeta * signPurl * zLast * dist * Math.sin(beta),
-    dist * Math.sin(zLast * beta),
-  ];
-}
-
-export function linkData(
+export function buildSegmentData(
   DS,
   yarnPath,
   nodes,
@@ -129,66 +119,75 @@ export function linkData(
       : stitchWidth * stitchAspect;
 
     links.push({
-      source: sourceIndex,
-      target: targetIndex,
+      source: [sourceI, sourceJ],
+      target: [targetI, targetJ],
       restLength,
       row: sourceRow,
       layer: [st, isLoop, biggestLayer],
+      path: null,
     });
   }
   return links;
 }
 
-export function layerDS(DS, pattern) {
-  const layers = {
-    knit: {
-      loop: [],
-      leg: [],
-    },
-    purl: {
-      loop: [],
-      leg: [],
-    },
-    mid: {
-      loop: [],
-      leg: [],
-    },
-  };
+// function calcZ(stitchType, cnType) {
+//   let zs;
 
-  let currZ = 0;
+//   if (cnType == "FL") {
+//     zs = [-1, 1];
+//   } else if (cnType == "LH") {
+//     zs = [-1, 1];
+//   } else if (cnType == "FH") {
+//     zs = [1, -1];
+//   } else if (cnType == "LL") {
+//     zs = [1, -1];
+//   }
 
-  for (let i = 0; i < DS.maxCNStack; i++) {
-    layers.purl.leg.push(currZ);
-    currZ++;
-  }
-  for (let i = 0; i < DS.maxCNStack; i++) {
-    layers.knit.loop.push(currZ);
-    currZ++;
-  }
+//   if (isPurl(stitchType)) zs = [-zs[0], -zs[1]];
 
-  for (let i = 0; i < DS.maxCNStack; i++) {
-    layers.mid.loop.push(currZ);
-    currZ++;
-  }
+//   return zs;
+// }
 
-  for (let i = 0; i < DS.maxCNStack; i++) {
-    layers.mid.leg.push(currZ);
-    currZ++;
-  }
+// function isHead(cnType) {
+//   return cnType == "FH" || cnType == "LH";
+// }
 
-  for (let i = 0; i < DS.maxCNStack; i++) {
-    layers.purl.loop.push(currZ);
-    currZ++;
-  }
+// function isPurl(stitchType) {
+//   return stitchType === stitches.PURL;
+// }
 
-  for (let i = 0; i < DS.maxCNStack; i++) {
-    layers.knit.leg.push(currZ);
-    currZ++;
-  }
+// function yarnOffset(cnType, cnPos, prev, next, ltr, stitchType, yarnData) {
+//   const dist = yarnData.radius;
+//   const dx = prev.x - next.x;
+//   const dy = prev.y - next.y;
 
-  let numLayers = currZ;
-  return [layers, numLayers];
-}
+//   const [zFirst, zLast] = calcZ(stitchType, cnType);
+
+//   let yarnSide = cnType == "FH" || cnType == "LL" ? ltr : !ltr;
+
+//   const alpha = yarnSide
+//     ? Math.atan2(dy * STITCH_ASPECT, -dx)
+//     : Math.atan2(-dy * STITCH_ASPECT, dx);
+
+//   const beta = Math.PI / 4;
+
+//   const signAlpha = ltr ? -1 : 1;
+//   const signBeta = isHead(cnType) ? 1 : -1;
+//   const signPurl = isPurl(stitchType) ? -1 : 1;
+
+//   return [
+//     cnPos.x + signAlpha * dist * Math.cos(alpha),
+//     cnPos.y +
+//       signAlpha * dist * Math.sin(alpha) -
+//       signBeta * signPurl * zFirst * dist * Math.sin(beta),
+//     dist * Math.sin(zFirst * beta),
+//     cnPos.x + signAlpha * dist * Math.cos(alpha),
+//     cnPos.y +
+//       signAlpha * dist * Math.sin(alpha) -
+//       signBeta * signPurl * zLast * dist * Math.sin(beta),
+//     dist * Math.sin(zLast * beta),
+//   ];
+// }
 
 // export function calculateYarnPoints(chart, nodes, cnGrid, yarnPath, PARAMS) {
 //   yarnPath.forEach(([i, j, row, cnType], index) => {
