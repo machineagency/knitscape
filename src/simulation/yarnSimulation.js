@@ -6,7 +6,7 @@ import { yarnRelaxation } from "./relaxation";
 import { populateDS, followTheYarn, orderCNs } from "./topology";
 import { layoutNodes, layerDS, buildSegmentData } from "./yarn3d";
 
-const STITCH_RATIO = 5 / 3; // Row height / stitch width
+const STITCH_RATIO = 0.75; // Row height / stitch width
 
 const SPREAD = 0.93;
 
@@ -34,6 +34,8 @@ export function simulate(stitchPattern, scale) {
   const yarnSegments = buildSegmentData(DS, yarnPath, nodes, stitchWidth);
 
   const [layerData, numLayers] = layerDS(DS, stitchPattern);
+
+  console.log(layerData);
 
   canvasSetup(numLayers);
   update();
@@ -169,10 +171,10 @@ export function simulate(stitchPattern, scale) {
   function init() {
     stitchWidth = Math.min(
       (canvasWidth * 0.9) / stitchPattern.width,
-      ((canvasHeight * 0.9) / stitchPattern.height) * STITCH_RATIO
+      (canvasHeight * 0.9) / stitchPattern.height / STITCH_RATIO
     );
 
-    stitchHeight = stitchWidth / STITCH_RATIO;
+    stitchHeight = stitchWidth * STITCH_RATIO;
 
     offsetX =
       yarnWidth() + (canvasWidth - stitchPattern.width * stitchWidth) / 2;
@@ -194,8 +196,8 @@ export function simulate(stitchPattern, scale) {
       let ctx = canvas.getContext("2d");
       ctx.translate(offsetX, offsetY);
       ctx.lineWidth = yarnWidth();
-      // ctx.shadowColor = "black";
-      // ctx.shadowBlur = 1;
+      ctx.shadowColor = "black";
+      ctx.shadowBlur = 1;
       canvasLayers.push(ctx);
       parentEl.appendChild(canvas);
     }
