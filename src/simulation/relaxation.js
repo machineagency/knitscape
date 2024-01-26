@@ -1,46 +1,5 @@
 const K_YARN = 0.06;
-
-const Vec2 = {
-  add([ax, ay], [bx, by]) {
-    return {
-      x: ax + bx,
-      y: a.y + b.y,
-    };
-  },
-
-  sub(a, b) {
-    return {
-      x: a.x - b.x,
-      y: a.y - b.y,
-    };
-  },
-
-  scale(vec, scalar) {
-    return {
-      x: vec.x * scalar,
-      y: vec.y * scalar,
-    };
-  },
-
-  abs(vec) {
-    return {
-      x: Math.abs(vec.x),
-      y: Math.abs(vec.y),
-    };
-  },
-
-  mag(vec) {
-    return Math.sqrt(vec.x * vec.x + vec.y * vec.y);
-  },
-
-  dot(a, b) {
-    return a.x * b.x + a.y * b.y;
-  },
-
-  normalize(vec) {
-    return this.scale(vec, 1 / this.mag(vec));
-  },
-};
+import { Vec2 } from "../utils";
 
 export function yarnRelaxation(
   alphaMin = 0.001,
@@ -65,7 +24,6 @@ export function yarnRelaxation(
 
     // Yarn does not spring back to rest length
     if (currentLength < restLength) return { x: 0, y: 0 };
-
     const forceMagnitude = K_YARN * (currentLength - restLength);
 
     const direction = Vec2.normalize(displacement);
@@ -85,9 +43,16 @@ export function yarnRelaxation(
     for (var k = 0; k < iterations; ++k) {
       ALPHA += (ALPHA_TARGET - ALPHA) * ALPHA_DECAY;
       // Accumulate forces to nodes
-      yarnSegments.forEach(({ source, target, restLength, yarnIndex }) => {
-        applyYarnForce(nodes[source], nodes[target], restLength, K_YARN);
-      });
+      yarnSegments.forEach(
+        ({ sourceIndex, targetIndex, restLength, yarnIndex }) => {
+          applyYarnForce(
+            nodes[sourceIndex],
+            nodes[targetIndex],
+            restLength,
+            K_YARN
+          );
+        }
+      );
 
       // Update node positions
       nodes.forEach((node) => {

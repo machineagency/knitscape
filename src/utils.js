@@ -185,3 +185,33 @@ export const Vec2 = {
     return this.scale(vec, 1 / this.mag(vec));
   },
 };
+
+// const Vec2 = {
+//   add([ax, ay], [bx, by]) {
+//     return [ax + bx, ay + by];
+//   },
+
+//   sub([ax, ay], [bx, by]) {
+//     return [ax - bx, ay - by];
+//   },
+
+//   scale([x, y], scalar) {
+//     return [x * scalar, y * scalar];
+//   },
+
+//   abs([x, y]) {
+//     return [Math.abs(x), Math.abs(y)];
+//   },
+
+//   mag([x, y]) {
+//     return Math.sqrt(x * x + y * y);
+//   },
+
+//   dot([ax, ay], [bx, by]) {
+//     return ax * bx + ay * by;
+//   },
+
+//   normalize(vec) {
+//     return this.scale(vec, 1 / this.mag(vec));
+//   },
+// };

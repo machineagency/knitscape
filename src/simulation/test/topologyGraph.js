@@ -1,14 +1,8 @@
 import { Pattern } from "../Pattern";
 import { cnStates, stitches } from "../../constants";
 
-import {
-  populateDS,
-  followTheYarn,
-  yarnPathToLinks,
-  cnOrderAt,
-  orderCNs,
-} from "../topology";
-import { layoutNodes } from "../yarn3d";
+import { populateDS, followTheYarn, cnOrderAt, orderCNs } from "../topology";
+import { layoutNodes, buildSegmentData } from "../yarn3d";
 import * as d3 from "d3";
 
 const STITCH_WIDTH = 75;
@@ -28,10 +22,10 @@ export function drawGraph(pattern, parentID) {
 
   const DS = populateDS(chart);
   orderCNs(DS, chart);
-  const [yarnPath, layeredYarnPath] = followTheYarn(DS, chart);
+  const yarnPath = followTheYarn(DS, chart);
   const nodes = layoutNodes(DS, STITCH_WIDTH);
   // orderLoops(DS, chart);
-  const links = yarnPathToLinks(DS, yarnPath, nodes, chart, STITCH_WIDTH);
+  const links = buildSegmentData(DS, yarnPath, nodes, chart, STITCH_WIDTH);
 
   nodes.forEach((node, index) => {
     const i = index % DS.width;
@@ -114,10 +108,10 @@ export function drawGraph(pattern, parentID) {
     .filter(function (d) {
       return d.linkType == "LLFL" || d.linkType == "FHLH";
     })
-    .attr("x1", (d) => nodes[d.source].pos.x)
-    .attr("y1", (d) => nodes[d.source].pos.y)
-    .attr("x2", (d) => nodes[d.target].pos.x)
-    .attr("y2", (d) => nodes[d.target].pos.y)
+    .attr("x1", (d) => nodes[d.sourceIndex].pos.x)
+    .attr("y1", (d) => nodes[d.sourceIndex].pos.y)
+    .attr("x2", (d) => nodes[d.targetIndex].pos.x)
+    .attr("y2", (d) => nodes[d.targetIndex].pos.y)
     .attr("marker-end", "url(#arrow)")
     .attr("stroke", (d) => directionColors[d.row % 2]);
 
@@ -132,21 +126,10 @@ export function drawGraph(pattern, parentID) {
     })
     .attr("marker-end", "url(#arrow)")
     .attr("stroke", (d) => directionColors[d.row % 2])
-    .attr("x1", (d) => nodes[d.source].pos.x)
-    .attr("y1", (d) => nodes[d.source].pos.y)
-    .attr("x2", (d) => nodes[d.target].pos.x)
-    .attr("y2", (d) => nodes[d.target].pos.y);
-
-  // yarnsFrontContainer
-  //   .attr("text-anchor", "middle")
-  //   .attr("font-size", "24")
-  //   .selectAll()
-  //   .data(links)
-  //   .join("text")
-  //   .text((d) => d.linkType)
-  //   .attr("x", (d) => (nodes[d.source].pos.x + nodes[d.target].pos.x) / 2)
-  //   .attr("y", (d) => (nodes[d.source].pos.y + nodes[d.target].pos.y) / 2)
-  //   .attr("alignment-baseline", "middle");
+    .attr("x1", (d) => nodes[d.sourceIndex].pos.x)
+    .attr("y1", (d) => nodes[d.sourceIndex].pos.y)
+    .attr("x2", (d) => nodes[d.targetIndex].pos.x)
+    .attr("y2", (d) => nodes[d.targetIndex].pos.y);
 
   const tooltip = d3
     .select(parentID)

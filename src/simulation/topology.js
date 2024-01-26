@@ -1,53 +1,53 @@
 import { stitches, cnStates, MAX_H_SHIFT, MAX_V_SHIFT } from "../constants";
 import { Vec2 } from "../utils";
 
-function calcLayer(nodes, source, target, linkType) {
-  if (nodes[source][0] == stitches.KNIT && nodes[target][0] == stitches.KNIT) {
-    if (linkType == "LHLL" || linkType == "FLFH") return 4;
-    else return 1;
-  } else if (
-    nodes[source][0] == stitches.PURL &&
-    nodes[target][0] == stitches.PURL
-  ) {
-    if (linkType == "LHLL" || linkType == "FLFH") return 0;
-    else return 3;
-  } else return 2;
-}
+// function calcLayer(nodes, source, target, linkType) {
+//   if (nodes[source][0] == stitches.KNIT && nodes[target][0] == stitches.KNIT) {
+//     if (linkType == "LHLL" || linkType == "FLFH") return 4;
+//     else return 1;
+//   } else if (
+//     nodes[source][0] == stitches.PURL &&
+//     nodes[target][0] == stitches.PURL
+//   ) {
+//     if (linkType == "LHLL" || linkType == "FLFH") return 0;
+//     else return 3;
+//   } else return 2;
+// }
 
-export function yarnPathToLinks(
-  DS,
-  yarnPath,
-  nodes,
-  stitchWidth = 1,
-  stitchAspect = 0.75
-) {
-  let source = 0;
-  let last = yarnPath[0][3];
-  const links = [];
+// export function yarnPathToLinks(
+//   DS,
+//   yarnPath,
+//   nodes,
+//   stitchWidth = 1,
+//   stitchAspect = 0.75
+// ) {
+//   let source = 0;
+//   let last = yarnPath[0][3];
+//   const links = [];
 
-  yarnPath.forEach(([i, j, row, headOrLeg], index) => {
-    if (index == 0) return;
-    let target = j * DS.width + i;
-    const linkType = last + headOrLeg;
-    const isLeg = linkType == "FLFH" || linkType == "LHLL" ? true : false;
-    const rl = isLeg
-      ? stitchWidth * stitchAspect
-      : Vec2.mag(Vec2.sub(nodes[source].pos, nodes[target].pos));
+//   yarnPath.forEach(([i, j, row, headOrLeg], index) => {
+//     if (index == 0) return;
+//     let target = j * DS.width + i;
+//     const linkType = last + headOrLeg;
+//     const isLeg = linkType == "FLFH" || linkType == "LHLL" ? true : false;
+//     const rl = isLeg
+//       ? stitchWidth * stitchAspect
+//       : Vec2.mag(Vec2.sub(nodes[source].pos, nodes[target].pos));
 
-    links.push({
-      source: source,
-      target: target,
-      restLength: rl,
-      row,
-      linkType,
-      layer: calcLayer(DS.data, source, target, linkType),
-    });
-    source = target;
-    last = headOrLeg;
-  });
+//     links.push({
+//       source: source,
+//       target: target,
+//       restLength: rl,
+//       row,
+//       linkType,
+//       layer: calcLayer(DS.data, source, target, linkType),
+//     });
+//     source = target;
+//     last = headOrLeg;
+//   });
 
-  return links;
-}
+//   return links;
+// }
 
 function checkForTransfers(i, j, DS) {
   let iMin = i - MAX_H_SHIFT < 0 ? 0 : i - MAX_H_SHIFT;

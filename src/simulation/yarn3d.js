@@ -26,57 +26,6 @@ export function layoutNodes(DS, stitchWidth = 1, stitchAspect = 0.75) {
   });
 }
 
-export function layerDS(DS) {
-  const layers = {
-    knit: {
-      loop: [],
-      leg: [],
-    },
-    purl: {
-      loop: [],
-      leg: [],
-    },
-    mid: {
-      loop: [],
-      leg: [],
-    },
-  };
-
-  let currZ = 0;
-
-  for (let i = 0; i < DS.maxCNStack; i++) {
-    layers.purl.leg.unshift(currZ);
-    currZ++;
-  }
-  for (let i = 0; i < DS.maxCNStack; i++) {
-    layers.knit.loop.unshift(currZ);
-    currZ++;
-  }
-
-  for (let i = 0; i < DS.maxCNStack; i++) {
-    layers.mid.loop.unshift(currZ);
-    currZ++;
-  }
-
-  for (let i = 0; i < DS.maxCNStack; i++) {
-    layers.mid.leg.unshift(currZ);
-    currZ++;
-  }
-
-  for (let i = 0; i < DS.maxCNStack; i++) {
-    layers.purl.loop.unshift(currZ);
-    currZ++;
-  }
-
-  for (let i = 0; i < DS.maxCNStack; i++) {
-    layers.knit.leg.unshift(currZ);
-    currZ++;
-  }
-
-  let numLayers = currZ;
-  return [layers, numLayers];
-}
-
 export function buildSegmentData(
   DS,
   yarnPath,
@@ -85,6 +34,10 @@ export function buildSegmentData(
   stitchAspect = 0.75
 ) {
   const links = [];
+  const maxStack = DS.maxCNStack;
+  const totalLayers = maxStack * 6 - 1;
+
+  console.log("max CN stack:", maxStack);
 
   for (let index = 0; index < yarnPath.length - 1; index++) {
     const [sourceI, sourceJ, sourceRow, sourceLayer] = yarnPath[index];
@@ -96,17 +49,64 @@ export function buildSegmentData(
     const source = DS.CN(sourceI, sourceJ);
     const target = DS.CN(targetI, targetJ);
 
-    let sourceLegParity = source[4][1] === index;
-    let targetLegParity = target[4][1] === index + 1;
+    let sourceLeg = source[4][1] === index;
+    let targetLeg = target[4][1] === index + 1;
 
-    const biggestLayer = sourceLayer > targetLayer ? sourceLayer : targetLayer;
-    const isLoop = sourceLegParity == targetLegParity ? "loop" : "leg";
+    const loop = sourceLeg == targetLeg;
+    const leg = sourceLeg != targetLeg;
 
-    let st;
+    const farthest = Math.max(sourceLayer, targetLayer);
+    const closest = Math.min(sourceLayer, targetLayer);
+    const subLayer = loop ? 2 * farthest : 2 * (farthest + 1);
+
+    // console.log(
+    //   farthest,
+    //   `(${sourceI},${sourceJ})`,
+    //   `(${targetI},${targetJ})`
+    // );
+
+    let layer;
     if (source[0] == target[0]) {
-      st = source[0] == stitches.KNIT ? "knit" : "purl";
+      if (source[0] == stitches.KNIT) {
+        let sub;
+
+        if (loop) {
+          // If it is a knit loop
+          sub = maxStack - farthest * 2;
+        } else {
+          let l = sourceLeg ? targetLayer : sourceLayer;
+          sub = (maxStack - l) * 2;
+        }
+        layer = maxStack * 4 + sub - 1;
+      } else if (source[0] == stitches.PURL) {
+        let sub;
+        if (loop) {
+          // If it is a PURL loop
+          sub = maxStack - farthest * 2;
+        } else {
+          let l = sourceLeg ? targetLayer : sourceLayer;
+          sub = l * 2;
+        }
+        layer = maxStack + sub - 1;
+      } else {
+        layer = subLayer + maxStack * 2;
+      }
     } else {
-      st = "mid";
+      let sub;
+      console.log(
+        farthest,
+        `(${sourceI},${sourceJ})`,
+        `(${targetI},${targetJ})`
+      );
+
+      if (loop) {
+        // If it is a PURL loop
+        sub = maxStack - farthest * 2;
+      } else {
+        let l = sourceLeg ? targetLayer : sourceLayer;
+        sub = l * 2;
+      }
+      layer = maxStack * 2 + sub - 1;
     }
 
     if (sourceRow != targetRow) {
@@ -114,21 +114,76 @@ export function buildSegmentData(
       // console.debug("hit edge!");
     }
 
-    const restLength = isLoop
+    // console.log(Vec2.sub(nodes[sourceIndex].pos, nodes[targetIndex].pos));
+
+    const restLength = loop
       ? Vec2.mag(Vec2.sub(nodes[sourceIndex].pos, nodes[targetIndex].pos))
       : stitchWidth * stitchAspect;
 
     links.push({
       source: [sourceI, sourceJ],
       target: [targetI, targetJ],
+      sourceIndex,
+      targetIndex,
       restLength,
       row: sourceRow,
-      layer: [st, isLoop, biggestLayer],
+      layer,
       path: null,
     });
   }
   return links;
 }
+
+// export function layerDS(DS) {
+//   const layers = {
+//     knit: {
+//       loop: [],
+//       leg: [],
+//     },
+//     purl: {
+//       loop: [],
+//       leg: [],
+//     },
+//     mid: {
+//       loop: [],
+//       leg: [],
+//     },
+//   };
+
+//   let currZ = 0;
+
+//   for (let i = 0; i < DS.maxCNStack; i++) {
+//     layers.purl.leg.unshift(currZ);
+//     currZ++;
+//   }
+//   for (let i = 0; i < DS.maxCNStack; i++) {
+//     layers.knit.loop.unshift(currZ);
+//     currZ++;
+//   }
+
+//   for (let i = 0; i < DS.maxCNStack; i++) {
+//     layers.mid.loop.unshift(currZ);
+//     currZ++;
+//   }
+
+//   for (let i = 0; i < DS.maxCNStack; i++) {
+//     layers.mid.leg.unshift(currZ);
+//     currZ++;
+//   }
+
+//   for (let i = 0; i < DS.maxCNStack; i++) {
+//     layers.purl.loop.unshift(currZ);
+//     currZ++;
+//   }
+
+//   for (let i = 0; i < DS.maxCNStack; i++) {
+//     layers.knit.leg.unshift(currZ);
+//     currZ++;
+//   }
+
+//   let numLayers = currZ;
+//   return [layers, numLayers];
+// }
 
 // function calcZ(stitchType, cnType) {
 //   let zs;

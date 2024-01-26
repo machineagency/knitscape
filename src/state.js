@@ -36,9 +36,9 @@ let GLOBAL_STATE = {
 
   repeats: [
     {
-      bitmap: new Bimp(2, 1, [5, 10]),
-      pos: [1, 1],
-      area: [2, 1],
+      bitmap: new Bimp(6, 1, [1, 1, 1, 2, 2, 2]),
+      pos: [0, 0],
+      area: [6, 6],
     },
   ],
 
@@ -57,7 +57,7 @@ let GLOBAL_STATE = {
     },
   ], // Library of motifs which can be used as repeats
 
-  chart: Bimp.empty(4, 4, 1),
+  chart: Bimp.empty(6, 6, 1),
 
   reverseScroll: false,
   grid: true,

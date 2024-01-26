@@ -4,9 +4,9 @@ import { yarnSpline } from "./yarnSpline";
 import { yarnRelaxation } from "./relaxation";
 
 import { populateDS, followTheYarn, orderCNs } from "./topology";
-import { layoutNodes, layerDS, buildSegmentData } from "./yarn3d";
+import { layoutNodes, buildSegmentData } from "./yarn3d";
 
-const STITCH_RATIO = 0.75; // Row height / stitch width
+const STITCH_ASPECT = 0.75; // Row height / stitch width
 
 const SPREAD = 0.93;
 
@@ -30,14 +30,16 @@ export function simulate(stitchPattern, scale) {
   const DS = populateDS(stitchPattern);
   orderCNs(DS, stitchPattern);
   const yarnPath = followTheYarn(DS, stitchPattern);
-  const nodes = layoutNodes(DS, stitchWidth);
-  const yarnSegments = buildSegmentData(DS, yarnPath, nodes, stitchWidth);
+  const nodes = layoutNodes(DS, stitchWidth, STITCH_ASPECT);
+  const yarnSegments = buildSegmentData(
+    DS,
+    yarnPath,
+    nodes,
+    stitchWidth,
+    STITCH_ASPECT
+  );
 
-  const [layerData, numLayers] = layerDS(DS, stitchPattern);
-
-  console.log(layerData);
-
-  canvasSetup(numLayers);
+  canvasSetup(DS.maxCNStack * 6);
   update();
 
   function yarnWidth() {
@@ -108,7 +110,13 @@ export function simulate(stitchPattern, scale) {
         getCoords(links[index + 2].target)
       );
 
-      const splinePts = yarnSpline(p0, p1, p2, p3);
+      let n1 = getCoords(links[index].source);
+      let n2 = getCoords(links[index].target);
+
+      const currentLength = Math.abs(Math.hypot(n1[0] - n2[0], n1[1] - n2[1]));
+      const tension = 1 - segment.restLength / currentLength;
+
+      const splinePts = yarnSpline(p0, p1, p2, p3, tension);
 
       segment.path = splinePath(splinePts);
       p0 = p1;
@@ -130,25 +138,18 @@ export function simulate(stitchPattern, scale) {
     ctx.stroke(new Path2D(path));
   }
 
-  function drawYarnSegments(segments, layers) {
+  function drawYarnSegments(segments) {
     let row;
-    let currentSegment = 0;
+    let currentSegment = segments.length - 1;
 
-    while (currentSegment < segments.length) {
+    while (currentSegment >= 0) {
       row = segments[currentSegment].row;
       const colorIndex = yarnColor(row);
 
-      while (
-        currentSegment < segments.length &&
-        segments[currentSegment].row == row
-      ) {
-        let segment = segments[currentSegment];
-        const [st, isLoop, layer] = segment.layer;
-        let layerZIndex = layers[st][isLoop][layer];
-
-        drawSegmentPathToLayer(layerZIndex, colorIndex, segment.path);
-
-        currentSegment++;
+      while (currentSegment >= 0 && segments[currentSegment].row == row) {
+        const { layer, path } = segments[currentSegment];
+        drawSegmentPathToLayer(layer, colorIndex, path);
+        currentSegment--;
       }
     }
   }
@@ -165,16 +166,16 @@ export function simulate(stitchPattern, scale) {
   function update() {
     clear();
     calculateSegmentControlPoints(yarnSegments);
-    drawYarnSegments(yarnSegments, layerData);
+    drawYarnSegments(yarnSegments);
   }
 
   function init() {
     stitchWidth = Math.min(
       (canvasWidth * 0.9) / stitchPattern.width,
-      (canvasHeight * 0.9) / stitchPattern.height / STITCH_RATIO
+      (canvasHeight * 0.9) / stitchPattern.height / STITCH_ASPECT
     );
 
-    stitchHeight = stitchWidth * STITCH_RATIO;
+    stitchHeight = stitchWidth * STITCH_ASPECT;
 
     offsetX =
       yarnWidth() + (canvasWidth - stitchPattern.width * stitchWidth) / 2;
@@ -205,7 +206,7 @@ export function simulate(stitchPattern, scale) {
 
   function simLoop() {
     if (sim && sim.running()) {
-      sim.tick(links, nodes);
+      sim.tick(yarnSegments, nodes);
       update();
       requestAnimationFrame(simLoop);
     }
