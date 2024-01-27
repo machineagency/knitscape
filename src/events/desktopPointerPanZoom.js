@@ -1,5 +1,4 @@
 import { GLOBAL_STATE, dispatch } from "../state";
-import { posAtCoords } from "../utils";
 import { zoomAtPoint } from "../actions/zoomFit";
 
 function pan(e, target) {
@@ -30,18 +29,19 @@ function pan(e, target) {
 
 export function desktopPointerPanZoom(desktop) {
   desktop.addEventListener("pointerdown", (e) => {
-    if (e.target == desktop || e.target.id == "symbol-canvas") {
-      // dispatch({ editingRepeat: -1 });
+    if (e.target == desktop) {
       pan(e, desktop);
     }
   });
 
-  desktop.addEventListener("pointermove", (e) => {
-    const { x, y } = posAtCoords(e, desktop);
-    if (GLOBAL_STATE.pos.x != x || GLOBAL_STATE.pos.y != y) {
-      dispatch({ pos: { x, y } });
-    }
-  });
+  // desktop.addEventListener("pointermove", (e) => {
+  //   const { x, y } = chartCoords(e, desktop);
+  //   console.log(x, y);
+
+  //   if (GLOBAL_STATE.pos.x != x || GLOBAL_STATE.pos.y != y) {
+  //     dispatch({ pos: { x, y } });
+  //   }
+  // });
 
   desktop.addEventListener("pointerleave", (e) => {
     dispatch({ pos: { x: -1, y: -1 } });

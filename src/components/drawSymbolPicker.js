@@ -1,5 +1,4 @@
-import { GLOBAL_STATE } from "../state";
-import { SYMBOL_PATHS } from "../constants";
+import { SYMBOL_DATA } from "../constants";
 
 export function drawSymbolPicker(symbolCanvas) {
   return ({ state }) => {
@@ -7,7 +6,7 @@ export function drawSymbolPicker(symbolCanvas) {
 
     function draw() {
       symbolMap.forEach((symbol) => {
-        const path = SYMBOL_PATHS[symbol];
+        const { path, color, stroke } = SYMBOL_DATA[symbol];
         if (path) {
           const canvas = document.querySelector(`[data-symbol=${symbol}]`);
           canvas.width = 50;
@@ -15,10 +14,10 @@ export function drawSymbolPicker(symbolCanvas) {
           const ctx = canvas.getContext("2d");
 
           ctx.scale(50, 50);
-          ctx.imageSmoothingEnabled = false;
-
+          ctx.fillStyle = color;
+          ctx.fillRect(0, 0, 1, 1);
           ctx.lineWidth = 0.01 * symbolLineWidth;
-
+          if (stroke) ctx.strokeStyle = stroke;
           ctx.stroke(path);
         }
       });

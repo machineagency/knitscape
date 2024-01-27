@@ -5,21 +5,21 @@ import { getRandomColor, shuffle } from "../utils";
 import jscolor from "@eastdesire/jscolor";
 import { Bimp } from "../lib/Bimp";
 
-function symbolPicker() {
-  return html` <div id="symbol-picker">
-    <h3>Symbols</h3>
-    ${GLOBAL_STATE.symbolMap.map(
-      (symbolName, index) => html`<button
-        class="btn solid img ${GLOBAL_STATE.activeSymbol == index
-          ? "current"
-          : ""}"
-        @click=${() => dispatch({ activeSymbol: index })}>
-        <div>${symbolName}</div>
-        <canvas class="symbol-preview" data-symbol=${symbolName}></canvas>
-      </button>`
-    )}
-  </div>`;
-}
+// function symbolPicker() {
+//   return html` <div id="symbol-picker">
+//     <h3>Symbols</h3>
+//     ${GLOBAL_STATE.symbolMap.map(
+//       (symbolName, index) => html`<button
+//         class="btn solid img ${GLOBAL_STATE.activeSymbol == index
+//           ? "current"
+//           : ""}"
+//         @click=${() => dispatch({ activeSymbol: index })}>
+//         <div>${symbolName}</div>
+//         <canvas class="symbol-preview" data-symbol=${symbolName}></canvas>
+//       </button>`
+//     )}
+//   </div>`;
+// }
 
 function motifLibrary() {
   return html`<div id="repeat-library">
@@ -163,27 +163,30 @@ function yarnPicker() {
   </div>`;
 }
 
-function addRepeat() {
-  const newBitmap = Bimp.empty(2, 2, [0, 0, 0, 0]);
+// function addRepeat() {
+//   const newBitmap = Bimp.empty(2, 2, [0, 0, 0, 0]);
 
-  dispatch({
-    repeats: [
-      ...GLOBAL_STATE.repeats,
-      {
-        bitmap: newBitmap,
-        area: [newBitmap.width, newBitmap.height],
-        pos: [0, 0],
-      },
-    ],
-    editingRepeat: GLOBAL_STATE.repeats.length,
-  });
-}
+//   dispatch({
+//     repeats: [
+//       ...GLOBAL_STATE.repeats,
+//       {
+//         bitmap: newBitmap,
+//         area: [newBitmap.width, newBitmap.height],
+//         pos: [0, 0],
+//       },
+//     ],
+//     editingRepeat: GLOBAL_STATE.repeats.length,
+//   });
+// }
+
+// <!-- <button class="btn solid add-repeat" @click=${() => addRepeat()}>
+//   <i class="fa-solid fa-plus"></i>
+// </button> -->
+// <!-- ${symbolPicker()}  -->
 
 export function leftBar() {
   return html`<div id="left-bar" class="scroller">
-    <button class="btn solid add-repeat" @click=${() => addRepeat()}>
-      <i class="fa-solid fa-plus"></i>
-    </button>
-    ${symbolPicker()} ${yarnPicker()}
+    ${yarnPicker()}
+    <span>[${GLOBAL_STATE.pos.x}, ${GLOBAL_STATE.pos.y}]</span>
   </div>`;
 }

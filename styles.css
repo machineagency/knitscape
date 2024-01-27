@@ -111,6 +111,14 @@ EDIT PANE
   overflow: hidden;
 }
 
+.chart-bottom-bar {
+  display: flex;
+  background-color: var(--base1);
+
+  align-items: center;
+  justify-content: center;
+}
+
 #desktop-container {
   flex: 1;
   display: flex;
@@ -275,7 +283,6 @@ TOOL PICKER
   box-shadow: 0 0 4px 0 black;
   background-color: var(--base1);
   z-index: 10;
-  font-size: larger;
   align-items: center;
 }
 
@@ -339,40 +346,30 @@ SYMBOL PICKER
 
 **********************************/
 
-#symbol-picker {
+.operation-picker {
   display: flex;
-  flex-direction: column;
-  gap: 0.3em;
+  background-color: var(--base1);
+  overflow: auto;
+  padding: 2px;
 }
 
-#symbol-picker > .btn.img {
-  align-self: stretch;
-  justify-content: space-between;
-  border-radius: 8px;
-  overflow: hidden;
+.color-mode-toggle {
+  margin: 2px 5px;
 }
 
-#symbol-picker > .btn.img div {
-  writing-mode: vertical-lr;
-  transform: rotate(180deg);
-  display: flex;
-  align-items: center;
-  line-height: 0;
-  flex: 1;
-}
-
-.btn.img.current {
-  outline: 1px solid white;
-  background-color: hsla(var(--accH), var(--accS), var(--accL), 0.3);
-  color: var(--text-highlight);
+.operation-picker button {
+  flex: 1 0 30px;
+  max-width: 50px;
 }
 
 .symbol-preview {
-  width: 50px;
-  height: 50px;
-  display: block;
-  background-color: #fff;
-  image-rendering: pixelated;
+  aspect-ratio: 1;
+  width: 100%;
+}
+
+.operation-picker .btn.img.current {
+  outline: 1px solid white;
+  z-index: 2;
 }
 
 /**********************************

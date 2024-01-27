@@ -1,20 +1,25 @@
 import { html } from "lit-html";
-import { GLOBAL_STATE, dispatch } from "../state";
+import { dispatch, GLOBAL_STATE } from "../state";
+import { chartEditingTools } from "../actions/chartEditingTools";
+import { toolData } from "../constants";
 import { MIN_SCALE, MAX_SCALE } from "../constants";
 import { centerZoom, fitChart } from "../actions/zoomFit";
 
-export function chartTools() {
-  return html` <div class="panzoom-controls">
-    <span>[${GLOBAL_STATE.pos.x}, ${GLOBAL_STATE.pos.y}]</span>
-    <i class="fa-solid fa-palette"></i>
+export function editingTools() {
+  return html` <div class="tool-picker">
+    ${Object.keys(chartEditingTools).map(
+      (toolName) => html`<button
+        class="btn solid ${GLOBAL_STATE.activeTool == toolName
+          ? "current"
+          : ""}"
+        @click=${() =>
+          dispatch({
+            activeTool: toolName,
+          })}>
+        <i class=${toolData[toolName].icon}></i>
+      </button>`
+    )}
 
-    <input
-      type="checkbox"
-      checked
-      @change=${(e) =>
-        dispatch({
-          colorMode: e.target.checked ? "operation" : "yarn",
-        })} />
     <button class="btn icon" @click=${() => centerZoom(GLOBAL_STATE.scale - 1)}>
       <i class="fa-solid fa-magnifying-glass-minus"></i>
     </button>

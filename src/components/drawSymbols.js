@@ -1,9 +1,10 @@
 import { GLOBAL_STATE } from "../state";
-import { SYMBOL_PATHS, SYMBOL_BITS } from "../constants";
+import { SYMBOL_DATA, SYMBOL_BITS } from "../constants";
 
 export function drawSymbols(symbolCanvas) {
   return ({ state }) => {
-    let { scale, symbolMap, chart, symbolLineWidth } = state;
+    let { scale, symbolMap, chart, symbolLineWidth, yarnSequence, colorMode } =
+      state;
 
     let lastDrawn = null;
     let width = chart.width;
@@ -21,6 +22,10 @@ export function drawSymbols(symbolCanvas) {
       for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
           let paletteIndex = chart.pixel(x, y);
+          let yarnIndex = yarnSequence.pixel(
+            0,
+            (chart.height - y - 1) % yarnSequence.height
+          );
 
           if (lastDrawn == null || lastDrawn.pixel(x, y) != paletteIndex) {
             const symbol = symbolMap[paletteIndex];
@@ -39,9 +44,20 @@ export function drawSymbols(symbolCanvas) {
               ctx.fillRect(0, 0, 1, 1);
             }
 
-            const path = SYMBOL_PATHS[symbol];
+            const { path, color, stroke, yarnModeColor } = SYMBOL_DATA[symbol];
 
-            if (path) ctx.stroke(path);
+            if (GLOBAL_STATE.colorMode == "operation") {
+              ctx.fillStyle = color;
+              ctx.fillRect(0, 0, 1, 1);
+            } else if (GLOBAL_STATE.colorMode == "yarn") {
+              if (yarnModeColor) {
+                ctx.fillStyle = yarnModeColor;
+                ctx.fillRect(0, 0, 1, 1);
+              }
+            }
+            ctx.lineWidth = 0.01 * symbolLineWidth;
+            if (stroke) ctx.strokeStyle = stroke;
+            ctx.stroke(path);
 
             ctx.restore();
           }
@@ -60,12 +76,14 @@ export function drawSymbols(symbolCanvas) {
           width != state.chart.width ||
           height != state.chart.height ||
           scale != state.scale ||
-          symbolLineWidth != state.symbolLineWidth
+          symbolLineWidth != state.symbolLineWidth ||
+          colorMode != state.colorMode
         ) {
           width = state.chart.width;
           height = state.chart.height;
           scale = state.scale;
           symbolLineWidth = state.symbolLineWidth;
+          colorMode = state.colorMode;
 
           lastDrawn = null;
         }

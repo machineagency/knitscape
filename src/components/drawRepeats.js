@@ -1,5 +1,5 @@
 import { GLOBAL_STATE } from "../state";
-import { SYMBOL_PATHS, SYMBOL_BITS } from "../constants";
+import { SYMBOL_DATA, SYMBOL_BITS } from "../constants";
 
 function clearLastDrawn(lastDrawn) {
   for (const repeat of lastDrawn) {
@@ -125,7 +125,7 @@ export function drawRepeats() {
             }
             ctx.fillRect(0, 0, 1, 1);
 
-            const path = SYMBOL_PATHS[symbol];
+            const { path } = SYMBOL_DATA[symbol];
 
             if (path) ctx.stroke(path);
 

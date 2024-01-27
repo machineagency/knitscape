@@ -20,6 +20,7 @@ import { addKeypressListeners } from "./events/keypressEvents";
 import { desktopPointerPanZoom } from "./events/desktopPointerPanZoom";
 import { colorSequencePointerInteraction } from "./events/colorSequencePointerInteraction";
 import { repeatPointerInteraction } from "./events/repeatPointerInteraction";
+import { chartInteraction } from "./events/chartInteraction";
 import { simulationPointerInteraction } from "./events/simulationPointerInteraction";
 // import { repeatLibraryDragInteraction } from "./events/repeatLibraryDragInteraction";
 
@@ -56,7 +57,8 @@ function initKeyboard() {
   addKeypressListeners();
 
   desktopPointerPanZoom(desktop);
-  repeatPointerInteraction(repeatContainer);
+  chartInteraction(symbolCanvas);
+  // repeatPointerInteraction(repeatContainer);
   colorSequencePointerInteraction(yarnSequenceEditorCanvas, colorDragger);
   simulationPointerInteraction(simContainer);
   // repeatLibraryDragInteraction(repeatLibrary);

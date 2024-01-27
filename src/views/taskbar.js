@@ -1,6 +1,6 @@
 import { html } from "lit-html";
 import { GLOBAL_STATE, dispatch, undo } from "../state";
-import { toggleFullscreen } from "../actions/zoomFit";
+import { toggleFullscreen, fitChart } from "../actions/zoomFit";
 import { newPattern, uploadFile } from "../actions/importers";
 
 function updateChartWidth(newWidth) {

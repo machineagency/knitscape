@@ -2,7 +2,6 @@ import { Bimp } from "./lib/Bimp";
 import {
   SNAPSHOT_INTERVAL,
   DEFAULT_PATTERN_LIBRARY,
-  DEFAULT_SYMBOLS,
   SNAPSHOT_FIELDS,
   stitches,
 } from "./constants";
@@ -13,6 +12,8 @@ let GLOBAL_STATE = {
 
   activeTool: "brush",
   activeSymbol: 1,
+
+  colorMode: "operation",
 
   chartBackground: "#ffffff",
   symbolPalette: {},
@@ -28,18 +29,18 @@ let GLOBAL_STATE = {
   simPan: { x: 0, y: 0 },
 
   activeYarn: 0,
-  yarnPalette: ["rgba(235,233,187,1)", "rgba(247,85,0,1)"], // Colors of the yarns
-  yarnSequence: new Bimp(1, 4, [0, 1, 0, 0]),
+  yarnPalette: ["rgba(235,233,187,1)", "rgba(50, 140, 188, 1)"], // Colors of the yarns
+  yarnSequence: new Bimp(1, 2, [0, 1]),
 
   editingRepeat: -1,
   repeatPos: [-1, -1],
 
   repeats: [
-    {
-      bitmap: new Bimp(6, 1, [1, 1, 1, 2, 2, 2]),
-      pos: [0, 0],
-      area: [6, 6],
-    },
+    // {
+    //   bitmap: new Bimp(6, 1, [1, 1, 1, 2, 2, 2]),
+    //   pos: [0, 0],
+    //   area: [6, 6],
+    // },
   ],
 
   repeatLibrary: [

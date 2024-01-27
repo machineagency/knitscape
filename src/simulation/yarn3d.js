@@ -92,21 +92,22 @@ export function buildSegmentData(
         layer = subLayer + maxStack * 2;
       }
     } else {
-      let sub;
-      console.log(
-        farthest,
-        `(${sourceI},${sourceJ})`,
-        `(${targetI},${targetJ})`
-      );
+      // let sub;
+      // console.log(
+      //   farthest,
+      //   `(${sourceI},${sourceJ})`,
+      //   `(${targetI},${targetJ})`
+      // );
 
-      if (loop) {
-        // If it is a PURL loop
-        sub = maxStack - farthest * 2;
-      } else {
-        let l = sourceLeg ? targetLayer : sourceLayer;
-        sub = l * 2;
-      }
-      layer = maxStack * 2 + sub - 1;
+      // if (loop) {
+      //   // If it is a PURL loop
+      //   sub = maxStack - farthest * 2;
+      // } else {
+      //   let l = sourceLeg ? targetLayer : sourceLayer;
+      //   sub = l * 2;
+      // }
+      // layer = maxStack * 2 + sub - 1;
+      layer = maxStack * 2;
     }
 
     if (sourceRow != targetRow) {

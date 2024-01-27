@@ -10,9 +10,13 @@ import { chartTools } from "./chartTools";
 import { debugPane } from "./debugPane";
 import { leftBar } from "./leftBar";
 import { repeatCanvas } from "./repeatCanvas";
-import { repeatTools } from "./repeatTools";
+import { editingTools } from "./editingTools";
+import { operationPicker } from "./operationPicker";
+// import { repeatTools } from "./repeatTools";
 
 import { simulationView } from "../components/runSimulation";
+
+// ${when(GLOBAL_STATE.editingRepeat > -1, repeatTools)}
 
 export function view() {
   return html`
@@ -24,9 +28,8 @@ export function view() {
       <div id="chart-pane">
         <div id="chart-layout">
           ${leftBar()}
-
           <div id="desktop">
-            ${when(GLOBAL_STATE.editingRepeat > -1, repeatTools)}
+            ${editingTools()}
             <div
               id="canvas-transform-group"
               style="transform: translate(${Math.floor(
@@ -44,8 +47,8 @@ export function view() {
               ${repeatCanvas()}
             </div>
           </div>
-          ${chartTools()}
         </div>
+        ${operationPicker()}
       </div>
       ${simulationView()}
     </div>
