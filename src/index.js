@@ -101,7 +101,7 @@ function init() {
   colorDragger = document.getElementById("color-dragger");
 
   Split(["#chart-pane", "#sim-pane"], {
-    sizes: [60, 40],
+    sizes: [30, 70],
     minSize: 100,
     gutterSize: 11,
   });

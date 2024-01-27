@@ -54,7 +54,7 @@ export function simulate(stitchPattern, scale) {
 
   // CN grid position, stitch row, previous CN coords, next CN coords
   function nodeOffset([i, j], row, [x1, y1], [x2, y2]) {
-    const movingRight = row % 2 == 0;
+    const right = row % 2 == 0;
     const isLeg = j == row;
 
     const x = x1 - x2;
@@ -62,19 +62,17 @@ export function simulate(stitchPattern, scale) {
 
     const mag = SPREAD * Math.sqrt(x ** 2 + y ** 2);
 
-    if (mag == 0) return [0, 0];
-
-    let unitNormal;
-    if (movingRight != isLeg) {
-      unitNormal = [-y / mag, x / mag];
-    } else {
-      unitNormal = [y / mag, -x / mag];
+    if (mag == 0) {
+      console.log(i, j);
+      return [0, 0];
     }
+
+    const normal = right != isLeg ? [-y / mag, x / mag] : [y / mag, -x / mag];
 
     const [posX, posY] = getCoords([i, j]);
     return [
-      posX + (yarnWidth() / 2) * unitNormal[0],
-      posY + (yarnWidth() / 2) * unitNormal[1],
+      posX + (yarnWidth() / 2) * normal[0],
+      posY + (yarnWidth() / 2) * normal[1],
     ];
   }
 
@@ -144,6 +142,7 @@ export function simulate(stitchPattern, scale) {
     } else {
       let ctx = canvasLayers[layer];
 
+      // console.log(layer);
       ctx.strokeStyle = GLOBAL_STATE.yarnPalette[colorIndex];
       // ctx.lineCap = "round";
 

@@ -35,6 +35,7 @@ export function buildSegmentData(
 ) {
   const links = [];
   const maxStack = DS.maxCNStack;
+  const stack = DS.maxCNStack - 1;
   const group = maxStack * 2;
   const totalLayers = maxStack * 6 - 1;
 
@@ -56,9 +57,66 @@ export function buildSegmentData(
     const loop = sourceLeg == targetLeg;
     const leg = sourceLeg != targetLeg;
 
+    const sourceOddity = sourceI % 2 != 0;
+    const targetOddity = targetI % 2 != 0;
+
+    const paritiesEqual = sourceOddity == targetOddity;
+
     const farthest = Math.max(sourceLayer, targetLayer);
 
+    // console.log(leg && !paritiesEqual);
+
     let layer;
+    // let startLayer, endLayer;
+
+    // if (source[0] == stitches.KNIT) {
+    //   if (paritiesEqual) {
+    //     // treat as knit leg
+    //     startLayer = 4 * maxStack - 2 * sourceLayer;
+    //   } else {
+    //     // treat as knit loop
+    //     startLayer = 3 * maxStack - 2 * sourceLayer - 1;
+    //   }
+    // } else if (source[0] == stitches.PURL) {
+    //   if (paritiesEqual || (leg && !paritiesEqual)) {
+    //     // treat as purl leg
+    //     startLayer = 1 * maxStack - 2 * sourceLayer - 1;
+    //   } else {
+    //     // treat as purl loop
+    //     startLayer = 2 * maxStack - 2 * sourceLayer;
+    //   }
+    // }
+
+    // if (target[0] == stitches.KNIT) {
+    //   if (paritiesEqual) {
+    //     // treat as knit leg
+    //     endLayer = 4 * maxStack - 2 * targetLayer;
+    //   } else {
+    //     // treat as knit loop
+    //     endLayer = 3 * maxStack - 2 * targetLayer - 1;
+    //   }
+    // } else if (target[0] == stitches.PURL) {
+    //   if (paritiesEqual || (leg && !paritiesEqual)) {
+    //     // treat as purl leg
+    //     endLayer = 1 * maxStack - 2 * targetLayer - 1;
+    //   } else {
+    //     // treat as purl loop
+    //     endLayer = 2 * maxStack - 2 * targetLayer;
+    //   }
+    // }
+
+    // if (startLayer == endLayer) {
+    //   layer = startLayer;
+    // } else if (startLayer == undefined || endLayer == undefined) {
+    //   layer = startLayer != undefined ? startLayer : endLayer;
+    // } else {
+    //   layer = [startLayer, endLayer];
+    // }
+    // if (layer == undefined) layer = 1;
+
+    // console.log([startLayer, endLayer]);
+    // console.log(layer);
+
     if (source[0] == target[0]) {
       //  the segment is not traveling between knit and purl
       if (source[0] == stitches.KNIT) {
@@ -148,7 +206,7 @@ export function buildSegmentData(
       restLength: loop
         ? Vec2.mag(Vec2.sub(nodes[sourceIndex].pos, nodes[targetIndex].pos))
         : stitchWidth * stitchAspect,
-      row: sourceRow,
+      row: targetRow,
       layer,
       path: null,
     });
