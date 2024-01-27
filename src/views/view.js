@@ -6,7 +6,7 @@ import { taskbar } from "./taskbar";
 import { downloadModal } from "./downloadModal";
 import { libraryModal } from "./libraryModal";
 import { settingsModal } from "./settingsModal";
-import { chartTools } from "./chartTools";
+// import { chartTools } from "./chartTools";
 import { debugPane } from "./debugPane";
 import { leftBar } from "./leftBar";
 import { repeatCanvas } from "./repeatCanvas";

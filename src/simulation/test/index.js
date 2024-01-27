@@ -65,7 +65,14 @@ let GLOBAL_STATE = {
   //   ]
   // ),
 
-  pattern: new Bimp(4, 4, [1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]),
+  pattern: new Bimp(
+    7,
+    7,
+    [
+      1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 1, 2, 2, 2, 1,
+      1, 1, 1, 2, 2, 2, 1, 5, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    ]
+  ),
 };
 function uploadFile() {
   let fileInputElement = document.createElement("input");

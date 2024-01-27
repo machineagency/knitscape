@@ -1,7 +1,7 @@
 import { Bimp } from "./lib/Bimp";
 import {
   SNAPSHOT_INTERVAL,
-  DEFAULT_PATTERN_LIBRARY,
+  // DEFAULT_PATTERN_LIBRARY,
   SNAPSHOT_FIELDS,
   stitches,
 } from "./constants";
@@ -15,11 +15,20 @@ let GLOBAL_STATE = {
 
   colorMode: "operation",
 
-  chartBackground: "#ffffff",
-  symbolPalette: {},
+  // chartBackground: "#ffffff",
+  // symbolPalette: {},
 
   symbolMap: Object.keys(stitches),
-  patternLibrary: DEFAULT_PATTERN_LIBRARY,
+  // patternLibrary: DEFAULT_PATTERN_LIBRARY,
+
+  chart: new Bimp(
+    7,
+    7,
+    [
+      1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 1, 2, 2, 2, 1,
+      1, 1, 1, 2, 2, 2, 1, 5, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    ]
+  ),
 
   scale: 15, // Number of pixels for each chart cell
   pos: { x: -1, y: -1 }, // Mouse position in chart
@@ -43,22 +52,20 @@ let GLOBAL_STATE = {
     // },
   ],
 
-  repeatLibrary: [
-    {
-      title: "blank",
-      bitmap: new Bimp(2, 2, [0, 0, 0, 0]),
-    },
-    {
-      title: "checks",
-      bitmap: new Bimp(2, 2, [0, 2, 2, 0]),
-    },
-    {
-      title: "stripe",
-      bitmap: new Bimp(2, 2, [0, 2, 0, 2]),
-    },
-  ], // Library of motifs which can be used as repeats
-
-  chart: Bimp.empty(6, 6, 1),
+  // repeatLibrary: [
+  //   {
+  //     title: "blank",
+  //     bitmap: new Bimp(2, 2, [0, 0, 0, 0]),
+  //   },
+  //   {
+  //     title: "checks",
+  //     bitmap: new Bimp(2, 2, [0, 2, 2, 0]),
+  //   },
+  //   {
+  //     title: "stripe",
+  //     bitmap: new Bimp(2, 2, [0, 2, 0, 2]),
+  //   },
+  // ], // Library of motifs which can be used as repeats
 
   reverseScroll: false,
   grid: true,

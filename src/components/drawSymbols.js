@@ -1,5 +1,5 @@
 import { GLOBAL_STATE } from "../state";
-import { SYMBOL_DATA, SYMBOL_BITS } from "../constants";
+import { SYMBOL_DATA } from "../constants";
 
 export function drawSymbols(symbolCanvas) {
   return ({ state }) => {
@@ -36,13 +36,13 @@ export function drawSymbols(symbolCanvas) {
 
             ctx.clearRect(0, 0, 1, 1);
 
-            if (SYMBOL_BITS[symbol]) {
-              // if the symbol would be true (i.e., slip or tuck), add a white background
-              // to represent that it would not show the yarn in that row
-              // TODO: make this a setting? what is the best way to represent this?
-              ctx.fillStyle = "#fff";
-              ctx.fillRect(0, 0, 1, 1);
-            }
+            // if (SYMBOL_BITS[symbol]) {
+            //   // if the symbol would be true (i.e., slip or tuck), add a white background
+            //   // to represent that it would not show the yarn in that row
+            //   // TODO: make this a setting? what is the best way to represent this?
+            //   ctx.fillStyle = "#fff";
+            //   ctx.fillRect(0, 0, 1, 1);
+            // }
 
             const { path, color, stroke, yarnModeColor } = SYMBOL_DATA[symbol];
 

@@ -128,14 +128,14 @@ export const SYMBOL_DATA = {
   },
 };
 
-export const SYMBOL_BITS = {
-  KNIT: false,
-  PURL: false,
-  FM: true,
-  BM: true,
-  FT: true,
-  BT: true,
-};
+// export const SYMBOL_BITS = {
+//   KNIT: false,
+//   PURL: false,
+//   FM: true,
+//   BM: true,
+//   FT: true,
+//   BT: true,
+// };
 
 export const DEFAULT_PATTERN_LIBRARY = import.meta.glob("../examples/*.json");
 

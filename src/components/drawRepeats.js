@@ -1,5 +1,5 @@
 import { GLOBAL_STATE } from "../state";
-import { SYMBOL_DATA, SYMBOL_BITS } from "../constants";
+import { SYMBOL_DATA } from "../constants";
 
 function clearLastDrawn(lastDrawn) {
   for (const repeat of lastDrawn) {
@@ -114,15 +114,15 @@ export function drawRepeats() {
 
             ctx.clearRect(0, 0, 1, 1);
 
-            if (SYMBOL_BITS[symbol]) {
-              // color the repeat black and white according to operations
-              // TODO: make this a setting? what is the best way to represent this?
-              ctx.fillStyle = "#fff";
-              ctx.strokeStyle = "#000";
-            } else {
-              ctx.fillStyle = "#000";
-              ctx.strokeStyle = "#fff";
-            }
+            // if (SYMBOL_BITS[symbol]) {
+            //   // color the repeat black and white according to operations
+            //   // TODO: make this a setting? what is the best way to represent this?
+            //   ctx.fillStyle = "#fff";
+            //   ctx.strokeStyle = "#000";
+            // } else {
+            //   ctx.fillStyle = "#000";
+            //   ctx.strokeStyle = "#fff";
+            // }
             ctx.fillRect(0, 0, 1, 1);
 
             const { path } = SYMBOL_DATA[symbol];

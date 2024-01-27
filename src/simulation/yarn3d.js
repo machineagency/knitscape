@@ -35,6 +35,7 @@ export function buildSegmentData(
 ) {
   const links = [];
   const maxStack = DS.maxCNStack;
+  const group = maxStack * 2;
   const totalLayers = maxStack * 6 - 1;
 
   console.log("max CN stack:", maxStack);
@@ -56,77 +57,97 @@ export function buildSegmentData(
     const leg = sourceLeg != targetLeg;
 
     const farthest = Math.max(sourceLayer, targetLayer);
-    const closest = Math.min(sourceLayer, targetLayer);
-    const subLayer = loop ? 2 * farthest : 2 * (farthest + 1);
-
-    // console.log(
-    //   farthest,
-    //   `(${sourceI},${sourceJ})`,
-    //   `(${targetI},${targetJ})`
-    // );
 
     let layer;
     if (source[0] == target[0]) {
+      //  the segment is not traveling between knit and purl
       if (source[0] == stitches.KNIT) {
+        // Source is a knit
         let sub;
 
         if (loop) {
-          // If it is a knit loop
+          // KNIT LOOP
           sub = maxStack - farthest * 2;
+          layer = maxStack * 2 + sub - 1;
         } else {
-          let l = sourceLeg ? targetLayer : sourceLayer;
-          sub = (maxStack - l) * 2;
+          // KNIT LEG
+          layer = totalLayers - (sourceLeg ? targetLayer : sourceLayer);
         }
-        layer = maxStack * 4 + sub - 1;
       } else if (source[0] == stitches.PURL) {
+        // Source is a purl
+
         let sub;
         if (loop) {
-          // If it is a PURL loop
+          // PURL LOOP
           sub = maxStack - farthest * 2;
+          layer = maxStack * 3 + sub - 1;
         } else {
+          // PURL LEG
+
+          layer = sourceLeg ? targetLayer : sourceLayer;
+        }
+      } else {
+        let sub;
+        if (loop) {
+          // WEIRD LOOP
+          sub = maxStack - farthest * 2;
+          layer = maxStack + sub - 1;
+        } else {
+          // WEIRD LEG
           let l = sourceLeg ? targetLayer : sourceLayer;
           sub = l * 2;
+
+          layer = maxStack + sub - 1;
         }
-        layer = maxStack + sub - 1;
-      } else {
-        layer = subLayer + maxStack * 2;
       }
     } else {
-      // let sub;
-      // console.log(
-      //   farthest,
-      //   `(${sourceI},${sourceJ})`,
-      //   `(${targetI},${targetJ})`
-      // );
+      // the segment is traveling between knit and purl
 
-      // if (loop) {
-      //   // If it is a PURL loop
-      //   sub = maxStack - farthest * 2;
-      // } else {
-      //   let l = sourceLeg ? targetLayer : sourceLayer;
-      //   sub = l * 2;
-      // }
-      // layer = maxStack * 2 + sub - 1;
-      layer = maxStack * 2;
+      let sub;
+      if (loop) {
+        // TWEEN LOOP
+        layer = maxStack * 2;
+
+        if (target[0] == stitches.PURL) {
+          sub = maxStack - farthest * 2;
+          layer = [maxStack * 2 + sub - 1, maxStack * 3 + sub - 1];
+        } else {
+          sub = maxStack - farthest * 2;
+          layer = [maxStack * 3 + sub - 1, maxStack * 2 + sub - 1];
+        }
+      } else {
+        // TWEEN LEG
+        let l = sourceLeg ? targetLayer : sourceLayer;
+
+        if (source[0] == stitches.KNIT || target[0] == stitches.PURL) {
+          layer = [
+            totalLayers - (sourceLeg ? targetLayer : sourceLayer),
+            sourceLeg ? targetLayer : sourceLayer,
+          ];
+        } else {
+          layer = [
+            sourceLeg ? targetLayer : sourceLayer,
+            totalLayers - (sourceLeg ? targetLayer : sourceLayer),
+          ];
+        }
+      }
+
+      // console.log(layer);
     }
 
-    if (sourceRow != targetRow) {
-      // literal edge case
-      // console.debug("hit edge!");
-    }
-
-    // console.log(Vec2.sub(nodes[sourceIndex].pos, nodes[targetIndex].pos));
-
-    const restLength = loop
-      ? Vec2.mag(Vec2.sub(nodes[sourceIndex].pos, nodes[targetIndex].pos))
-      : stitchWidth * stitchAspect;
+    // if (sourceRow != targetRow) {
+    // literal edge case
+    // console.debug("hit edge!");
+    // }
 
     links.push({
       source: [sourceI, sourceJ],
       target: [targetI, targetJ],
       sourceIndex,
       targetIndex,
-      restLength,
+      restLength: loop
+        ? Vec2.mag(Vec2.sub(nodes[sourceIndex].pos, nodes[targetIndex].pos))
+        : stitchWidth * stitchAspect,
       row: sourceRow,
       layer,
       path: null,
@@ -134,57 +155,6 @@ export function buildSegmentData(
   }
   return links;
 }
-
-// export function layerDS(DS) {
-//   const layers = {
-//     knit: {
-//       loop: [],
-//       leg: [],
-//     },
-//     purl: {
-//       loop: [],
-//       leg: [],
-//     },
-//     mid: {
-//       loop: [],
-//       leg: [],
-//     },
-//   };
-
-//   let currZ = 0;
-
-//   for (let i = 0; i < DS.maxCNStack; i++) {
-//     layers.purl.leg.unshift(currZ);
-//     currZ++;
-//   }
-//   for (let i = 0; i < DS.maxCNStack; i++) {
-//     layers.knit.loop.unshift(currZ);
-//     currZ++;
-//   }
-
-//   for (let i = 0; i < DS.maxCNStack; i++) {
-//     layers.mid.loop.unshift(currZ);
-//     currZ++;
-//   }
-
-//   for (let i = 0; i < DS.maxCNStack; i++) {
-//     layers.mid.leg.unshift(currZ);
-//     currZ++;
-//   }
-
-//   for (let i = 0; i < DS.maxCNStack; i++) {
-//     layers.purl.loop.unshift(currZ);
-//     currZ++;
-//   }
-
-//   for (let i = 0; i < DS.maxCNStack; i++) {
-//     layers.knit.leg.unshift(currZ);
-//     currZ++;
-//   }
-
-//   let numLayers = currZ;
-//   return [layers, numLayers];
-// }
 
 // function calcZ(stitchType, cnType) {
 //   let zs;

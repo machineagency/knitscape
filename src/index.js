@@ -35,7 +35,7 @@ import { drawSymbolPicker } from "./components/drawSymbolPicker";
 import { resizeCanvases } from "./components/resizeCanvases";
 import { runSimulation } from "./components/runSimulation";
 import { closeModals } from "./events/closeModals";
-import { generateChart } from "./components/generateChart";
+// import { generateChart } from "./components/generateChart";
 import { isMobile } from "./utils";
 
 let symbolCanvas,
@@ -119,7 +119,7 @@ function init() {
     drawRepeats(),
     drawSymbolPicker(),
     runSimulation(),
-    generateChart(),
+    // generateChart(),
   ]);
 
   measureWindow();

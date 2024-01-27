@@ -1,5 +1,5 @@
 import { GLOBAL_STATE } from "../state";
-import { yarnSpline } from "./yarnSpline";
+import { yarnSpline, splitYarnSpline } from "./yarnSpline";
 
 import { yarnRelaxation } from "./relaxation";
 
@@ -116,9 +116,13 @@ export function simulate(stitchPattern, scale) {
       const currentLength = Math.abs(Math.hypot(n1[0] - n2[0], n1[1] - n2[1]));
       const tension = 1 - segment.restLength / currentLength;
 
-      const splinePts = yarnSpline(p0, p1, p2, p3, tension);
-
-      segment.path = splinePath(splinePts);
+      if (segment.layer.length == 2) {
+        const splinePtsArr = splitYarnSpline(p0, p1, p2, p3, tension);
+        segment.path = splinePtsArr.map((splinePts) => splinePath(splinePts));
+      } else {
+        const splinePts = yarnSpline(p0, p1, p2, p3, tension);
+        segment.path = splinePath(splinePts);
+      }
       p0 = p1;
       p1 = p2;
       p2 = p3;
@@ -130,12 +134,21 @@ export function simulate(stitchPattern, scale) {
   ///////////////////////
 
   function drawSegmentPathToLayer(layer, colorIndex, path) {
-    let ctx = canvasLayers[layer];
+    if (!path) return;
+    if (layer.length == 2) {
+      layer.forEach((layerID, index) => {
+        let ctx = canvasLayers[layerID];
+        ctx.strokeStyle = GLOBAL_STATE.yarnPalette[colorIndex];
+        ctx.stroke(new Path2D(path[index]));
+      });
+    } else {
+      let ctx = canvasLayers[layer];
 
-    ctx.strokeStyle = GLOBAL_STATE.yarnPalette[colorIndex];
-    // ctx.lineCap = "round";
+      ctx.strokeStyle = GLOBAL_STATE.yarnPalette[colorIndex];
+      // ctx.lineCap = "round";
 
-    ctx.stroke(new Path2D(path));
+      ctx.stroke(new Path2D(path));
+    }
   }
 
   function drawYarnSegments(segments) {
@@ -152,6 +165,23 @@ export function simulate(stitchPattern, scale) {
         currentSegment--;
       }
     }
+
+    // let row;
+    // let currentSegment = 0;
+
+    // while (currentSegment < segments.length) {
+    //   row = segments[currentSegment].row;
+    //   const colorIndex = yarnColor(row);
+
+    //   while (
+    //     currentSegment < segments.length &&
+    //     segments[currentSegment].row == row
+    //   ) {
+    //     const { layer, path } = segments[currentSegment];
+    //     drawSegmentPathToLayer(layer, colorIndex, path);
+    //     currentSegment++;
+    //   }
+    // }
   }
 
   function clear() {
@@ -192,7 +222,7 @@ export function simulate(stitchPattern, scale) {
       canvas.width = canvasWidth;
       canvas.height = canvasHeight;
       canvas.style.cssText = `width: ${width}px; height: ${height}px; z-index: ${layer}; filter: brightness(${
-        0.6 + 0.4 * (layer / (numLayers - 1))
+        0.7 + 0.4 * (layer / (numLayers - 1))
       });`;
       let ctx = canvas.getContext("2d");
       ctx.translate(offsetX, offsetY);
