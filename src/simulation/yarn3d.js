@@ -67,136 +67,142 @@ export function buildSegmentData(
     // console.log(leg && !paritiesEqual);
 
     let layer;
-    // let startLayer, endLayer;
+    let startLayer, endLayer;
 
-    // if (source[0] == stitches.KNIT) {
-    //   if (paritiesEqual) {
-    //     // treat as knit leg
-    //     startLayer = 4 * maxStack - 2 * sourceLayer;
-    //   } else {
-    //     // treat as knit loop
-    //     startLayer = 3 * maxStack - 2 * sourceLayer - 1;
-    //   }
-    // } else if (source[0] == stitches.PURL) {
-    //   if (paritiesEqual || (leg && !paritiesEqual)) {
-    //     // treat as purl leg
-    //     startLayer = 1 * maxStack - 2 * sourceLayer - 1;
-    //   } else {
-    //     // treat as purl loop
-    //     startLayer = 2 * maxStack - 2 * sourceLayer;
-    //   }
-    // }
+    if (source[0] == stitches.KNIT) {
+      if (paritiesEqual) {
+        // treat as knit leg
+        startLayer = sourceLeg ? 4 * maxStack : 4 * maxStack - 2 * sourceLayer;
+      } else {
+        // treat as knit loop
+        startLayer = sourceLeg
+          ? 2 * maxStack + 1
+          : 4 * maxStack - 2 * sourceLayer - 1;
+      }
+    } else if (source[0] == stitches.PURL) {
+      if (paritiesEqual || (leg && !paritiesEqual)) {
+        // treat as purl leg
+        startLayer = sourceLeg ? 1 : 2 * maxStack - 2 * sourceLayer - 1;
+      } else {
+        // treat as purl loop
+        startLayer = sourceLeg ? 2 * maxStack : 2 * maxStack - 2 * sourceLayer;
+      }
+    }
 
-    // if (target[0] == stitches.KNIT) {
-    //   if (paritiesEqual) {
-    //     // treat as knit leg
-    //     endLayer = 4 * maxStack - 2 * targetLayer;
-    //   } else {
-    //     // treat as knit loop
-    //     endLayer = 3 * maxStack - 2 * targetLayer - 1;
-    //   }
-    // } else if (target[0] == stitches.PURL) {
-    //   if (paritiesEqual || (leg && !paritiesEqual)) {
-    //     // treat as purl leg
-    //     endLayer = 1 * maxStack - 2 * targetLayer - 1;
-    //   } else {
-    //     // treat as purl loop
-    //     endLayer = 2 * maxStack - 2 * targetLayer;
-    //   }
-    // }
+    if (target[0] == stitches.KNIT) {
+      if (paritiesEqual) {
+        // treat as knit leg
+        endLayer = targetLeg ? 4 * maxStack : 4 * maxStack - 2 * targetLayer;
+      } else {
+        // treat as knit loop
+        endLayer = targetLeg
+          ? 2 * maxStack + 1
+          : 4 * maxStack - 2 * targetLayer - 1;
+      }
+    } else if (target[0] == stitches.PURL) {
+      if (paritiesEqual || (leg && !paritiesEqual)) {
+        // treat as purl leg
+        endLayer = targetLeg ? 1 : 2 * maxStack - 2 * targetLayer - 1;
+      } else {
+        // treat as purl loop
+        endLayer = targetLeg ? 2 * maxStack : 2 * maxStack - 2 * targetLayer;
+      }
+    }
 
-    // if (startLayer == endLayer) {
-    //   layer = startLayer;
-    // } else if (startLayer == undefined || endLayer == undefined) {
-    //   layer = startLayer != undefined ? startLayer : endLayer;
-    // } else {
-    //   layer = [startLayer, endLayer];
-    // }
-    // if (layer == undefined) layer = 1;
+    if (startLayer == endLayer) {
+      layer = startLayer;
+    } else if (startLayer == undefined || endLayer == undefined) {
+      layer = startLayer != undefined ? startLayer : endLayer;
+    } else {
+      layer = [startLayer, endLayer];
+    }
+
+    // console.log(layer, sourceLayer, targetLayer, index);
+    if (layer == undefined) layer = 1;
 
     // console.log([startLayer, endLayer]);
     // console.log(layer);
 
-    if (source[0] == target[0]) {
-      //  the segment is not traveling between knit and purl
-      if (source[0] == stitches.KNIT) {
-        // Source is a knit
-        let sub;
+    //     if (source[0] == target[0]) {
+    //       //  the segment is not traveling between knit and purl
+    //       if (source[0] == stitches.KNIT) {
+    //         // Source is a knit
+    //         let sub;
 
-        if (loop) {
-          // KNIT LOOP
-          sub = maxStack - farthest * 2;
-          layer = maxStack * 2 + sub - 1;
-        } else {
-          // KNIT LEG
-          layer = totalLayers - (sourceLeg ? targetLayer : sourceLayer);
-        }
-      } else if (source[0] == stitches.PURL) {
-        // Source is a purl
+    //         if (loop) {
+    //           // KNIT LOOP
+    //           sub = maxStack - farthest * 2;
+    //           layer = maxStack * 2 + sub - 1;
+    //         } else {
+    //           // KNIT LEG
+    //           layer = totalLayers - (sourceLeg ? targetLayer : sourceLayer);
+    //         }
+    //       } else if (source[0] == stitches.PURL) {
+    //         // Source is a purl
 
-        let sub;
-        if (loop) {
-          // PURL LOOP
-          sub = maxStack - farthest * 2;
-          layer = maxStack * 3 + sub - 1;
-        } else {
-          // PURL LEG
+    //         let sub;
+    //         if (loop) {
+    //           // PURL LOOP
+    //           sub = maxStack - farthest * 2;
+    //           layer = maxStack * 3 + sub - 1;
+    //         } else {
+    //           // PURL LEG
 
-          layer = sourceLeg ? targetLayer : sourceLayer;
-        }
-      } else {
-        let sub;
-        if (loop) {
-          // WEIRD LOOP
-          sub = maxStack - farthest * 2;
-          layer = maxStack + sub - 1;
-        } else {
-          // WEIRD LEG
-          let l = sourceLeg ? targetLayer : sourceLayer;
-          sub = l * 2;
+    //           layer = sourceLeg ? targetLayer : sourceLayer;
+    //         }
+    //       } else {
+    //         let sub;
+    //         if (loop) {
+    //           // WEIRD LOOP
+    //           sub = maxStack - farthest * 2;
+    //           layer = maxStack + sub - 1;
+    //         } else {
+    //           // WEIRD LEG
+    //           let l = sourceLeg ? targetLayer : sourceLayer;
+    //           sub = l * 2;
 
-          layer = maxStack + sub - 1;
-        }
-      }
-    } else {
-      // the segment is traveling between knit and purl
+    //           layer = maxStack + sub - 1;
+    //         }
+    //       }
+    //     } else {
+    //       // the segment is traveling between knit and purl
 
-      let sub;
-      if (loop) {
-        // TWEEN LOOP
-        layer = maxStack * 2;
+    //       let sub;
+    //       if (loop) {
+    //         // TWEEN LOOP
+    //         layer = maxStack * 2;
 
-        if (target[0] == stitches.PURL) {
-          sub = maxStack - farthest * 2;
-          layer = [maxStack * 2 + sub - 1, maxStack * 3 + sub - 1];
-        } else {
-          sub = maxStack - farthest * 2;
-          layer = [maxStack * 3 + sub - 1, maxStack * 2 + sub - 1];
-        }
-      } else {
-        // TWEEN LEG
-        let l = sourceLeg ? targetLayer : sourceLayer;
+    //         if (target[0] == stitches.PURL) {
+    //           sub = maxStack - farthest * 2;
+    //           layer = [maxStack * 2 + sub - 1, maxStack * 3 + sub - 1];
+    //         } else {
+    //           sub = maxStack - farthest * 2;
+    //           layer = [maxStack * 3 + sub - 1, maxStack * 2 + sub - 1];
+    //         }
+    //       } else {
+    //         // TWEEN LEG
+    //         let l = sourceLeg ? targetLayer : sourceLayer;
 
-        if (source[0] == stitches.KNIT || target[0] == stitches.PURL) {
-          layer = [
-            totalLayers - (sourceLeg ? targetLayer : sourceLayer),
-            sourceLeg ? targetLayer : sourceLayer,
-          ];
-        } else {
-          layer = [
-            sourceLeg ? targetLayer : sourceLayer,
-            totalLayers - (sourceLeg ? targetLayer : sourceLayer),
-          ];
-        }
-      }
+    //         if (source[0] == stitches.KNIT || target[0] == stitches.PURL) {
+    //           layer = [
+    //             totalLayers - (sourceLeg ? targetLayer : sourceLayer),
+    //             sourceLeg ? targetLayer : sourceLayer,
+    //           ];
+    //         } else {
+    //           layer = [
+    //             sourceLeg ? targetLayer : sourceLayer,
+    //             totalLayers - (sourceLeg ? targetLayer : sourceLayer),
+    //           ];
+    //         }
+    //       }
 
-      // console.log(layer);
-    }
+    //       // console.log(layer);
+    //     }
 
-    // if (sourceRow != targetRow) {
-    // literal edge case
-    // console.debug("hit edge!");
-    // }
+    //     // if (sourceRow != targetRow) {
+    //     // literal edge case
+    //     // console.debug("hit edge!");
+    //     // }
 
     links.push({
       source: [sourceI, sourceJ],

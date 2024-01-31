@@ -465,16 +465,32 @@ export function followTheYarn(DS) {
 
       let layer = -1;
 
+      // console.log(i, j);
       for (const [index, [ii, jj]] of DS.CNO(...cnLoc).entries()) {
-        if (ii == i && jj == j) {
+        // const [iFinal, jFinal] = finalLocation(ii, jj, DS);
+        // console.log(cnLoc);
+        // console.log(ii, jj);
+
+        if (
+          (legNode && DS.YPI(ii, jj)[1] == yarnPathIndex) ||
+          (!legNode && DS.YPI(ii, jj)[0] == yarnPathIndex)
+        ) {
           layer = index;
           break;
         }
+
+        // if (ii == i && jj == j) {
+        //   layer = index;
+        //   break;
+        // }
       }
 
       // console.log(layer);
       if (layer < 0)
-        console.log(`Couldn't find the stack index for cn (${i},${j})`);
+        console.log(
+          `Couldn't find the stack index for cn (${i},${j}), ypi${yarnPathIndex}  `
+        );
+
       if (layer > highestLayer) highestLayer = layer;
 
       yarnPath.push([...cnLoc, currentStitchRow, layer]);
@@ -788,7 +804,7 @@ function cnsAt(i, j, DS) {
   for (let jj = jMin; jj <= jMax; jj++) {
     for (let ii = iMin; ii <= iMax; ii++) {
       let [iFinal, jFinal] = finalLocation(ii, jj, DS);
-      if (iFinal == i && jFinal == j && DS.AV(ii, jj) != cnStates.ECN) {
+      if (iFinal == i && jFinal == j) {
         cnList.push([ii, jj]);
       }
     }

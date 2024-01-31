@@ -39,7 +39,8 @@ export function simulate(stitchPattern, scale) {
     STITCH_ASPECT
   );
 
-  canvasSetup(DS.maxCNStack * 6);
+  const numLayers = DS.maxCNStack * 4;
+  canvasSetup();
   update();
 
   function yarnWidth() {
@@ -135,12 +136,16 @@ export function simulate(stitchPattern, scale) {
     if (!path) return;
     if (layer.length == 2) {
       layer.forEach((layerID, index) => {
-        let ctx = canvasLayers[layerID];
+        let ctx =
+          canvasLayers[
+            GLOBAL_STATE.flipped ? numLayers - layerID : layerID - 1
+          ];
         ctx.strokeStyle = GLOBAL_STATE.yarnPalette[colorIndex];
         ctx.stroke(new Path2D(path[index]));
       });
     } else {
-      let ctx = canvasLayers[layer];
+      let ctx =
+        canvasLayers[GLOBAL_STATE.flipped ? numLayers - layer : layer - 1];
 
       // console.log(layer);
       ctx.strokeStyle = GLOBAL_STATE.yarnPalette[colorIndex];
@@ -151,36 +156,37 @@ export function simulate(stitchPattern, scale) {
   }
 
   function drawYarnSegments(segments) {
-    let row;
-    let currentSegment = segments.length - 1;
-
-    while (currentSegment >= 0) {
-      row = segments[currentSegment].row;
-      const colorIndex = yarnColor(row);
-
-      while (currentSegment >= 0 && segments[currentSegment].row == row) {
-        const { layer, path } = segments[currentSegment];
-        drawSegmentPathToLayer(layer, colorIndex, path);
-        currentSegment--;
-      }
-    }
-
+    // const layerDS
     // let row;
-    // let currentSegment = 0;
+    // let currentSegment = segments.length - 1;
 
-    // while (currentSegment < segments.length) {
+    // while (currentSegment >= 0) {
     //   row = segments[currentSegment].row;
     //   const colorIndex = yarnColor(row);
 
-    //   while (
-    //     currentSegment < segments.length &&
-    //     segments[currentSegment].row == row
-    //   ) {
+    //   while (currentSegment >= 0 && segments[currentSegment].row == row) {
     //     const { layer, path } = segments[currentSegment];
     //     drawSegmentPathToLayer(layer, colorIndex, path);
-    //     currentSegment++;
+    //     currentSegment--;
     //   }
     // }
+
+    let row;
+    let currentSegment = 0;
+
+    while (currentSegment < segments.length) {
+      row = segments[currentSegment].row;
+      const colorIndex = yarnColor(row);
+
+      while (
+        currentSegment < segments.length &&
+        segments[currentSegment].row == row
+      ) {
+        const { layer, path } = segments[currentSegment];
+        drawSegmentPathToLayer(layer, colorIndex, path);
+        currentSegment++;
+      }
+    }
   }
 
   function clear() {
@@ -212,7 +218,7 @@ export function simulate(stitchPattern, scale) {
       -yarnWidth() + (canvasHeight - stitchPattern.height * stitchHeight) / 2;
   }
 
-  function canvasSetup(numLayers) {
+  function canvasSetup() {
     while (parentEl.firstChild) {
       parentEl.removeChild(parentEl.firstChild);
     }
@@ -220,14 +226,26 @@ export function simulate(stitchPattern, scale) {
       let canvas = document.createElement("canvas");
       canvas.width = canvasWidth;
       canvas.height = canvasHeight;
-      canvas.style.cssText = `width: ${width}px; height: ${height}px; z-index: ${layer}; filter: brightness(${
-        0.7 + 0.4 * (layer / (numLayers - 1))
-      });`;
+
+      let l = Math.floor((numLayers - 1 - layer) / 2) % DS.maxCNStack;
+      let b = 0.2 / DS.maxCNStack;
+
+      let brightness;
+
+      if (layer < DS.maxCNStack * 2) {
+        //purl layer
+        brightness = layer % 2 == 0 ? 0.7 - l * b : 0.9 - l * b;
+      } else {
+        //knit layer
+        brightness = layer % 2 == 0 ? 0.8 - l * b : 1 - l * b;
+      }
+
+      canvas.style.cssText = `width: ${width}px; height: ${height}px; z-index: ${layer}; filter: brightness(${brightness});`;
       let ctx = canvas.getContext("2d");
       ctx.translate(offsetX, offsetY);
       ctx.lineWidth = yarnWidth();
-      ctx.shadowColor = "black";
-      ctx.shadowBlur = 1;
+      // ctx.shadowColor = "#444";
+      // ctx.shadowBlur = 1;
       canvasLayers.push(ctx);
       parentEl.appendChild(canvas);
     }
