@@ -25,7 +25,7 @@ function updateChartHeight(newHeight) {
 export function taskbar() {
   return html`<div id="taskbar">
     <h1 class="site-title">KnitScape</h1>
-    <div id="chart-size-controls">
+    <!-- <div id="chart-size-controls">
       <label>Width</label>
       <input
         class="input"
@@ -42,7 +42,7 @@ export function taskbar() {
         @change=${(e) => updateChartHeight(Number(e.target.value))}
         min="5"
         max="1000" />
-    </div>
+    </div> -->
     <div class="taskbar-buttons">
       <button class="btn icon" @click=${() => undo()}>
         <i class="fa-solid fa-rotate-left"></i>

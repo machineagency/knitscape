@@ -1,10 +1,5 @@
 import { Bimp } from "./lib/Bimp";
-import {
-  SNAPSHOT_INTERVAL,
-  // DEFAULT_PATTERN_LIBRARY,
-  SNAPSHOT_FIELDS,
-  stitches,
-} from "./constants";
+import { SNAPSHOT_INTERVAL, SNAPSHOT_FIELDS, stitches } from "./constants";
 
 let GLOBAL_STATE = {
   editingPalette: false,
@@ -12,23 +7,25 @@ let GLOBAL_STATE = {
 
   activeTool: "brush",
   activeSymbol: 1,
-
   colorMode: "operation",
+  context: "shape",
 
-  // chartBackground: "#ffffff",
-  // symbolPalette: {},
+  layers: [],
 
   symbolMap: Object.keys(stitches),
-  // patternLibrary: DEFAULT_PATTERN_LIBRARY,
 
-  chart: new Bimp(
-    7,
-    7,
-    [
-      1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 1, 2, 2, 2, 1,
-      1, 1, 1, 2, 2, 2, 1, 5, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    ]
-  ),
+  // chart: new Bimp(
+  //   7,
+  //   7,
+  //   [
+  //     1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 1, 2, 2, 2, 1,
+  //     1, 1, 1, 2, 2, 2, 1, 5, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  //   ]
+  // ),
+
+  shapeChart: Bimp.empty(10, 10, 1),
+  colorChart: Bimp.empty(10, 10, 0),
+  chart: Bimp.empty(10, 10, 1),
 
   scale: 15, // Number of pixels for each chart cell
   pos: { x: -1, y: -1 }, // Mouse position in chart

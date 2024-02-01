@@ -1,25 +1,8 @@
 import { html } from "lit-html";
 import { GLOBAL_STATE, dispatch } from "../state";
-import { LAYERS } from "../constants";
 import { getRandomColor, shuffle } from "../utils";
 import jscolor from "@eastdesire/jscolor";
 import { Bimp } from "../lib/Bimp";
-
-// function symbolPicker() {
-//   return html` <div id="symbol-picker">
-//     <h3>Symbols</h3>
-//     ${GLOBAL_STATE.symbolMap.map(
-//       (symbolName, index) => html`<button
-//         class="btn solid img ${GLOBAL_STATE.activeSymbol == index
-//           ? "current"
-//           : ""}"
-//         @click=${() => dispatch({ activeSymbol: index })}>
-//         <div>${symbolName}</div>
-//         <canvas class="symbol-preview" data-symbol=${symbolName}></canvas>
-//       </button>`
-//     )}
-//   </div>`;
-// }
 
 function motifLibrary() {
   return html`<div id="repeat-library">
@@ -163,30 +146,49 @@ function yarnPicker() {
   </div>`;
 }
 
-// function addRepeat() {
-//   const newBitmap = Bimp.empty(2, 2, [0, 0, 0, 0]);
+function modePicker() {
+  return html`<div class="mode-picker">
+    <button
+      class="btn solid mode-select ${GLOBAL_STATE.context == "shape"
+        ? "selected"
+        : ""}"
+      @click=${() => dispatch({ context: "shape" })}>
+      <i class="fa-solid fa-draw-polygon"></i>
+      <span>shape</span>
+    </button>
+    <button
+      class="btn solid mode-select ${GLOBAL_STATE.context == "color"
+        ? "selected"
+        : ""}"
+      @click=${() => dispatch({ context: "color" })}>
+      <i class="fa-solid fa-palette"></i>
+      <span>color</span>
+    </button>
+    <button
+      class="btn solid mode-select ${GLOBAL_STATE.context == "texture"
+        ? "selected"
+        : ""}"
+      @click=${() => dispatch({ context: "texture" })}>
+      <i class="fa-solid fa-water"></i>
+      <span>texture</span>
+    </button>
 
-//   dispatch({
-//     repeats: [
-//       ...GLOBAL_STATE.repeats,
-//       {
-//         bitmap: newBitmap,
-//         area: [newBitmap.width, newBitmap.height],
-//         pos: [0, 0],
-//       },
-//     ],
-//     editingRepeat: GLOBAL_STATE.repeats.length,
-//   });
-// }
+    <button
+      class="btn solid mode-select ${GLOBAL_STATE.context == "process"
+        ? "selected"
+        : ""}"
+      @click=${() => dispatch({ context: "process" })}>
+      <i class="fa-solid fa-bars-staggered"></i>
+      <span>process</span>
+    </button>
+  </div>`;
+}
 
-// <!-- <button class="btn solid add-repeat" @click=${() => addRepeat()}>
-//   <i class="fa-solid fa-plus"></i>
-// </button> -->
-// <!-- ${symbolPicker()}  -->
-
-export function leftBar() {
-  return html`<div id="left-bar" class="scroller">
-    ${yarnPicker()}
-    <span>[${GLOBAL_STATE.pos.x}, ${GLOBAL_STATE.pos.y}]</span>
+export function sidebar() {
+  return html`<div class="sidebar scroller">
+    ${modePicker()}
+    <div class="mouse-position">
+      [${GLOBAL_STATE.pos.x}, ${GLOBAL_STATE.pos.y}]
+    </div>
   </div>`;
 }

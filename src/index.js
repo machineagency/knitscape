@@ -38,10 +38,13 @@ import { closeModals } from "./events/closeModals";
 // import { generateChart } from "./components/generateChart";
 import { isMobile } from "./utils";
 
+import { redrawCharts } from "./components/redrawCharts";
+
 let symbolCanvas,
   gridCanvas,
   yarnColorCanvas,
   desktop,
+  chartPane,
   repeatContainer,
   yarnSequenceEditorCanvas,
   colorDragger,
@@ -56,10 +59,10 @@ function r() {
 function initKeyboard() {
   addKeypressListeners();
 
-  desktopPointerPanZoom(desktop);
-  chartInteraction(symbolCanvas);
+  desktopPointerPanZoom(chartPane);
+  // chartInteraction(symbolCanvas);
   // repeatPointerInteraction(repeatContainer);
-  colorSequencePointerInteraction(yarnSequenceEditorCanvas, colorDragger);
+  // colorSequencePointerInteraction(yarnSequenceEditorCanvas, colorDragger);
   simulationPointerInteraction(simContainer);
   // repeatLibraryDragInteraction(repeatLibrary);
   closeModals();
@@ -68,7 +71,7 @@ function initKeyboard() {
 function initTouch() {
   document.body.style.setProperty("--font-size", "1.1rem");
 
-  desktopTouchPanZoom(desktop);
+  desktopTouchPanZoom(chartPane);
   repeatTouchInteraction(repeatContainer);
   colorSequenceTouchInteraction(yarnSequenceEditorCanvas, colorDragger);
   simulationTouchInteraction(simContainer);
@@ -95,13 +98,14 @@ function init() {
   yarnColorCanvas = document.getElementById("yarn-color-canvas");
   yarnSequenceEditorCanvas = document.getElementById("yarn-sequence-canvas");
   desktop = document.getElementById("desktop");
+  chartPane = document.getElementById("chart-pane");
   repeatContainer = document.getElementById("repeat-container");
   simContainer = document.getElementById("sim-container");
   repeatLibrary = document.getElementById("repeat-library");
   colorDragger = document.getElementById("color-dragger");
 
   Split(["#chart-pane", "#sim-pane"], {
-    sizes: [50, 50],
+    sizes: [60, 40],
     minSize: 100,
     gutterSize: 11,
   });
@@ -109,21 +113,22 @@ function init() {
   isMobile() ? initTouch() : initKeyboard();
 
   StateMonitor.register([
-    resizeCanvases([symbolCanvas, gridCanvas, yarnColorCanvas]),
-    yarnSequenceCanvas({
-      canvas: yarnSequenceEditorCanvas,
-    }),
-    drawSymbols(symbolCanvas),
-    drawYarnColors(yarnColorCanvas),
-    drawGrid(gridCanvas),
-    drawRepeats(),
-    drawSymbolPicker(),
+    // resizeCanvases([symbolCanvas, gridCanvas, yarnColorCanvas]),
+    // yarnSequenceCanvas({
+    //   canvas: yarnSequenceEditorCanvas,
+    // }),
+    // drawSymbols(symbolCanvas),
+    // drawYarnColors(yarnColorCanvas),
+    // drawGrid(gridCanvas),
+    // drawRepeats(),
+    // drawSymbolPicker(),
+    redrawCharts(),
     runSimulation(),
     // generateChart(),
   ]);
 
   measureWindow();
-  fitChart();
+  // fitChart();
 }
 
 window.onload = init;

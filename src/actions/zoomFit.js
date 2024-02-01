@@ -82,7 +82,7 @@ export function zoomAtPoint(pt, scale) {
 
 export function fitChart() {
   const { width, height } = devicePixelBoundingBox(
-    document.getElementById("desktop")
+    document.getElementById("chart-pane")
   );
 
   const scale = Math.floor(
