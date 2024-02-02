@@ -23,6 +23,27 @@ let GLOBAL_STATE = {
   //   ]
   // ),
 
+  shaping: {
+    left: [
+      [0, 0],
+      [0, 10],
+    ],
+    right: [
+      [10, 0],
+      [10, 10],
+    ],
+  },
+
+  shape: [
+    [0, 0],
+    [1, 4],
+    [4, 4],
+    [5, 0],
+  ],
+
+  stitchGauge: 7, // stitches per inch
+  rowGauge: 11, // rows per inch
+
   shapeChart: Bimp.empty(10, 10, 1),
   colorChart: Bimp.empty(10, 10, 0),
   chart: Bimp.empty(10, 10, 1),

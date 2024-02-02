@@ -102,11 +102,17 @@ SHAPE PANE
 
 **********************************/
 
-.edge-grabber {
-  fill: red;
-  stroke: black;
-  stroke-width: 2px;
+.handle {
+  fill: rgb(52, 145, 195);
+  stroke: rgb(52, 145, 195);
   cursor: grab;
+  pointer-events: all;
+}
+
+.shape-line {
+  stroke: rgb(52, 145, 195);
+  cursor: grab;
+  pointer-events: all;
 }
 
 /**********************************

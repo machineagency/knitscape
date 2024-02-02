@@ -39,6 +39,7 @@ import { closeModals } from "./events/closeModals";
 import { isMobile } from "./utils";
 
 import { redrawCharts } from "./components/redrawCharts";
+import { shapeMonitor } from "./contexts/shape/shapeContext";
 
 let symbolCanvas,
   gridCanvas,
@@ -123,6 +124,7 @@ function init() {
     // drawRepeats(),
     // drawSymbolPicker(),
     redrawCharts(),
+    shapeMonitor(),
     runSimulation(),
     // generateChart(),
   ]);

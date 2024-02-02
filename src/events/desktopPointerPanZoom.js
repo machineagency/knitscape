@@ -1,6 +1,22 @@
 import { GLOBAL_STATE, dispatch } from "../state";
 import { zoomAtPoint } from "../actions/zoomFit";
 
+function chartCoords(event, target) {
+  const bounds = target.getBoundingClientRect();
+
+  const x = Math.floor(
+    ((event.clientX - bounds.x) / GLOBAL_STATE.scale) * devicePixelRatio
+  );
+  const y =
+    GLOBAL_STATE.chart.height -
+    Math.floor(
+      ((event.clientY - bounds.y) / GLOBAL_STATE.scale) * devicePixelRatio
+    ) -
+    1;
+
+  return { x, y };
+}
+
 function pan(e, target) {
   const startPos = { x: e.clientX, y: e.clientY };
   const startPan = GLOBAL_STATE.chartPan;
@@ -28,24 +44,23 @@ function pan(e, target) {
 }
 
 export function desktopPointerPanZoom(desktop) {
-  desktop.addEventListener("pointerdown", (e) => {
-    if (e.target == desktop) {
-      pan(e, desktop);
-    }
-  });
+  // desktop.addEventListener("pointerdown", (e) => {
+  //   if (e.target == desktop) {
+  //     pan(e, desktop);
+  //   }
+  // });
 
   // desktop.addEventListener("pointermove", (e) => {
   //   const { x, y } = chartCoords(e, desktop);
   //   console.log(x, y);
-
   //   if (GLOBAL_STATE.pos.x != x || GLOBAL_STATE.pos.y != y) {
   //     dispatch({ pos: { x, y } });
   //   }
   // });
 
-  desktop.addEventListener("pointerleave", (e) => {
-    dispatch({ pos: { x: -1, y: -1 } });
-  });
+  // desktop.addEventListener("pointerleave", (e) => {
+  //   dispatch({ pos: { x: -1, y: -1 } });
+  // });
 
   desktop.addEventListener("wheel", (e) => {
     const bounds = desktop.getBoundingClientRect();
