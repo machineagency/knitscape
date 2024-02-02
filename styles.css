@@ -115,6 +115,10 @@ SHAPE PANE
   pointer-events: all;
 }
 
+.ruler {
+  fill: var(--base3);
+}
+
 /**********************************
 
 CHART EDITING PANE

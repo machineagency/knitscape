@@ -1,4 +1,4 @@
-import { redrawShapeContext } from "../contexts/shape/shapeContext";
+import { drawShapeChart } from "../contexts/shape/shapeContext";
 
 export function redrawCharts() {
   return ({ state }) => {
@@ -6,7 +6,7 @@ export function redrawCharts() {
 
     function updateContext() {
       if (context == "shape") {
-        redrawShapeContext();
+        drawShapeChart(null);
       }
 
       // else if (context == "color") {

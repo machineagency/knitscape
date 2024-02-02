@@ -39,7 +39,7 @@ import { closeModals } from "./events/closeModals";
 import { isMobile } from "./utils";
 
 import { redrawCharts } from "./components/redrawCharts";
-import { shapeMonitor } from "./contexts/shape/shapeContext";
+import { shapeMonitor } from "./contexts/shape/shapeMonitor";
 
 let symbolCanvas,
   gridCanvas,

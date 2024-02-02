@@ -1,127 +1,39 @@
 import { html, svg } from "lit-html";
 import { ref, createRef } from "lit-html/directives/ref.js";
 import { Bimp } from "../../lib/Bimp";
-
 import { GLOBAL_STATE, dispatch } from "../../state";
-import { chartEditingTools } from "../../actions/chartEditingTools";
 
-import { STITCH_ASPECT } from "../../constants";
-
-function pan(e) {
-  const startPos = { x: e.clientX, y: e.clientY };
-  const startPan = GLOBAL_STATE.chartPan;
-
-  function move(e) {
-    if (e.buttons == 0) {
-      end();
-    } else {
-      const dx = startPos.x - e.clientX;
-      const dy = startPos.y - e.clientY;
-
-      dispatch({
-        chartPan: {
-          x: Math.floor(startPan.x - dx),
-          y: Math.floor(startPan.y - dy),
-        },
-      });
-    }
-  }
-
-  function end() {
-    window.removeEventListener("pointermove", move);
-    window.removeEventListener("pointerup", end);
-    window.removeEventListener("pointerleave", end);
-  }
-
-  window.addEventListener("pointermove", move);
-  window.addEventListener("pointerup", end);
-  window.addEventListener("pointerleave", end);
-}
+import { polygonBbox, draftCoordsToChartCoords, findInside } from "./shapeHelp";
+import { pan, zoom, fitDraft } from "./shapeEvents";
 
 let activeTool = "hand";
 let canvasRef = createRef();
-// let gridRef = createRef();
 let svgRef = createRef();
 
-function updateChartWidth(newWidth) {
-  newWidth = newWidth > 500 ? 500 : newWidth;
+const HANDLE_RADIUS = 8;
+const HANDLE_STROKE_WIDTH = 2;
+const PATH_STROKE_WIDTH = 4;
+const colors = ["#555", "#ddd"];
 
-  dispatch({
-    chart: GLOBAL_STATE.chart.resize(newWidth, GLOBAL_STATE.chart.height),
-  });
+function computeDraftMask(shape) {
+  const bbox = polygonBbox(shape);
 
-  fitChart();
-}
-
-function updateChartHeight(newHeight) {
-  newHeight = newHeight > 500 ? 500 : newHeight;
-  dispatch({
-    chart: GLOBAL_STATE.chart.resize(GLOBAL_STATE.chart.width, newHeight),
-  });
-
-  fitChart();
-}
-
-function chartCoords(event, target) {
-  const bounds = target.getBoundingClientRect();
-
-  const x = Math.floor(
-    ((event.clientX - bounds.x) / GLOBAL_STATE.scale) * GLOBAL_STATE.stitchGauge
+  let chart = Bimp.empty(
+    Math.ceil(GLOBAL_STATE.stitchGauge * bbox.width),
+    Math.ceil(GLOBAL_STATE.rowGauge * bbox.height),
+    0
   );
 
-  const y =
-    GLOBAL_STATE.shapeChart.height -
-    Math.floor(
-      ((event.clientY - bounds.y) / GLOBAL_STATE.scale) * GLOBAL_STATE.rowGauge
-    ) -
-    1;
+  let chartCoords = shape.map((pt) =>
+    draftCoordsToChartCoords(pt, bbox, chart)
+  );
 
-  return { x, y };
-}
-
-function outsideBounds({ x, y }) {
-  if (
-    x < 0 ||
-    x >= GLOBAL_STATE.shapeChart.width ||
-    y < 0 ||
-    y >= GLOBAL_STATE.shapeChart.width
-  ) {
-    return true;
-  }
-  return false;
-}
-
-function editChart(canvas, tool) {
-  // tool onMove is not called unless pointer moves into another cell in the chart
-  let pos = GLOBAL_STATE.pos;
-  dispatch({ transforming: true });
-
-  let onMove = tool(pos);
-  if (!onMove) return;
-
-  function move(moveEvent) {
-    if (moveEvent.buttons == 0) {
-      end();
-    } else {
-      let newPos = GLOBAL_STATE.pos;
-
-      if (newPos.x == pos.x && newPos.y == pos.y) return;
-      onMove(newPos);
-      pos = newPos;
-    }
+  for (let i = 0; i < shape.length; i++) {
+    chart = chart.line(chartCoords[i], chartCoords[(i + 1) % shape.length], 1);
   }
 
-  function end() {
-    dispatch({ transforming: false });
-
-    canvas.removeEventListener("pointermove", move);
-    canvas.removeEventListener("pointerup", end);
-    canvas.removeEventListener("pointerleave", end);
-  }
-
-  canvas.addEventListener("pointermove", move);
-  canvas.addEventListener("pointerup", end);
-  canvas.addEventListener("pointerleave", end);
+  chart = chart.flood(findInside(chart), 1);
+  return chart;
 }
 
 function dragHandle(e) {
@@ -142,7 +54,9 @@ function dragHandle(e) {
         y + dy / GLOBAL_STATE.scale,
       ];
 
-      dispatch({ shape: newShape });
+      let chart = computeDraftMask(newShape);
+
+      dispatch({ shape: newShape, shapeChart: chart });
     }
   }
 
@@ -158,30 +72,31 @@ function dragHandle(e) {
 }
 
 function pointerdown(e) {
-  const coords = chartCoords(e, canvasRef.value);
-
   if (e.target.classList.contains("handle")) {
     dragHandle(e);
-  } else if (outsideBounds(coords) || activeTool == "hand") {
+  } else if (activeTool == "hand") {
     pan(e);
   }
 }
 
-function pointermove(e) {
-  const { x, y } = chartCoords(e, canvasRef.value);
+export function resizeCanvas(scale) {
+  const canvas = canvasRef.value;
 
-  if (GLOBAL_STATE.pos.x != x || GLOBAL_STATE.pos.y != y) {
-    dispatch({ pos: { x, y } });
-  }
+  const width = Math.round(
+    (scale * GLOBAL_STATE.shapeChart.width) / GLOBAL_STATE.stitchGauge
+  );
+  const height = Math.round(
+    (scale * GLOBAL_STATE.shapeChart.height) / GLOBAL_STATE.rowGauge
+  );
+
+  canvas.width = width;
+  canvas.height = height;
+
+  canvas.style.width = `${width}px`;
+  canvas.style.height = `${height}px`;
 }
 
-function pointerleave() {
-  dispatch({ pos: { x: -1, y: -1 } });
-}
-
-const colors = ["#000", "#ddd"];
-
-function drawShapeChart(lastDrawn = null) {
+export function drawShapeChart(lastDrawn = null) {
   const chart = GLOBAL_STATE.shapeChart;
   const width = chart.width;
   const height = chart.height;
@@ -193,49 +108,17 @@ function drawShapeChart(lastDrawn = null) {
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      ctx.save();
-      ctx.translate(x * cellX, (height - y - 1) * cellY);
-      ctx.scale(cellX, cellY);
-      ctx.fillStyle = colors[chart.pixel(x, y)];
-      ctx.fillRect(0, 0, 1, 1);
-      ctx.restore();
+      let paletteIndex = chart.pixel(x, y);
+      if (lastDrawn == null || lastDrawn.pixel(x, y) != paletteIndex) {
+        ctx.save();
+        ctx.translate(x * cellX, (height - y - 1) * cellY);
+        ctx.scale(cellX, cellY);
+        ctx.fillStyle = colors[paletteIndex];
+        ctx.fillRect(0, 0, 1, 1);
+        ctx.restore();
+      }
     }
   }
-}
-
-export function shapeMonitor(canvases) {
-  return ({ state }) => {
-    let { scale, shapeChart } = state;
-
-    let width = shapeChart.width;
-    let height = shapeChart.height;
-    let lastDrawn = shapeChart;
-
-    return {
-      syncState(state) {
-        if (
-          scale != state.scale ||
-          width != state.shapeChart.width ||
-          height != state.shapeChart.height
-        ) {
-          width = state.shapeChart.width;
-          height = state.shapeChart.height;
-          scale = state.scale;
-
-          lastDrawn = null;
-        }
-
-        if (lastDrawn != state.shapeChart) {
-          drawShapeChart(lastDrawn);
-          lastDrawn = state.shapeChart;
-        }
-      },
-    };
-  };
-}
-
-export function redrawShapeContext() {
-  drawShapeChart(null);
 }
 
 function shapingToolbar() {
@@ -255,13 +138,13 @@ function shapingToolbar() {
       @click=${() => (activeTool = "direct")}>
       <i class="fa-solid fa-arrow-pointer"></i>
     </button>
-    <button class="btn icon" @click=${fitShape}>
+    <button class="btn icon" @click=${(e) => fitDraft(svgRef.value)}>
       <i class="fa-solid fa-expand"></i>
     </button>
   </div>`;
 }
 
-function drawShape() {
+function draftPath() {
   let pts = GLOBAL_STATE.shape;
   let scale = GLOBAL_STATE.scale;
   let numPts = pts.length;
@@ -270,7 +153,7 @@ function drawShape() {
   for (let i = 0; i < numPts; i++) {
     geom.push(
       svg`<line class="shape-line"
-      stroke-width=${4 / scale}
+      stroke-width=${PATH_STROKE_WIDTH / scale}
       x1=${pts[i][0]}
       y1=${pts[i][1]}
       x2=${pts[(i + 1) % numPts][0]}
@@ -285,74 +168,19 @@ function drawShape() {
       data-index="${i}"
       cx="${pts[i][0]}"
       cy="${pts[i][1]}"
-      stroke-width="${2 / scale}"
-      r="${8 / scale}" />`
+      stroke-width="${HANDLE_STROKE_WIDTH / scale}"
+      r="${HANDLE_RADIUS / scale}" />`
     );
   }
 
   return geom;
 }
 
-function calcBbox() {
-  let xMin = Infinity;
-  let yMin = Infinity;
-  let xMax = -Infinity;
-  let yMax = -Infinity;
-  GLOBAL_STATE.shape.forEach(([x, y]) => {
-    if (x < xMin) xMin = x;
-    if (y < yMin) yMin = y;
-    if (x > xMax) xMax = x;
-    if (y > yMax) yMax = y;
-  });
-
-  return {
-    width: Math.abs(xMax - xMin),
-    height: Math.abs(yMax - yMin),
-    xMin,
-    yMin,
-    xMax,
-    yMax,
-  };
-}
-
-function makeChartToShape() {
-  const bbox = calcBbox();
-
-  dispatch({
-    shapeChart: Bimp.empty(
-      Math.ceil(GLOBAL_STATE.stitchGauge * bbox.width),
-      Math.ceil(GLOBAL_STATE.rowGauge * bbox.height),
-      1
-    ),
-  });
-}
-
-function fitShape() {
-  const bbox = calcBbox();
-  const { width, height } = svgRef.value.getBoundingClientRect();
-  const scale = Math.floor(
-    0.9 *
-      Math.min(Math.floor(width / bbox.width), Math.floor(height / bbox.height))
-  );
-
-  dispatch({
-    scale,
-    chartPan: {
-      x: (width - scale * bbox.width) / 2,
-      y: (height - scale * bbox.height) / 2,
-    },
-  });
-}
-
-function init() {
-  setTimeout(fitShape);
-  makeChartToShape();
-}
-
-function gridPattern() {
+function patternDefs() {
   const cellX = GLOBAL_STATE.scale / GLOBAL_STATE.stitchGauge;
   const cellY = GLOBAL_STATE.scale / GLOBAL_STATE.rowGauge;
-  const chart = GLOBAL_STATE.shapeChart;
+  const tick = GLOBAL_STATE.scale;
+  const { x, y } = GLOBAL_STATE.chartPan;
 
   return svg`
     <defs>
@@ -361,38 +189,51 @@ function gridPattern() {
         width="${cellX}"
         height="${cellY}"
         patternUnits="userSpaceOnUse">
-        <line stroke-width="1px" stroke="black" x1="0" y1="0" x2="${cellX}" y2="0"></line>
-        <line stroke-width="1px" stroke="black" x1="0" y1="0" x2="0" y2="${cellY}"></line>
+        <line stroke-width="1px" stroke="black" x1="0" y1="0.5" x2="${cellX}" y2="0.5"></line>
+        <line stroke-width="1px" stroke="black" x1="0.5" y1="0" x2="0.5" y2="${cellY}"></line>
       </pattern>
-    </defs>
-    <rect
-      class="grid-background"
-      width=${cellX * chart.width}
-      height=${cellY * chart.height}
-      fill="url(#grid)">
-    </rect>`;
+      <pattern
+        id="ruler-vertical"
+        width="20"
+        height="${tick}"
+        x="${x - tick}"
+        y="${y - tick}"
+        patternUnits="userSpaceOnUse">
+        <rect width="${tick}" height="${tick}" class="ruler"></rect>
+        <line stroke-width="1px" stroke="black" x1="0" y1="0" x2="${tick}" y2="0"></line>
+      </pattern>
+      <pattern
+        id="ruler-horizontal"
+        width="${tick}"
+        height="20"
+        x="${x - tick}"
+        y="${y - tick}"
+        patternUnits="userSpaceOnUse">
+        <rect width="${tick}" height="${tick}" class="ruler"></rect>
+        <line stroke-width="1px" stroke="black" x1="0" y1="0" x2="0" y2="${tick}"></line>
+      </pattern>
+    </defs>`;
 }
 
 export function shapeContextView() {
   const { x, y } = GLOBAL_STATE.chartPan;
   const scale = GLOBAL_STATE.scale;
   const chart = GLOBAL_STATE.shapeChart;
+  const bbox = polygonBbox(GLOBAL_STATE.shape);
 
-  const width = (scale * chart.width) / GLOBAL_STATE.stitchGauge;
-  const height = (scale * chart.height) / GLOBAL_STATE.rowGauge;
+  const width = Math.round((scale * chart.width) / GLOBAL_STATE.stitchGauge);
+  const height = Math.round((scale * chart.height) / GLOBAL_STATE.rowGauge);
+
+  const chartX = Math.round(x + bbox.xMin * scale);
+  const chartY = Math.round(y + bbox.yMin * scale);
 
   return html`
     ${shapingToolbar()}
     <div
-      style="position: absolute; transform: translate(${x}px, ${y}px);
+      style="position: absolute; bottom: 0; left: 0;
+      transform: translate(${chartX}px, ${-chartY}px);
       outline: 1px solid black;">
-      <canvas
-        width="${width}"
-        height="${height}"
-        style="width: ${width}px; height: ${height}px"
-        ${ref(canvasRef)}
-        ${ref(drawShapeChart)}>
-      </canvas>
+      <canvas ${ref(canvasRef)}></canvas>
     </div>
     <svg
       style="position: absolute; top: 0px; left: 0px; overflow: hidden;"
@@ -401,14 +242,30 @@ export function shapeContextView() {
       ${ref(svgRef)}
       ${ref(init)}
       @pointerdown=${pointerdown}
-      @pointermove=${pointermove}
-      @pointerleave=${pointerleave}>
+      @wheel=${zoom}>
+      ${patternDefs()}
       <g transform="scale (1, -1)" transform-origin="center">
+        <rect
+          style="shape-rendering: crispedges;"
+          transform="translate(${chartX} ${chartY})"
+          width=${width}
+          height=${height}
+          fill="url(#grid)"></rect>
+
         <g transform="translate(${x} ${y})">
-          ${gridPattern()}
-          <g transform="scale(${scale})">${drawShape()}</g>
+          <g transform="scale(${scale})">${draftPath()}</g>
         </g>
+
+        <rect width="20" height="100%" fill="url(#ruler-vertical)"></rect>
+        <rect width="100%" height="20" fill="url(#ruler-horizontal)"></rect>
       </g>
     </svg>
   `;
+}
+
+function init() {
+  setTimeout(() => fitDraft(svgRef.value));
+  dispatch({
+    shapeChart: computeDraftMask(GLOBAL_STATE.shape),
+  });
 }
