@@ -16,27 +16,28 @@ import { operationPicker } from "./operationPicker";
 
 import { simulationView } from "../components/runSimulation";
 import { shapeContextView } from "../contexts/shape/shapeContext";
+import { colorContextView } from "../contexts/color/colorContext";
 
-function colorContextView() {
-  return html` ${editingTools()}
-    <div
-      id="canvas-transform-group"
-      style="transform: translate(${Math.floor(
-        GLOBAL_STATE.chartPan.x
-      )}px, ${Math.floor(GLOBAL_STATE.chartPan.y)}px);">
-      <div id="yarn-sequence">
-        <button id="color-dragger" class="btn solid grab">
-          <i class="fa-solid fa-grip"></i>
-        </button>
-        <canvas id="yarn-sequence-canvas"></canvas>
-      </div>
-      <canvas id="yarn-color-canvas"></canvas>
-      <canvas id="symbol-canvas"></canvas>
-      <canvas id="grid" class="grid-canvas"></canvas>
-      <!-- ${repeatCanvas()} -->
-    </div>
-    ${operationPicker()}`;
-}
+// function colorContextView() {
+//   return html` ${editingTools()}
+//     <div
+//       id="canvas-transform-group"
+//       style="transform: translate(${Math.floor(
+//         GLOBAL_STATE.chartPan.x
+//       )}px, ${Math.floor(GLOBAL_STATE.chartPan.y)}px);">
+//       <div id="yarn-sequence">
+//         <button id="color-dragger" class="btn solid grab">
+//           <i class="fa-solid fa-grip"></i>
+//         </button>
+//         <canvas id="yarn-sequence-canvas"></canvas>
+//       </div>
+//       <canvas id="yarn-color-canvas"></canvas>
+//       <canvas id="symbol-canvas"></canvas>
+//       <canvas id="grid" class="grid-canvas"></canvas>
+//       <!-- ${repeatCanvas()} -->
+//     </div>
+//     ${operationPicker()}`;
+// }
 
 function textureContextView() {
   return html`<div>texture</div>`;

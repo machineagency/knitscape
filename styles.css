@@ -109,7 +109,7 @@ SHAPE PANE
   pointer-events: all;
 }
 
-.shape-line {
+.draft-line {
   stroke: rgb(52, 145, 195);
   cursor: grab;
   pointer-events: all;

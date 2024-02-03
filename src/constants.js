@@ -178,5 +178,5 @@ export const cnStates = {
 };
 
 export const MAX_H_SHIFT = 6; // maximum horizontal shift for CNs (2x the number of stitches)
-export const MAX_V_SHIFT = 6; // maximum vertical shift for CNs
+export const MAX_V_SHIFT = 20; // maximum vertical shift for CNs
 export const STITCH_ASPECT = 1.25;

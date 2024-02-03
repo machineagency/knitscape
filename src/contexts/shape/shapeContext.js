@@ -65,14 +65,50 @@ function dragHandle(e) {
   window.addEventListener("pointerleave", end);
 }
 
+function addHandle(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+
+  const index = Number(e.target.dataset.index);
+  const scale = GLOBAL_STATE.scale;
+  const { x, y } = GLOBAL_STATE.chartPan;
+
+  let pos = {
+    x: (e.clientX - rect.left - x) / scale,
+    y: (rect.height - (e.clientY - rect.top) - y) / scale,
+  };
+
+  let pt = [
+    (e.clientX - rect.left - x) / scale,
+    (rect.height - (e.clientY - rect.top) - y) / scale,
+  ];
+
+  const newShape = [...GLOBAL_STATE.shape];
+  newShape.splice(index + 1, 0, pt);
+  dispatch({ shape: newShape });
+}
+
 function pointerdown(e) {
   if (e.target.classList.contains("handle")) {
     dragHandle(e);
+  } else if (e.target.classList.contains("draft-line")) {
+    addHandle(e);
   } else if (activeTool == "hand") {
     pan(e);
   }
 }
 
+function pointermove(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+
+  const index = e.target.dataset.index;
+  const scale = GLOBAL_STATE.scale;
+  const { x, y } = GLOBAL_STATE.chartPan;
+
+  let pos = {
+    x: (e.clientX - rect.left - x) / scale,
+    y: (rect.height - (e.clientY - rect.top) - y) / scale,
+  };
+}
 export function resizeCanvas(scale) {
   const canvas = canvasRef.value;
 
@@ -97,6 +133,11 @@ export function drawShapeChart(lastDrawn = null) {
 
   const cellX = GLOBAL_STATE.scale / GLOBAL_STATE.stitchGauge;
   const cellY = GLOBAL_STATE.scale / GLOBAL_STATE.rowGauge;
+
+  if (!canvasRef.value) {
+    console.warn("Shape context canvas is missing!!!!");
+    return;
+  }
 
   const ctx = canvasRef.value.getContext("2d");
 
@@ -146,7 +187,9 @@ function draftPath() {
 
   for (let i = 0; i < numPts; i++) {
     geom.push(
-      svg`<line class="shape-line"
+      svg`<line
+      class="draft-line"
+      data-index="${i}"
       stroke-width=${PATH_STROKE_WIDTH / scale}
       x1=${pts[i][0]}
       y1=${pts[i][1]}
@@ -236,6 +279,7 @@ export function shapeContextView() {
       ${ref(svgRef)}
       ${ref(init)}
       @pointerdown=${pointerdown}
+      @pointermove=${pointermove}
       @wheel=${zoom}>
       ${patternDefs()}
       <g transform="scale (1, -1)" transform-origin="center">
@@ -258,6 +302,7 @@ export function shapeContextView() {
 }
 
 function init() {
+  if (!svgRef.value) return;
   setTimeout(() => fitDraft(svgRef.value));
   dispatch({
     shapeChart: computeDraftMask(GLOBAL_STATE.shape),
