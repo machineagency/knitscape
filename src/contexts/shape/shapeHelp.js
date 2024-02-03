@@ -21,14 +21,21 @@ export function polygonBbox(shape) {
   };
 }
 
-function scale(number, inMin, inMax, outMin, outMax) {
+export function mapCoords(number, inMin, inMax, outMin, outMax) {
   return ((number - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
+}
+
+export function mapDraftToChart(pt, bbox, chart) {
+  return [
+    Math.round(mapCoords(pt[0], bbox.xMin, bbox.xMax, 0, chart.width - 1)),
+    Math.round(mapCoords(pt[1], bbox.yMin, bbox.yMax, 0, chart.height)),
+  ];
 }
 
 export function draftCoordsToChartCoords(pt, bbox, chart) {
   return {
-    x: Math.round(scale(pt[0], bbox.xMin, bbox.xMax, 0, chart.width - 1)),
-    y: Math.round(scale(pt[1], bbox.yMin, bbox.yMax, 0, chart.height - 1)),
+    x: Math.round(mapCoords(pt[0], bbox.xMin, bbox.xMax, 0, chart.width - 1)),
+    y: Math.round(mapCoords(pt[1], bbox.yMin, bbox.yMax, 0, chart.height - 1)),
   };
 }
 

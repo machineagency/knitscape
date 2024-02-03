@@ -3,8 +3,9 @@ import { ref, createRef } from "lit-html/directives/ref.js";
 import { Bimp } from "../../lib/Bimp";
 import { GLOBAL_STATE, dispatch } from "../../state";
 
-import { polygonBbox, draftCoordsToChartCoords, findInside } from "./shapeHelp";
+import { polygonBbox } from "./shapeHelp";
 import { pan, zoom, fitDraft } from "./shapeEvents";
+import { scanlineFill } from "./scanline";
 
 let activeTool = "hand";
 let canvasRef = createRef();
@@ -24,15 +25,8 @@ function computeDraftMask(shape) {
     0
   );
 
-  let chartCoords = shape.map((pt) =>
-    draftCoordsToChartCoords(pt, bbox, chart)
-  );
+  chart = scanlineFill(bbox, shape, chart);
 
-  for (let i = 0; i < shape.length; i++) {
-    chart = chart.line(chartCoords[i], chartCoords[(i + 1) % shape.length], 1);
-  }
-
-  chart = chart.flood(findInside(chart), 1);
   return chart;
 }
 
