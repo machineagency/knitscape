@@ -6,22 +6,18 @@ import { yarnRelaxation } from "./relaxation";
 import { populateDS, followTheYarn, orderCNs } from "./topology";
 import { layoutNodes, buildSegmentData } from "./yarn3d";
 
-const STITCH_ASPECT = 0.75; // Row height / stitch width
-
-const SPREAD = 0.93;
-
-const dpi = devicePixelRatio;
-
 export function simulate(stitchPattern, scale) {
   let relaxed = false;
   let stitchHeight, stitchWidth, sim, offsetX, offsetY;
+
+  const STITCH_ASPECT = GLOBAL_STATE.stitchGauge / GLOBAL_STATE.rowGauge;
 
   const parentEl = document.getElementById("canvas-container");
   const bbox = document.getElementById("sim-container").getBoundingClientRect();
   const width = bbox.width * scale;
   const height = bbox.height * scale;
-  const canvasWidth = dpi * width;
-  const canvasHeight = dpi * height;
+  const canvasWidth = devicePixelRatio * width;
+  const canvasHeight = devicePixelRatio * height;
 
   const canvasLayers = [];
 
@@ -61,7 +57,7 @@ export function simulate(stitchPattern, scale) {
     const x = x1 - x2;
     const y = y1 - y2;
 
-    const mag = SPREAD * Math.sqrt(x ** 2 + y ** 2);
+    const mag = Math.sqrt(x ** 2 + y ** 2);
 
     if (mag == 0) {
       console.log(i, j);

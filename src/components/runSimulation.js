@@ -73,7 +73,7 @@ export function runSimulation() {
       if (stopSim) stopSim();
 
       ({ stopSim, relax } = simulate(
-        new Pattern(GLOBAL_STATE.chart, GLOBAL_STATE.yarnSequence.pixels),
+        new Pattern(GLOBAL_STATE.shapeChart, GLOBAL_STATE.yarnSequence.pixels),
         GLOBAL_STATE.simScale
       ));
     }
@@ -84,9 +84,13 @@ export function runSimulation() {
 
     return {
       syncState(state, changes) {
-        const found = ["repeats", "yarnPalette", "yarnSequence", "chart"].some(
-          (key) => changes.includes(key)
-        );
+        const found = [
+          "repeats",
+          "yarnPalette",
+          "yarnSequence",
+          "chart",
+          "shapeChart",
+        ].some((key) => changes.includes(key));
 
         if (found) {
           debouncedRun();

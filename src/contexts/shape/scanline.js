@@ -34,9 +34,9 @@ export function scanlineFill(bbox, shape, chart) {
       }
     }
 
-    activeEdges.sort((a, b) => b.x - a.x); // sort edges by x
+    activeEdges.sort((a, b) => a.x - b.x); // sort edges by x
 
-    for (let i = 0; i < activeEdges.length / 2; i = i + 2) {
+    for (let i = 0; i < activeEdges.length; i = i + 2) {
       // fill in between ascending pairs
       chart = chart.line(
         { x: Math.round(activeEdges[i].x), y },
