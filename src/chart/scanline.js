@@ -1,4 +1,4 @@
-import { mapDraftToChart } from "./shapeHelp";
+import { toChartCoords } from "./helpers";
 
 function addEdge(edgeTable, [x1, y1], [x2, y2]) {
   if (y1 > y2) {
@@ -11,7 +11,7 @@ function addEdge(edgeTable, [x1, y1], [x2, y2]) {
 }
 
 export function scanlineFill(bbox, shape, chart) {
-  const points = shape.map((pt) => mapDraftToChart(pt, bbox, chart));
+  const points = shape.map((pt) => toChartCoords(pt, bbox, chart));
 
   let edges = [];
 

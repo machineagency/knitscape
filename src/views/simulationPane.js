@@ -5,7 +5,7 @@ import {
   simPan,
   simZoom,
   centerZoomSimulation,
-} from "../eventHandlers/simPanZoom";
+} from "../interaction/simPanZoom";
 
 export function simulationView() {
   let { x, y } = GLOBAL_STATE.simPan;

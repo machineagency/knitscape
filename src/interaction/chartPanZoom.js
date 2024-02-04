@@ -1,5 +1,20 @@
 import { GLOBAL_STATE, dispatch } from "../state";
-import { polygonBbox } from "./shapeHelp";
+import { polygonBbox } from "../chart/helpers";
+
+function zoomAtPoint(pt, scale) {
+  const start = {
+    x: (pt.x - GLOBAL_STATE.chartPan.x) / GLOBAL_STATE.scale,
+    y: (pt.y - GLOBAL_STATE.chartPan.y) / GLOBAL_STATE.scale,
+  };
+
+  dispatch({
+    scale,
+    chartPan: {
+      x: Math.round(pt.x - start.x * scale),
+      y: Math.round(pt.y - start.y * scale),
+    },
+  });
+}
 
 export function pan(e) {
   const startPos = { x: e.clientX, y: e.clientY };
@@ -32,21 +47,6 @@ export function pan(e) {
   window.addEventListener("pointerleave", end);
 }
 
-function zoomAtPoint(pt, scale) {
-  const start = {
-    x: (pt.x - GLOBAL_STATE.chartPan.x) / GLOBAL_STATE.scale,
-    y: (pt.y - GLOBAL_STATE.chartPan.y) / GLOBAL_STATE.scale,
-  };
-
-  dispatch({
-    scale,
-    chartPan: {
-      x: Math.round(pt.x - start.x * scale),
-      y: Math.round(pt.y - start.y * scale),
-    },
-  });
-}
-
 export function fitDraft(parent) {
   const bbox = polygonBbox(GLOBAL_STATE.boundary);
   const { width, height } = parent.getBoundingClientRect();
@@ -58,9 +58,9 @@ export function fitDraft(parent) {
   dispatch({
     scale,
     chartPan: {
-      x: Math.round((width - scale * bbox.width) / 2) + 10,
-      y: Math.round((height - scale * bbox.height) / 2) + 10,
-    }, // the 10 accounts for the ruler width/height
+      x: Math.round((width - scale * bbox.width) / 2),
+      y: Math.round((height - scale * bbox.height) / 2),
+    },
   });
 }
 

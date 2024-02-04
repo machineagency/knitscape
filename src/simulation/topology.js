@@ -1,5 +1,5 @@
 import { stitches, cnStates, MAX_H_SHIFT, MAX_V_SHIFT } from "../constants";
-import { Vec2 } from "../utils";
+import { Vec2 } from "../lib/Vec2";
 
 // function calcLayer(nodes, source, target, linkType) {
 //   if (nodes[source][0] == stitches.KNIT && nodes[target][0] == stitches.KNIT) {

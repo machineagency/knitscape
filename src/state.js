@@ -10,12 +10,10 @@ let GLOBAL_STATE = {
   stitchGauge: 7, // stitches per inch
   rowGauge: 11, // rows per inch
 
-  pointerPos: [0, 0],
+  chartPointerPos: [0, 0],
 
-  activeTool: "brush",
+  activeTool: "hand",
   activeSymbol: 1,
-  colorMode: "operation",
-  context: "shape",
 
   symbolMap: Object.keys(stitches),
 
@@ -26,7 +24,7 @@ let GLOBAL_STATE = {
     [5, 0],
   ],
 
-  shapeChart: Bimp.empty(10, 10, 1),
+  shapingMask: Bimp.empty(10, 10, 1),
 
   scale: 15, // Number of pixels for each chart cell
   chartPan: { x: 0, y: 0 }, // Pan value for the chart editor view
@@ -37,9 +35,9 @@ let GLOBAL_STATE = {
   flipped: false,
 
   // YARN
-  yarnPalette: ["rgba(235,233,187,1)", "rgba(50, 140, 188, 1)"], // Colors of the yarns
+  yarnPalette: ["#ebe9bbff", "#328cbcff", "#bc7532ff"], // Colors of the yarns
   yarnWidth: 0.24,
-  yarnExpanded: true,
+  yarnExpanded: false,
   yarn: null,
   yarnSequence: new Bimp(1, 2, [0, 1]),
   yarnSelections: [],

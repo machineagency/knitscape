@@ -1,5 +1,5 @@
 import { stitches } from "../constants";
-import { Vec2 } from "../utils";
+import { Vec2 } from "../lib/Vec2";
 
 export function layoutNodes(DS, stitchWidth = 1, stitchAspect = 0.75) {
   // calculates the x,y values for the i,j

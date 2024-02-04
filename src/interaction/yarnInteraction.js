@@ -45,3 +45,11 @@ export function selectYarn(e) {
   window.addEventListener("pointerup", end);
   window.addEventListener("pointerleave", end);
 }
+
+export function yarnInteraction(e) {
+  let cl = e.target.classList;
+  if (cl.contains("yarn-cell")) {
+    selectYarn(e);
+  } else if (cl.contains("yarn-sequence")) {
+  }
+}

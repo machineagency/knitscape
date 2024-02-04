@@ -2,7 +2,7 @@ import { html } from "lit-html";
 import { when } from "lit-html/directives/when.js";
 
 import { GLOBAL_STATE, dispatch, undo } from "../state";
-import { toggleFullscreen, currentlyFullscreen } from "../utils";
+import { toggleFullscreen, currentlyFullscreen } from "../utilities/fullscreen";
 
 // import {
 //   downloadBMP,

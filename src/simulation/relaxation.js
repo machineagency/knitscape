@@ -1,5 +1,5 @@
+import { Vec2 } from "../lib/Vec2";
 const K_YARN = 0.06;
-import { Vec2 } from "../utils";
 
 export function yarnRelaxation(
   alphaMin = 0.001,

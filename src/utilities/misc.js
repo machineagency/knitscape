@@ -1,41 +1,5 @@
-import { bmp_lib } from "./lib/bmp";
-import { dispatch, GLOBAL_STATE } from "./state";
-
-export function currentlyFullscreen() {
-  return !(
-    !window.document.fullscreenElement &&
-    !window.document.mozFullScreenElement &&
-    !window.document.webkitFullscreenElement &&
-    !window.document.msFullscreenElement
-  );
-}
-
-export function toggleFullscreen() {
-  var doc = window.document;
-  var docEl = doc.documentElement;
-
-  var requestFullScreen =
-    docEl.requestFullscreen ||
-    docEl.mozRequestFullScreen ||
-    docEl.webkitRequestFullScreen ||
-    docEl.msRequestFullscreen;
-  var cancelFullScreen =
-    doc.exitFullscreen ||
-    doc.mozCancelFullScreen ||
-    doc.webkitExitFullscreen ||
-    doc.msExitFullscreen;
-
-  if (
-    !doc.fullscreenElement &&
-    !doc.mozFullScreenElement &&
-    !doc.webkitFullscreenElement &&
-    !doc.msFullscreenElement
-  ) {
-    requestFullScreen.call(docEl);
-  } else {
-    cancelFullScreen.call(doc);
-  }
-}
+import { bmp_lib } from "../lib/bmp";
+import { dispatch, GLOBAL_STATE } from "../state";
 
 export function closeModals() {
   // Close all modals (e.g., on escape or click outside taskbar)
@@ -44,6 +8,24 @@ export function closeModals() {
     showSettings: false,
     showDownload: false,
   });
+}
+
+export function setCanvasSize(canvas, width, height) {
+  // Resizes the canvas to match the shaping boundary
+  // const canvas = canvasRef.value;
+
+  // const width = Math.round(
+  //   (scale * GLOBAL_STATE.shapingMask.width) / GLOBAL_STATE.stitchGauge
+  // );
+  // const height = Math.round(
+  //   (scale * GLOBAL_STATE.shapingMask.height) / GLOBAL_STATE.rowGauge
+  // );
+
+  canvas.width = width;
+  canvas.height = height;
+
+  canvas.style.width = `${width}px`;
+  canvas.style.height = `${height}px`;
 }
 
 export function currentTargetPointerPos(e) {
@@ -137,45 +119,3 @@ export function makeBMP(repeatBimp, colorRepeat, palette) {
   bmp_lib.render(im, bits, rgbPalette);
   return im;
 }
-
-export const Vec2 = {
-  add(a, b) {
-    return {
-      x: a.x + b.x,
-      y: a.y + b.y,
-    };
-  },
-
-  sub(a, b) {
-    return {
-      x: a.x - b.x,
-      y: a.y - b.y,
-    };
-  },
-
-  scale(vec, scalar) {
-    return {
-      x: vec.x * scalar,
-      y: vec.y * scalar,
-    };
-  },
-
-  abs(vec) {
-    return {
-      x: Math.abs(vec.x),
-      y: Math.abs(vec.y),
-    };
-  },
-
-  mag(vec) {
-    return Math.sqrt(vec.x * vec.x + vec.y * vec.y);
-  },
-
-  dot(a, b) {
-    return a.x * b.x + a.y * b.y;
-  },
-
-  normalize(vec) {
-    return this.scale(vec, 1 / this.mag(vec));
-  },
-};

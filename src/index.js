@@ -3,16 +3,15 @@ import { html, render } from "lit-html";
 
 import { StateMonitor, dispatch, GLOBAL_STATE } from "./state";
 
-import { addKeypressListeners } from "./events";
-import { runSimulation } from "./components/runSimulation";
-import { shapeMonitor } from "./shape/shapeMonitor";
+import { runSimulation } from "./subscribers/runSimulation";
+import { shapingMaskSubscriber } from "./subscribers/shapingMaskSubscriber";
 
 import { taskbar } from "./views/taskbar";
-
 import { simulationView } from "./views/simulationPane";
 import { chartPaneView } from "./views/chartPane";
 
-import { closeModals, currentTargetPointerPos } from "./utils";
+import { globalKeydown, globalKeyup } from "./interaction/globalKeypress";
+import { closeModals, currentTargetPointerPos } from "./utilities/misc";
 
 function pointerIcon() {
   return html`<div id="pointer">
@@ -28,15 +27,13 @@ function view() {
       <div
         id="chart-pane"
         @pointermove=${(e) =>
-          (GLOBAL_STATE.pointerPos = currentTargetPointerPos(e))}>
+          (GLOBAL_STATE.chartPointerPos = currentTargetPointerPos(e))}>
         ${chartPaneView()}
       </div>
       ${simulationView()}
     </div>
   `;
 }
-
-let simContainer;
 
 function r() {
   render(view(), document.body);
@@ -57,17 +54,16 @@ function measureWindow() {
 function init() {
   r();
 
-  simContainer = document.getElementById("sim-container");
-
   Split(["#chart-pane", "#sim-pane"], {
     sizes: [60, 40],
     minSize: 100,
     gutterSize: 11,
   });
 
-  addKeypressListeners();
+  window.addEventListener("keydown", globalKeydown);
+  window.addEventListener("keyup", globalKeyup);
 
-  StateMonitor.register([shapeMonitor(), runSimulation()]);
+  StateMonitor.register([shapingMaskSubscriber(), runSimulation()]);
 
   measureWindow();
 }
