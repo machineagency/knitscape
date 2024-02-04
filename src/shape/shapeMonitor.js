@@ -1,4 +1,4 @@
-import { drawShapeChart, resizeCanvas } from "./shapeContext";
+import { drawShapeChart, resizeCanvas } from "../views/chartPane";
 
 export function shapeMonitor() {
   return ({ state }) => {

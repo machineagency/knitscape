@@ -1,11 +1,12 @@
 import { html, svg } from "lit-html";
 import { ref, createRef } from "lit-html/directives/ref.js";
-import { Bimp } from "../../lib/Bimp";
-import { GLOBAL_STATE, dispatch } from "../../state";
+import { Bimp } from "../lib/Bimp";
+import { GLOBAL_STATE, dispatch } from "../state";
 
-import { polygonBbox } from "./shapeHelp";
-import { pan, zoom, fitDraft } from "./shapeEvents";
-import { scanlineFill } from "./scanline";
+import { polygonBbox } from "../shape/shapeHelp";
+import { pan, zoom, fitDraft } from "../shape/shapeEvents";
+import { scanlineFill } from "../shape/scanline";
+import { selectYarn } from "../shape/yarnSelect";
 
 let activeTool = "hand";
 let canvasRef = createRef();
@@ -32,7 +33,7 @@ function computeDraftMask(shape) {
 
 function dragHandle(e) {
   const index = e.target.dataset.index;
-  let [x, y] = GLOBAL_STATE.shape[index];
+  let [x, y] = GLOBAL_STATE.boundary[index];
 
   const startPos = { x: e.clientX, y: e.clientY };
 
@@ -42,7 +43,7 @@ function dragHandle(e) {
     } else {
       const dx = startPos.x - e.clientX;
       const dy = startPos.y - e.clientY;
-      let newShape = [...GLOBAL_STATE.shape];
+      let newShape = [...GLOBAL_STATE.boundary];
       newShape[index] = [
         x - dx / GLOBAL_STATE.scale,
         y + dy / GLOBAL_STATE.scale,
@@ -50,7 +51,7 @@ function dragHandle(e) {
 
       let chart = computeDraftMask(newShape);
 
-      dispatch({ shape: newShape, shapeChart: chart });
+      dispatch({ boundary: newShape, shapeChart: chart });
     }
   }
 
@@ -82,9 +83,9 @@ function addHandle(e) {
     (rect.height - (e.clientY - rect.top) - y) / scale,
   ];
 
-  const newShape = [...GLOBAL_STATE.shape];
+  const newShape = [...GLOBAL_STATE.boundary];
   newShape.splice(index + 1, 0, pt);
-  dispatch({ shape: newShape });
+  dispatch({ boundary: newShape });
 }
 
 function pointerdown(e) {
@@ -97,18 +98,12 @@ function pointerdown(e) {
   }
 }
 
-function pointermove(e) {
-  const rect = e.currentTarget.getBoundingClientRect();
-
-  const index = e.target.dataset.index;
-  const scale = GLOBAL_STATE.scale;
-  const { x, y } = GLOBAL_STATE.chartPan;
-
-  let pos = {
-    x: (e.clientX - rect.left - x) / scale,
-    y: (rect.height - (e.clientY - rect.top) - y) / scale,
-  };
+function yarnInteraction(e) {
+  if (e.target.classList.contains("yarn-row")) {
+    selectYarn(e);
+  }
 }
+
 export function resizeCanvas(scale) {
   const canvas = canvasRef.value;
 
@@ -180,7 +175,7 @@ function shapingToolbar() {
 }
 
 function draftPath() {
-  let pts = GLOBAL_STATE.shape;
+  let pts = GLOBAL_STATE.boundary;
   let scale = GLOBAL_STATE.scale;
   let numPts = pts.length;
   let geom = [];
@@ -252,11 +247,62 @@ function patternDefs() {
     </defs>`;
 }
 
-export function shapeContextView() {
+function drawYarnSelectBox() {
+  return GLOBAL_STATE.yarnSelections.map(
+    ([start, end], index) => html`<div
+      data-selectindex=${index}
+      style="bottom: ${(start * GLOBAL_STATE.scale) /
+      GLOBAL_STATE.rowGauge}px; height: ${((end - start) * GLOBAL_STATE.scale) /
+      GLOBAL_STATE.rowGauge}px;"
+      class="yarn-select-box"></div>`
+  );
+}
+
+function yarnSequence() {
+  if (!GLOBAL_STATE.yarn) return;
+  const scale = GLOBAL_STATE.scale;
+  const chart = GLOBAL_STATE.shapeChart;
+  const height = scale / GLOBAL_STATE.rowGauge;
+
+  const yarns = [];
+  for (let row = 0; row < chart.height; row++) {
+    yarns.push(html`<div data-yarnrow=${row} class="yarn-row-container">
+      ${GLOBAL_STATE.yarnPalette.map(
+        (yarn, index) =>
+          html`<div
+            data-yarnindex=${index}
+            class="yarn-row ${GLOBAL_STATE.yarn[row].has(index)
+              ? "active"
+              : "inactive"}"
+            style="${GLOBAL_STATE.yarnExpanded
+              ? `width: ${height}px`
+              : ""}; --color: ${yarn}"></div>`
+      )}
+    </div>`);
+  }
+
+  return yarns;
+}
+
+function editYarns() {
+  return GLOBAL_STATE.yarnPalette.map(
+    (color, index) =>
+      html`<div
+        class="edit-yarn-btn"
+        style="--color: ${color};"
+        @click=${() => editYarn()}>
+        <button class="delete-color-button" @click=${() => deleteYarn(index)}>
+          <i class="fa-solid fa-circle-xmark"></i>
+        </button>
+      </div>`
+  );
+}
+
+export function chartPaneView() {
   const { x, y } = GLOBAL_STATE.chartPan;
   const scale = GLOBAL_STATE.scale;
   const chart = GLOBAL_STATE.shapeChart;
-  const bbox = polygonBbox(GLOBAL_STATE.shape);
+  const bbox = polygonBbox(GLOBAL_STATE.boundary);
 
   const width = Math.round((scale * chart.width) / GLOBAL_STATE.stitchGauge);
   const height = Math.round((scale * chart.height) / GLOBAL_STATE.rowGauge);
@@ -279,7 +325,6 @@ export function shapeContextView() {
       ${ref(svgRef)}
       ${ref(init)}
       @pointerdown=${pointerdown}
-      @pointermove=${pointermove}
       @wheel=${zoom}>
       ${patternDefs()}
       <g transform="scale (1, -1)" transform-origin="center">
@@ -294,17 +339,39 @@ export function shapeContextView() {
           <g transform="scale(${scale})">${draftPath()}</g>
         </g>
 
-        <rect width="20" height="100%" fill="url(#ruler-vertical)"></rect>
-        <rect width="100%" height="20" fill="url(#ruler-horizontal)"></rect>
+        <!-- <rect width="20" height="100%" fill="url(#ruler-vertical)"></rect>
+        <rect width="100%" height="20" fill="url(#ruler-horizontal)"></rect> -->
       </g>
     </svg>
+    <div
+      @pointerdown=${(e) => yarnInteraction(e)}
+      class="yarn-sequence-container"
+      style="transform: translate(0px, ${-chartY}px); height: ${height}px; ${!GLOBAL_STATE.yarnExpanded
+        ? `width: ${scale / GLOBAL_STATE.rowGauge}px`
+        : ""}">
+      <button
+        class="yarn-panel-toggle"
+        style="bottom: ${GLOBAL_STATE.pos}px)"
+        @click=${() => dispatch({ yarnExpanded: !GLOBAL_STATE.yarnExpanded })}>
+        ${GLOBAL_STATE.yarnExpanded ? "collapse" : "expand"}
+      </button>
+      ${yarnSequence()} ${drawYarnSelectBox()}
+
+      <div
+        class="edit-yarn-container"
+        style="height: ${scale / GLOBAL_STATE.rowGauge}px;">
+        ${editYarns()}
+      </div>
+    </div>
   `;
 }
 
 function init() {
   if (!svgRef.value) return;
   setTimeout(() => fitDraft(svgRef.value));
+  let chart = computeDraftMask(GLOBAL_STATE.boundary);
   dispatch({
-    shapeChart: computeDraftMask(GLOBAL_STATE.shape),
+    shapeChart: chart,
+    yarn: Array.from({ length: chart.height }, () => new Set([0])),
   });
 }

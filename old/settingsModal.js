@@ -49,28 +49,3 @@ export function settingsModal() {
     </div>
   </div>`;
 }
-
-// function editBackgroundColor(target) {
-//   if (!target.jscolor) {
-//     const picker = new jscolor(target, {
-//       preset: "dark large",
-//       format: "hex",
-//       value: GLOBAL_STATE.chartBackground,
-//       onInput: () => dispatch({ chartBackground: picker.toRGBString() }),
-//       previewElement: null,
-//     });
-//   }
-//   target.jscolor.show();
-// }
-
-/* <label class="form-control">
-        <button
-          id="background-color-edit"
-          name="chart-background"
-          class="btn icon-text"
-          style="background: ${GLOBAL_STATE.chartBackground};"
-          @click=${(e) => editBackgroundColor(e.target)}>
-          <i class="fa-solid fa-palette"></i>
-          Background Color
-        </button>
-      </label> */

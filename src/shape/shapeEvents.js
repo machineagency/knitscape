@@ -1,4 +1,4 @@
-import { GLOBAL_STATE, dispatch } from "../../state";
+import { GLOBAL_STATE, dispatch } from "../state";
 import { polygonBbox } from "./shapeHelp";
 
 export function pan(e) {
@@ -48,7 +48,7 @@ function zoomAtPoint(pt, scale) {
 }
 
 export function fitDraft(parent) {
-  const bbox = polygonBbox(GLOBAL_STATE.shape);
+  const bbox = polygonBbox(GLOBAL_STATE.boundary);
   const { width, height } = parent.getBoundingClientRect();
   const scale = Math.floor(
     0.9 *

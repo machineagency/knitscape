@@ -1,6 +1,6 @@
 import { html, svg } from "lit-html";
-import { GLOBAL_STATE } from "./state";
-import { Bimp } from "./lib/Bimp";
+import { GLOBAL_STATE } from "../state";
+import { Bimp } from "../lib/Bimp";
 
 const machineConfigs = {
   th860: {

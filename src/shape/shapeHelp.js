@@ -1,10 +1,10 @@
-export function polygonBbox(shape) {
+export function polygonBbox(boundary) {
   let xMin = Infinity;
   let yMin = Infinity;
   let xMax = -Infinity;
   let yMax = -Infinity;
 
-  shape.forEach(([x, y]) => {
+  boundary.forEach(([x, y]) => {
     if (x < xMin) xMin = x;
     if (y < yMin) yMin = y;
     if (x > xMax) xMax = x;

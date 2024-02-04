@@ -4,11 +4,9 @@ export const MIN_SCALE = 5;
 export const MAX_SIM_SCALE = 6;
 export const MIN_SIM_SCALE = 0.6;
 
-export const SNAPSHOT_INTERVAL = 1000;
+export const SNAPSHOT_INTERVAL = 5000;
 
-export const SNAPSHOT_FIELDS = ["yarnPalette", "yarnSequence", "repeats"];
-
-export const LAYERS = ["chart", "repeats", "yarn"];
+export const SNAPSHOT_FIELDS = ["yarnPalette", "boundary"];
 
 // Paths made in https://yqnn.github.io/svg-path-editor/
 export const SYMBOL_DATA = {
@@ -128,16 +126,7 @@ export const SYMBOL_DATA = {
   },
 };
 
-// export const SYMBOL_BITS = {
-//   KNIT: false,
-//   PURL: false,
-//   FM: true,
-//   BM: true,
-//   FT: true,
-//   BT: true,
-// };
-
-export const DEFAULT_PATTERN_LIBRARY = import.meta.glob("../examples/*.json");
+// export const DEFAULT_PATTERN_LIBRARY = import.meta.glob("../examples/*.json");
 
 export const toolData = {
   brush: { icon: "fa-solid fa-paintbrush", hotkey: "b" },
@@ -179,4 +168,3 @@ export const cnStates = {
 
 export const MAX_H_SHIFT = 6; // maximum horizontal shift for CNs (2x the number of stitches)
 export const MAX_V_SHIFT = 20; // maximum vertical shift for CNs
-export const STITCH_ASPECT = 1.25;

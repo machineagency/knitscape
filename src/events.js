@@ -1,10 +1,9 @@
-import { GLOBAL_STATE, dispatch, undo } from "../state";
-import { toolData } from "../constants";
+import { GLOBAL_STATE, dispatch, undo } from "./state";
+import { toolData } from "./constants";
+import { closeModals } from "./utils";
 
 const ctrlShortcuts = {
-  a: () => console.log("select all?"),
   z: () => undo(),
-  s: () => dispatch({ showDownload: true }),
 };
 
 const hotkeys = {
@@ -16,45 +15,26 @@ const hotkeys = {
     ])
   ),
 
-  // Misc
-  g: () => dispatch({ grid: !GLOBAL_STATE.grid }),
-
   // UI
-  Escape: () =>
-    dispatch({
-      showLibrary: false,
-      showSettings: false,
-      showDownload: false,
-      editingRepeat: -1,
-      showRepeatLibrary: false,
-    }),
-  d: () =>
-    dispatch({
-      debug: !GLOBAL_STATE.debug,
-    }),
+  Escape: closeModals,
 };
 
-function symbolSwitch(index) {
-  if (index <= GLOBAL_STATE.symbolMap.length) dispatch({ activeSymbol: index });
+function numberPressed(num) {
+  // number key was pressed
+  console.debug(`${num} key pressed`);
 }
 
 export function addKeypressListeners() {
   window.addEventListener("keydown", (e) => {
-    // if (
-    //   !(
-    //     GLOBAL_STATE.showSettings ||
-    //     GLOBAL_STATE.showDownload ||
-    //     GLOBAL_STATE.showLibrary
-    //   )
-    // ) {
     if (e.ctrlKey && e.key.toLowerCase() in ctrlShortcuts) {
       e.preventDefault();
       ctrlShortcuts[e.key.toLowerCase()]();
     } else if (e.key in hotkeys) hotkeys[e.key]();
-    else if (/^[0-9]$/i.test(e.key)) symbolSwitch(Number(e.key) - 1);
-    // }
+    else if (/^[0-9]$/i.test(e.key)) numberPressed(Number(e.key));
+
     const newHeldKeys = new Set(GLOBAL_STATE.heldKeys);
     newHeldKeys.add(e.key);
+
     dispatch({ heldKeys: newHeldKeys });
   });
 

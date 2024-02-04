@@ -1,45 +1,54 @@
 import { bmp_lib } from "./lib/bmp";
-import { GLOBAL_STATE } from "./state";
+import { dispatch, GLOBAL_STATE } from "./state";
 
-export function generateChart(repeats) {
-  let chart = GLOBAL_STATE.chart;
-  for (const repeat of repeats) {
-    chart = chart.overlay(repeat.bitmap, repeat.pos);
+export function currentlyFullscreen() {
+  return !(
+    !window.document.fullscreenElement &&
+    !window.document.mozFullScreenElement &&
+    !window.document.webkitFullscreenElement &&
+    !window.document.msFullscreenElement
+  );
+}
+
+export function toggleFullscreen() {
+  var doc = window.document;
+  var docEl = doc.documentElement;
+
+  var requestFullScreen =
+    docEl.requestFullscreen ||
+    docEl.mozRequestFullScreen ||
+    docEl.webkitRequestFullScreen ||
+    docEl.msRequestFullscreen;
+  var cancelFullScreen =
+    doc.exitFullscreen ||
+    doc.mozCancelFullScreen ||
+    doc.webkitExitFullscreen ||
+    doc.msExitFullscreen;
+
+  if (
+    !doc.fullscreenElement &&
+    !doc.mozFullScreenElement &&
+    !doc.webkitFullscreenElement &&
+    !doc.msFullscreenElement
+  ) {
+    requestFullScreen.call(docEl);
+  } else {
+    cancelFullScreen.call(doc);
   }
-  return chart;
 }
 
-export function devicePixelBoundingBox(el) {
-  const bbox = el.getBoundingClientRect();
-
-  return {
-    width: bbox.width * devicePixelRatio,
-    height: bbox.height * devicePixelRatio,
-  };
+export function closeModals() {
+  // Close all modals (e.g., on escape or click outside taskbar)
+  dispatch({
+    showLibrary: false,
+    showSettings: false,
+    showDownload: false,
+  });
 }
 
-export function colorSequencePosAtCoords(event, target) {
-  const bounds = target.getBoundingClientRect();
-
-  const x = Math.floor(
-    ((event.clientX - bounds.x) / GLOBAL_STATE.scale) * devicePixelRatio
-  );
-  const y = Math.floor(
-    ((event.clientY - bounds.y) / GLOBAL_STATE.scale) * devicePixelRatio
-  );
-  return { x, y: GLOBAL_STATE.yarnSequence.height - y - 1 };
-}
-
-export function posAtCoords(event, target) {
-  const bounds = target.getBoundingClientRect();
-
-  const x = Math.floor(
-    ((event.clientX - bounds.x) / GLOBAL_STATE.scale) * devicePixelRatio
-  );
-  const y = Math.floor(
-    ((event.clientY - bounds.y) / GLOBAL_STATE.scale) * devicePixelRatio
-  );
-  return { x, y };
+export function currentTargetPointerPos(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  return [e.clientX - rect.left, rect.height - (e.clientY - rect.top)];
 }
 
 export function getRandomColor() {
@@ -59,21 +68,6 @@ export function download(dataStr, downloadName) {
   document.body.appendChild(downloadAnchorNode);
   downloadAnchorNode.click();
   downloadAnchorNode.remove();
-}
-
-export async function buildImagePalette(imageNames) {
-  return await Promise.all(
-    imageNames.map(async (imageName) => {
-      const im = new Image();
-      im.src = new URL(
-        `../assets/symbols/${imageName}.png`,
-        import.meta.url
-      ).href;
-
-      await im.decode();
-      return { image: im, title: imageName };
-    })
-  );
 }
 
 export function isMobile() {

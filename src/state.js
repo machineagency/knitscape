@@ -2,113 +2,62 @@ import { Bimp } from "./lib/Bimp";
 import { SNAPSHOT_INTERVAL, SNAPSHOT_FIELDS, stitches } from "./constants";
 
 let GLOBAL_STATE = {
-  editingPalette: false,
-  transforming: false,
+  heldKeys: new Set(), // Keys that are currently held down
+  snapshots: [], // Array of snapshot history
+  lastSnapshot: 0, // time of last snapshot
+
+  // GAUGE
+  stitchGauge: 7, // stitches per inch
+  rowGauge: 11, // rows per inch
+
+  pointerPos: [0, 0],
 
   activeTool: "brush",
   activeSymbol: 1,
   colorMode: "operation",
   context: "shape",
 
-  layers: [],
-
   symbolMap: Object.keys(stitches),
 
-  // chart: new Bimp(
-  //   7,
-  //   7,
-  //   [
-  //     1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 1, 2, 2, 2, 1,
-  //     1, 1, 1, 2, 2, 2, 1, 5, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  //   ]
-  // ),
-
-  shaping: {
-    left: [
-      [0, 0],
-      [0, 10],
-    ],
-    right: [
-      [10, 0],
-      [10, 10],
-    ],
-  },
-
-  shape: [
+  boundary: [
     [0, 0],
     [1, 4],
     [4, 4],
     [5, 0],
   ],
 
-  stitchGauge: 7, // stitches per inch
-  rowGauge: 11, // rows per inch
-
   shapeChart: Bimp.empty(10, 10, 1),
-  colorChart: Bimp.empty(10, 10, 0),
-  chart: Bimp.empty(10, 10, 1),
 
   scale: 15, // Number of pixels for each chart cell
-  pos: { x: -1, y: -1 }, // Mouse position in chart
   chartPan: { x: 0, y: 0 }, // Pan value for the chart editor view
 
+  // SIMULATION
   simScale: 1,
   simPan: { x: 0, y: 0 },
-
-  activeYarn: 0,
-  yarnPalette: ["rgba(235,233,187,1)", "rgba(50, 140, 188, 1)"], // Colors of the yarns
-  yarnSequence: new Bimp(1, 2, [0, 1]),
-
-  editingRepeat: -1,
-  repeatPos: [-1, -1],
-
-  repeats: [
-    // {
-    //   bitmap: new Bimp(6, 1, [1, 1, 1, 2, 2, 2]),
-    //   pos: [0, 0],
-    //   area: [6, 6],
-    // },
-  ],
-
-  // repeatLibrary: [
-  //   {
-  //     title: "blank",
-  //     bitmap: new Bimp(2, 2, [0, 0, 0, 0]),
-  //   },
-  //   {
-  //     title: "checks",
-  //     bitmap: new Bimp(2, 2, [0, 2, 2, 0]),
-  //   },
-  //   {
-  //     title: "stripe",
-  //     bitmap: new Bimp(2, 2, [0, 2, 0, 2]),
-  //   },
-  // ], // Library of motifs which can be used as repeats
-
-  reverseScroll: false,
-  grid: true,
-  symbolLineWidth: 3,
   flipped: false,
 
-  // PUNCH CARD
-  punchcardMode: false, // constrains repeat width to a punchcard-friendly width
-  machine: "th860",
-  punchVerticalRepeats: 5,
-  rows: 40, //punchcard rows
-  numSides: 8, //number of punch sides
+  // YARN
+  yarnPalette: ["rgba(235,233,187,1)", "rgba(50, 140, 188, 1)"], // Colors of the yarns
+  yarnWidth: 0.24,
+  yarnExpanded: true,
+  yarn: null,
+  yarnSequence: new Bimp(1, 2, [0, 1]),
+  yarnSelections: [],
+
+  reverseScroll: false,
+  symbolLineWidth: 3,
 
   // Various UI pane states
   showLibrary: false,
   showSettings: false,
   showDownload: false,
-  showRepeatLibrary: false,
-  debug: false,
 
-  snapshots: [], // Array of snapshot history
-  lastSnapshot: 0, // time of last snapshot
-  heldKeys: new Set(), // Keys that are currently held down
-
-  yarnWidth: 0.24,
+  // PUNCH CARD
+  // punchcardMode: false, // constrains repeat width to a punchcard-friendly width
+  // machine: "th860",
+  // punchVerticalRepeats: 5,
+  // rows: 40, //punchcard rows
+  // numSides: 8, //number of punch sides
 };
 
 function loadWorkspace(workspace) {

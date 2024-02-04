@@ -1,5 +1,4 @@
 import { drawShapeChart } from "../contexts/shape/shapeContext";
-import { drawColorChart } from "../contexts/color/colorContext";
 
 export function redrawCharts() {
   return ({ state }) => {
@@ -8,8 +7,6 @@ export function redrawCharts() {
     function updateContext() {
       if (context == "shape") {
         drawShapeChart(null);
-      } else if (context == "color") {
-        drawColorChart(null);
       }
     }
 
@@ -19,7 +16,7 @@ export function redrawCharts() {
           scale = state.scale;
           context = state.context;
 
-          requestAnimationFrame(updateContext);
+          // requestAnimationFrame(updateContext);
         }
       },
     };

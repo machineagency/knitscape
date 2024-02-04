@@ -1,83 +1,46 @@
-import { render } from "lit-html";
 import Split from "split.js";
+import { html, render } from "lit-html";
 
-import { StateMonitor } from "./state";
+import { StateMonitor, dispatch, GLOBAL_STATE } from "./state";
 
-import { fitChart } from "./actions/zoomFit";
-
-import { view } from "./views/view";
-
-import { yarnSequenceCanvas } from "./components/yarnSequenceCanvas";
-
-// Chart View Canvas Layers
-import { drawYarnColors } from "./components/drawYarnColors";
-import { drawSymbols } from "./components/drawSymbols";
-import { drawGrid } from "./components/drawGrid";
-import { drawRepeats } from "./components/drawRepeats";
-
-// Pointer/keyboard interaction
-import { addKeypressListeners } from "./events/keypressEvents";
-import { desktopPointerPanZoom } from "./events/desktopPointerPanZoom";
-import { colorSequencePointerInteraction } from "./events/colorSequencePointerInteraction";
-import { repeatPointerInteraction } from "./events/repeatPointerInteraction";
-import { chartInteraction } from "./events/chartInteraction";
-import { simulationPointerInteraction } from "./events/simulationPointerInteraction";
-// import { repeatLibraryDragInteraction } from "./events/repeatLibraryDragInteraction";
-
-// Touch interaction
-import { desktopTouchPanZoom } from "./events/desktopTouchPanZoom";
-import { colorSequenceTouchInteraction } from "./events/colorSequenceTouchInteraction";
-import { repeatTouchInteraction } from "./events/repeatTouchInteraction";
-import { simulationTouchInteraction } from "./events/simulationTouchInteraction";
-
-import { drawSymbolPicker } from "./components/drawSymbolPicker";
-// import { drawRepeatLibrary } from "./components/drawRepeatLibrary";
-import { resizeCanvases } from "./components/resizeCanvases";
+import { addKeypressListeners } from "./events";
 import { runSimulation } from "./components/runSimulation";
-import { closeModals } from "./events/closeModals";
-// import { generateChart } from "./components/generateChart";
-import { isMobile } from "./utils";
+import { shapeMonitor } from "./shape/shapeMonitor";
 
-import { redrawCharts } from "./components/redrawCharts";
-import { shapeMonitor } from "./contexts/shape/shapeMonitor";
+import { taskbar } from "./views/taskbar";
 
-let symbolCanvas,
-  gridCanvas,
-  yarnColorCanvas,
-  desktop,
-  chartPane,
-  repeatContainer,
-  yarnSequenceEditorCanvas,
-  colorDragger,
-  simContainer,
-  repeatLibrary;
+import { simulationView } from "./views/simulationPane";
+import { chartPaneView } from "./views/chartPane";
+
+import { closeModals, currentTargetPointerPos } from "./utils";
+
+function pointerIcon() {
+  return html`<div id="pointer">
+    <i class="fa-solid ${tools[GLOBAL_STATE.activeTool].icon}"></i>
+  </div>`;
+}
+
+function view() {
+  return html`
+    ${taskbar()}
+
+    <div id="site" @pointerdown=${closeModals}>
+      <div
+        id="chart-pane"
+        @pointermove=${(e) =>
+          (GLOBAL_STATE.pointerPos = currentTargetPointerPos(e))}>
+        ${chartPaneView()}
+      </div>
+      ${simulationView()}
+    </div>
+  `;
+}
+
+let simContainer;
 
 function r() {
   render(view(), document.body);
   window.requestAnimationFrame(r);
-}
-
-function initKeyboard() {
-  addKeypressListeners();
-
-  desktopPointerPanZoom(chartPane);
-  // chartInteraction(symbolCanvas);
-  // repeatPointerInteraction(repeatContainer);
-  // colorSequencePointerInteraction(yarnSequenceEditorCanvas, colorDragger);
-  simulationPointerInteraction(simContainer);
-  // repeatLibraryDragInteraction(repeatLibrary);
-  closeModals();
-}
-
-function initTouch() {
-  document.body.style.setProperty("--font-size", "1.1rem");
-
-  desktopTouchPanZoom(chartPane);
-  repeatTouchInteraction(repeatContainer);
-  colorSequenceTouchInteraction(yarnSequenceEditorCanvas, colorDragger);
-  simulationTouchInteraction(simContainer);
-  // repeatLibraryDragInteraction(repeatLibrary);
-  closeModals();
 }
 
 function measureWindow() {
@@ -94,16 +57,7 @@ function measureWindow() {
 function init() {
   r();
 
-  symbolCanvas = document.getElementById("symbol-canvas");
-  gridCanvas = document.getElementById("grid");
-  yarnColorCanvas = document.getElementById("yarn-color-canvas");
-  yarnSequenceEditorCanvas = document.getElementById("yarn-sequence-canvas");
-  desktop = document.getElementById("desktop");
-  chartPane = document.getElementById("chart-pane");
-  repeatContainer = document.getElementById("repeat-container");
   simContainer = document.getElementById("sim-container");
-  repeatLibrary = document.getElementById("repeat-library");
-  colorDragger = document.getElementById("color-dragger");
 
   Split(["#chart-pane", "#sim-pane"], {
     sizes: [60, 40],
@@ -111,26 +65,11 @@ function init() {
     gutterSize: 11,
   });
 
-  isMobile() ? initTouch() : initKeyboard();
+  addKeypressListeners();
 
-  StateMonitor.register([
-    // resizeCanvases([symbolCanvas, gridCanvas, yarnColorCanvas]),
-    // yarnSequenceCanvas({
-    //   canvas: yarnSequenceEditorCanvas,
-    // }),
-    // drawSymbols(symbolCanvas),
-    // drawYarnColors(yarnColorCanvas),
-    // drawGrid(gridCanvas),
-    // drawRepeats(),
-    // drawSymbolPicker(),
-    redrawCharts(),
-    shapeMonitor(),
-    runSimulation(),
-    // generateChart(),
-  ]);
+  StateMonitor.register([shapeMonitor(), runSimulation()]);
 
   measureWindow();
-  // fitChart();
 }
 
 window.onload = init;
