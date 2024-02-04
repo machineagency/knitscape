@@ -23,7 +23,7 @@ export function runSimulation() {
       if (GLOBAL_STATE.stopSim) GLOBAL_STATE.stopSim();
 
       let { stopSim, relax } = simulate(
-        new Pattern(GLOBAL_STATE.shapingMask, GLOBAL_STATE.yarnSequence.pixels),
+        new Pattern(GLOBAL_STATE.shapingMask, GLOBAL_STATE.yarnSequence),
         GLOBAL_STATE.simScale
       );
 

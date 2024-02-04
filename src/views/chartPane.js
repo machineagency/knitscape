@@ -86,28 +86,8 @@ function patternDefs() {
         width="${cellX}"
         height="${cellY}"
         patternUnits="userSpaceOnUse">
-        <line stroke-width="1px" stroke="black" x1="0" y1="0.5" x2="${cellX}" y2="0.5"></line>
-        <line stroke-width="1px" stroke="black" x1="0.5" y1="0" x2="0.5" y2="${cellY}"></line>
-      </pattern>
-      <pattern
-        id="ruler-vertical"
-        width="20"
-        height="${tick}"
-        x="${x - tick}"
-        y="${y - tick}"
-        patternUnits="userSpaceOnUse">
-        <rect width="${tick}" height="${tick}" class="ruler"></rect>
-        <line stroke-width="1px" stroke="black" x1="0" y1="0" x2="${tick}" y2="0"></line>
-      </pattern>
-      <pattern
-        id="ruler-horizontal"
-        width="${tick}"
-        height="20"
-        x="${x - tick}"
-        y="${y - tick}"
-        patternUnits="userSpaceOnUse">
-        <rect width="${tick}" height="${tick}" class="ruler"></rect>
-        <line stroke-width="1px" stroke="black" x1="0" y1="0" x2="0" y2="${tick}"></line>
+        <line stroke-width="1px" stroke="black" x1="0" y1="0" x2="${cellX}" y2="0"></line>
+        <line stroke-width="1px" stroke="black" x1="0" y1="0" x2="0" y2="${cellY}"></line>
       </pattern>
     </defs>`;
 }
@@ -127,6 +107,8 @@ export function chartPaneView() {
 
   const chartX = Math.round(x + bbox.xMin * scale);
   const chartY = Math.round(y + bbox.yMin * scale);
+
+  const cellHeight = scale / GLOBAL_STATE.rowGauge;
 
   return html`
     ${shapingToolbar()} ${yarnPanel(chartY, chartHeight)}
@@ -148,12 +130,13 @@ export function chartPaneView() {
         @wheel=${zoom}>
         ${patternDefs()}
         <g transform="scale (1, -1)" transform-origin="center">
-          <rect
-            style="shape-rendering: crispedges;"
+          ${cellHeight < 10
+            ? ""
+            : svg`<rect
             transform="translate(${chartX} ${chartY})"
             width=${chartWidth}
             height=${chartHeight}
-            fill="url(#grid)"></rect>
+            fill="url(#grid)"></rect>`}
 
           <g transform="translate(${x} ${y})">
             <g transform="scale(${scale})">${draftPath()}</g>
@@ -170,6 +153,6 @@ function init() {
   let chart = computeDraftMask(GLOBAL_STATE.boundary);
   dispatch({
     shapingMask: chart,
-    yarn: Array.from({ length: chart.height }, () => new Set([0])),
+    yarnSequence: Array.from({ length: chart.height }, () => [0]),
   });
 }

@@ -44,7 +44,11 @@ export function dragHandle(e) {
 
       let chart = computeDraftMask(newShape);
 
-      dispatch({ boundary: newShape, shapingMask: chart });
+      dispatch({
+        boundary: newShape,
+        shapingMask: chart,
+        yarnSequence: Array.from({ length: chart.height }, () => [0]),
+      });
     }
   }
 

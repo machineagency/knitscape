@@ -5,9 +5,6 @@ export function drawShapingMask(canvas, chart, cellX, cellY, lastDrawn = null) {
   const width = chart.width;
   const height = chart.height;
 
-  // const cellX = GLOBAL_STATE.scale / GLOBAL_STATE.stitchGauge;
-  // const cellY = GLOBAL_STATE.scale / GLOBAL_STATE.rowGauge;
-
   const ctx = canvas.getContext("2d");
 
   for (let y = 0; y < height; y++) {

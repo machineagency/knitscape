@@ -95,6 +95,7 @@ canvas {
 .desktop {
   flex: 1;
   position: relative;
+  box-shadow: inset 0 0 6px 0px rgba(0, 0, 0, 0.5);
 }
 
 /* #endregion */
@@ -250,7 +251,6 @@ canvas {
   position: relative;
   z-index: 10;
   background-color: var(--base1);
-  box-shadow: 0 0 10px 0 black;
   border-right: 3px solid var(--base0);
   box-sizing: content-box;
 }

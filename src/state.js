@@ -38,8 +38,8 @@ let GLOBAL_STATE = {
   yarnPalette: ["#ebe9bbff", "#328cbcff", "#bc7532ff"], // Colors of the yarns
   yarnWidth: 0.24,
   yarnExpanded: false,
-  yarn: null,
-  yarnSequence: new Bimp(1, 2, [0, 1]),
+  yarnSequence: null,
+  // yarnSequence: new Bimp(1, 2, [0, 1]),
   yarnSelections: [],
 
   reverseScroll: false,

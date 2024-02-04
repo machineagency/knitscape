@@ -22,7 +22,10 @@ export function selectYarn(e) {
         startRow < currentRow ? [startRow, currentRow] : [currentRow, startRow];
 
       start = start < 0 ? 0 : start;
-      end = end >= GLOBAL_STATE.yarn.length ? GLOBAL_STATE.yarn.length : end;
+      end =
+        end >= GLOBAL_STATE.yarnSequence.length
+          ? GLOBAL_STATE.yarnSequence.length
+          : end;
 
       if (currentRow != lastRow && end - start > 0) {
         const newSelect = startSelect.concat([[start, end]]);

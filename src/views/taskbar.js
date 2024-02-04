@@ -58,11 +58,6 @@ function settingsModal() {
         Invert Scroll
       </label>
     </div>
-    <button
-      class="btn icon"
-      @click=${() => window.open("https://github.com/knitscape/knitscape")}>
-      <i class="fa-brands fa-github"></i>
-    </button>
   </div>`;
 }
 

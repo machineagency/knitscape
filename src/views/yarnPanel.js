@@ -50,7 +50,7 @@ function drawYarnSelectBox() {
 }
 
 export function yarnSequence(cellHeight) {
-  if (!GLOBAL_STATE.yarn) return;
+  if (!GLOBAL_STATE.yarnSequence) return;
   const chart = GLOBAL_STATE.shapingMask;
 
   const yarns = [];
@@ -63,7 +63,7 @@ export function yarnSequence(cellHeight) {
         (yarn, index) =>
           html`<div
             data-yarnindex=${index}
-            class="yarn-cell ${GLOBAL_STATE.yarn[row].has(index)
+            class="yarn-cell ${GLOBAL_STATE.yarnSequence[row].includes(index)
               ? "active"
               : "inactive"}"
             style="--color: ${yarn}"></div>`

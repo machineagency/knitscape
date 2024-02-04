@@ -44,9 +44,7 @@ export function simulate(stitchPattern, scale) {
   }
 
   function yarnColor(rowNum) {
-    return stitchPattern.yarnSequence[
-      rowNum % stitchPattern.yarnSequence.length
-    ];
+    return stitchPattern.yarnSequence[rowNum][0];
   }
 
   // CN grid position, stitch row, previous CN coords, next CN coords
