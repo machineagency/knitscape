@@ -12,15 +12,6 @@ export function closeModals() {
 
 export function setCanvasSize(canvas, width, height) {
   // Resizes the canvas to match the shaping boundary
-  // const canvas = canvasRef.value;
-
-  // const width = Math.round(
-  //   (scale * GLOBAL_STATE.shapingMask.width) / GLOBAL_STATE.stitchGauge
-  // );
-  // const height = Math.round(
-  //   (scale * GLOBAL_STATE.shapingMask.height) / GLOBAL_STATE.rowGauge
-  // );
-
   canvas.width = width;
   canvas.height = height;
 

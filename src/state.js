@@ -1,5 +1,5 @@
 import { Bimp } from "./lib/Bimp";
-import { SNAPSHOT_INTERVAL, SNAPSHOT_FIELDS, stitches } from "./constants";
+import { SNAPSHOT_INTERVAL, SNAPSHOT_FIELDS } from "./constants";
 
 let GLOBAL_STATE = {
   heldKeys: new Set(), // Keys that are currently held down
@@ -10,18 +10,16 @@ let GLOBAL_STATE = {
   stitchGauge: 7, // stitches per inch
   rowGauge: 11, // rows per inch
 
-  chartPointerPos: [0, 0],
+  desktopPointerPos: [0, 0],
 
   activeTool: "hand",
   activeSymbol: 1,
 
-  symbolMap: Object.keys(stitches),
-
   boundary: [
-    [0, 0],
-    [1, 4],
-    [4, 4],
-    [5, 0],
+    [0, 0, 1],
+    [1, 4, 0],
+    [4, 4, 1],
+    [5, 0, 0],
   ],
 
   shapingMask: Bimp.empty(10, 10, 1),

@@ -98,6 +98,16 @@ canvas {
   box-shadow: inset 0 0 6px 0px rgba(0, 0, 0, 0.5);
 }
 
+.pointer-highlight {
+  fill: #adadad78;
+  pointer-events: none;
+}
+.pointer-pos {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
 /* #endregion */
 
 /* #region TOOL PICKER */
@@ -227,21 +237,22 @@ canvas {
 
 /* #region DRAFTING */
 
-.handle {
+.point {
   fill: rgb(52, 145, 195);
   stroke: rgb(52, 145, 195);
   cursor: grab;
   pointer-events: all;
 }
 
-.draft-line {
+.path {
   stroke: rgb(52, 145, 195);
   cursor: grab;
   pointer-events: all;
 }
 
-.ruler {
-  fill: var(--base3);
+.path.warn {
+  stroke: rgb(195, 52, 52);
+  pointer-events: all;
 }
 
 /* #endregion */

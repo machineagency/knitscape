@@ -1,5 +1,5 @@
 import { Bimp } from "../lib/Bimp";
-import { GLOBAL_STATE, dispatch } from "../state";
+import { GLOBAL_STATE } from "../state";
 import { scanlineFill } from "./scanline";
 
 export function polygonBbox(boundary) {
@@ -32,7 +32,7 @@ export function mapCoords(number, inMin, inMax, outMin, outMax) {
 export function toChartCoords(pt, bbox, chart) {
   return [
     Math.round(mapCoords(pt[0], bbox.xMin, bbox.xMax, 0, chart.width - 1)),
-    Math.round(mapCoords(pt[1], bbox.yMin, bbox.yMax, 0, chart.height)),
+    Math.round(mapCoords(pt[1], bbox.yMin, bbox.yMax, 0, chart.height - 1)),
   ];
 }
 
@@ -43,7 +43,7 @@ export function computeDraftMask(boundary) {
     Math.ceil(GLOBAL_STATE.stitchGauge * bbox.width),
     Math.ceil(GLOBAL_STATE.rowGauge * bbox.height),
     0
-  );
+  ); // Make a chart that contains the shaping paths
 
   chart = scanlineFill(bbox, boundary, chart);
 

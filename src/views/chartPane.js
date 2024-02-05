@@ -1,20 +1,19 @@
 import { html, svg } from "lit-html";
 import { ref, createRef } from "lit-html/directives/ref.js";
-import { Bimp } from "../lib/Bimp";
 import { GLOBAL_STATE, dispatch } from "../state";
 
 import { polygonBbox, computeDraftMask } from "../chart/helpers";
-import { scanlineFill } from "../chart/scanline";
 
-import { chartPointerDown } from "../interaction/chartInteraction";
-import { pan, zoom, fitDraft } from "../interaction/chartPanZoom";
+import {
+  chartContextMenu,
+  chartPointerDown,
+} from "../interaction/chartInteraction";
+import { zoom, fitDraft } from "../interaction/chartPanZoom";
 import { yarnPanel } from "./yarnPanel";
+import { shapingPaths } from "./shapingPaths";
+import { currentTargetPointerPos } from "../utilities/misc";
 
 let svgRef = createRef();
-
-const HANDLE_RADIUS = 8;
-const HANDLE_STROKE_WIDTH = 2;
-const PATH_STROKE_WIDTH = 4;
 
 function shapingToolbar() {
   return html`<div class="tool-picker">
@@ -39,80 +38,46 @@ function shapingToolbar() {
   </div>`;
 }
 
-function draftPath() {
-  let pts = GLOBAL_STATE.boundary;
-  let scale = GLOBAL_STATE.scale;
-  let numPts = pts.length;
-  let geom = [];
-
-  for (let i = 0; i < numPts; i++) {
-    geom.push(
-      svg`<line
-      class="draft-line"
-      data-index="${i}"
-      stroke-width=${PATH_STROKE_WIDTH / scale}
-      x1=${pts[i][0]}
-      y1=${pts[i][1]}
-      x2=${pts[(i + 1) % numPts][0]}
-      y2=${pts[(i + 1) % numPts][1]}>`
-    );
-  }
-
-  for (let i = 0; i < numPts; i++) {
-    geom.push(
-      svg`<circle
-      class="handle"
-      data-index="${i}"
-      cx="${pts[i][0]}"
-      cy="${pts[i][1]}"
-      stroke-width="${HANDLE_STROKE_WIDTH / scale}"
-      r="${HANDLE_RADIUS / scale}" />`
-    );
-  }
-
-  return geom;
-}
-
-function patternDefs() {
-  const cellX = GLOBAL_STATE.scale / GLOBAL_STATE.stitchGauge;
-  const cellY = GLOBAL_STATE.scale / GLOBAL_STATE.rowGauge;
-  const tick = GLOBAL_STATE.scale;
-  const { x, y } = GLOBAL_STATE.chartPan;
-
-  return svg`
-    <defs>
+const gridPattern = (cellWidth, cellHeight) => svg`
       <pattern
         id="grid"
-        width="${cellX}"
-        height="${cellY}"
+        width="${cellWidth}"
+        height="${cellHeight}"
         patternUnits="userSpaceOnUse">
-        <line stroke-width="1px" stroke="black" x1="0" y1="0" x2="${cellX}" y2="0"></line>
-        <line stroke-width="1px" stroke="black" x1="0" y1="0" x2="0" y2="${cellY}"></line>
-      </pattern>
-    </defs>`;
-}
+        <line stroke-width="1px" stroke="black" x1="0" y1="0" x2="${cellWidth}" y2="0"></line>
+        <line stroke-width="1px" stroke="black" x1="0" y1="0" x2="0" y2="${cellHeight}"></line>
+      </pattern>`;
 
 export function chartPaneView() {
   const { x, y } = GLOBAL_STATE.chartPan;
   const scale = GLOBAL_STATE.scale;
   const chart = GLOBAL_STATE.shapingMask;
   const bbox = polygonBbox(GLOBAL_STATE.boundary);
+  const { stitchGauge, rowGauge } = GLOBAL_STATE;
 
-  const chartWidth = Math.round(
-    (scale * chart.width) / GLOBAL_STATE.stitchGauge
-  );
-  const chartHeight = Math.round(
-    (scale * chart.height) / GLOBAL_STATE.rowGauge
-  );
+  const chartWidth = Math.round((scale * chart.width) / stitchGauge);
+  const chartHeight = Math.round((scale * chart.height) / rowGauge);
 
   const chartX = Math.round(x + bbox.xMin * scale);
   const chartY = Math.round(y + bbox.yMin * scale);
 
-  const cellHeight = scale / GLOBAL_STATE.rowGauge;
+  const cellWidth = scale / stitchGauge;
+  const cellHeight = scale / rowGauge;
+
+  let pointerX = Math.floor(
+    (GLOBAL_STATE.desktopPointerPos[0] - chartX) / cellWidth
+  );
+  let pointerY = Math.floor(
+    (GLOBAL_STATE.desktopPointerPos[1] - chartY) / cellHeight
+  );
 
   return html`
     ${shapingToolbar()} ${yarnPanel(chartY, chartHeight)}
-    <div class="desktop">
+    <div
+      class="desktop"
+      @pointermove=${(e) =>
+        (GLOBAL_STATE.desktopPointerPos = currentTargetPointerPos(e))}>
+      <span class="pointer-pos">[${pointerX},${pointerY}]</span>
       <div
         style="position: absolute; bottom: 0; left: 0;
       transform: translate(${chartX}px, ${-chartY}px);
@@ -127,19 +92,31 @@ export function chartPaneView() {
         ${ref(svgRef)}
         ${ref(init)}
         @pointerdown=${chartPointerDown}
+        @contextmenu=${chartContextMenu}
         @wheel=${zoom}>
-        ${patternDefs()}
+        <defs>${gridPattern(cellWidth, cellHeight)}</defs>
         <g transform="scale (1, -1)" transform-origin="center">
-          ${cellHeight < 10
-            ? ""
-            : svg`<rect
+          <g
             transform="translate(${chartX} ${chartY})"
+            width=${chartWidth}
+            height=${chartHeight}>
+            ${cellHeight < 10
+              ? ""
+              : svg`<rect
+
             width=${chartWidth}
             height=${chartHeight}
             fill="url(#grid)"></rect>`}
-
+            <rect
+              class="pointer-highlight"
+              transform="translate(${pointerX * cellWidth + 1} ${pointerY *
+                cellHeight +
+              1})"
+              width=${cellWidth - 1}
+              height=${cellHeight - 1}></rect>
+          </g>
           <g transform="translate(${x} ${y})">
-            <g transform="scale(${scale})">${draftPath()}</g>
+            <g transform="scale(${scale})">${shapingPaths()}</g>
           </g>
         </g>
       </svg>

@@ -1,7 +1,7 @@
 import Split from "split.js";
 import { html, render } from "lit-html";
 
-import { StateMonitor, dispatch, GLOBAL_STATE } from "./state";
+import { StateMonitor } from "./state";
 
 import { runSimulation } from "./subscribers/runSimulation";
 import { shapingMaskSubscriber } from "./subscribers/shapingMaskSubscriber";
@@ -11,25 +11,20 @@ import { simulationView } from "./views/simulationPane";
 import { chartPaneView } from "./views/chartPane";
 
 import { globalKeydown, globalKeyup } from "./interaction/globalKeypress";
-import { closeModals, currentTargetPointerPos } from "./utilities/misc";
+import { closeModals } from "./utilities/misc";
 
-function pointerIcon() {
-  return html`<div id="pointer">
-    <i class="fa-solid ${tools[GLOBAL_STATE.activeTool].icon}"></i>
-  </div>`;
-}
+// function pointerIcon() {
+//   return html`<div id="pointer">
+//     <i class="fa-solid ${tools[GLOBAL_STATE.activeTool].icon}"></i>
+//   </div>`;
+// }
 
 function view() {
   return html`
     ${taskbar()}
 
     <div id="site" @pointerdown=${closeModals}>
-      <div
-        id="chart-pane"
-        @pointermove=${(e) =>
-          (GLOBAL_STATE.chartPointerPos = currentTargetPointerPos(e))}>
-        ${chartPaneView()}
-      </div>
+      <div id="chart-pane">${chartPaneView()}</div>
       ${simulationView()}
     </div>
   `;

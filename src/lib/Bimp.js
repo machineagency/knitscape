@@ -192,6 +192,8 @@ export class Bimp {
   }
 
   line(from, to, color) {
+    if (from.x == to.x && from.y == to.y)
+      return this.draw([{ x: from.x, y: from.y, color }]);
     let changes = [];
     if (Math.abs(from.x - to.x) > Math.abs(from.y - to.y)) {
       if (from.x > to.x) [from, to] = [to, from];

@@ -1,12 +1,40 @@
 # knitscape
 
-knitscape is tool for designing pattern repeats for knit slip/tuck colorwork. It
-was developed with domestic knitting machines in mind, but the charts are
-suitable for hand-knitting as well.
+KnitScape is a design and simulation tool for knitting patterns.
 
 ## features
 
-- Add and edit multiple repeats in chart view
+bugs/fixes
+
+- scanline is a bit off for some reason
+- In sim, shouldn't regenerate yarn topology/cancel relaxation on zoom or when
+  yarn colors are changed
+- flip button doesn't reverse stacking order
+
+todo
+
+- global
+  - edit overall gauge
+- silhouette
+  - different line types: short rows, cast on/bind off, waste yarn, fashioned?
+  - drag line
+  - remove points
+  - curves
+  - simple constraints
+- yarn sequencer
+  - [x] select range of rows
+  - [ ] drag to move selection
+  - [ ] sequence editor
+  - [ ] ranges shouldn't overlap
+- stitch painter
+  - select areas
+  - repeat editor
+- simulation
+
+- misc/icebox
+  - synchronized simulation/chart view mode (pan/zoom updates both views)
+
+<!-- - Add and edit multiple repeats in chart view
   - Resize and position base repeat
   - Resize repeat area
   - Edit repeat can contain four operations (knit, purl, tuck slip)
@@ -18,27 +46,4 @@ suitable for hand-knitting as well.
   - flip simulation swatch (view "wrong" or "right" side)
 - Importing and exporting
   - Export to JSON, PNG, and SilverKnit's TXT format
-  - Import patterns from JSON and pattern library
-
-<!-- ## todo
-
-- sim update optimizations
-- settings
-  - yarn width
-  - yarn spread
-  - default stitch sizes
-  - end-needle selection
-
-ideas/icebox
-
-- knitting
-  - lace symbols
-  - increases/decreases
-  - auto-mosaic mode: draw desired mosaic result, infer stitch pattern
-  - fair isle mode: specify two colors in a row, chart design switches between
-    them
-- save to local storage
-- some sort of tuck/slip verification - tuck always must have knit on either
-  side, slip can't be more than 4/6 rows
-- overlay operation chart on knit sim/make it editable
-- different repeat operations: mirror, offset per repeat -->
+  - Import patterns from JSON and pattern library -->

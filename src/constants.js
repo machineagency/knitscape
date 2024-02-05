@@ -12,9 +12,8 @@ export const SNAPSHOT_FIELDS = ["yarnPalette", "boundary"];
 export const SYMBOL_DATA = {
   EMPTY: {
     path: new Path2D("M 0.25 0.25 L 0.75 0.75 M 0.25 0.75 L 0.75 0.25"),
-    color: "#000000",
+    color: "#555",
     stroke: "#ffffff",
-    yarnModeColor: "#000000",
   },
   KNIT: {
     path: new Path2D(
@@ -158,6 +157,8 @@ export const stitches = {
   BXL2: 17,
   BXL3: 18,
 };
+
+export const STITCH_MAP = Object.keys(stitches);
 
 export const cnStates = {
   ECN: 0, // Empty
