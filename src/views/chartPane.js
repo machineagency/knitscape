@@ -10,7 +10,7 @@ import {
 } from "../interaction/chartInteraction";
 import { zoom, fitDraft } from "../interaction/chartPanZoom";
 import { yarnPanel } from "./yarnPanel";
-import { shapingPaths } from "./shapingPaths";
+import { shapingPaths, pathAnnotations } from "./shapingPaths";
 import { currentTargetPointerPos } from "../utilities/misc";
 
 let svgRef = createRef();
@@ -120,6 +120,11 @@ export function chartPaneView() {
           </g>
         </g>
       </svg>
+      <div
+        style="position: absolute; bottom: 0; left: 0;
+      transform: translate(${chartX}px, ${-chartY}px);">
+        ${pathAnnotations()}
+      </div>
     </div>
   `;
 }

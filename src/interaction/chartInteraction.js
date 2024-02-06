@@ -2,6 +2,19 @@ import { GLOBAL_STATE, dispatch } from "../state";
 import { pan } from "./chartPanZoom";
 import { computeDraftMask } from "../chart/helpers";
 
+export function updateFashioning(index, val) {
+  const newBounds = [...GLOBAL_STATE.boundary];
+  newBounds[index][2] = val;
+
+  let chart = computeDraftMask(newBounds);
+
+  dispatch({
+    boundary: newBounds,
+    shapingMask: chart,
+    yarnSequence: Array.from({ length: chart.height }, () => [0]),
+  });
+}
+
 function addPoint(e) {
   const rect = e.currentTarget.getBoundingClientRect();
 
@@ -130,6 +143,8 @@ export function chartPointerDown(e) {
     dragPoint(e);
   } else if (e.target.classList.contains("path")) {
     dragPath(e);
+  } else if (e.target.classList.contains("dragger")) {
+    return;
   } else if (GLOBAL_STATE.activeTool == "hand") {
     pan(e);
   }

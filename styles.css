@@ -250,6 +250,22 @@ canvas {
   pointer-events: all;
 }
 
+.sloper-container {
+  position: absolute;
+  box-shadow: 0 0 5px black;
+  background-color: var(--base13);
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.fashioning-input {
+  flex: 1;
+  width: 40px;
+}
+
 .path.warn {
   stroke: rgb(195, 52, 52);
   pointer-events: all;
