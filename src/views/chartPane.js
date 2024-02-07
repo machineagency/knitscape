@@ -29,13 +29,13 @@ function toolbar() {
       <i class="fa-solid fa-minus"></i>
     </button>
     <button
-      class="btn solid ${GLOBAL_STATE.activeTool == "rect" ? "current" : ""}"
-      @click=${() => (GLOBAL_STATE.activeTool = "rect")}>
+      class="btn solid ${GLOBAL_STATE.activeTool == "select" ? "current" : ""}"
+      @click=${() => (GLOBAL_STATE.activeTool = "select")}>
       <i class="fa-solid fa-vector-square"></i>
     </button>
     <button
-      class="btn solid ${GLOBAL_STATE.activeTool == "direct" ? "current" : ""}"
-      @click=${() => (GLOBAL_STATE.activeTool = "direct")}>
+      class="btn solid ${GLOBAL_STATE.activeTool == "pointer" ? "current" : ""}"
+      @click=${() => (GLOBAL_STATE.activeTool = "pointer")}>
       <i class="fa-solid fa-arrow-pointer"></i>
     </button>
     <button class="btn icon" @click=${(e) => fitDraft(svgRef.value)}>
@@ -55,11 +55,11 @@ const gridPattern = (cellWidth, cellHeight) => svg`
       </pattern>`;
 
 export function chartPaneView() {
+  const { stitchSelect, scale, stitchGauge, rowGauge } = GLOBAL_STATE;
+
   const { x, y } = GLOBAL_STATE.chartPan;
-  const scale = GLOBAL_STATE.scale;
   const chart = GLOBAL_STATE.shapingMask;
   const bbox = polygonBbox(GLOBAL_STATE.boundary);
-  const { stitchGauge, rowGauge } = GLOBAL_STATE;
 
   const chartWidth = Math.round((scale * chart.width) / stitchGauge);
   const chartHeight = Math.round((scale * chart.height) / rowGauge);
@@ -109,7 +109,6 @@ export function chartPaneView() {
             ${cellHeight < 10
               ? ""
               : svg`<rect
-
             width=${chartWidth}
             height=${chartHeight}
             fill="url(#grid)"></rect>`}
@@ -120,6 +119,17 @@ export function chartPaneView() {
               1})"
               width=${cellWidth - 1}
               height=${cellHeight - 1}></rect>
+            ${GLOBAL_STATE.stitchSelect
+              ? svg`<rect
+              class="stitch-select"
+              transform="translate(${stitchSelect[0][0] * cellWidth + 1} ${
+                  stitchSelect[0][1] * cellHeight + 1
+                })"
+              width=${(stitchSelect[1][0] - stitchSelect[0][0]) * cellWidth - 1}
+              height=${
+                (stitchSelect[1][1] - stitchSelect[0][1]) * cellHeight - 1
+              }></rect>`
+              : ""}
           </g>
           <g transform="translate(${x} ${y})">
             <g transform="scale(${scale})">

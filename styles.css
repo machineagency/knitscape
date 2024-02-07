@@ -244,19 +244,10 @@ canvas {
   pointer-events: all;
 }
 
-.point.annotation {
-  fill: rgb(45, 23, 70);
-  stroke: rgb(45, 23, 70);
-}
-
 .path {
   stroke: rgb(52, 145, 195);
   cursor: grab;
   pointer-events: all;
-}
-
-.path.annotation {
-  stroke: rgb(45, 23, 70);
 }
 
 .sloper-container {
@@ -275,9 +266,22 @@ canvas {
   width: 40px;
 }
 
-.path.warn {
-  stroke: rgb(195, 52, 52);
+.annotation-point {
+  fill: rgb(45, 23, 70);
+  stroke: rgb(45, 23, 70);
   pointer-events: all;
+}
+
+.annotation-path {
+  stroke: rgb(45, 23, 70);
+  pointer-events: all;
+}
+
+.stitch-select {
+  stroke: white;
+  stroke-width: 4px;
+  stroke-dasharray: 10 4;
+  fill: #ffffff49;
 }
 
 /* #endregion */

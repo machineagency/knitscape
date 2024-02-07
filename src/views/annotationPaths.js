@@ -9,15 +9,15 @@ export function annotationPaths() {
   let geom = [];
 
   for (let p = 0; p < paths.length; p++) {
-    const numPts = paths[p].length;
+    const numPts = paths[p].length - 1;
     for (let i = 0; i < numPts; i++) {
       let [x1, y1, f] = paths[p][i];
-      let [x2, y2] = paths[p][(i + 1) % numPts];
+      let [x2, y2] = paths[p][i + 1];
       geom.push(
         svg`<line
-      class="path annotation"
-      data-index="${i}"
-      data-fashioning="${f}"
+      class="annotation-path"
+      data-pathindex=${p}
+      data-pointindex=${i}
       stroke-width=${PATH_STROKE_WIDTH / scale}
       x1=${x1}
       y1=${y1}
@@ -32,8 +32,9 @@ export function annotationPaths() {
     for (let i = 0; i < numPts; i++) {
       geom.push(
         svg`<circle
-      class="point annotation"
-      data-index="${i}"
+      class="annotation-point"
+      data-pathindex=${p}
+      data-pointindex="${i}"
       cx="${paths[p][i][0]}"
       cy="${paths[p][i][1]}"
       stroke-width="${POINT_STROKE_WIDTH / scale}"

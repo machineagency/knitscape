@@ -1,5 +1,5 @@
 import { bmp_lib } from "../lib/bmp";
-import { dispatch, GLOBAL_STATE } from "../state";
+import { dispatch } from "../state";
 
 export function closeModals() {
   // Close all modals (e.g., on escape or click outside taskbar)
@@ -8,6 +8,10 @@ export function closeModals() {
     showSettings: false,
     showDownload: false,
   });
+}
+
+export function clearSelection() {
+  dispatch({ stitchSelect: null });
 }
 
 export function setCanvasSize(canvas, width, height) {

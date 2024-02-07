@@ -1,6 +1,6 @@
 import { GLOBAL_STATE } from "../state";
 import { svg, html } from "lit-html";
-import { updateFashioning } from "../interaction/chartInteraction";
+import { updateFashioning } from "../interaction/boundaries";
 
 const POINT_RADIUS = 8;
 const POINT_STROKE_WIDTH = 2;
@@ -53,15 +53,6 @@ export function shapingPaths() {
       x2=${x2}
       y2=${y2}>`
     );
-
-    // geom.push(svg`
-    // <g transform="scale(1 -1) translate(${(x1 + x2) / 2}, ${(y1 + y2) / -2})" >
-    //   <foreignobject transform="scale(${1 / scale})" width="50" height="30">
-    //   <div class="dragger-container">
-    //       <input class="dragger" type="range" style="width: 100%;"/>
-    //   </div>
-    //   </foreignobject>
-    // </g>`);
   }
 
   for (let i = 0; i < numPts; i++) {

@@ -12,6 +12,7 @@ let GLOBAL_STATE = {
 
   desktopPointerPos: [0, 0],
 
+  locked: false,
   activeTool: "line",
   activeSymbol: 1,
 
@@ -22,8 +23,12 @@ let GLOBAL_STATE = {
     [5, 0, 0],
   ],
 
+  stitchSelect: null,
+
   regions: [],
   paths: [],
+
+  blocks: [],
 
   shapingMask: Bimp.empty(10, 10, 1),
 
@@ -40,7 +45,6 @@ let GLOBAL_STATE = {
   yarnWidth: 0.24,
   yarnExpanded: false,
   yarnSequence: null,
-  // yarnSequence: new Bimp(1, 2, [0, 1]),
   yarnSelections: [],
 
   reverseScroll: false,
