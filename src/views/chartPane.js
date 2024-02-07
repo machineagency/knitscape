@@ -11,11 +11,12 @@ import {
 import { zoom, fitDraft } from "../interaction/chartPanZoom";
 import { yarnPanel } from "./yarnPanel";
 import { shapingPaths, pathAnnotations } from "./shapingPaths";
+import { annotationPaths } from "./annotationPaths";
 import { currentTargetPointerPos } from "../utilities/misc";
 
 let svgRef = createRef();
 
-function shapingToolbar() {
+function toolbar() {
   return html`<div class="tool-picker">
     <button
       class="btn solid ${GLOBAL_STATE.activeTool == "hand" ? "current" : ""}"
@@ -25,7 +26,12 @@ function shapingToolbar() {
     <button
       class="btn solid ${GLOBAL_STATE.activeTool == "line" ? "current" : ""}"
       @click=${() => (GLOBAL_STATE.activeTool = "line")}>
-      <i class="fa-solid fa-draw-polygon"></i>
+      <i class="fa-solid fa-minus"></i>
+    </button>
+    <button
+      class="btn solid ${GLOBAL_STATE.activeTool == "rect" ? "current" : ""}"
+      @click=${() => (GLOBAL_STATE.activeTool = "rect")}>
+      <i class="fa-solid fa-vector-square"></i>
     </button>
     <button
       class="btn solid ${GLOBAL_STATE.activeTool == "direct" ? "current" : ""}"
@@ -72,7 +78,7 @@ export function chartPaneView() {
   );
 
   return html`
-    ${shapingToolbar()} ${yarnPanel(chartY, chartHeight)}
+    ${toolbar()} ${yarnPanel(chartY, chartHeight)}
     <div
       class="desktop"
       @pointermove=${(e) =>
@@ -116,7 +122,9 @@ export function chartPaneView() {
               height=${cellHeight - 1}></rect>
           </g>
           <g transform="translate(${x} ${y})">
-            <g transform="scale(${scale})">${shapingPaths()}</g>
+            <g transform="scale(${scale})">
+              ${shapingPaths()}${annotationPaths()}
+            </g>
           </g>
         </g>
       </svg>

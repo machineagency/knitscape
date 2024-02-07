@@ -244,10 +244,19 @@ canvas {
   pointer-events: all;
 }
 
+.point.annotation {
+  fill: rgb(45, 23, 70);
+  stroke: rgb(45, 23, 70);
+}
+
 .path {
   stroke: rgb(52, 145, 195);
   cursor: grab;
   pointer-events: all;
+}
+
+.path.annotation {
+  stroke: rgb(45, 23, 70);
 }
 
 .sloper-container {

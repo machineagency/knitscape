@@ -1,6 +1,7 @@
 import { GLOBAL_STATE, dispatch } from "../state";
 import { pan } from "./chartPanZoom";
 import { computeDraftMask } from "../chart/helpers";
+import { drawLine } from "./lines";
 
 export function updateFashioning(index, val) {
   const newBounds = [...GLOBAL_STATE.boundary];
@@ -139,7 +140,9 @@ export function dragPath(e) {
 }
 
 export function chartPointerDown(e) {
-  if (e.target.classList.contains("point")) {
+  if (GLOBAL_STATE.activeTool == "line") {
+    drawLine(e);
+  } else if (e.target.classList.contains("point")) {
     dragPoint(e);
   } else if (e.target.classList.contains("path")) {
     dragPath(e);

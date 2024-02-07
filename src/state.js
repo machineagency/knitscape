@@ -12,7 +12,7 @@ let GLOBAL_STATE = {
 
   desktopPointerPos: [0, 0],
 
-  activeTool: "hand",
+  activeTool: "line",
   activeSymbol: 1,
 
   boundary: [
@@ -21,6 +21,9 @@ let GLOBAL_STATE = {
     [4, 4, 1],
     [5, 0, 0],
   ],
+
+  regions: [],
+  paths: [],
 
   shapingMask: Bimp.empty(10, 10, 1),
 
