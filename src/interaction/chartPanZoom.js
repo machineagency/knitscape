@@ -80,7 +80,7 @@ export function zoom(e) {
   zoomAtPoint(
     {
       x: e.clientX - bounds.left,
-      y: e.clientY - bounds.top,
+      y: bounds.height - e.clientY - bounds.top,
     },
     scale
   );

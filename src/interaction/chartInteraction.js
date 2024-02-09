@@ -7,6 +7,10 @@ import { addPoint, deletePoint, dragPath, dragPoint } from "./boundaries";
 import { selectBox } from "./select";
 
 export function chartPointerDown(e) {
+  if (e.which == 2) {
+    pan(e);
+    return;
+  }
   if (GLOBAL_STATE.locked) return;
   if (GLOBAL_STATE.activeTool == "line") {
     drawLine(e);

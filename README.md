@@ -4,19 +4,13 @@ KnitScape is a design and simulation tool for knitting patterns.
 
 ## features
 
-bugs/fixes
+-
 
-- scanline is a bit off for some reason
-- In sim, shouldn't regenerate yarn topology/cancel relaxation on zoom or when
-  yarn colors are changed
-- flip button doesn't reverse stacking order
-
-todo
+## todo
 
 - global
   - edit overall gauge
 - silhouette
-  - different line types: short rows, cast on/bind off, waste yarn, fashioned?
   - drag line
   - remove points
   - curves
@@ -29,21 +23,33 @@ todo
 - stitch painter
   - select areas
   - repeat editor
-- simulation
 
-- misc/icebox
-  - synchronized simulation/chart view mode (pan/zoom updates both views)
+## ideas
 
-<!-- - Add and edit multiple repeats in chart view
-  - Resize and position base repeat
-  - Resize repeat area
-  - Edit repeat can contain four operations (knit, purl, tuck slip)
-- Edit color sequence
-  - Edit yarn colors directly, add/remove yarns
-  - shuffle color indices, randomize colors
-- 2D yarn relaxation simulation
-  - renders to canvas with D3 force simulation
-  - flip simulation swatch (view "wrong" or "right" side)
-- Importing and exporting
-  - Export to JSON, PNG, and SilverKnit's TXT format
-  - Import patterns from JSON and pattern library -->
+- synchronized simulation/chart view mode (pan/zoom updates both views)
+- different line types: short rows, cast on/bind off, waste yarn, fashioned?
+
+## bugs, fixes
+
+- scanline is a bit off for some reason
+- In sim, shouldn't regenerate yarn topology/cancel relaxation on zoom or when
+  yarn colors are changed
+- flip button doesn't reverse stacking order
+- edge node layout is not correct in sim
+
+## primitives (figuring this out)
+
+- stitch
+  - individual operations
+- paths
+  - drawn in real-world dimensions
+- boundaries
+  - a closed path
+- stitch blocks
+  - structuring elements -> rectangular arrays, origin+width+height
+  - select an area and paint with stitch pattern
+- stitch paths
+  - select stitch block and path to make a stitch path
+  - constrain slope to whole-number stitch slopes, e.g. 3/1, 5/2 ?
+- stitch region
+  - a boundary filled with a stitch block

@@ -140,7 +140,7 @@ export function chartPaneView() {
       </svg>
       <div
         style="position: absolute; bottom: 0; left: 0;
-      transform: translate(${chartX}px, ${-chartY}px);">
+      transform: translate(${x}px, ${-y}px);">
         ${pathAnnotations()}
       </div>
     </div>

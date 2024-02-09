@@ -13,7 +13,7 @@ let GLOBAL_STATE = {
   desktopPointerPos: [0, 0],
 
   locked: false,
-  activeTool: "line",
+  activeTool: "pointer",
   activeSymbol: 1,
 
   boundary: [

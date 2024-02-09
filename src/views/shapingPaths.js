@@ -1,4 +1,4 @@
-import { GLOBAL_STATE } from "../state";
+import { GLOBAL_STATE as state } from "../state";
 import { svg, html } from "lit-html";
 import { updateFashioning } from "../interaction/boundaries";
 
@@ -7,8 +7,8 @@ const POINT_STROKE_WIDTH = 2;
 const PATH_STROKE_WIDTH = 4;
 
 export function pathAnnotations() {
-  let pts = GLOBAL_STATE.boundary;
-  let scale = GLOBAL_STATE.scale;
+  const { boundary: pts, scale, stitchGauge, rowGauge } = state;
+
   let numPts = pts.length;
   let geom = [];
 
@@ -16,11 +16,18 @@ export function pathAnnotations() {
     let [x1, y1, f] = pts[i];
     let [x2, y2] = pts[(i + 1) % numPts];
 
+    let rise = ((y2 - y1) * rowGauge).toFixed(2);
+    let run = ((x2 - x1) * stitchGauge).toFixed(2);
+
+    let length = Math.sqrt(rise * rise + run * run).toFixed(2);
+
     geom.push(html` <div
-      class="sloper-container"
+      class="path-annotation"
       style="transform: translate(${(scale * (x1 + x2)) / 2}px, ${(scale *
         (y1 + y2)) /
       -2}px)">
+      <div class="stitch-slope"><span>${rise}/${run}</span></div>
+      <span>${length}"</span>
       <input
         type="number"
         class="fashioning-input"
@@ -34,8 +41,8 @@ export function pathAnnotations() {
 }
 
 export function shapingPaths() {
-  let pts = GLOBAL_STATE.boundary;
-  let scale = GLOBAL_STATE.scale;
+  let pts = state.boundary;
+  let scale = state.scale;
   let numPts = pts.length;
   let geom = [];
 

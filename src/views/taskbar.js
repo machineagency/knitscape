@@ -49,10 +49,23 @@ function settingsModal() {
     <h2>Settings</h2>
 
     <div class="modal-content">
+      <label class="form-control">
+        <input
+          type="number"
+          .value=${String(GLOBAL_STATE.rowGauge)}
+          @change=${(e) => dispatch({ rowGauge: Number(e.target.value) })} />
+        rows per inch
+      </label>
+      <label class="form-control">
+        <input
+          type="number"
+          .value=${String(GLOBAL_STATE.stitchGauge)}
+          @change=${(e) => dispatch({ stitchGauge: Number(e.target.value) })} />
+        stitches per inch
+      </label>
       <label class="form-control toggle">
         <input
           type="checkbox"
-          name="debug"
           ?checked=${GLOBAL_STATE.reverseScroll}
           @change=${(e) => dispatch({ reverseScroll: e.target.checked })} />
         Invert Scroll
