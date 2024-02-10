@@ -2,7 +2,7 @@ import { html, svg } from "lit-html";
 import { ref, createRef } from "lit-html/directives/ref.js";
 import { GLOBAL_STATE, dispatch } from "../state";
 
-import { polygonBbox, computeDraftMask } from "../chart/helpers";
+import { polygonBbox, scanlineFill } from "../charting/helpers";
 
 import {
   chartContextMenu,
@@ -150,7 +150,11 @@ export function chartPaneView() {
 function init() {
   if (!svgRef.value) return;
   setTimeout(() => fitDraft(svgRef.value));
-  let chart = computeDraftMask(GLOBAL_STATE.boundary);
+  let chart = scanlineFill(
+    GLOBAL_STATE.boundary,
+    GLOBAL_STATE.stitchGauge,
+    GLOBAL_STATE.rowGauge
+  );
   dispatch({
     shapingMask: chart,
     yarnSequence: Array.from({ length: chart.height }, () => [0]),

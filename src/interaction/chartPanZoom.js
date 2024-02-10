@@ -1,5 +1,5 @@
 import { GLOBAL_STATE, dispatch } from "../state";
-import { polygonBbox } from "../chart/helpers";
+import { polygonBbox } from "../charting/helpers";
 
 function zoomAtPoint(pt, scale) {
   const start = {

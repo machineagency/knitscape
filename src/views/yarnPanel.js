@@ -2,7 +2,7 @@ import { html, svg } from "lit-html";
 
 import { GLOBAL_STATE, dispatch } from "../state";
 import { yarnInteraction } from "../interaction/yarnInteraction";
-import { editYarnColor, deleteYarn, addRandomYarn } from "../chart/yarn";
+import { editYarnColor, deleteYarn, addRandomYarn } from "../charting/yarn";
 
 export function yarnPanel(chartY, chartHeight) {
   const panelWidth = GLOBAL_STATE.yarnExpanded

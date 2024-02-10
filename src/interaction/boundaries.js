@@ -1,11 +1,15 @@
-import { computeDraftMask } from "../chart/helpers";
+import { scanlineFill } from "../charting/helpers";
 import { GLOBAL_STATE, dispatch } from "../state";
 
 export function updateFashioning(index, val) {
   const newBounds = [...GLOBAL_STATE.boundary];
   newBounds[index][2] = val;
 
-  let chart = computeDraftMask(newBounds);
+  let chart = scanlineFill(
+    newBounds,
+    GLOBAL_STATE.stitchGauge,
+    GLOBAL_STATE.rowGauge
+  );
 
   dispatch({
     boundary: newBounds,
@@ -35,10 +39,14 @@ export function addPoint(e) {
 export function deletePoint(e) {
   const index = Number(e.target.dataset.index);
 
-  const newShape = [...GLOBAL_STATE.boundary];
-  newShape.splice(index, 1);
+  const newBounds = [...GLOBAL_STATE.boundary];
+  newBounds.splice(index, 1);
 
-  let chart = computeDraftMask(newShape);
+  let chart = scanlineFill(
+    newBounds,
+    GLOBAL_STATE.stitchGauge,
+    GLOBAL_STATE.rowGauge
+  );
 
   dispatch({
     boundary: newShape,
@@ -59,17 +67,21 @@ export function dragPoint(e) {
     } else {
       const dx = startPos.x - e.clientX;
       const dy = startPos.y - e.clientY;
-      let newShape = [...GLOBAL_STATE.boundary];
-      newShape[index] = [
+      let newBounds = [...GLOBAL_STATE.boundary];
+      newBounds[index] = [
         x - dx / GLOBAL_STATE.scale,
         y + dy / GLOBAL_STATE.scale,
         fashioning,
       ];
 
-      let chart = computeDraftMask(newShape);
+      let chart = scanlineFill(
+        newBounds,
+        GLOBAL_STATE.stitchGauge,
+        GLOBAL_STATE.rowGauge
+      );
 
       dispatch({
-        boundary: newShape,
+        boundary: newBounds,
         shapingMask: chart,
         yarnSequence: Array.from({ length: chart.height }, () => [0]),
       });
@@ -116,7 +128,11 @@ export function dragPath(e) {
         f1,
       ];
 
-      let chart = computeDraftMask(updated);
+      let chart = scanlineFill(
+        updated,
+        GLOBAL_STATE.stitchGauge,
+        GLOBAL_STATE.rowGauge
+      );
 
       dispatch({
         boundary: updated,

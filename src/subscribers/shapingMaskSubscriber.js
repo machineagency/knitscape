@@ -1,4 +1,4 @@
-import { drawShapingMask } from "../chart/drawing";
+import { drawShapingMask } from "../charting/drawing";
 import { setCanvasSize } from "../utilities/misc";
 
 export function shapingMaskSubscriber() {

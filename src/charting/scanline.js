@@ -1,5 +1,6 @@
-import { toChartCoords } from "./helpers";
+import { toChartCoords, polygonBbox } from "./helpers";
 import { stitches } from "../constants";
+import { Bimp } from "../lib/Bimp";
 
 function addEdge(edgeTable, [x1, y1], [x2, y2], f) {
   if (y1 > y2) {
@@ -18,7 +19,15 @@ function addEdge(edgeTable, [x1, y1], [x2, y2], f) {
   });
 }
 
-export function scanlineFill(bbox, shape, chart) {
+export function scanlineFill(bbox, shape, stitchGauge, rowGauge) {
+  const bbox = polygonBbox(boundary);
+
+  let chart = Bimp.empty(
+    Math.ceil(stitchGauge * bbox.width),
+    Math.ceil(rowGauge * bbox.height),
+    0
+  ); // Make a chart that contains the shaping paths
+
   const points = shape.map((pt) => toChartCoords(pt, bbox, chart));
   let edges = [];
 
