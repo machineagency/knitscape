@@ -261,9 +261,86 @@ canvas {
   pointer-events: all;
 }
 
+/* #endregion */
+
+/* #region STITCH SELECT */
+
+.stitch-select-box {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stitch-select-box > svg {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+
 .stitch-select {
   stroke: white;
-  stroke-width: 4px;
+  stroke-width: 8px;
+  stroke-dasharray: 10 4;
+  fill: #ffffff49;
+}
+
+.add-stitch-block {
+  z-index: 1;
+  padding: 5px;
+  line-height: 1;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* #endregion */
+
+/* #region STITCH BLOCKS */
+
+.stitch-block {
+  position: absolute;
+  outline: 1px solid white;
+  border: 1px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stitch-block-toolbar {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  display: flex;
+  text-wrap: nowrap;
+  gap: 0.4em;
+  padding: 0.4em;
+  border-radius: 12px;
+  box-shadow: 0 0 4px 0 black;
+  background-color: var(--base1);
+  z-index: 10;
+  align-items: center;
+}
+
+.stitch-block-toolbar > button {
+  cursor: pointer;
+}
+
+.stitch-block-toolbar .btn.current {
+  background-color: var(--accent);
+  color: var(--base2);
+}
+
+.stitch-block:hover .stitch-block-hover {
+  display: block;
+}
+
+.stitch-block-hover {
+  display: none;
+  position: absolute;
+}
+
+.block-outline {
+  stroke: white;
+  stroke-width: 8px;
   stroke-dasharray: 10 4;
   fill: #ffffff49;
 }

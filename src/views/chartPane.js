@@ -1,5 +1,6 @@
 import { html, svg } from "lit-html";
 import { ref, createRef } from "lit-html/directives/ref.js";
+import { when } from "lit-html/directives/when.js";
 import { GLOBAL_STATE, dispatch } from "../state";
 
 import { polygonBbox, scanlineFill } from "../charting/helpers";
@@ -13,6 +14,9 @@ import { yarnPanel } from "./yarnPanel";
 import { shapingPaths, pathAnnotations } from "./shapingPaths";
 import { annotationPaths } from "./annotationPaths";
 import { currentTargetPointerPos } from "../utilities/misc";
+import { stitchSelectToolbar } from "./stitchSelection";
+import { stitchBlocks } from "./stitchBlocks";
+import { gridPattern } from "./grid";
 
 let svgRef = createRef();
 
@@ -44,38 +48,27 @@ function toolbar() {
   </div>`;
 }
 
-const gridPattern = (cellWidth, cellHeight) => svg`
-      <pattern
-        id="grid"
-        width="${cellWidth}"
-        height="${cellHeight}"
-        patternUnits="userSpaceOnUse">
-        <line stroke-width="1px" stroke="black" x1="0" y1="0" x2="${cellWidth}" y2="0"></line>
-        <line stroke-width="1px" stroke="black" x1="0" y1="0" x2="0" y2="${cellHeight}"></line>
-      </pattern>`;
-
 export function chartPaneView() {
-  const { stitchSelect, scale, stitchGauge, rowGauge } = GLOBAL_STATE;
+  const {
+    scale,
+    cellWidth,
+    cellHeight,
+    chartPan: { x, y },
+    shapingMask: chart,
+    boundary,
+    desktopPointerPos,
+  } = GLOBAL_STATE;
 
-  const { x, y } = GLOBAL_STATE.chartPan;
-  const chart = GLOBAL_STATE.shapingMask;
-  const bbox = polygonBbox(GLOBAL_STATE.boundary);
+  const bbox = polygonBbox(boundary);
 
-  const chartWidth = Math.round((scale * chart.width) / stitchGauge);
-  const chartHeight = Math.round((scale * chart.height) / rowGauge);
+  const chartWidth = Math.round(cellWidth * chart.width);
+  const chartHeight = Math.round(cellHeight * chart.height);
 
   const chartX = Math.round(x + bbox.xMin * scale);
   const chartY = Math.round(y + bbox.yMin * scale);
 
-  const cellWidth = scale / stitchGauge;
-  const cellHeight = scale / rowGauge;
-
-  let pointerX = Math.floor(
-    (GLOBAL_STATE.desktopPointerPos[0] - chartX) / cellWidth
-  );
-  let pointerY = Math.floor(
-    (GLOBAL_STATE.desktopPointerPos[1] - chartY) / cellHeight
-  );
+  let pointerX = Math.floor((desktopPointerPos[0] - chartX) / cellWidth);
+  let pointerY = Math.floor((desktopPointerPos[1] - chartY) / cellHeight);
 
   return html`
     ${toolbar()} ${yarnPanel(chartY, chartHeight)}
@@ -119,17 +112,6 @@ export function chartPaneView() {
               1})"
               width=${cellWidth - 1}
               height=${cellHeight - 1}></rect>
-            ${GLOBAL_STATE.stitchSelect
-              ? svg`<rect
-              class="stitch-select"
-              transform="translate(${stitchSelect[0][0] * cellWidth + 1} ${
-                  stitchSelect[0][1] * cellHeight + 1
-                })"
-              width=${(stitchSelect[1][0] - stitchSelect[0][0]) * cellWidth - 1}
-              height=${
-                (stitchSelect[1][1] - stitchSelect[0][1]) * cellHeight - 1
-              }></rect>`
-              : ""}
           </g>
           <g transform="translate(${x} ${y})">
             <g transform="scale(${scale})">
@@ -142,6 +124,8 @@ export function chartPaneView() {
         style="position: absolute; bottom: 0; left: 0;
       transform: translate(${x}px, ${-y}px);">
         ${pathAnnotations()}
+        ${when(GLOBAL_STATE.stitchSelect, stitchSelectToolbar)}
+        ${stitchBlocks()}
       </div>
     </div>
   `;

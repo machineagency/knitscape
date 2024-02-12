@@ -1,8 +1,13 @@
 import { SYMBOL_DATA, STITCH_MAP } from "../constants";
 
-export function drawShapingMask(canvas, chart, cellX, cellY, lastDrawn = null) {
-  const width = chart.width;
-  const height = chart.height;
+export function drawChart(
+  canvas,
+  chart,
+  cellWidth,
+  cellHeight,
+  lastDrawn = null
+) {
+  const { width, height } = chart;
 
   const ctx = canvas.getContext("2d");
 
@@ -12,8 +17,8 @@ export function drawShapingMask(canvas, chart, cellX, cellY, lastDrawn = null) {
 
       if (lastDrawn == null || lastDrawn.pixel(x, y) != paletteIndex) {
         ctx.save();
-        ctx.translate(x * cellX, (height - y - 1) * cellY);
-        ctx.scale(cellX, cellY);
+        ctx.translate(x * cellWidth, (height - y - 1) * cellHeight);
+        ctx.scale(cellWidth, cellHeight);
         ctx.fillStyle = SYMBOL_DATA[STITCH_MAP[chart.pixel(x, y)]].color;
         ctx.fillRect(0, 0, 1, 1);
         ctx.restore();

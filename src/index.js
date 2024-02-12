@@ -4,7 +4,10 @@ import { html, render } from "lit-html";
 import { StateMonitor } from "./state";
 
 import { runSimulation } from "./subscribers/runSimulation";
-import { shapingMaskSubscriber } from "./subscribers/shapingMaskSubscriber";
+import {
+  shapingMaskSubscriber,
+  blockSubscriber,
+} from "./subscribers/shapingMaskSubscriber";
 
 import { taskbar } from "./views/taskbar";
 import { simulationView } from "./views/simulationPane";
@@ -19,7 +22,7 @@ import { closeModals } from "./utilities/misc";
 //   </div>`;
 // }
 
-function view() {
+export function view() {
   return html`
     ${taskbar()}
 
@@ -58,7 +61,13 @@ function init() {
   window.addEventListener("keydown", globalKeydown);
   window.addEventListener("keyup", globalKeyup);
 
-  StateMonitor.register([shapingMaskSubscriber(), runSimulation()]);
+  StateMonitor.requestRender = () => render(view(), document.body);
+
+  StateMonitor.register([
+    shapingMaskSubscriber(),
+    blockSubscriber(),
+    runSimulation(),
+  ]);
 
   measureWindow();
 }

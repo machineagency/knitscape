@@ -5,11 +5,11 @@ import { yarnInteraction } from "../interaction/yarnInteraction";
 import { editYarnColor, deleteYarn, addRandomYarn } from "../charting/yarn";
 
 export function yarnPanel(chartY, chartHeight) {
-  const panelWidth = GLOBAL_STATE.yarnExpanded
-    ? GLOBAL_STATE.yarnPalette.length * 30
-    : GLOBAL_STATE.yarnPalette.length * 10;
+  const { cellHeight, yarnPalette, yarnExpanded } = GLOBAL_STATE;
 
-  const cellHeight = GLOBAL_STATE.scale / GLOBAL_STATE.rowGauge;
+  const panelWidth = yarnExpanded
+    ? yarnPalette.length * 30
+    : yarnPalette.length * 10;
 
   return html` <div class="yarn-panel" style="width: ${panelWidth}px">
     <div
@@ -23,11 +23,8 @@ export function yarnPanel(chartY, chartHeight) {
     </div>
     <button
       class="yarn-panel-toggle btn"
-      @click=${() => dispatch({ yarnExpanded: !GLOBAL_STATE.yarnExpanded })}>
-      <i
-        class="fa-solid fa-angles-${GLOBAL_STATE.yarnExpanded
-          ? "left"
-          : "right"}"></i>
+      @click=${() => dispatch({ yarnExpanded: !yarnExpanded })}>
+      <i class="fa-solid fa-angles-${yarnExpanded ? "left" : "right"}"></i>
     </button>
 
     <button class="add-yarn btn" @click=${addRandomYarn}>
@@ -39,12 +36,13 @@ export function yarnPanel(chartY, chartHeight) {
 }
 
 function drawYarnSelectBox() {
+  const { cellHeight } = GLOBAL_STATE;
+
   return GLOBAL_STATE.yarnSelections.map(
     ([start, end], index) => html`<div
       data-selectindex=${index}
-      style="bottom: ${(start * GLOBAL_STATE.scale) /
-      GLOBAL_STATE.rowGauge}px; height: ${((end - start) * GLOBAL_STATE.scale) /
-      GLOBAL_STATE.rowGauge}px;"
+      style="bottom: ${start * cellHeight}px; height: ${(end - start) *
+      cellHeight}px;"
       class="yarn-select-box"></div>`
   );
 }

@@ -16,7 +16,10 @@ const hotkeys = {
   ),
 
   // UI
-  Escape: closeModals,
+  Escape: () => {
+    dispatch({ editingBlock: null });
+    closeModals();
+  },
 };
 
 function numberPressed(num) {

@@ -1,21 +1,6 @@
 import { GLOBAL_STATE, dispatch } from "../state";
 import { polygonBbox } from "../charting/helpers";
 
-function zoomAtPoint(pt, scale) {
-  const start = {
-    x: (pt.x - GLOBAL_STATE.chartPan.x) / GLOBAL_STATE.scale,
-    y: (pt.y - GLOBAL_STATE.chartPan.y) / GLOBAL_STATE.scale,
-  };
-
-  dispatch({
-    scale,
-    chartPan: {
-      x: Math.round(pt.x - start.x * scale),
-      y: Math.round(pt.y - start.y * scale),
-    },
-  });
-}
-
 export function pan(e) {
   const startPos = { x: e.clientX, y: e.clientY };
   const startPan = GLOBAL_STATE.chartPan;
@@ -48,7 +33,9 @@ export function pan(e) {
 }
 
 export function fitDraft(parent) {
-  const bbox = polygonBbox(GLOBAL_STATE.boundary);
+  const { stitchGauge, rowGauge, boundary } = GLOBAL_STATE;
+
+  const bbox = polygonBbox(boundary);
   const { width, height } = parent.getBoundingClientRect();
   const scale = Math.floor(
     0.9 *
@@ -57,9 +44,30 @@ export function fitDraft(parent) {
 
   dispatch({
     scale,
+    cellWidth: scale / stitchGauge,
+    cellHeight: scale / rowGauge,
     chartPan: {
       x: Math.round((width - scale * bbox.width) / 2),
       y: Math.round((height - scale * bbox.height) / 2),
+    },
+  });
+}
+
+function zoomAtPoint(pt, newScale) {
+  const { chartPan, stitchGauge, rowGauge, scale } = GLOBAL_STATE;
+
+  const start = {
+    x: (pt.x - chartPan.x) / scale,
+    y: (pt.y - chartPan.y) / scale,
+  };
+
+  dispatch({
+    scale: newScale,
+    cellWidth: newScale / stitchGauge,
+    cellHeight: newScale / rowGauge,
+    chartPan: {
+      x: Math.round(pt.x - start.x * newScale),
+      y: Math.round(pt.y - start.y * newScale),
     },
   });
 }
@@ -77,6 +85,7 @@ export function zoom(e) {
       ? GLOBAL_STATE.scale * 1.1
       : GLOBAL_STATE.scale * 0.9;
   }
+
   zoomAtPoint(
     {
       x: e.clientX - bounds.left,

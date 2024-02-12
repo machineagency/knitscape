@@ -28,12 +28,17 @@ let GLOBAL_STATE = {
   regions: [],
   paths: [],
 
-  blocks: [],
+  blocks: {},
+  editingBlock: null,
+  activeBlockTool: "brush",
+  activeSymbol: 2,
 
   shapingMask: Bimp.empty(10, 10, 1),
 
   scale: 15, // Number of pixels for each chart cell
   chartPan: { x: 0, y: 0 }, // Pan value for the chart editor view
+  cellWidth: 15 / 7,
+  cellHeight: 15 / 11,
 
   // SIMULATION
   simScale: 1,
@@ -118,9 +123,16 @@ function undo() {
   StateMonitor.syncState(GLOBAL_STATE, changes);
 }
 
-function dispatch(action) {
+function dispatch(action, requestRender = false) {
   const changes = Object.keys(action);
-  StateMonitor.syncState(updateState(action), changes);
+
+  if (requestRender) {
+    updateState(action);
+    StateMonitor.requestRender();
+    StateMonitor.syncState(GLOBAL_STATE, changes);
+  } else {
+    StateMonitor.syncState(updateState(action), changes);
+  }
 }
 
 const StateMonitor = (() => {
@@ -134,7 +146,7 @@ const StateMonitor = (() => {
 
   function register(componentArr) {
     componentArr.forEach((component) =>
-      components.push(component({ state: GLOBAL_STATE, dispatch }))
+      components.push(component({ state: GLOBAL_STATE }))
     );
   }
 
