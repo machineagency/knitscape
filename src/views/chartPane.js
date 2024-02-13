@@ -16,6 +16,7 @@ import { annotationPaths } from "./annotationPaths";
 import { currentTargetPointerPos } from "../utilities/misc";
 import { stitchBlocks, stitchSelectBox } from "./stitchBlockView";
 import { gridPattern } from "./grid";
+import { operationPicker } from "./operationPicker";
 
 let svgRef = createRef();
 
@@ -56,6 +57,7 @@ export function chartPaneView() {
     shapingMask: chart,
     boundary,
     desktopPointerPos,
+    editingBlock,
   } = GLOBAL_STATE;
 
   const bbox = polygonBbox(boundary);
@@ -105,6 +107,10 @@ export function chartPaneView() {
             height=${chartHeight}
             fill="url(#grid)"></rect>`}
             <rect
+              width=${chartWidth}
+              height=${chartHeight}
+              fill=${editingBlock ? "#00000033" : "transparent"}></rect>
+            <rect
               class="pointer-highlight"
               transform="translate(${pointerX * cellWidth + 1} ${pointerY *
                 cellHeight +
@@ -125,6 +131,7 @@ export function chartPaneView() {
         ${pathAnnotations()} ${when(GLOBAL_STATE.stitchSelect, stitchSelectBox)}
         ${stitchBlocks()}
       </div>
+      ${operationPicker()}
     </div>
   `;
 }

@@ -25,24 +25,19 @@ export function stitchSelectBox() {
     <div class="select-tools">
       <button class="add-block" @click=${addStitchBlock}>
         <i class="fa-solid fa-plus"></i>
-        <i class="fa-solid fa-mound"></i>
-        texture block
+        <!-- <i class="fa-solid fa-mound"></i> -->
+        stitch block
       </button>
-      <!-- <button class="add-block" @click=${addStitchBlock}>
-        <i class="fa-solid fa-plus"></i>
-        <i class="fa-solid fa-palette"></i>
-        color block
-      </button> -->
     </div>
   </div>`;
 }
 
 export function stitchBlocks() {
-  const { blocks, scale, cellWidth, cellHeight, editingBlock } = GLOBAL_STATE;
+  const { blocks, cellWidth, cellHeight, editingBlock } = GLOBAL_STATE;
   const blockTemplates = [];
 
   for (const [blockID, block] of Object.entries(blocks)) {
-    const { pos, bitmap } = block;
+    const { pos } = block;
     blockTemplates.push(
       html`<div
         class="stitch-block"
@@ -50,7 +45,24 @@ export function stitchBlocks() {
           if (editingBlock == blockID) blockPointerDown(e, blockID);
         }}
         style="left: ${Math.round(pos[0] * cellWidth) -
-        1}px; bottom: ${Math.round(pos[1] * cellHeight) - 1}px;">
+        1}px; bottom: ${Math.round(pos[1] * cellHeight)}px;">
+        <canvas data-blockid=${blockID}></canvas>
+
+        <svg
+          class="block-grid"
+          style="position: absolute; top: 0px; left: 0px; overflow: hidden;"
+          width="100%"
+          height="100%">
+          <defs>${gridPattern(cellWidth, cellHeight)}</defs>
+          ${when(
+            cellHeight > 10,
+            () => svg`<rect
+            width="100%"
+            height="100%"
+            fill="url(#grid)"></rect>`
+          )}
+        </svg>
+
         ${when(
           editingBlock == blockID,
           () => stitchBlockToolbar(blockID),
@@ -60,25 +72,6 @@ export function stitchBlocks() {
             </button>
           </div>`
         )}
-
-        <canvas data-blockid=${blockID}></canvas>
-
-        <!-- <svg
-          class="block-grid"
-          style="position: absolute; top: 0px; left: 0px;
-        overflow: hidden;"
-          width="100%"
-          height="100%">
-          <defs>${gridPattern(cellWidth, cellHeight)}</defs>
-          <rect class="block-outline" width="100%" height="100%"></rect>
-          ${when(
-          cellHeight > 10,
-          () => svg`<rect
-            width=${bitmap.width * cellWidth}
-            height=${bitmap.height * cellHeight}
-            fill="url(#grid)"></rect>`
-        )}
-        </svg> -->
       </div>`
     );
   }

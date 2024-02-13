@@ -41,7 +41,6 @@ let GLOBAL_STATE = {
   blocks: {},
   editingBlock: null,
   activeBlockTool: "brush",
-  activeSymbol: 2,
 
   shapingMask: Bimp.empty(10, 10, 1),
 

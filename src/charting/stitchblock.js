@@ -16,6 +16,7 @@ export function addStitchBlock() {
         [uuid]: {
           pos: bl,
           bitmap: Bimp.empty(width, height, 1),
+          type: "stitch",
         },
       },
     },

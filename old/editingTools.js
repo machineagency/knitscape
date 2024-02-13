@@ -5,7 +5,7 @@ import { toolData } from "../constants";
 import { MIN_SCALE, MAX_SCALE } from "../constants";
 import { centerZoom, fitChart } from "../actions/zoomFit";
 
-export function editingTools() {
+export function blockToolbar() {
   return html` <div class="tool-picker">
     ${Object.keys(chartEditingTools).map(
       (toolName) => html`<button

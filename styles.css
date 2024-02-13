@@ -83,6 +83,10 @@ canvas {
 #settings-modal {
   max-width: 700px;
 }
+
+.color-mode-toggle {
+  margin: 2px 5px;
+}
 /* #endregion */
 
 /* #region CHART PANE */
@@ -95,6 +99,8 @@ canvas {
 .desktop {
   flex: 1;
   position: relative;
+  display: flex;
+  justify-content: center;
   box-shadow: inset 0 0 6px 0px rgba(0, 0, 0, 0.5);
 }
 
@@ -135,26 +141,33 @@ canvas {
 /* #region SYMBOL PICKER */
 .operation-picker {
   display: flex;
+  position: absolute;
+  bottom: 0;
+  margin: 10px;
   background-color: var(--base1);
   overflow: auto;
-  padding: 2px;
-}
-
-.color-mode-toggle {
-  margin: 2px 5px;
+  padding: 4px;
+  gap: 4px;
+  border-radius: 8px;
 }
 
 .operation-picker button {
   flex: 1 0 30px;
   max-width: 50px;
+  background-color: var(--base0);
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .symbol-preview {
   aspect-ratio: 1;
   width: 100%;
+  display: block;
 }
 
-.operation-picker .btn.img.current {
+.operation-picker button.selected {
   outline: 1px solid white;
   z-index: 2;
 }
@@ -336,19 +349,19 @@ canvas {
 }
 
 .stitch-block:hover .stitch-block-hover {
-  display: block;
+  display: flex;
 }
 
 .stitch-block-hover {
   display: none;
   position: absolute;
-}
-
-.block-outline {
-  stroke: white;
-  stroke-width: 8px;
-  stroke-dasharray: 10 4;
-  fill: #ffffff49;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  outline: 4px solid white;
+  border: 3px solid black;
+  background-color: #ffffff3c;
 }
 
 /* #endregion */
