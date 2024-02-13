@@ -5,6 +5,7 @@ let GLOBAL_STATE = {
   heldKeys: new Set(), // Keys that are currently held down
   snapshots: [], // Array of snapshot history
   lastSnapshot: 0, // time of last snapshot
+  colorMode: "operation",
 
   // GAUGE
   stitchGauge: 7, // stitches per inch
@@ -22,6 +23,15 @@ let GLOBAL_STATE = {
     [4, 4, 1],
     [5, 0, 0],
   ],
+
+  boundaries: {
+    base: [
+      [0, 0],
+      [0, 3],
+      [4, 3],
+      [0, 4],
+    ],
+  },
 
   stitchSelect: null,
 

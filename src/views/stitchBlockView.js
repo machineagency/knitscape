@@ -5,7 +5,37 @@ import { toolData } from "../constants";
 import { GLOBAL_STATE, dispatch } from "../state";
 import { gridPattern } from "./grid";
 import { blockPointerDown } from "../interaction/blockInteraction";
-import { removeStitchBlock } from "../charting/stitchblock";
+import { addStitchBlock, removeStitchBlock } from "../charting/stitchblock";
+
+export function stitchSelectBox() {
+  const {
+    stitchSelect: [bl, tr],
+    cellWidth,
+    cellHeight,
+  } = GLOBAL_STATE;
+
+  return html`<div
+    class="stitch-select-box"
+    style="width: ${(tr[0] - bl[0]) * cellWidth}px; height: ${(tr[1] - bl[1]) *
+    cellHeight}px; left: ${bl[0] * cellWidth}px; bottom: ${bl[1] *
+    cellHeight}px;">
+    <svg>
+      <rect class="stitch-select" width="100%" height="100%"></rect>
+    </svg>
+    <div class="select-tools">
+      <button class="add-block" @click=${addStitchBlock}>
+        <i class="fa-solid fa-plus"></i>
+        <i class="fa-solid fa-mound"></i>
+        texture block
+      </button>
+      <!-- <button class="add-block" @click=${addStitchBlock}>
+        <i class="fa-solid fa-plus"></i>
+        <i class="fa-solid fa-palette"></i>
+        color block
+      </button> -->
+    </div>
+  </div>`;
+}
 
 export function stitchBlocks() {
   const { blocks, scale, cellWidth, cellHeight, editingBlock } = GLOBAL_STATE;
@@ -85,15 +115,7 @@ export function stitchBlockToolbar(blockID) {
         })}>
       <i class="fa-solid fa-hand"></i>
     </button>
-    <button
-      class="btn"
-      @click=${() =>
-        dispatch(
-          {
-            editingBlock: null,
-          },
-          true
-        )}>
+    <button class="btn" @click=${() => dispatch({ editingBlock: null }, true)}>
       <i class="fa-solid fa-circle-xmark"></i>
     </button>
   </div>`;

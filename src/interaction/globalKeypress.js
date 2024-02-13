@@ -17,7 +17,7 @@ const hotkeys = {
 
   // UI
   Escape: () => {
-    dispatch({ editingBlock: null });
+    dispatch({ editingBlock: null, stitchSelect: null });
     closeModals();
   },
 };

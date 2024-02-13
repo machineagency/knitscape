@@ -369,13 +369,16 @@ a.btn {
   text-decoration: none;
 }
 
+button {
+  cursor: pointer;
+}
+
 /* Reset button style */
 button.btn {
   border: none;
   background-color: transparent;
   font-family: inherit;
   padding: 0;
-  cursor: inherit;
 }
 
 a.btn,

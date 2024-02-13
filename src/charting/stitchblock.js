@@ -13,7 +13,10 @@ export function addStitchBlock() {
       stitchSelect: null,
       blocks: {
         ...blocks,
-        [uuid]: { pos: bl, bitmap: Bimp.empty(width, height, 1) },
+        [uuid]: {
+          pos: bl,
+          bitmap: Bimp.empty(width, height, 1),
+        },
       },
     },
     true
@@ -32,3 +35,7 @@ export function removeStitchBlock(blockID) {
     true
   );
 }
+
+export function setBlockPosition(blockID, newPos) {}
+
+export function setBlockSize(blockID, newWidth, newHeight) {}

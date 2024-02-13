@@ -14,8 +14,7 @@ import { yarnPanel } from "./yarnPanel";
 import { shapingPaths, pathAnnotations } from "./shapingPaths";
 import { annotationPaths } from "./annotationPaths";
 import { currentTargetPointerPos } from "../utilities/misc";
-import { stitchSelectToolbar } from "./stitchSelection";
-import { stitchBlocks } from "./stitchBlocks";
+import { stitchBlocks, stitchSelectBox } from "./stitchBlockView";
 import { gridPattern } from "./grid";
 
 let svgRef = createRef();
@@ -123,8 +122,7 @@ export function chartPaneView() {
       <div
         style="position: absolute; bottom: 0; left: 0;
       transform: translate(${x}px, ${-y}px);">
-        ${pathAnnotations()}
-        ${when(GLOBAL_STATE.stitchSelect, stitchSelectToolbar)}
+        ${pathAnnotations()} ${when(GLOBAL_STATE.stitchSelect, stitchSelectBox)}
         ${stitchBlocks()}
       </div>
     </div>
@@ -139,6 +137,7 @@ function init() {
     GLOBAL_STATE.stitchGauge,
     GLOBAL_STATE.rowGauge
   );
+
   dispatch({
     shapingMask: chart,
     yarnSequence: Array.from({ length: chart.height }, () => [0]),

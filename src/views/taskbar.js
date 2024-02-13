@@ -21,7 +21,18 @@ export function taskbar() {
     <div id="taskbar">
       <h1 class="site-title">KnitScape</h1>
 
-      <div class="taskbar-buttons">
+      <div class="button-group">
+        <label class="color-mode-toggle switch">
+          <input
+            type="checkbox"
+            checked
+            @change=${(e) =>
+              dispatch({
+                colorMode: e.target.checked ? "operation" : "yarn",
+              })} />
+          <span class="slider round"></span>
+        </label>
+
         <button
           class="btn icon ${GLOBAL_STATE.showSettings ? "open" : ""}"
           @click=${() =>
