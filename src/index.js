@@ -1,7 +1,7 @@
 import Split from "split.js";
 import { html, render } from "lit-html";
 
-import { StateMonitor } from "./state";
+import { StateMonitor, GLOBAL_STATE } from "./state";
 
 import { runSimulation } from "./subscribers/runSimulation";
 import {
@@ -15,6 +15,8 @@ import { chartPaneView } from "./views/chartPane";
 
 import { globalKeydown, globalKeyup } from "./interaction/globalKeypress";
 import { closeModals } from "./utilities/misc";
+
+import { evaluateChart } from "./charting/evalChart";
 
 // function pointerIcon() {
 //   return html`<div id="pointer">
@@ -70,6 +72,10 @@ function init() {
   ]);
 
   measureWindow();
+
+  const { boundaries, regions } = GLOBAL_STATE;
+
+  evaluateChart(boundaries, regions);
 }
 
 window.onload = init;

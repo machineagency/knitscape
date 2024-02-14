@@ -32,7 +32,7 @@ export function pan(e) {
   window.addEventListener("pointerleave", end);
 }
 
-export function fitDraft(parent) {
+export function fitChart(parent) {
   const { stitchGauge, rowGauge, boundary } = GLOBAL_STATE;
 
   const bbox = polygonBbox(boundary);

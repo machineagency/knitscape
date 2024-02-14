@@ -9,7 +9,7 @@ import {
   chartContextMenu,
   chartPointerDown,
 } from "../interaction/chartInteraction";
-import { zoom, fitDraft } from "../interaction/chartPanZoom";
+import { zoom, fitChart } from "../interaction/chartPanZoom";
 import { yarnPanel } from "./yarnPanel";
 import { shapingPaths, pathAnnotations } from "./shapingPaths";
 import { annotationPaths } from "./annotationPaths";
@@ -42,7 +42,7 @@ function toolbar() {
       @click=${() => (GLOBAL_STATE.activeTool = "pointer")}>
       <i class="fa-solid fa-arrow-pointer"></i>
     </button>
-    <button class="btn icon" @click=${(e) => fitDraft(svgRef.value)}>
+    <button class="btn icon" @click=${(e) => fitChart(svgRef.value)}>
       <i class="fa-solid fa-expand"></i>
     </button>
   </div>`;
@@ -138,7 +138,7 @@ export function chartPaneView() {
 
 function init() {
   if (!svgRef.value) return;
-  setTimeout(() => fitDraft(svgRef.value));
+  setTimeout(() => fitChart(svgRef.value));
   let chart = scanlineFill(
     GLOBAL_STATE.boundary,
     GLOBAL_STATE.stitchGauge,

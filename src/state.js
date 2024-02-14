@@ -1,5 +1,5 @@
 import { Bimp } from "./lib/Bimp";
-import { SNAPSHOT_INTERVAL, SNAPSHOT_FIELDS } from "./constants";
+import { SNAPSHOT_INTERVAL, SNAPSHOT_FIELDS, stitches } from "./constants";
 
 let GLOBAL_STATE = {
   heldKeys: new Set(), // Keys that are currently held down
@@ -31,7 +31,16 @@ let GLOBAL_STATE = {
       [4, 3],
       [0, 4],
     ],
+
+    qwer: [
+      [0, 0],
+      [0, 3],
+      [4, 3],
+      [0, 6],
+    ],
   },
+
+  regions: [["base", stitches.KNIT]],
 
   stitchSelect: null,
 
