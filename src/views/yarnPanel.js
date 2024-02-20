@@ -1,4 +1,4 @@
-import { html, svg } from "lit-html";
+import { html } from "lit-html";
 
 import { GLOBAL_STATE, dispatch } from "../state";
 import { yarnInteraction } from "../interaction/yarnInteraction";
@@ -49,7 +49,7 @@ function drawYarnSelectBox() {
 
 export function yarnSequence(cellHeight) {
   if (!GLOBAL_STATE.yarnSequence) return;
-  const chart = GLOBAL_STATE.shapingMask;
+  const chart = GLOBAL_STATE.chart;
 
   const yarns = [];
   for (let row = 0; row < chart.height; row++) {

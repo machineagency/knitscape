@@ -1,13 +1,15 @@
 import Split from "split.js";
 import { html, render } from "lit-html";
 
-import { StateMonitor, GLOBAL_STATE } from "./state";
+import { StateMonitor, dispatch } from "./state";
+import { stitches } from "./constants";
 
 import { runSimulation } from "./subscribers/runSimulation";
 import {
-  shapingMaskSubscriber,
+  chartSubscriber,
   blockSubscriber,
-} from "./subscribers/shapingMaskSubscriber";
+} from "./subscribers/chartSubscriber";
+import { chartEvalSubscriber } from "./subscribers/chartEvalSubscriber";
 
 import { taskbar } from "./views/taskbar";
 import { simulationView } from "./views/simulationPane";
@@ -17,6 +19,7 @@ import { globalKeydown, globalKeyup } from "./interaction/globalKeypress";
 import { closeModals } from "./utilities/misc";
 
 import { evaluateChart } from "./charting/evalChart";
+import { fitChart } from "./interaction/chartPanZoom";
 
 // function pointerIcon() {
 //   return html`<div id="pointer">
@@ -51,7 +54,40 @@ function measureWindow() {
   );
 }
 
+const testWorkspace = {
+  boundaries: [
+    [
+      [0, 0],
+      [0, 3],
+      [3, 3],
+      [4, 0],
+    ],
+    [
+      [1, 1],
+      [1, 2],
+      [3, 2],
+      [2, 1],
+    ],
+  ],
+  regions: [
+    [0, stitches.KNIT],
+    [1, stitches.PURL],
+  ],
+};
+
 function init() {
+  // TODO: This is where we would load a default workspace
+  const { boundaries, regions } = testWorkspace;
+
+  let chart = evaluateChart(boundaries, regions);
+
+  dispatch({
+    boundaries,
+    regions,
+    chart,
+    yarnSequence: Array.from({ length: chart.height }, () => [0]),
+  });
+
   r();
 
   Split(["#chart-pane", "#sim-pane"], {
@@ -66,16 +102,15 @@ function init() {
   StateMonitor.requestRender = () => render(view(), document.body);
 
   StateMonitor.register([
-    shapingMaskSubscriber(),
+    chartEvalSubscriber(),
+    chartSubscriber(),
     blockSubscriber(),
     runSimulation(),
   ]);
 
   measureWindow();
 
-  const { boundaries, regions } = GLOBAL_STATE;
-
-  evaluateChart(boundaries, regions);
+  setTimeout(() => fitChart(document.getElementById("svg-layer")));
 }
 
 window.onload = init;

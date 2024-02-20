@@ -1,23 +1,23 @@
 import { drawChart } from "../charting/drawing";
 import { setCanvasSize } from "../utilities/misc";
 
-export function shapingMaskSubscriber() {
+export function chartSubscriber() {
   return ({ state }) => {
-    let { scale, shapingMask } = state;
+    let { scale, chart } = state;
 
-    let width = shapingMask.width;
-    let height = shapingMask.height;
-    let lastDrawn = shapingMask;
+    let width = chart.width;
+    let height = chart.height;
+    let lastDrawn = chart;
 
     return {
       syncState(state) {
         if (
           scale != state.scale ||
-          width != state.shapingMask.width ||
-          height != state.shapingMask.height
+          width != state.chart.width ||
+          height != state.chart.height
         ) {
-          width = state.shapingMask.width;
-          height = state.shapingMask.height;
+          width = state.chart.width;
+          height = state.chart.height;
           scale = state.scale;
 
           setCanvasSize(
@@ -29,15 +29,15 @@ export function shapingMaskSubscriber() {
           lastDrawn = null;
         }
 
-        if (lastDrawn != state.shapingMask) {
+        if (lastDrawn != state.chart) {
           drawChart(
             document.getElementById("chart-canvas"),
-            state.shapingMask,
+            state.chart,
             scale / state.stitchGauge,
             scale / state.rowGauge,
             lastDrawn
           );
-          lastDrawn = state.shapingMask;
+          lastDrawn = state.chart;
         }
       },
     };

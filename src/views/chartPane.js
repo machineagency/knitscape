@@ -1,9 +1,9 @@
 import { html, svg } from "lit-html";
 import { ref, createRef } from "lit-html/directives/ref.js";
 import { when } from "lit-html/directives/when.js";
-import { GLOBAL_STATE, dispatch } from "../state";
+import { GLOBAL_STATE } from "../state";
 
-import { polygonBbox, scanlineFill } from "../charting/helpers";
+import { bBoxAllBoundaries } from "../charting/helpers";
 
 import {
   chartContextMenu,
@@ -11,7 +11,9 @@ import {
 } from "../interaction/chartInteraction";
 import { zoom, fitChart } from "../interaction/chartPanZoom";
 import { yarnPanel } from "./yarnPanel";
-import { shapingPaths, pathAnnotations } from "./shapingPaths";
+
+import { boundaryView } from "./boundaryView";
+
 import { annotationPaths } from "./annotationPaths";
 import { currentTargetPointerPos } from "../utilities/misc";
 import { stitchBlocks, stitchSelectBox } from "./stitchBlockView";
@@ -54,13 +56,13 @@ export function chartPaneView() {
     cellWidth,
     cellHeight,
     chartPan: { x, y },
-    shapingMask: chart,
-    boundary,
+    chart,
+    boundaries,
     desktopPointerPos,
     editingBlock,
   } = GLOBAL_STATE;
 
-  const bbox = polygonBbox(boundary);
+  const bbox = bBoxAllBoundaries(boundaries);
 
   const chartWidth = Math.round(cellWidth * chart.width);
   const chartHeight = Math.round(cellHeight * chart.height);
@@ -85,12 +87,12 @@ export function chartPaneView() {
         <canvas id="chart-canvas"></canvas>
       </div>
       <svg
+        id="svg-layer"
         class="desktop-svg"
         style="position: absolute; top: 0px; left: 0px; overflow: hidden;"
         width="100%"
         height="100%"
         ${ref(svgRef)}
-        ${ref(init)}
         @pointerdown=${chartPointerDown}
         @contextmenu=${chartContextMenu}
         @wheel=${zoom}>
@@ -120,7 +122,7 @@ export function chartPaneView() {
           </g>
           <g transform="translate(${x} ${y})">
             <g transform="scale(${scale})">
-              ${shapingPaths()}${annotationPaths()}
+              ${boundaryView()}${annotationPaths()}
             </g>
           </g>
         </g>
@@ -128,25 +130,9 @@ export function chartPaneView() {
       <div
         style="position: absolute; bottom: 0; left: 0;
       transform: translate(${x}px, ${-y}px);">
-        ${pathAnnotations()} ${when(GLOBAL_STATE.stitchSelect, stitchSelectBox)}
-        ${stitchBlocks()}
+        ${when(GLOBAL_STATE.stitchSelect, stitchSelectBox)} ${stitchBlocks()}
       </div>
       ${operationPicker()}
     </div>
   `;
-}
-
-function init() {
-  if (!svgRef.value) return;
-  setTimeout(() => fitChart(svgRef.value));
-  let chart = scanlineFill(
-    GLOBAL_STATE.boundary,
-    GLOBAL_STATE.stitchGauge,
-    GLOBAL_STATE.rowGauge
-  );
-
-  dispatch({
-    shapingMask: chart,
-    yarnSequence: Array.from({ length: chart.height }, () => [0]),
-  });
 }

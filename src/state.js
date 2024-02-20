@@ -1,5 +1,4 @@
-import { Bimp } from "./lib/Bimp";
-import { SNAPSHOT_INTERVAL, SNAPSHOT_FIELDS, stitches } from "./constants";
+import { SNAPSHOT_INTERVAL, SNAPSHOT_FIELDS } from "./constants";
 
 let GLOBAL_STATE = {
   heldKeys: new Set(), // Keys that are currently held down
@@ -17,41 +16,19 @@ let GLOBAL_STATE = {
   activeTool: "pointer",
   activeSymbol: 1,
 
-  boundary: [
-    [0, 0, 1],
-    [1, 4, 0],
-    [4, 4, 1],
-    [5, 0, 0],
-  ],
+  boundaries: [],
 
-  boundaries: {
-    base: [
-      [0, 0],
-      [0, 3],
-      [4, 3],
-      [0, 4],
-    ],
-
-    qwer: [
-      [0, 0],
-      [0, 3],
-      [4, 3],
-      [0, 6],
-    ],
-  },
-
-  regions: [["base", stitches.KNIT]],
+  regions: [],
 
   stitchSelect: null,
 
-  regions: [],
   paths: [],
 
   blocks: {},
   editingBlock: null,
   activeBlockTool: "brush",
 
-  shapingMask: Bimp.empty(10, 10, 1),
+  chart: null,
 
   scale: 15, // Number of pixels for each chart cell
   chartPan: { x: 0, y: 0 }, // Pan value for the chart editor view

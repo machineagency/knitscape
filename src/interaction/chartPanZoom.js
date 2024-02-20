@@ -1,5 +1,5 @@
 import { GLOBAL_STATE, dispatch } from "../state";
-import { polygonBbox } from "../charting/helpers";
+import { bBoxAllBoundaries } from "../charting/helpers";
 
 export function pan(e) {
   const startPos = { x: e.clientX, y: e.clientY };
@@ -33,9 +33,9 @@ export function pan(e) {
 }
 
 export function fitChart(parent) {
-  const { stitchGauge, rowGauge, boundary } = GLOBAL_STATE;
+  const { stitchGauge, rowGauge, boundaries } = GLOBAL_STATE;
 
-  const bbox = polygonBbox(boundary);
+  const bbox = bBoxAllBoundaries(boundaries);
   const { width, height } = parent.getBoundingClientRect();
   const scale = Math.floor(
     0.9 *

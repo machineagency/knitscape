@@ -1,33 +1,34 @@
 import { Bimp } from "../lib/Bimp";
 import { stitches } from "../constants";
+import { knitScanline } from "./knitScanline";
+import { bBoxAllBoundaries } from "./helpers";
+import { GLOBAL_STATE } from "../state";
 
-export function bBoxAllBoundaries(boundaries) {
-  let xMin = Infinity;
-  let yMin = Infinity;
-  let xMax = -Infinity;
-  let yMax = -Infinity;
+function evalRegions(chart, globalBbox, boundaries, regions) {
+  let filledChart = chart;
 
-  for (const [id, boundary] of Object.entries(boundaries)) {
-    boundary.forEach(([x, y]) => {
-      if (x < xMin) xMin = x;
-      if (y < yMin) yMin = y;
-      if (x > xMax) xMax = x;
-      if (y > yMax) yMax = y;
-    });
+  for (const [boundaryIndex, fill] of regions) {
+    filledChart = knitScanline(
+      filledChart,
+      globalBbox,
+      boundaries[boundaryIndex],
+      fill
+    );
   }
 
-  return {
-    width: Math.abs(xMax - xMin),
-    height: Math.abs(yMax - yMin),
-    xMin,
-    yMin,
-    xMax,
-    yMax,
-  };
+  return filledChart;
 }
 
 export function evaluateChart(boundaries, regions) {
-  let bbox = bBoxAllBoundaries(boundaries);
+  const BBOX = bBoxAllBoundaries(boundaries);
 
-  let chart = Bimp.empty(bbox.width, bbox.height, stitches.EMPTY);
+  // First, create an empty chart that is fit to the boundaries
+  let chart = Bimp.empty(
+    Math.ceil(GLOBAL_STATE.stitchGauge * BBOX.width),
+    Math.ceil(GLOBAL_STATE.rowGauge * BBOX.height),
+    stitches.EMPTY
+  );
+  chart = evalRegions(chart, BBOX, boundaries, regions);
+
+  return chart;
 }

@@ -1,4 +1,4 @@
-import { GLOBAL_STATE, dispatch } from "../state";
+import { GLOBAL_STATE } from "../state";
 
 import { simulate } from "../simulation/yarnSimulation";
 import { Pattern } from "../simulation/Pattern";
@@ -14,16 +14,11 @@ function debounce(callback, wait) {
 }
 
 export function runSimulation() {
-  return ({ state }) => {
-    let queueSim = false;
-
+  return () => {
     function run() {
-      queueSim = false;
-
       if (GLOBAL_STATE.stopSim) GLOBAL_STATE.stopSim();
-
       let { stopSim, relax } = simulate(
-        new Pattern(GLOBAL_STATE.shapingMask, GLOBAL_STATE.yarnSequence),
+        new Pattern(GLOBAL_STATE.chart, GLOBAL_STATE.yarnSequence),
         GLOBAL_STATE.simScale
       );
 
@@ -38,8 +33,8 @@ export function runSimulation() {
 
     return {
       syncState(state, changes) {
-        const found = ["yarnPalette", "yarnSequence", "shapingMask"].some(
-          (key) => changes.includes(key)
+        const found = ["yarnPalette", "yarnSequence", "chart"].some((key) =>
+          changes.includes(key)
         );
 
         if (found) {

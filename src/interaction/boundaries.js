@@ -56,8 +56,10 @@ export function deletePoint(e) {
 }
 
 export function dragPoint(e) {
-  const index = Number(e.target.dataset.index);
-  let [x, y, fashioning] = GLOBAL_STATE.boundary[index];
+  const boundaryIndex = Number(e.target.dataset.boundaryindex);
+  const pointIndex = Number(e.target.dataset.index);
+
+  let [x, y] = GLOBAL_STATE.boundaries[boundaryIndex][pointIndex];
 
   const startPos = { x: e.clientX, y: e.clientY };
 
@@ -67,23 +69,22 @@ export function dragPoint(e) {
     } else {
       const dx = startPos.x - e.clientX;
       const dy = startPos.y - e.clientY;
-      let newBounds = [...GLOBAL_STATE.boundary];
-      newBounds[index] = [
+      let newBounds = [...GLOBAL_STATE.boundaries];
+      newBounds[boundaryIndex][pointIndex] = [
         x - dx / GLOBAL_STATE.scale,
         y + dy / GLOBAL_STATE.scale,
-        fashioning,
       ];
 
-      let chart = scanlineFill(
-        newBounds,
-        GLOBAL_STATE.stitchGauge,
-        GLOBAL_STATE.rowGauge
-      );
+      // let chart = scanlineFill(
+      //   newBounds,
+      //   GLOBAL_STATE.stitchGauge,
+      //   GLOBAL_STATE.rowGauge
+      // );
 
       dispatch({
-        boundary: newBounds,
-        shapingMask: chart,
-        yarnSequence: Array.from({ length: chart.height }, () => [0]),
+        boundaries: newBounds,
+        // shapingMask: chart,
+        // yarnSequence: Array.from({ length: chart.height }, () => [0]),
       });
     }
   }
