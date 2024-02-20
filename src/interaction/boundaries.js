@@ -1,57 +1,35 @@
-import { scanlineFill } from "../charting/helpers";
 import { GLOBAL_STATE, dispatch } from "../state";
-
-export function updateFashioning(index, val) {
-  const newBounds = [...GLOBAL_STATE.boundary];
-  newBounds[index][2] = val;
-
-  let chart = scanlineFill(
-    newBounds,
-    GLOBAL_STATE.stitchGauge,
-    GLOBAL_STATE.rowGauge
-  );
-
-  dispatch({
-    boundary: newBounds,
-    shapingMask: chart,
-    yarnSequence: Array.from({ length: chart.height }, () => [0]),
-  });
-}
 
 export function addPoint(e) {
   const rect = e.currentTarget.getBoundingClientRect();
 
-  const index = Number(e.target.dataset.index);
+  const boundaryIndex = Number(e.target.dataset.boundaryindex);
+  const pointIndex = Number(e.target.dataset.index);
+
   const scale = GLOBAL_STATE.scale;
   const { x, y } = GLOBAL_STATE.chartPan;
 
   let pt = [
     (e.clientX - rect.left - x) / scale,
     (rect.height - (e.clientY - rect.top) - y) / scale,
-    GLOBAL_STATE.boundary[index].fashioning,
   ];
 
-  const newShape = [...GLOBAL_STATE.boundary];
-  newShape.splice(index + 1, 0, pt);
-  dispatch({ boundary: newShape });
+  let newBounds = [...GLOBAL_STATE.boundaries];
+  newBounds[boundaryIndex].splice(pointIndex + 1, 0, pt);
+
+  dispatch({ boundaries: newBounds });
 }
 
 export function deletePoint(e) {
-  const index = Number(e.target.dataset.index);
+  const boundaryIndex = Number(e.target.dataset.boundaryindex);
+  const pointIndex = Number(e.target.dataset.index);
 
-  const newBounds = [...GLOBAL_STATE.boundary];
-  newBounds.splice(index, 1);
+  let newBounds = [...GLOBAL_STATE.boundaries];
 
-  let chart = scanlineFill(
-    newBounds,
-    GLOBAL_STATE.stitchGauge,
-    GLOBAL_STATE.rowGauge
-  );
+  newBounds[boundaryIndex].splice(pointIndex, 1);
 
   dispatch({
-    boundary: newShape,
-    shapingMask: chart,
-    yarnSequence: Array.from({ length: chart.height }, () => [0]),
+    boundaries: newBounds,
   });
 }
 
@@ -67,24 +45,14 @@ export function dragPoint(e) {
     if (e.buttons == 0) {
       end();
     } else {
-      const dx = startPos.x - e.clientX;
-      const dy = startPos.y - e.clientY;
       let newBounds = [...GLOBAL_STATE.boundaries];
       newBounds[boundaryIndex][pointIndex] = [
-        x - dx / GLOBAL_STATE.scale,
-        y + dy / GLOBAL_STATE.scale,
+        x - (startPos.x - e.clientX) / GLOBAL_STATE.scale,
+        y + (startPos.y - e.clientY) / GLOBAL_STATE.scale,
       ];
-
-      // let chart = scanlineFill(
-      //   newBounds,
-      //   GLOBAL_STATE.stitchGauge,
-      //   GLOBAL_STATE.rowGauge
-      // );
 
       dispatch({
         boundaries: newBounds,
-        // shapingMask: chart,
-        // yarnSequence: Array.from({ length: chart.height }, () => [0]),
       });
     }
   }
@@ -101,11 +69,13 @@ export function dragPoint(e) {
 }
 
 export function dragPath(e) {
-  const index = Number(e.target.dataset.index);
-  const pts = GLOBAL_STATE.boundary;
+  const boundaryIndex = Number(e.target.dataset.boundaryindex);
+  const pointIndex = Number(e.target.dataset.index);
 
-  let [x0, y0, f0] = pts[index];
-  let [x1, y1, f1] = pts[(index + 1) % pts.length];
+  const boundary = GLOBAL_STATE.boundaries[boundaryIndex];
+
+  let [x0, y0] = boundary[pointIndex];
+  let [x1, y1] = boundary[(pointIndex + 1) % boundary.length];
 
   const startPos = { x: e.clientX, y: e.clientY };
 
@@ -115,30 +85,20 @@ export function dragPath(e) {
     } else {
       const dx = startPos.x - e.clientX;
       const dy = startPos.y - e.clientY;
-      let updated = [...pts];
+      let newBounds = [...GLOBAL_STATE.boundaries];
 
-      updated[index] = [
+      newBounds[boundaryIndex][pointIndex] = [
         x0 - dx / GLOBAL_STATE.scale,
         y0 + dy / GLOBAL_STATE.scale,
-        f0,
       ];
 
-      updated[(index + 1) % pts.length] = [
+      newBounds[boundaryIndex][(pointIndex + 1) % boundary.length] = [
         x1 - dx / GLOBAL_STATE.scale,
         y1 + dy / GLOBAL_STATE.scale,
-        f1,
       ];
 
-      let chart = scanlineFill(
-        updated,
-        GLOBAL_STATE.stitchGauge,
-        GLOBAL_STATE.rowGauge
-      );
-
       dispatch({
-        boundary: updated,
-        shapingMask: chart,
-        yarnSequence: Array.from({ length: chart.height }, () => [0]),
+        boundaries: newBounds,
       });
     }
   }

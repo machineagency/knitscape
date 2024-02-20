@@ -251,16 +251,26 @@ canvas {
 /* #region DRAFTING */
 
 .point {
-  fill: rgb(52, 145, 195);
-  stroke: rgb(52, 145, 195);
+  fill: rgb(53, 53, 53);
+  stroke: rgb(53, 53, 53);
   cursor: grab;
   pointer-events: all;
 }
 
 .path {
-  stroke: rgb(52, 145, 195);
+  stroke: transparent;
   cursor: grab;
   pointer-events: all;
+}
+
+.point:hover,
+.path:hover {
+  stroke: rgb(177, 220, 243);
+}
+
+.region {
+  stroke: rgb(53, 53, 53);
+  pointer-events: none;
 }
 
 .annotation-point {
