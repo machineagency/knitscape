@@ -1,5 +1,4 @@
 import { GLOBAL_STATE, dispatch } from "../state";
-import { bBoxAllBoundaries } from "../charting/helpers";
 
 export function pan(e) {
   const startPos = { x: e.clientX, y: e.clientY };
@@ -33,28 +32,34 @@ export function pan(e) {
 }
 
 export function fitChart(parent) {
-  const { stitchGauge, rowGauge, boundaries } = GLOBAL_STATE;
+  const { cellAspect, chart, bbox } = GLOBAL_STATE;
 
-  const bbox = bBoxAllBoundaries(boundaries);
   const { width, height } = parent.getBoundingClientRect();
+
   const scale = Math.floor(
     0.9 *
-      Math.min(Math.floor(width / bbox.width), Math.floor(height / bbox.height))
+      Math.min(
+        Math.floor(width / chart.width),
+        Math.floor(height / (chart.height * cellAspect))
+      )
   );
+
+  const xOffset = (width - scale * chart.width) / 2;
+  const yOffset = (height - scale * chart.height * cellAspect) / 2;
 
   dispatch({
     scale,
-    cellWidth: scale / stitchGauge,
-    cellHeight: scale / rowGauge,
+    cellWidth: scale,
+    cellHeight: scale * cellAspect,
     chartPan: {
-      x: Math.round((width - scale * bbox.width) / 2),
-      y: Math.round((height - scale * bbox.height) / 2),
+      x: Math.round(xOffset - bbox.xMin * scale),
+      y: Math.round(yOffset - bbox.yMin * scale * cellAspect),
     },
   });
 }
 
 function zoomAtPoint(pt, newScale) {
-  const { chartPan, stitchGauge, rowGauge, scale } = GLOBAL_STATE;
+  const { chartPan, cellAspect, scale } = GLOBAL_STATE;
 
   const start = {
     x: (pt.x - chartPan.x) / scale,
@@ -63,8 +68,8 @@ function zoomAtPoint(pt, newScale) {
 
   dispatch({
     scale: newScale,
-    cellWidth: newScale / stitchGauge,
-    cellHeight: newScale / rowGauge,
+    cellWidth: newScale,
+    cellHeight: newScale * cellAspect,
     chartPan: {
       x: Math.round(pt.x - start.x * newScale),
       y: Math.round(pt.y - start.y * newScale),
@@ -89,7 +94,7 @@ export function zoom(e) {
   zoomAtPoint(
     {
       x: e.clientX - bounds.left,
-      y: bounds.height - e.clientY - bounds.top,
+      y: bounds.height - (e.clientY - bounds.top),
     },
     scale
   );

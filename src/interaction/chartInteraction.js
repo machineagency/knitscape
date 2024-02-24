@@ -3,7 +3,14 @@ import { pan } from "./chartPanZoom";
 import { clearSelection } from "../utilities/misc";
 
 import { drawLine, dragAnnotationPath, dragAnnotationPoint } from "./lines";
-import { addPoint, deletePoint, dragPath, dragPoint } from "./boundaries";
+import {
+  addPoint,
+  deletePoint,
+  dragPath,
+  dragPoint,
+  dragBoundary,
+  editBoundary,
+} from "./boundaries";
 import { selectBox } from "./select";
 
 export function chartPointerDown(e) {
@@ -11,19 +18,25 @@ export function chartPointerDown(e) {
     pan(e);
     return;
   }
+
+  const cl = e.target.classList;
+
   if (GLOBAL_STATE.locked) return;
   if (GLOBAL_STATE.activeTool == "line") {
     drawLine(e);
   } else if (GLOBAL_STATE.activeTool == "pointer") {
-    if (e.target.classList.contains("point")) {
+    if (cl.contains("point")) {
       dragPoint(e);
-    } else if (e.target.classList.contains("path")) {
+    } else if (cl.contains("path")) {
       dragPath(e);
-    } else if (e.target.classList.contains("annotation-path")) {
+    } else if (cl.contains("annotation-path")) {
       dragAnnotationPath(e);
-    } else if (e.target.classList.contains("annotation-point")) {
+    } else if (cl.contains("annotation-point")) {
       dragAnnotationPoint(e);
-    } else if (e.target.classList.contains("dragger")) {
+    } else if (cl.contains("boundary")) {
+      editBoundary(e);
+      dragBoundary(e);
+    } else if (cl.contains("dragger")) {
       return;
     }
   } else if (GLOBAL_STATE.activeTool == "select") {
@@ -31,6 +44,16 @@ export function chartPointerDown(e) {
     selectBox();
   } else if (GLOBAL_STATE.activeTool == "hand") {
     pan(e);
+  }
+}
+
+export function chartClick(e) {
+  const cl = e.target.classList;
+
+  if (GLOBAL_STATE.activeTool == "pointer") {
+    if (cl.contains("boundary")) {
+      editBoundary(e);
+    }
   }
 }
 

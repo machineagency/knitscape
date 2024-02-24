@@ -3,7 +3,7 @@ import { when } from "lit-html/directives/when.js";
 import { editingTools } from "../charting/editingTools";
 import { toolData } from "../constants";
 import { GLOBAL_STATE, dispatch } from "../state";
-import { gridPattern } from "./grid";
+import { gridPattern } from "./defs";
 import { blockPointerDown } from "../interaction/blockInteraction";
 import { addStitchBlock, removeStitchBlock } from "../charting/stitchblock";
 

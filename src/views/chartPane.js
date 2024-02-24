@@ -3,21 +3,20 @@ import { ref, createRef } from "lit-html/directives/ref.js";
 import { when } from "lit-html/directives/when.js";
 import { GLOBAL_STATE } from "../state";
 
-import { bBoxAllBoundaries } from "../charting/helpers";
-
 import {
   chartContextMenu,
   chartPointerDown,
+  chartClick,
 } from "../interaction/chartInteraction";
 import { zoom, fitChart } from "../interaction/chartPanZoom";
 import { yarnPanel } from "./yarnPanel";
 
-import { boundaryView } from "./boundaryView";
+import { boundaryMenu, boundaryView } from "./boundaryView";
 
 import { annotationPaths } from "./annotationPaths";
 import { currentTargetPointerPos } from "../utilities/misc";
 import { stitchBlocks, stitchSelectBox } from "./stitchBlockView";
-import { gridPattern } from "./grid";
+import { gridPattern, cellShadow } from "./defs";
 import { operationPicker } from "./operationPicker";
 
 let svgRef = createRef();
@@ -50,89 +49,104 @@ function toolbar() {
   </div>`;
 }
 
+function trackPointer(e) {
+  const { cellWidth, cellHeight, chartPan, bbox } = GLOBAL_STATE;
+  let [x, y] = currentTargetPointerPos(e);
+  GLOBAL_STATE.pointer = [
+    Math.floor((x - chartPan.x) / cellWidth - bbox.xMin),
+    Math.floor((y - chartPan.y) / cellHeight - bbox.yMin),
+  ];
+}
+
+function pointerCellHighlight() {
+  const {
+    cellWidth,
+    cellHeight,
+    chart,
+    transforming,
+    pointer: [x, y],
+  } = GLOBAL_STATE;
+
+  if (transforming || x < 0 || y < 0 || x >= chart.width || y >= chart.height)
+    return;
+
+  return svg`<rect
+      class="cell-highlight"
+      transform="translate(${x * cellWidth + 2} ${y * cellHeight + 2})"
+      filter="url(#path-shadow)"
+      width=${cellWidth - 3}
+      height=${cellHeight - 3}></rect>`;
+}
+
 export function chartPaneView() {
   const {
     scale,
     cellWidth,
     cellHeight,
-    chartPan: { x, y },
+    chartPan,
     chart,
-    boundaries,
-    desktopPointerPos,
+    pointer,
     editingBlock,
+    bbox,
+    transforming,
   } = GLOBAL_STATE;
 
-  const bbox = bBoxAllBoundaries(boundaries);
+  const offsetX = Math.round(bbox.xMin * cellWidth);
+  const offsetY = Math.round(bbox.yMin * cellHeight);
 
-  const chartWidth = Math.round(cellWidth * chart.width);
-  const chartHeight = Math.round(cellHeight * chart.height);
-
-  const chartX = Math.round(x + bbox.xMin * scale);
-  const chartY = Math.round(y + bbox.yMin * scale);
-
-  let pointerX = Math.floor((desktopPointerPos[0] - chartX) / cellWidth);
-  let pointerY = Math.floor((desktopPointerPos[1] - chartY) / cellHeight);
+  const w = Math.round(cellWidth * chart.width);
+  const h = Math.round(cellHeight * chart.height);
 
   return html`
-    ${toolbar()} ${yarnPanel(chartY, chartHeight)}
-    <div
-      class="desktop"
-      @pointermove=${(e) =>
-        (GLOBAL_STATE.desktopPointerPos = currentTargetPointerPos(e))}>
-      <span class="pointer-pos">[${pointerX},${pointerY}]</span>
+    ${toolbar()} ${yarnPanel(chartPan.y + bbox.yMin * scale, h)}
+    <div class="desktop" @pointermove=${(e) => trackPointer(e)}>
+      <span class="pointer-pos">[${pointer[0]},${pointer[1]}]</span>
       <div
-        style="position: absolute; bottom: 0; left: 0;
-      transform: translate(${chartX}px, ${-chartY}px);
-      outline: 1px solid black;">
-        <canvas id="chart-canvas"></canvas>
+        style="position: absolute; bottom: 0; left: 0; transform: translate(${chartPan.x}px,${-chartPan.y}px);">
+        <canvas
+          style="transform: translate(${offsetX}px,${-offsetY}px); outline: 1px solid black;"
+          id="chart-canvas"></canvas>
       </div>
       <svg
         id="svg-layer"
-        class="desktop-svg"
+        class="desktop-svg ${transforming ? "transforming" : "allow-hover"}"
         style="position: absolute; top: 0px; left: 0px; overflow: hidden;"
         width="100%"
         height="100%"
         ${ref(svgRef)}
         @pointerdown=${chartPointerDown}
         @contextmenu=${chartContextMenu}
+        @click=${chartClick}
         @wheel=${zoom}>
-        <defs>${gridPattern(cellWidth, cellHeight)}</defs>
+        <defs>${gridPattern(cellWidth, cellHeight)}${cellShadow()}</defs>
         <g transform="scale (1, -1)" transform-origin="center">
-          <g
-            transform="translate(${chartX} ${chartY})"
-            width=${chartWidth}
-            height=${chartHeight}>
-            ${cellHeight < 10
-              ? ""
-              : svg`<rect
-            width=${chartWidth}
-            height=${chartHeight}
+          <g transform="translate(${chartPan.x} ${chartPan.y})">
+            <g
+              transform="translate(${offsetX} ${offsetY})"
+              width=${w}
+              height=${h}>
+              ${cellHeight < 10
+                ? ""
+                : svg`<rect
+            width=${w}
+            height=${h}
             fill="url(#grid)"></rect>`}
-            <rect
-              width=${chartWidth}
-              height=${chartHeight}
-              fill=${editingBlock ? "#00000033" : "transparent"}></rect>
-            <rect
-              class="pointer-highlight"
-              transform="translate(${pointerX * cellWidth + 1} ${pointerY *
-                cellHeight +
-              1})"
-              width=${cellWidth - 1}
-              height=${cellHeight - 1}></rect>
-          </g>
-          <g transform="translate(${x} ${y})">
-            <g transform="scale(${scale})">
-              ${boundaryView()}${annotationPaths()}
+              <rect
+                width=${w}
+                height=${h}
+                fill=${editingBlock ? "#00000033" : "transparent"}></rect>
+              ${pointerCellHighlight()}
             </g>
+            ${boundaryView()}
           </g>
         </g>
       </svg>
       <div
         style="position: absolute; bottom: 0; left: 0;
-      transform: translate(${x}px, ${-y}px);">
+      transform: translate(${chartPan.x}px, ${-chartPan.y}px);">
         ${when(GLOBAL_STATE.stitchSelect, stitchSelectBox)} ${stitchBlocks()}
       </div>
-      ${operationPicker()}
+      ${operationPicker()} ${boundaryMenu()}
     </div>
   `;
 }

@@ -1,7 +1,7 @@
 import { stitches } from "../constants";
 import { Bimp } from "../lib/Bimp";
 
-export function polygonBbox(boundary) {
+export function bbox(boundary) {
   let xMin = Infinity;
   let yMin = Infinity;
   let xMax = -Infinity;

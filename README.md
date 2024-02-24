@@ -13,11 +13,21 @@ KnitScape is a design and simulation tool for knitting patterns.
 - path
   - [ ] select path
   - [ ] constrain to stitch slope?
-- boundary
-  - [x] drag line
-  - [x] remove points
+- boundary/regions
+  - [x] drag boundary and points
+  - [x] add and remove points
+  - [x] drag region
+  - [x] remove boundary/region
+  - [x] change stitch fill
+  - [x] active boundary/region
+  - [ ] transform to block
+  - [ ] select multiple
+  - [ ] change yarn fill
+  - [ ] add boundary/region
+  - [ ] copy and paste boundary
+  - [ ] add block fill
   - [ ] simple constraints
-  - [ ] how to add curves?
+  - [ ] curves?
 - yarn sequencer
   - [x] select range of rows
   - [ ] drag to move selection
@@ -30,6 +40,7 @@ KnitScape is a design and simulation tool for knitting patterns.
   - [x] delete stitch block
   - [x] dim rest of chart while editing
   - [x] show operation select when editing stitch block
+  - [ ] block copy and paste
   - [ ] evaluate chart on block edit
   - [ ] move stitch block
   - [ ] resize stitch block
@@ -44,6 +55,8 @@ KnitScape is a design and simulation tool for knitting patterns.
   - [ ] create blockpath
 - direct edit layer
   - [ ] edit base chart directly, overriding anything below
+- pattern
+  - grid pattern (num x, num y, shift)?
 
 ## ideas
 

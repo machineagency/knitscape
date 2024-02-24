@@ -33,8 +33,8 @@ export function chartSubscriber() {
           drawChart(
             document.getElementById("chart-canvas"),
             state.chart,
-            scale / state.stitchGauge,
-            scale / state.rowGauge,
+            scale,
+            scale * state.cellAspect,
             lastDrawn
           );
           lastDrawn = state.chart;

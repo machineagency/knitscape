@@ -2,6 +2,11 @@ import { GLOBAL_STATE, dispatch, undo } from "../state";
 import { toolData } from "../constants";
 import { closeModals } from "../utilities/misc";
 
+function escapeEverything() {
+  dispatch({ editingBlock: null, editingBoundary: null, stitchSelect: null });
+  closeModals();
+}
+
 const ctrlShortcuts = {
   z: () => undo(),
 };
@@ -16,10 +21,7 @@ const hotkeys = {
   ),
 
   // UI
-  Escape: () => {
-    dispatch({ editingBlock: null, stitchSelect: null });
-    closeModals();
-  },
+  Escape: escapeEverything,
 };
 
 function numberPressed(num) {

@@ -5,24 +5,25 @@ let GLOBAL_STATE = {
   snapshots: [], // Array of snapshot history
   lastSnapshot: 0, // time of last snapshot
   colorMode: "operation",
+  transforming: false, // If the pointer is being used to do something
 
   // GAUGE
-  stitchGauge: 7, // stitches per inch
-  rowGauge: 11, // rows per inch
+  stitchGauge: null, // stitches per inch
+  rowGauge: null, // rows per inch
+  cellAspect: 11 / 7,
 
-  desktopPointerPos: [0, 0],
+  pointer: [-1, -1],
 
   locked: false,
   activeTool: "pointer",
   activeSymbol: 1,
 
+  paths: [],
   boundaries: [],
-
   regions: [],
 
   stitchSelect: null,
-
-  paths: [],
+  editingBoundary: null,
 
   blocks: {},
   editingBlock: null,
@@ -31,9 +32,11 @@ let GLOBAL_STATE = {
   chart: null,
 
   scale: 15, // Number of pixels for each chart cell
-  chartPan: { x: 0, y: 0 }, // Pan value for the chart editor view
   cellWidth: 15 / 7,
   cellHeight: 15 / 11,
+
+  chartPan: { x: 0, y: 0 }, // Pan value for the chart editor view
+  bbox: { xMin: 0, yMin: 0 },
 
   // SIMULATION
   simScale: 1,
@@ -41,26 +44,17 @@ let GLOBAL_STATE = {
   flipped: false,
 
   // YARN
-  yarnPalette: ["#ebe9bbff", "#328cbcff", "#bc7532ff"], // Colors of the yarns
+  yarnPalette: null,
   yarnWidth: 0.24,
-  yarnExpanded: false,
   yarnSequence: null,
   yarnSelections: [],
 
-  reverseScroll: false,
-  symbolLineWidth: 3,
-
   // Various UI pane states
-  showLibrary: false,
   showSettings: false,
-  showDownload: false,
+  yarnExpanded: false,
 
-  // PUNCH CARD
-  // punchcardMode: false, // constrains repeat width to a punchcard-friendly width
-  // machine: "th860",
-  // punchVerticalRepeats: 5,
-  // rows: 40, //punchcard rows
-  // numSides: 8, //number of punch sides
+  // INTERACTION
+  reverseScroll: false,
 };
 
 function loadWorkspace(workspace) {

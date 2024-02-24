@@ -6,15 +6,19 @@ export function addPoint(e) {
   const boundaryIndex = Number(e.target.dataset.boundaryindex);
   const pointIndex = Number(e.target.dataset.index);
 
-  const scale = GLOBAL_STATE.scale;
-  const { x, y } = GLOBAL_STATE.chartPan;
+  const {
+    scale,
+    cellAspect,
+    boundaries,
+    chartPan: { x, y },
+  } = GLOBAL_STATE;
 
   let pt = [
-    (e.clientX - rect.left - x) / scale,
-    (rect.height - (e.clientY - rect.top) - y) / scale,
+    Math.round((e.clientX - rect.left - x) / scale),
+    Math.round((rect.height - (e.clientY - rect.top) - y) / scale / cellAspect),
   ];
 
-  let newBounds = [...GLOBAL_STATE.boundaries];
+  let newBounds = [...boundaries];
   newBounds[boundaryIndex].splice(pointIndex + 1, 0, pt);
 
   dispatch({ boundaries: newBounds });
@@ -25,7 +29,6 @@ export function deletePoint(e) {
   const pointIndex = Number(e.target.dataset.index);
 
   let newBounds = [...GLOBAL_STATE.boundaries];
-
   newBounds[boundaryIndex].splice(pointIndex, 1);
 
   dispatch({
@@ -37,19 +40,28 @@ export function dragPoint(e) {
   const boundaryIndex = Number(e.target.dataset.boundaryindex);
   const pointIndex = Number(e.target.dataset.index);
 
-  let [x, y] = GLOBAL_STATE.boundaries[boundaryIndex][pointIndex];
+  const [x, y] = GLOBAL_STATE.boundaries[boundaryIndex][pointIndex];
+  let last = [0, 0];
 
   const startPos = { x: e.clientX, y: e.clientY };
+  dispatch({ transforming: true });
 
   function move(e) {
     if (e.buttons == 0) {
       end();
     } else {
-      let newBounds = [...GLOBAL_STATE.boundaries];
-      newBounds[boundaryIndex][pointIndex] = [
-        x - (startPos.x - e.clientX) / GLOBAL_STATE.scale,
-        y + (startPos.y - e.clientY) / GLOBAL_STATE.scale,
-      ];
+      const { scale, cellAspect, boundaries } = GLOBAL_STATE;
+
+      let dx = Math.round((startPos.x - e.clientX) / scale);
+      let dy = Math.round((startPos.y - e.clientY) / scale / cellAspect);
+
+      if (last[0] == dx && last[1] == dy) return;
+
+      let newBounds = [...boundaries];
+
+      newBounds[boundaryIndex][pointIndex] = [x - dx, y + dy];
+
+      last = [dx, dy];
 
       dispatch({
         boundaries: newBounds,
@@ -61,6 +73,7 @@ export function dragPoint(e) {
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerup", end);
     window.removeEventListener("pointerleave", end);
+    dispatch({ transforming: false });
   }
 
   window.addEventListener("pointermove", move);
@@ -74,28 +87,35 @@ export function dragPath(e) {
 
   const boundary = GLOBAL_STATE.boundaries[boundaryIndex];
 
-  let [x0, y0] = boundary[pointIndex];
-  let [x1, y1] = boundary[(pointIndex + 1) % boundary.length];
+  const [x0, y0] = boundary[pointIndex];
+  const [x1, y1] = boundary[(pointIndex + 1) % boundary.length];
+  let last = [0, 0];
 
   const startPos = { x: e.clientX, y: e.clientY };
+
+  dispatch({ transforming: true });
 
   function move(e) {
     if (e.buttons == 0) {
       end();
     } else {
-      const dx = startPos.x - e.clientX;
-      const dy = startPos.y - e.clientY;
-      let newBounds = [...GLOBAL_STATE.boundaries];
+      const { scale, cellAspect, boundaries } = GLOBAL_STATE;
 
-      newBounds[boundaryIndex][pointIndex] = [
-        x0 - dx / GLOBAL_STATE.scale,
-        y0 + dy / GLOBAL_STATE.scale,
-      ];
+      let dx = Math.round((startPos.x - e.clientX) / scale);
+      let dy = Math.round((startPos.y - e.clientY) / scale / cellAspect);
 
+      if (last[0] == dx && last[1] == dy) return;
+
+      let newBounds = [...boundaries];
+
+      newBounds[boundaryIndex][pointIndex] = [x0 - dx, y0 + dy];
       newBounds[boundaryIndex][(pointIndex + 1) % boundary.length] = [
-        x1 - dx / GLOBAL_STATE.scale,
-        y1 + dy / GLOBAL_STATE.scale,
+        x1 - dx,
+        y1 + dy,
       ];
+
+      last[0] = dx;
+      last[1] = dy;
 
       dispatch({
         boundaries: newBounds,
@@ -107,9 +127,69 @@ export function dragPath(e) {
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerup", end);
     window.removeEventListener("pointerleave", end);
+    dispatch({ transforming: false });
   }
 
   window.addEventListener("pointermove", move);
   window.addEventListener("pointerup", end);
   window.addEventListener("pointerleave", end);
+}
+
+export function dragBoundary(e) {
+  const boundaryIndex = Number(e.target.dataset.boundaryindex);
+
+  if (GLOBAL_STATE.editingBoundary != boundaryIndex) return;
+
+  const startBounds = GLOBAL_STATE.boundaries[boundaryIndex];
+  const startPos = { x: e.clientX, y: e.clientY };
+
+  let last = [0, 0];
+  dispatch({ transforming: true });
+
+  function move(e) {
+    if (e.buttons == 0) {
+      end();
+    } else {
+      const { scale, cellAspect, boundaries } = GLOBAL_STATE;
+
+      let dx = Math.round((startPos.x - e.clientX) / scale);
+      let dy = Math.round((startPos.y - e.clientY) / scale / cellAspect);
+
+      if (last[0] == dx && last[1] == dy) return;
+
+      let newBounds = [...boundaries];
+      newBounds[boundaryIndex] = startBounds.map(([x, y]) => [x - dx, y + dy]);
+      last = [dx, dy];
+      dispatch({
+        boundaries: newBounds,
+      });
+    }
+  }
+
+  function end() {
+    window.removeEventListener("pointermove", move);
+    window.removeEventListener("pointerup", end);
+    window.removeEventListener("pointerleave", end);
+    dispatch({ transforming: false });
+  }
+
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", end);
+  window.addEventListener("pointerleave", end);
+}
+
+export function editBoundary(e) {
+  const boundaryIndex = Number(e.target.dataset.boundaryindex);
+
+  dispatch({ editingBoundary: boundaryIndex });
+}
+
+export function removeBoundary(index) {
+  const { boundaries, regions } = GLOBAL_STATE;
+
+  dispatch({
+    boundaries: boundaries.slice(0, index).concat(boundaries.slice(index + 1)),
+    regions: regions.slice(0, index).concat(regions.slice(index + 1)),
+    editingBoundary: null,
+  });
 }

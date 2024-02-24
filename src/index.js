@@ -20,12 +20,7 @@ import { closeModals } from "./utilities/misc";
 
 import { evaluateChart } from "./charting/evalChart";
 import { fitChart } from "./interaction/chartPanZoom";
-
-// function pointerIcon() {
-//   return html`<div id="pointer">
-//     <i class="fa-solid ${tools[GLOBAL_STATE.activeTool].icon}"></i>
-//   </div>`;
-// }
+import { bBoxAllBoundaries } from "./charting/helpers";
 
 export function view() {
   return html`
@@ -57,36 +52,65 @@ function measureWindow() {
 const testWorkspace = {
   boundaries: [
     [
-      [0, 0],
-      [0, 3],
-      [3, 3],
-      [4, 0],
+      [-1, 0],
+      [-1, 15],
+      [15, 15],
+      [15, 0],
     ],
     [
-      [1, 1],
-      [1, 2],
-      [3, 2],
-      [2, 1],
+      [-1, 0],
+      [-1, 10],
+      [1, 10],
+      [1, 0],
+    ],
+    [
+      [3, 0],
+      [3, 10],
+      [5, 10],
+      [5, 0],
+    ],
+    [
+      [7, 0],
+      [7, 10],
+      [9, 10],
+      [9, 0],
+    ],
+    [
+      [11, 0],
+      [11, 10],
+      [13, 10],
+      [13, 0],
     ],
   ],
   regions: [
-    [0, stitches.KNIT],
-    [1, stitches.PURL],
+    { type: "stitch", fill: stitches.KNIT },
+    { type: "stitch", fill: stitches.PURL },
+    { type: "stitch", fill: stitches.PURL },
+    { type: "stitch", fill: stitches.PURL },
+    { type: "stitch", fill: stitches.PURL },
   ],
+  cellAspect: 7 / 11,
+  stitchGauge: 7, // stitches per inch
+  rowGauge: 11, // rows per inch
+  yarnPalette: ["#ebe9bbff", "#328cbcff", "#bc7532ff"],
 };
 
-function init() {
-  // TODO: This is where we would load a default workspace
-  const { boundaries, regions } = testWorkspace;
+function loadWorkspace(workspace) {
+  const { boundaries, regions, stitchGauge, rowGauge } = workspace;
 
-  let chart = evaluateChart(boundaries, regions);
+  // Make chart by evaluating workspace
+  let chart = evaluateChart(boundaries, regions, stitchGauge, rowGauge);
 
   dispatch({
-    boundaries,
-    regions,
+    ...workspace,
     chart,
     yarnSequence: Array.from({ length: chart.height }, () => [0]),
+    bbox: bBoxAllBoundaries(boundaries),
   });
+}
+
+function init() {
+  loadWorkspace(testWorkspace);
 
   r();
 
