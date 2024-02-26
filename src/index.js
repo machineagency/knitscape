@@ -84,9 +84,9 @@ const testWorkspace = {
     // ],
   ],
   regions: [
-    { fillType: "stitch", stitch: stitches.KNIT, blockID: null, gap: [1, 1] },
+    { fillType: "stitch", stitch: stitches.KNIT, blockID: null, gap: [0, 0] },
     // { fillType: "stitch", fill: stitches.PURL },
-    { fillType: "block", stitch: stitches.KNIT, blockID: "test", gap: [1, 1] },
+    { fillType: "block", stitch: stitches.KNIT, blockID: "test", gap: [0, 0] },
     // { fillType: "stitch", fill: stitches.PURL },
     // { fillType: "stitch", fill: stitches.PURL },
   ],

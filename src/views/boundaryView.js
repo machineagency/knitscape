@@ -125,11 +125,13 @@ function blockFillMenu(regions, index) {
 
   return html`<button @click=${() => chooseBlockFill()}>select block</button
     >xGap<input
+      class="num-input"
       type="number"
       min="0"
       value=${gap[0]}
       @change=${(e) => setXGap(Number(e.target.value))} />
     yGap<input
+      class="num-input"
       type="number"
       min="0"
       @change=${(e) => setYGap(Number(e.target.value))}
@@ -183,5 +185,11 @@ export function boundaryMenu() {
     ${fillType == "stitch"
       ? stitchFillMenu(regions, index)
       : blockFillMenu(regions, index)}
+
+    <button
+      class="btn"
+      @click=${() => dispatch({ editingBoundary: null }, true)}>
+      <i class="fa-solid fa-circle-xmark"></i>
+    </button>
   </div>`;
 }

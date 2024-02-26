@@ -32,6 +32,7 @@ export function removeStitchBlock(blockID) {
   dispatch(
     {
       blocks: updated,
+      editingBlock: null,
     },
     true
   );

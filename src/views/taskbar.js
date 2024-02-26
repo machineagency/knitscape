@@ -63,11 +63,13 @@ function settingsModal() {
       <label class="form-control">
         Cell aspect
         <input
+          class="num-input"
           type="number"
           .value=${String(GLOBAL_STATE.rowGauge)}
           @change=${(e) => dispatch({ rowGauge: Number(e.target.value) })} />
         /
         <input
+          class="num-input"
           type="number"
           .value=${String(GLOBAL_STATE.stitchGauge)}
           @change=${(e) => dispatch({ stitchGauge: Number(e.target.value) })} />

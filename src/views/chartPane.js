@@ -35,8 +35,13 @@ function toolbar() {
     </button>
     <button
       class="btn solid ${GLOBAL_STATE.activeTool == "select" ? "current" : ""}"
-      @click=${() => (GLOBAL_STATE.activeTool = "select")}>
+      @click=${() => (GLOBAL_STATE.activeTool = "region")}>
       <i class="fa-solid fa-vector-square"></i>
+    </button>
+    <button
+      class="btn solid ${GLOBAL_STATE.activeTool == "select" ? "current" : ""}"
+      @click=${() => (GLOBAL_STATE.activeTool = "select")}>
+      <i class="fa-solid fa-table-cells"></i>
     </button>
     <button
       class="btn solid ${GLOBAL_STATE.activeTool == "pointer" ? "current" : ""}"
@@ -98,8 +103,9 @@ export function chartPaneView() {
   const h = Math.round(cellHeight * chart.height);
 
   return html`
-    ${toolbar()} ${yarnPanel(chartPan.y + bbox.yMin * scale, h)}
+    ${yarnPanel(chartPan.y + bbox.yMin * scale, h)}
     <div class="desktop" @pointermove=${(e) => trackPointer(e)}>
+      ${toolbar()}
       <span class="pointer-pos">[${pointer[0]},${pointer[1]}]</span>
       <div
         style="position: absolute; bottom: 0; left: 0; transform: translate(${chartPan.x}px,${-chartPan.y}px);">

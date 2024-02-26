@@ -25,7 +25,6 @@ export function stitchSelectBox() {
     <div class="select-tools">
       <button class="add-block" @click=${addStitchBlock}>
         <i class="fa-solid fa-plus"></i>
-        <!-- <i class="fa-solid fa-mound"></i> -->
         stitch block
       </button>
     </div>
@@ -117,7 +116,7 @@ export function stitchBlockToolbar(blockID) {
         dispatch({
           activeBlockTool: "move",
         })}>
-      <i class="fa-solid fa-hand"></i>
+      <i class="fa-solid fa-arrows-up-down-left-right"></i>
     </button>
     <button class="btn" @click=${() => dispatch({ editingBlock: null }, true)}>
       <i class="fa-solid fa-circle-xmark"></i>

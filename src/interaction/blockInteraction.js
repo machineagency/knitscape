@@ -12,6 +12,48 @@ function blockPos(e, blockID) {
   };
 }
 
+function moveBlock(e, blockID) {
+  const [x, y] = GLOBAL_STATE.blocks[blockID].pos;
+  let last = [0, 0];
+
+  const startPos = { x: e.clientX, y: e.clientY };
+  dispatch({ transforming: true });
+
+  function move(e) {
+    if (e.buttons == 0) {
+      end();
+    } else {
+      const { scale, cellAspect, blocks } = GLOBAL_STATE;
+
+      let dx = Math.round((startPos.x - e.clientX) / scale);
+      let dy = Math.round((startPos.y - e.clientY) / scale / cellAspect);
+
+      if (last[0] == dx && last[1] == dy) return;
+
+      let updatedBlocks = { ...blocks };
+
+      updatedBlocks[blockID].pos = [x - dx, y + dy];
+
+      last = [dx, dy];
+
+      dispatch({
+        blocks: updatedBlocks,
+      });
+    }
+  }
+
+  function end() {
+    window.removeEventListener("pointermove", move);
+    window.removeEventListener("pointerup", end);
+    window.removeEventListener("pointerleave", end);
+    dispatch({ transforming: false });
+  }
+
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", end);
+  window.addEventListener("pointerleave", end);
+}
+
 function editBlock(e, blockID, tool) {
   let pos = blockPos(e, blockID);
 
@@ -70,6 +112,8 @@ export function blockPointerDown(e, blockID) {
   const activeTool = GLOBAL_STATE.activeBlockTool;
   if (GLOBAL_STATE.activeTool == "hand") {
     pan(e);
+  } else if (activeTool == "move") {
+    moveBlock(e, blockID);
   } else if (activeTool in editingTools) {
     editBlock(e, blockID, editingTools[activeTool]);
   }

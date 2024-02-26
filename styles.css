@@ -120,8 +120,8 @@ canvas {
 
 /* #region TOOL PICKER */
 .tool-picker {
-  top: 8px;
-  right: 8px;
+  margin: 8px;
+  justify-self: center;
   position: absolute;
   display: flex;
   gap: 0.4em;
@@ -143,9 +143,12 @@ canvas {
 /* #region SYMBOL PICKER */
 .operation-picker {
   display: flex;
+  flex-direction: column;
   position: absolute;
-  bottom: 0;
-  margin: 10px;
+  right: 0;
+  align-self: center;
+  height: 80%;
+  margin: 8px;
   background-color: var(--base1);
   overflow: auto;
   padding: 4px;
@@ -154,8 +157,8 @@ canvas {
 }
 
 .operation-picker button {
-  flex: 1 0 30px;
-  max-width: 50px;
+  flex: 1 1 40px;
+  max-width: 40px;
   background-color: var(--base0);
   padding: 0;
   border: 0;
@@ -307,6 +310,10 @@ canvas {
   background-color: var(--base1);
   z-index: 10;
   align-items: center;
+}
+
+.num-input {
+  width: 40px;
 }
 
 /* #endregion */
