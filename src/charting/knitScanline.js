@@ -27,7 +27,15 @@ function addEdge(edgeTable, [x1, y1], [x2, y2]) {
   });
 }
 
-export function knitScanline(chart, bbox, boundary, fillOp) {
+export function knitScanline(chart, bbox, boundary, blocks, fillData) {
+  if (fillData.fillType == "stitch") {
+    if (fillData.stitch == 0) return chart;
+  } else if (fillData.fillType == "block") {
+    if (fillData.blockID == null) return chart;
+    let block = blocks[fillData.blockID];
+    if (block == undefined) return chart;
+  }
+
   let scanChart = chart;
   const points = boundary.map((pt) => toChartCoords(pt, bbox, chart));
 
@@ -64,12 +72,29 @@ export function knitScanline(chart, bbox, boundary, fillOp) {
 
       if (xStart == xEnd) continue;
 
-      // fill in between ascending pairs
-      scanChart = scanChart.line(
-        { x: xStart, y },
-        { x: xEnd - 1, y }, // Fill up to but not including x
-        fillOp
-      );
+      if (fillData.fillType == "stitch") {
+        // fill in between ascending pairs
+        scanChart = scanChart.line(
+          { x: xStart, y },
+          { x: xEnd - 1, y }, // Fill up to but not including x
+          fillData.stitch
+        );
+      } else if (fillData.fillType == "block") {
+        let block = blocks[fillData.blockID];
+        let { bitmap, pos } = block;
+        let changes = [];
+        let yOffset = (y - pos[1]) % (bitmap.height + fillData.gap[1]);
+        if (yOffset < 0) yOffset = bitmap.height + fillData.gap[1] + yOffset;
+
+        for (let x = xStart; x < xEnd; x++) {
+          let xOffset = (x - pos[0]) % (bitmap.width + fillData.gap[0]);
+
+          if (xOffset < 0) xOffset = bitmap.width + fillData.gap[0] + xOffset;
+          if (xOffset >= bitmap.width || yOffset >= bitmap.height) continue;
+          changes.push({ x, y, color: bitmap.pixel(xOffset, yOffset) });
+        }
+        scanChart = scanChart.draw(changes);
+      }
     }
 
     y++;

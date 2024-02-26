@@ -24,6 +24,8 @@ let GLOBAL_STATE = {
 
   stitchSelect: null,
   editingBoundary: null,
+  selectingBlock: false,
+  onBlockSelect: null,
 
   blocks: {},
   editingBlock: null,

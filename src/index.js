@@ -21,6 +21,7 @@ import { closeModals } from "./utilities/misc";
 import { evaluateChart } from "./charting/evalChart";
 import { fitChart } from "./interaction/chartPanZoom";
 import { bBoxAllBoundaries } from "./charting/helpers";
+import { Bimp } from "./lib/Bimp";
 
 export function view() {
   return html`
@@ -57,38 +58,45 @@ const testWorkspace = {
       [15, 15],
       [15, 0],
     ],
+    // [
+    //   [-1, 0],
+    //   [-1, 10],
+    //   [1, 10],
+    //   [1, 0],
+    // ],
     [
-      [-1, 0],
-      [-1, 10],
-      [1, 10],
-      [1, 0],
-    ],
-    [
-      [3, 0],
+      [0, 0],
       [3, 10],
-      [5, 10],
-      [5, 0],
-    ],
-    [
-      [7, 0],
-      [7, 10],
-      [9, 10],
+      [8, 10],
       [9, 0],
     ],
-    [
-      [11, 0],
-      [11, 10],
-      [13, 10],
-      [13, 0],
-    ],
+    // [
+    //   [7, 0],
+    //   [7, 10],
+    //   [9, 10],
+    //   [9, 0],
+    // ],
+    // [
+    //   [11, 0],
+    //   [11, 10],
+    //   [13, 10],
+    //   [13, 0],
+    // ],
   ],
   regions: [
-    { type: "stitch", fill: stitches.KNIT },
-    { type: "stitch", fill: stitches.PURL },
-    { type: "stitch", fill: stitches.PURL },
-    { type: "stitch", fill: stitches.PURL },
-    { type: "stitch", fill: stitches.PURL },
+    { fillType: "stitch", stitch: stitches.KNIT, blockID: null, gap: [1, 1] },
+    // { fillType: "stitch", fill: stitches.PURL },
+    { fillType: "block", stitch: stitches.KNIT, blockID: "test", gap: [1, 1] },
+    // { fillType: "stitch", fill: stitches.PURL },
+    // { fillType: "stitch", fill: stitches.PURL },
   ],
+  blocks: {
+    test: {
+      type: "stitch",
+      pos: [3, 0],
+      bitmap: new Bimp(2, 2, [1, 2, 1, 1]),
+    },
+  },
   cellAspect: 7 / 11,
   stitchGauge: 7, // stitches per inch
   rowGauge: 11, // rows per inch
@@ -96,10 +104,10 @@ const testWorkspace = {
 };
 
 function loadWorkspace(workspace) {
-  const { boundaries, regions, stitchGauge, rowGauge } = workspace;
+  const { boundaries, regions, blocks } = workspace;
 
   // Make chart by evaluating workspace
-  let chart = evaluateChart(boundaries, regions, stitchGauge, rowGauge);
+  let chart = evaluateChart(boundaries, regions, blocks);
 
   dispatch({
     ...workspace,

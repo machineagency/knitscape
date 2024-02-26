@@ -93,34 +93,95 @@ export function boundaryView() {
   return layers.concat(active);
 }
 
+function blockFillMenu(regions, index) {
+  const { blockID, gap } = regions[index];
+
+  function selectBlock(newBlockID) {
+    let updatedRegions = [...regions];
+    updatedRegions[index].blockID = newBlockID;
+    console.log(`assigning block ${newBlockID} to region ${index}`);
+    dispatch({
+      regions: updatedRegions,
+      selectingBlock: false,
+      onBlockSelect: null,
+    });
+  }
+
+  function chooseBlockFill() {
+    dispatch({ selectingBlock: true, onBlockSelect: selectBlock });
+  }
+
+  function setYGap(yGap) {
+    let updatedRegions = [...regions];
+    updatedRegions[index].gap[1] = yGap;
+    dispatch({ regions: updatedRegions });
+  }
+
+  function setXGap(xGap) {
+    let updatedRegions = [...regions];
+    updatedRegions[index].gap[0] = xGap;
+    dispatch({ regions: updatedRegions });
+  }
+
+  return html`<button @click=${() => chooseBlockFill()}>select block</button
+    >xGap<input
+      type="number"
+      min="0"
+      value=${gap[0]}
+      @change=${(e) => setXGap(Number(e.target.value))} />
+    yGap<input
+      type="number"
+      min="0"
+      @change=${(e) => setYGap(Number(e.target.value))}
+      value=${gap[1]} /> `;
+}
+
+function stitchFillMenu(regions, index) {
+  const { stitch } = regions[index];
+
+  function changeStitchFill(st) {
+    let updatedRegions = [...regions];
+    updatedRegions[index].stitch = st;
+    dispatch({ regions: updatedRegions });
+  }
+
+  return html` <select
+    @change=${(e) => changeStitchFill(Number(e.target.value))}
+    .value=${stitch}>
+    ${Object.entries(stitches).map(
+      ([st, stIndex]) =>
+        html`<option value="${stIndex}" ?selected=${stitch == stIndex}>
+          ${st}
+        </option>`
+    )}
+  </select>`;
+}
+
 export function boundaryMenu() {
   const { regions, editingBoundary: index } = GLOBAL_STATE;
 
   if (index == null) return;
 
-  function changeFill(fill) {
+  function changeFillType(fillType) {
     let updatedRegions = [...regions];
-    updatedRegions[index].fill = fill;
+    updatedRegions[index].fillType = fillType;
     dispatch({ regions: updatedRegions });
   }
+
+  const { fillType } = regions[index];
 
   return html`<div class="boundary-menu">
     <button class="btn" @click=${() => removeBoundary(index)}>
       <i class="fa-solid fa-trash"></i>
     </button>
 
-    <select
-      id="dropdown"
-      @change=${(e) => changeFill(Number(e.target.value))}
-      .value=${regions[index].fill}>
-      ${Object.entries(stitches).map(
-        ([st, stIndex]) =>
-          html`<option
-            value="${stIndex}"
-            ?selected=${regions[index].fill == stIndex}>
-            ${st}
-          </option>`
-      )}
+    <select @change=${(e) => changeFillType(e.target.value)} .value=${fillType}>
+      <option value="stitch">stitch fill</option>
+      <option value="block">block fill</option>
     </select>
+
+    ${fillType == "stitch"
+      ? stitchFillMenu(regions, index)
+      : blockFillMenu(regions, index)}
   </div>`;
 }

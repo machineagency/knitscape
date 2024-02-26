@@ -1,40 +1,31 @@
 import { GLOBAL_STATE, dispatch } from "../state";
 
 export function selectBox() {
-  const {
-    desktopPointerPos: start,
-    chartPan: pan,
-    scale,
-    stitchGauge,
-    rowGauge,
-  } = GLOBAL_STATE;
+  const [startX, startY] = [...GLOBAL_STATE.pointer];
+  let [lastX, lastY] = [startX, startY];
 
-  const cellWidth = scale / stitchGauge;
-  const cellHeight = scale / rowGauge;
-
-  let pX = Math.floor((start[0] - pan.x) / cellWidth);
-  let pY = Math.floor((start[1] - pan.y) / cellHeight);
+  dispatch({ transforming: true });
 
   function move(e) {
     if (e.buttons == 0) {
       end();
     } else {
-      let cx = Math.floor(
-        (GLOBAL_STATE.desktopPointerPos[0] - pan.x) / cellWidth
-      );
-      let cy = Math.floor(
-        (GLOBAL_STATE.desktopPointerPos[1] - pan.y) / cellHeight
-      );
+      const [currX, currY] = [...GLOBAL_STATE.pointer];
 
-      if (pX == cx || pY == cy) return;
+      if (lastX == currX && lastY == currY) return;
 
-      let xs = [pX, cx].toSorted((a, b) => a - b);
-      let ys = [pY, cy].toSorted((a, b) => a - b);
+      let [x0, x1] = [startX, currX].toSorted((a, b) => a - b);
+      let [y0, y1] = [startY, currY].toSorted((a, b) => a - b);
+
+      lastX = currX;
+      lastY = currY;
+
+      if (x0 == x1 || y0 == y1) return;
 
       dispatch({
         stitchSelect: [
-          [xs[0], ys[0]],
-          [xs[1], ys[1]],
+          [x0, y0],
+          [x1, y1],
         ],
       });
     }
@@ -44,6 +35,7 @@ export function selectBox() {
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerup", end);
     window.removeEventListener("pointerleave", end);
+    dispatch({ transforming: false });
   }
 
   window.addEventListener("pointermove", move);

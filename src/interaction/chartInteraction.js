@@ -41,7 +41,7 @@ export function chartPointerDown(e) {
     }
   } else if (GLOBAL_STATE.activeTool == "select") {
     clearSelection();
-    selectBox();
+    selectBox(e);
   } else if (GLOBAL_STATE.activeTool == "hand") {
     pan(e);
   }

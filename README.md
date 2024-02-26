@@ -25,7 +25,7 @@ KnitScape is a design and simulation tool for knitting patterns.
   - [ ] change yarn fill
   - [ ] add boundary/region
   - [ ] copy and paste boundary
-  - [ ] add block fill
+  - [x] add block fill
   - [ ] simple constraints
   - [ ] curves?
 - yarn sequencer

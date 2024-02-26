@@ -18,8 +18,7 @@ export function chartEvalSubscriber() {
       const chart = evaluateChart(
         GLOBAL_STATE.boundaries,
         GLOBAL_STATE.regions,
-        GLOBAL_STATE.stitchGauge,
-        GLOBAL_STATE.rowGauge
+        GLOBAL_STATE.blocks
       );
       dispatch({
         chart,
@@ -34,7 +33,7 @@ export function chartEvalSubscriber() {
 
     return {
       syncState(state, changes) {
-        const found = ["boundaries", "regions"].some((key) =>
+        const found = ["boundaries", "regions", "blocks"].some((key) =>
           changes.includes(key)
         );
 

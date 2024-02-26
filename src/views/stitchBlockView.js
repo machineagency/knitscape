@@ -33,7 +33,14 @@ export function stitchSelectBox() {
 }
 
 export function stitchBlocks() {
-  const { blocks, cellWidth, cellHeight, editingBlock } = GLOBAL_STATE;
+  const {
+    blocks,
+    cellWidth,
+    cellHeight,
+    editingBlock,
+    selectingBlock,
+    onBlockSelect,
+  } = GLOBAL_STATE;
   const blockTemplates = [];
 
   for (const [blockID, block] of Object.entries(blocks)) {
@@ -42,6 +49,10 @@ export function stitchBlocks() {
       html`<div
         class="stitch-block"
         @pointerdown=${(e) => {
+          if (selectingBlock) {
+            onBlockSelect(blockID);
+            return;
+          }
           if (editingBlock == blockID) blockPointerDown(e, blockID);
         }}
         style="left: ${Math.round(pos[0] * cellWidth) -
