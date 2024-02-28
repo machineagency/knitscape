@@ -4,8 +4,12 @@ import { editingTools } from "../charting/editingTools";
 import { toolData } from "../constants";
 import { GLOBAL_STATE, dispatch } from "../state";
 import { gridPattern } from "./defs";
-import { blockPointerDown } from "../interaction/blockInteraction";
-import { addStitchBlock, removeStitchBlock } from "../charting/stitchblock";
+import {
+  blockPointerDown,
+  removeStitchBlock,
+  resizeBlock,
+  addStitchBlock,
+} from "../interaction/blockInteraction";
 
 export function stitchSelectBox() {
   const {
@@ -47,22 +51,24 @@ export function stitchBlocks() {
     blockTemplates.push(
       html`<div
         class="stitch-block"
+        style="left: ${Math.round(pos[0] * cellWidth) -
+        1}px; bottom: ${Math.round(pos[1] * cellHeight)}px;"
         @pointerdown=${(e) => {
           if (selectingBlock) {
             onBlockSelect(blockID);
             return;
           }
-          if (editingBlock == blockID) blockPointerDown(e, blockID);
-        }}
-        style="left: ${Math.round(pos[0] * cellWidth) -
-        1}px; bottom: ${Math.round(pos[1] * cellHeight)}px;">
+        }}>
         <canvas data-blockid=${blockID}></canvas>
 
         <svg
           class="block-grid"
           style="position: absolute; top: 0px; left: 0px; overflow: hidden;"
           width="100%"
-          height="100%">
+          height="100%"
+          @pointerdown=${(e) => {
+            if (editingBlock == blockID) blockPointerDown(e, blockID);
+          }}>
           <defs>${gridPattern(cellWidth, cellHeight)}</defs>
           ${when(
             cellHeight > 10,
@@ -75,10 +81,12 @@ export function stitchBlocks() {
 
         ${when(
           editingBlock == blockID,
-          () => stitchBlockToolbar(blockID),
+          () => draggers(blockID),
           () => html` <div class="stitch-block-hover">
-            <button @click=${() => dispatch({ editingBlock: blockID })}>
-              <i class="fa-solid fa-pen"></i>edit block
+            <button
+              class=" btn solid"
+              @click=${() => dispatch({ editingBlock: blockID })}>
+              <i class="fa-solid fa-pen"></i>
             </button>
           </div>`
         )}
@@ -89,8 +97,33 @@ export function stitchBlocks() {
   return blockTemplates;
 }
 
-export function stitchBlockToolbar(blockID) {
-  let block = GLOBAL_STATE.blocks[blockID];
+function draggers(blockID) {
+  return html`<button
+      class="dragger up"
+      @pointerdown=${(e) => resizeBlock(e, blockID, "up")}>
+      <i class="fa-solid fa-angle-up"></i>
+    </button>
+    <button
+      class="dragger down"
+      @pointerdown=${(e) => resizeBlock(e, blockID, "down")}>
+      <i class="fa-solid fa-angle-down"></i>
+    </button>
+    <button
+      class="dragger left"
+      @pointerdown=${(e) => resizeBlock(e, blockID, "left")}>
+      <i class="fa-solid fa-angle-left"></i>
+    </button>
+    <button
+      class="dragger right"
+      @pointerdown=${(e) => resizeBlock(e, blockID, "right")}>
+      <i class="fa-solid fa-angle-right"></i>
+    </button>`;
+}
+
+export function stitchBlockToolbar() {
+  let { blocks, editingBlock: blockID, activeBlockTool } = GLOBAL_STATE;
+  let block = blocks[blockID];
+
   return html` <div class="stitch-block-toolbar">
     <button class="btn" @click=${() => removeStitchBlock(blockID)}>
       <i class="fa-solid fa-trash"></i>
@@ -98,9 +131,7 @@ export function stitchBlockToolbar(blockID) {
     <span>${block.bitmap.width} x ${block.bitmap.height} </span>
     ${Object.keys(editingTools).map(
       (toolName) => html`<button
-        class="btn solid ${GLOBAL_STATE.activeBlockTool == toolName
-          ? "current"
-          : ""}"
+        class="btn solid ${activeBlockTool == toolName ? "current" : ""}"
         @click=${() =>
           dispatch({
             activeBlockTool: toolName,
@@ -109,7 +140,7 @@ export function stitchBlockToolbar(blockID) {
       </button>`
     )}
     <button
-      class="btn solid move-repeat ${GLOBAL_STATE.activeBlockTool == "move"
+      class="btn solid move-repeat ${activeBlockTool == "move"
         ? "current"
         : ""}"
       @click=${() =>

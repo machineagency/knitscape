@@ -368,10 +368,10 @@ canvas {
 }
 
 .stitch-block-toolbar {
+  margin: 8px;
+  justify-self: center;
   position: absolute;
-  bottom: calc(100% + 8px);
   display: flex;
-  text-wrap: nowrap;
   gap: 0.4em;
   padding: 0.4em;
   border-radius: 12px;
@@ -404,6 +404,39 @@ canvas {
   outline: 4px solid white;
   border: 3px solid black;
   background-color: #ffffff3c;
+}
+
+.dragger {
+  position: absolute;
+  line-height: 0;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid black;
+  justify-content: center;
+}
+
+.dragger.up {
+  bottom: 100%;
+  width: 2em;
+  border-radius: 8px 8px 0 0;
+}
+
+.dragger.down {
+  top: 100%;
+  width: 2em;
+  border-radius: 0 0 8px 8px;
+}
+
+.dragger.left {
+  right: 100%;
+  border-radius: 8px 0 0 8px;
+  height: 2em;
+}
+
+.dragger.right {
+  left: 100%;
+  border-radius: 0 8px 8px 0;
+  height: 2em;
 }
 
 /* #endregion */

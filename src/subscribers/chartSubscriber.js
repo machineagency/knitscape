@@ -47,7 +47,10 @@ export function chartSubscriber() {
 function clearLastDrawn(blocks) {
   return Object.fromEntries(
     Object.entries(blocks).map(([blockID, block]) => {
-      return [blockID, { bitmap: null, pos: [...block.pos] }];
+      return [
+        blockID,
+        { bitmap: null, pos: [...block.pos], width: null, height: null },
+      ];
     })
   );
 }
@@ -81,6 +84,20 @@ export function blockSubscriber() {
         }
 
         for (const [blockID, block] of Object.entries(state.blocks)) {
+          if (
+            lastDrawn[blockID].width != block.bitmap.width ||
+            lastDrawn[blockID].height != block.bitmap.height
+          ) {
+            setCanvasSize(
+              document.querySelector(`[data-blockid="${blockID}"]`),
+              Math.round(block.bitmap.width * state.cellWidth),
+              Math.round(block.bitmap.height * state.cellHeight)
+            );
+
+            lastDrawn[blockID].width = block.bitmap.width;
+            lastDrawn[blockID].height = block.bitmap.height;
+          }
+
           if (lastDrawn[blockID].bitmap != block.bitmap) {
             drawChart(
               document.querySelector(`[data-blockid="${blockID}"]`),

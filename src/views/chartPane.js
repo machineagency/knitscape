@@ -18,6 +18,7 @@ import { currentTargetPointerPos } from "../utilities/misc";
 import { stitchBlocks, stitchSelectBox } from "./stitchBlockView";
 import { gridPattern, cellShadow } from "./defs";
 import { operationPicker } from "./operationPicker";
+import { stitchBlockToolbar } from "./stitchBlockView";
 
 let svgRef = createRef();
 
@@ -34,7 +35,7 @@ function toolbar() {
       <i class="fa-solid fa-minus"></i>
     </button>
     <button
-      class="btn solid ${GLOBAL_STATE.activeTool == "select" ? "current" : ""}"
+      class="btn solid ${GLOBAL_STATE.activeTool == "region" ? "current" : ""}"
       @click=${() => (GLOBAL_STATE.activeTool = "region")}>
       <i class="fa-solid fa-vector-square"></i>
     </button>
@@ -52,6 +53,14 @@ function toolbar() {
       <i class="fa-solid fa-expand"></i>
     </button>
   </div>`;
+}
+
+function contextToolbar() {
+  if (GLOBAL_STATE.editingBlock != null) {
+    return stitchBlockToolbar();
+  } else {
+    return toolbar();
+  }
 }
 
 function trackPointer(e) {
@@ -105,12 +114,14 @@ export function chartPaneView() {
   return html`
     ${yarnPanel(chartPan.y + bbox.yMin * scale, h)}
     <div class="desktop" @pointermove=${(e) => trackPointer(e)}>
-      ${toolbar()}
+      ${contextToolbar()}
       <span class="pointer-pos">[${pointer[0]},${pointer[1]}]</span>
       <div
         style="position: absolute; bottom: 0; left: 0; transform: translate(${chartPan.x}px,${-chartPan.y}px);">
         <canvas
-          style="transform: translate(${offsetX}px,${-offsetY}px); outline: 1px solid black;"
+          style="transform: translate(${offsetX}px,${-offsetY}px); outline: 1px solid black; filter: ${editingBlock
+            ? "grayscale(1)"
+            : "none"}"
           id="chart-canvas"></canvas>
       </div>
       <svg

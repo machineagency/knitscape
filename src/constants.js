@@ -194,6 +194,12 @@ export const SYMBOL_DATA = {
     color: "#b47619",
     description: "3x back transfer left",
   },
+  TRANSPARENT: {
+    pathdata: "",
+    path: new Path2D(),
+    color: "transparent",
+    description: "transparent",
+  },
 };
 
 // export const DEFAULT_PATTERN_LIBRARY = import.meta.glob("../examples/*.json");
@@ -227,6 +233,7 @@ export const stitches = {
   BXL1: 16, // Back left transfers
   BXL2: 17,
   BXL3: 18,
+  TRANSPARENT: 19,
 };
 
 export const STITCH_MAP = Object.keys(stitches);

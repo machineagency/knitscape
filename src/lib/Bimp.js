@@ -96,6 +96,16 @@ export class Bimp {
     return new Bimp(this.width, this.height, this.make2d().toReversed().flat());
   }
 
+  hFlip() {
+    return new Bimp(
+      this.width,
+      this.height,
+      this.make2d()
+        .map((row) => row.toReversed())
+        .flat()
+    );
+  }
+
   pixel(x, y) {
     if (x > this.width - 1 || x < 0 || y > this.height - 1 || y < 0) {
       return -1;

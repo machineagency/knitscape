@@ -1,3 +1,5 @@
+import { stitches } from "../constants";
+
 function mapCoords(number, inMin, inMax, outMin, outMax) {
   return ((number - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
 }
@@ -91,6 +93,9 @@ export function knitScanline(chart, bbox, boundary, blocks, fillData) {
 
           if (xOffset < 0) xOffset = bitmap.width + fillData.gap[0] + xOffset;
           if (xOffset >= bitmap.width || yOffset >= bitmap.height) continue;
+
+          let operation = bitmap.pixel(xOffset, yOffset);
+          if (operation == stitches.TRANSPARENT) continue;
           changes.push({ x, y, color: bitmap.pixel(xOffset, yOffset) });
         }
         scanChart = scanChart.draw(changes);
