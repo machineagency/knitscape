@@ -26,7 +26,7 @@ export const activeBoundaryMask = (
   if (!boundary) return;
   return svg`
 <mask id="boundarymask">
-  <rect x="0" y="0" width="100%" height="100%" fill="#d7d7d7e1" />
+  <rect x="0" y="0" width="100%" height="100%" fill="#969696ff" />
   <g transform="scale (1, -1)" transform-origin="center">
     <g transform="translate(${chartPan.x} ${chartPan.y})">
       <path d="M ${boundary.reduce(
@@ -41,9 +41,6 @@ export const activeBoundaryMask = (
 <filter id="grayscale">
   <feColorMatrix type="matrix" values="0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0"/>
 </filter>
-
-<svg style="  backdrop-filter: blur(2px);filter: url(#grayscale)">
-  <rect fill="gray" width="100%" height="100%" mask="url(#boundarymask)"/>
-</svg>
+<rect fill="gray" width="100%" height="100%" filter="url(#grayscale)" mask="url(#boundarymask)"/>
  `;
 };
