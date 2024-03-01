@@ -53,7 +53,7 @@ let GLOBAL_STATE = {
 
   // Various UI pane states
   showSettings: false,
-  yarnExpanded: false,
+  yarnExpanded: true,
 
   // INTERACTION
   reverseScroll: false,

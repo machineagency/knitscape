@@ -1,5 +1,4 @@
 import { html, svg } from "lit-html";
-import { ref, createRef } from "lit-html/directives/ref.js";
 import { when } from "lit-html/directives/when.js";
 import { GLOBAL_STATE } from "../state";
 
@@ -13,14 +12,12 @@ import { yarnPanel } from "./yarnPanel";
 
 import { boundaryMenu, boundaryView } from "./boundaryView";
 
-import { annotationPaths } from "./annotationPaths";
+// import { annotationPaths } from "./annotationPaths";
 import { currentTargetPointerPos } from "../utilities/misc";
 import { stitchBlocks, stitchSelectBox } from "./stitchBlockView";
-import { gridPattern, cellShadow } from "./defs";
+import { gridPattern, cellShadow, activeBoundaryMask } from "./defs";
 import { operationPicker } from "./operationPicker";
 import { stitchBlockToolbar } from "./stitchBlockView";
-
-let svgRef = createRef();
 
 function toolbar() {
   return html`<div class="tool-picker">
@@ -49,7 +46,9 @@ function toolbar() {
       @click=${() => (GLOBAL_STATE.activeTool = "pointer")}>
       <i class="fa-solid fa-arrow-pointer"></i>
     </button>
-    <button class="btn icon" @click=${(e) => fitChart(svgRef.value)}>
+    <button
+      class="btn icon"
+      @click=${() => fitChart(document.getElementById("svg-layer"))}>
       <i class="fa-solid fa-expand"></i>
     </button>
   </div>`;
@@ -126,34 +125,44 @@ export function chartPaneView() {
       </div>
       <svg
         id="svg-layer"
+        preserveAspectRatio="xMidYMid meet"
         class="desktop-svg ${transforming ? "transforming" : "allow-hover"}"
-        style="position: absolute; top: 0px; left: 0px; overflow: hidden;"
+        style="position: absolute; z-index: 2;"
         width="100%"
         height="100%"
-        ${ref(svgRef)}
         @pointerdown=${chartPointerDown}
         @contextmenu=${chartContextMenu}
         @click=${chartClick}
         @wheel=${zoom}>
-        <defs>${gridPattern(cellWidth, cellHeight)}${cellShadow()}</defs>
+        <defs>${gridPattern(cellWidth, cellHeight)} ${cellShadow()}</defs>
+
+        ${activeBoundaryMask(
+          GLOBAL_STATE.boundaries[GLOBAL_STATE.editingBoundary],
+          chartPan,
+          cellWidth,
+          cellHeight
+        )}
+
         <g transform="scale (1, -1)" transform-origin="center">
           <g transform="translate(${chartPan.x} ${chartPan.y})">
-            <g
-              transform="translate(${offsetX} ${offsetY})"
-              width=${w}
-              height=${h}>
-              ${cellHeight < 10
-                ? ""
-                : svg`<rect
-            width=${w}
-            height=${h}
-            fill="url(#grid)"></rect>`}
+            <g transform="translate(${offsetX} ${offsetY})">
+              ${cellHeight > 10
+                ? svg`
+              <rect
+
+                width=${w}
+                height=${h}
+                fill="url(#grid)">
+              </rect>`
+                : ""}
+
               <rect
                 width=${w}
                 height=${h}
                 fill=${editingBlock ? "#00000033" : "transparent"}></rect>
               ${pointerCellHighlight()}
             </g>
+
             ${boundaryView()}
           </g>
         </g>

@@ -96,6 +96,6 @@ export function zoom(e) {
       x: e.clientX - bounds.left,
       y: bounds.height - (e.clientY - bounds.top),
     },
-    scale
+    Math.floor(scale)
   );
 }
