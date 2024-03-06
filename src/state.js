@@ -49,8 +49,6 @@ let GLOBAL_STATE = {
   // YARN
   yarnPalette: null,
   yarnWidth: 0.24,
-  yarnSequence: null,
-  yarnSelections: [],
 
   // Various UI pane states
   showSettings: false,

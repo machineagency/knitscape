@@ -111,7 +111,7 @@ export function chartPaneView() {
   const h = Math.round(cellHeight * chart.height);
 
   return html`
-    ${yarnPanel(chartPan.y + bbox.yMin * scale, h)}
+    ${yarnPanel(chartPan.y + offsetY, h)}
     <div class="desktop" @pointermove=${(e) => trackPointer(e)}>
       ${contextToolbar()}
       <span class="pointer-pos">[${pointer[0]},${pointer[1]}]</span>
