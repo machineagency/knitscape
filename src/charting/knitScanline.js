@@ -29,17 +29,23 @@ function addEdge(edgeTable, [x1, y1], [x2, y2]) {
   });
 }
 
-export function knitScanline(chart, bbox, boundary, blocks, fillData) {
+export function knitScanline(
+  stitchChart,
+  yarnChart,
+  bbox,
+  boundary,
+  stitchBlock,
+  fillData,
+  yarnBlock
+) {
   if (fillData.fillType == "stitch") {
-    if (fillData.stitch == 0) return chart;
+    if (fillData.stitch == 0) return { stitch: stitchChart, yarn: yarnChart };
   } else if (fillData.fillType == "block") {
-    if (fillData.blockID == null) return chart;
-    let block = blocks[fillData.blockID];
-    if (block == undefined) return chart;
+    if (stitchBlock == undefined)
+      return { stitch: stitchChart, yarn: yarnChart };
   }
 
-  let scanChart = chart;
-  const points = boundary.map((pt) => toChartCoords(pt, bbox, chart));
+  const points = boundary.map((pt) => toChartCoords(pt, bbox, stitchChart));
 
   let edges = [];
 
@@ -76,14 +82,14 @@ export function knitScanline(chart, bbox, boundary, blocks, fillData) {
 
       if (fillData.fillType == "stitch") {
         // fill in between ascending pairs
-        scanChart = scanChart.line(
+        stitchChart = stitchChart.line(
           { x: xStart, y },
           { x: xEnd - 1, y }, // Fill up to but not including x
           fillData.stitch
         );
       } else if (fillData.fillType == "block") {
-        let block = blocks[fillData.blockID];
-        let { bitmap, pos } = block;
+        // let block = blocks[fillData.blockID];
+        let { bitmap, pos } = stitchBlock;
         let changes = [];
         let yOffset = (y - pos[1]) % (bitmap.height + fillData.gap[1]);
         if (yOffset < 0) yOffset = bitmap.height + fillData.gap[1] + yOffset;
@@ -96,10 +102,25 @@ export function knitScanline(chart, bbox, boundary, blocks, fillData) {
 
           let operation = bitmap.pixel(xOffset, yOffset);
           if (operation == stitches.TRANSPARENT) continue;
-          changes.push({ x, y, color: bitmap.pixel(xOffset, yOffset) });
+          changes.push({ x, y, color: operation });
         }
-        scanChart = scanChart.draw(changes);
+        stitchChart = stitchChart.draw(changes);
       }
+
+      let { bitmap, pos } = yarnBlock;
+      let changes = [];
+      let yOffset = (y - pos[1]) % bitmap.height;
+
+      for (let x = xStart; x < xEnd; x++) {
+        let xOffset = (x - pos[0]) % bitmap.width;
+
+        if (xOffset < 0) xOffset = bitmap.width + xOffset;
+        if (xOffset >= bitmap.width || yOffset >= bitmap.height) continue;
+
+        let yarnColor = bitmap.pixel(xOffset, yOffset) + 1;
+        changes.push({ x, y, color: yarnColor });
+      }
+      yarnChart = yarnChart.draw(changes);
     }
 
     y++;
@@ -113,5 +134,5 @@ export function knitScanline(chart, bbox, boundary, blocks, fillData) {
     }
   }
 
-  return scanChart;
+  return { stitch: stitchChart, yarn: yarnChart };
 }

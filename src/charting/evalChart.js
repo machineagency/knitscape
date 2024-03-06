@@ -17,7 +17,7 @@ function shiftBlocks(bbox, blocks) {
   );
 }
 
-export function evaluateChart(boundaries, regions, blocks) {
+export function evaluateChart(boundaries, regions, yarnRegions, blocks) {
   const bbox = bBoxAllBoundaries(boundaries);
 
   const chartWidth = bbox.xMax - bbox.xMin;
@@ -26,11 +26,23 @@ export function evaluateChart(boundaries, regions, blocks) {
   const shiftedBlocks = shiftBlocks(bbox, blocks);
 
   // First, create an empty chart that is fit to the boundaries
-  let chart = Bimp.empty(chartWidth, chartHeight, stitches.EMPTY);
+  let stitchChart = Bimp.empty(chartWidth, chartHeight, stitches.EMPTY);
+  let yarnChart = Bimp.empty(chartWidth, chartHeight, 0);
 
-  for (const [index, data] of Object.entries(regions)) {
-    chart = knitScanline(chart, bbox, boundaries[index], shiftedBlocks, data);
+  for (const [index, fillData] of Object.entries(regions)) {
+    let { stitch, yarn } = knitScanline(
+      stitchChart,
+      yarnChart,
+      bbox,
+      boundaries[index],
+      shiftedBlocks[fillData.blockID],
+      fillData,
+      yarnRegions[index]
+    );
+
+    stitchChart = stitch;
+    yarnChart = yarn;
   }
 
-  return chart;
+  return { stitchChart, yarnChart };
 }

@@ -21,6 +21,7 @@ let GLOBAL_STATE = {
   paths: [],
   boundaries: [],
   regions: [],
+  yarnRegions: [],
 
   stitchSelect: null,
   editingBoundary: null,

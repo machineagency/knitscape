@@ -58,12 +58,6 @@ const testWorkspace = {
       [15, 15],
       [15, 0],
     ],
-    // [
-    //   [-1, 0],
-    //   [-1, 10],
-    //   [1, 10],
-    //   [1, 0],
-    // ],
     [
       [0, 0],
       [3, 10],
@@ -90,6 +84,10 @@ const testWorkspace = {
     // { fillType: "stitch", fill: stitches.PURL },
     // { fillType: "stitch", fill: stitches.PURL },
   ],
+  yarnRegions: [
+    { bitmap: new Bimp(1, 1, [0]), pos: [0, 0] },
+    { bitmap: new Bimp(1, 1, [1]), pos: [0, 0] },
+  ],
   blocks: {
     test: {
       type: "stitch",
@@ -104,15 +102,21 @@ const testWorkspace = {
 };
 
 function loadWorkspace(workspace) {
-  const { boundaries, regions, blocks } = workspace;
+  const { boundaries, regions, blocks, yarnRegions } = workspace;
 
   // Make chart by evaluating workspace
-  let chart = evaluateChart(boundaries, regions, blocks);
+  let { stitchChart, yarnChart } = evaluateChart(
+    boundaries,
+    regions,
+    yarnRegions,
+    blocks
+  );
 
   dispatch({
     ...workspace,
-    chart,
-    yarnSequence: Array.from({ length: chart.height }, () => [0]),
+    chart: stitchChart,
+    yarnChart: yarnChart,
+    yarnSequence: Array.from({ length: stitchChart.height }, () => [0]),
     bbox: bBoxAllBoundaries(boundaries),
   });
 }
