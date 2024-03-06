@@ -2,6 +2,7 @@ import { Bimp } from "../lib/Bimp";
 import { stitches } from "../constants";
 import { knitScanline } from "./knitScanline";
 import { bBoxAllBoundaries } from "./helpers";
+import { yarnSeparation } from "./yarnSeparation";
 
 function shiftBlocks(bbox, blocks) {
   return Object.fromEntries(
@@ -44,5 +45,10 @@ export function evaluateChart(boundaries, regions, yarnRegions, blocks) {
     yarnChart = yarn;
   }
 
-  return { stitchChart, yarnChart };
+  const { machineChart, yarnSequence, rowMap } = yarnSeparation(
+    stitchChart,
+    yarnChart
+  );
+
+  return { stitchChart, yarnChart, machineChart, yarnSequence, rowMap };
 }

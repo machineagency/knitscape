@@ -4,7 +4,7 @@ let GLOBAL_STATE = {
   heldKeys: new Set(), // Keys that are currently held down
   snapshots: [], // Array of snapshot history
   lastSnapshot: 0, // time of last snapshot
-  colorMode: "operation",
+  colorMode: "yarn",
   transforming: false, // If the pointer is being used to do something
 
   // GAUGE
@@ -33,6 +33,9 @@ let GLOBAL_STATE = {
   activeBlockTool: "brush",
 
   chart: null,
+  yarnChart: null,
+  machineChart: null,
+  rowMap: null,
 
   scale: 15, // Number of pixels for each chart cell
   cellWidth: 15 / 7,
@@ -52,7 +55,7 @@ let GLOBAL_STATE = {
 
   // Various UI pane states
   showSettings: false,
-  yarnExpanded: true,
+  yarnExpanded: false,
 
   // INTERACTION
   reverseScroll: false,

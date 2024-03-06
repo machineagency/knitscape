@@ -1,18 +1,24 @@
 import { stitches } from "../constants";
 import { Vec2 } from "../lib/Vec2";
 
-export function layoutNodes(DS, stitchWidth = 1, stitchAspect = 0.75) {
+export function layoutNodes(
+  DS,
+  stitchChart,
+  rowMap,
+  stitchWidth = 1,
+  stitchAspect = 0.75
+) {
   // calculates the x,y values for the i,j
   const HALF_STITCH = stitchWidth / 2;
   const STITCH_HEIGHT = stitchWidth * stitchAspect;
-
+  console.log(rowMap);
   return DS.data.map((node, index) => {
     const i = index % DS.width;
     const j = (index - i) / DS.width;
     return {
       pos: {
         x: i * HALF_STITCH,
-        y: (DS.height - j - 1) * STITCH_HEIGHT,
+        y: (stitchChart.height - rowMap[j] - 1) * STITCH_HEIGHT,
       },
       f: {
         x: 0,

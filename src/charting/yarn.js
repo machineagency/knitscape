@@ -4,22 +4,25 @@ import jscolor from "@eastdesire/jscolor";
 import { Bimp } from "../lib/Bimp";
 
 export function deleteYarn(index) {
-  if (GLOBAL_STATE.yarnPalette.length == 1) {
+  const { yarnPalette, yarnChart } = GLOBAL_STATE;
+
+  if (yarnPalette.length == 1) {
     alert("you need some color in your life");
     return;
   }
-  const newPalette = GLOBAL_STATE.yarnPalette.filter((color, i) => i != index);
-  const newBitmap = GLOBAL_STATE.yarnSequence.pixels.map((bit) => {
+  const newPalette = yarnPalette.filter((color, i) => i != index);
+  const newBitmap = yarnChart.pixels.map((bit) => {
     if (bit == index) return 0;
     if (bit > index) return bit - 1;
     return bit;
   });
+  //TODO: also remove yarn from yarn blocks
 
   dispatch({
     yarnPalette: newPalette,
-    yarnSequence: new Bimp(
-      GLOBAL_STATE.yarnSequence.width,
-      GLOBAL_STATE.yarnSequence.height,
+    yarnChart: new Bimp(
+      GLOBAL_STATE.yarnChart.width,
+      GLOBAL_STATE.yarnChart.height,
       newBitmap
     ),
   });

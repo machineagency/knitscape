@@ -53,47 +53,32 @@ function measureWindow() {
 const testWorkspace = {
   boundaries: [
     [
-      [-1, 0],
-      [-1, 15],
-      [15, 15],
-      [15, 0],
+      [0, 0],
+      [0, 7],
+      [7, 7],
+      [7, 0],
     ],
     [
-      [0, 0],
-      [3, 10],
-      [8, 10],
-      [9, 0],
+      [2, 2],
+      [2, 5],
+      [5, 5],
+      [5, 2],
     ],
-    // [
-    //   [7, 0],
-    //   [7, 10],
-    //   [9, 10],
-    //   [9, 0],
-    // ],
-    // [
-    //   [11, 0],
-    //   [11, 10],
-    //   [13, 10],
-    //   [13, 0],
-    // ],
   ],
   regions: [
     { fillType: "stitch", stitch: stitches.KNIT, blockID: null, gap: [0, 0] },
-    // { fillType: "stitch", fill: stitches.PURL },
-    { fillType: "block", stitch: stitches.KNIT, blockID: "test", gap: [0, 0] },
-    // { fillType: "stitch", fill: stitches.PURL },
-    // { fillType: "stitch", fill: stitches.PURL },
+    { fillType: "stitch", stitch: stitches.KNIT, blockID: "test", gap: [0, 0] },
   ],
   yarnRegions: [
     { bitmap: new Bimp(1, 1, [0]), pos: [0, 0] },
     { bitmap: new Bimp(1, 1, [1]), pos: [0, 0] },
   ],
   blocks: {
-    test: {
-      type: "stitch",
-      pos: [3, 0],
-      bitmap: new Bimp(2, 2, [1, 2, 1, 1]),
-    },
+    // test: {
+    //   type: "stitch",
+    //   pos: [3, 0],
+    //   bitmap: new Bimp(2, 2, [1, 2, 1, 1]),
+    // },
   },
   cellAspect: 7 / 11,
   stitchGauge: 7, // stitches per inch
@@ -105,18 +90,16 @@ function loadWorkspace(workspace) {
   const { boundaries, regions, blocks, yarnRegions } = workspace;
 
   // Make chart by evaluating workspace
-  let { stitchChart, yarnChart } = evaluateChart(
-    boundaries,
-    regions,
-    yarnRegions,
-    blocks
-  );
-
+  let { stitchChart, yarnChart, machineChart, yarnSequence, rowMap } =
+    evaluateChart(boundaries, regions, yarnRegions, blocks);
+  console.log(rowMap);
   dispatch({
     ...workspace,
     chart: stitchChart,
     yarnChart: yarnChart,
-    yarnSequence: Array.from({ length: stitchChart.height }, () => [0]),
+    machineChart,
+    yarnSequence,
+    rowMap,
     bbox: bBoxAllBoundaries(boundaries),
   });
 }

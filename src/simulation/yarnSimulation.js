@@ -26,7 +26,13 @@ export function simulate(stitchPattern, scale) {
   const DS = populateDS(stitchPattern);
   orderCNs(DS, stitchPattern);
   const yarnPath = followTheYarn(DS, stitchPattern);
-  const nodes = layoutNodes(DS, stitchWidth, STITCH_ASPECT);
+  const nodes = layoutNodes(
+    DS,
+    GLOBAL_STATE.chart,
+    GLOBAL_STATE.rowMap,
+    stitchWidth,
+    STITCH_ASPECT
+  );
   const yarnSegments = buildSegmentData(
     DS,
     yarnPath,
@@ -44,7 +50,7 @@ export function simulate(stitchPattern, scale) {
   }
 
   function yarnColor(rowNum) {
-    return stitchPattern.yarnSequence[rowNum][0];
+    return stitchPattern.yarnSequence[rowNum] - 1;
   }
 
   // CN grid position, stitch row, previous CN coords, next CN coords
@@ -201,7 +207,7 @@ export function simulate(stitchPattern, scale) {
   function init() {
     stitchWidth = Math.min(
       (canvasWidth * 0.9) / stitchPattern.width,
-      (canvasHeight * 0.9) / stitchPattern.height / STITCH_ASPECT
+      (canvasHeight * 0.9) / GLOBAL_STATE.chart.height / STITCH_ASPECT
     );
 
     stitchHeight = stitchWidth * STITCH_ASPECT;
@@ -209,7 +215,8 @@ export function simulate(stitchPattern, scale) {
     offsetX =
       yarnWidth() + (canvasWidth - stitchPattern.width * stitchWidth) / 2;
     offsetY =
-      -yarnWidth() + (canvasHeight - stitchPattern.height * stitchHeight) / 2;
+      -yarnWidth() +
+      (canvasHeight - GLOBAL_STATE.chart.height * stitchHeight) / 2;
   }
 
   function canvasSetup() {

@@ -15,16 +15,20 @@ function debounce(callback, wait) {
 export function chartEvalSubscriber() {
   return () => {
     function evalChart() {
-      const { stitchChart, yarnChart } = evaluateChart(
-        GLOBAL_STATE.boundaries,
-        GLOBAL_STATE.regions,
-        GLOBAL_STATE.yarnRegions,
-        GLOBAL_STATE.blocks
-      );
+      let { stitchChart, yarnChart, machineChart, yarnSequence, rowMap } =
+        evaluateChart(
+          GLOBAL_STATE.boundaries,
+          GLOBAL_STATE.regions,
+          GLOBAL_STATE.yarnRegions,
+          GLOBAL_STATE.blocks
+        );
+
       dispatch({
         chart: stitchChart,
         yarnChart: yarnChart,
-        yarnSequence: Array.from({ length: stitchChart.height }, () => [0]),
+        machineChart,
+        yarnSequence,
+        rowMap,
         bbox: bBoxAllBoundaries(GLOBAL_STATE.boundaries),
       });
     }
