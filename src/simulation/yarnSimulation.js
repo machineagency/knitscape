@@ -25,7 +25,7 @@ export function simulate(stitchPattern, scale) {
 
   const DS = populateDS(stitchPattern);
   orderCNs(DS, stitchPattern);
-  const yarnPath = followTheYarn(DS, stitchPattern);
+  const { yarnPath, yarnPaths } = followTheYarn(DS, GLOBAL_STATE.yarnSequence);
   const nodes = layoutNodes(
     DS,
     GLOBAL_STATE.chart,
@@ -35,7 +35,7 @@ export function simulate(stitchPattern, scale) {
   );
   const yarnSegments = buildSegmentData(
     DS,
-    yarnPath,
+    yarnPaths,
     nodes,
     stitchWidth,
     STITCH_ASPECT
@@ -85,46 +85,50 @@ export function simulate(stitchPattern, scale) {
     return `M ${p0x} ${p0y} C${p1x} ${p1y} ${p2x} ${p2y} ${p3x} ${p3y}`;
   }
 
-  function calculateSegmentControlPoints(links) {
-    let p0 = [nodes[0].pos.x - stitchWidth, nodes[0].pos.y];
-    let p1 = nodeOffset(
-      links[0].source,
-      links[0].row,
-      p0,
-      getCoords(links[0].target)
-    );
-    let p2 = nodeOffset(
-      links[0].target,
-      links[0].row,
-      p1,
-      getCoords(links[1].target)
-    );
-
-    links.forEach((segment, index) => {
-      if (index > links.length - 3) return;
-      let p3 = nodeOffset(
-        links[index + 1].target,
-        links[index].row,
-        p2,
-        getCoords(links[index + 2].target)
+  function calculateSegmentControlPoints(yarnSegMap) {
+    Object.entries(yarnSegMap).map(([yarnIndex, links]) => {
+      let p0 = [nodes[0].pos.x - stitchWidth, nodes[0].pos.y];
+      let p1 = nodeOffset(
+        links[0].source,
+        links[0].row,
+        p0,
+        getCoords(links[0].target)
+      );
+      let p2 = nodeOffset(
+        links[0].target,
+        links[0].row,
+        p1,
+        getCoords(links[1].target)
       );
 
-      let n1 = getCoords(links[index].source);
-      let n2 = getCoords(links[index].target);
+      links.forEach((segment, index) => {
+        if (index > links.length - 3) return;
+        let p3 = nodeOffset(
+          links[index + 1].target,
+          links[index].row,
+          p2,
+          getCoords(links[index + 2].target)
+        );
 
-      const currentLength = Math.abs(Math.hypot(n1[0] - n2[0], n1[1] - n2[1]));
-      const tension = 1 - segment.restLength / currentLength;
+        let n1 = getCoords(links[index].source);
+        let n2 = getCoords(links[index].target);
 
-      if (segment.layer.length == 2) {
-        const splinePtsArr = splitYarnSpline(p0, p1, p2, p3, tension);
-        segment.path = splinePtsArr.map((splinePts) => splinePath(splinePts));
-      } else {
-        const splinePts = yarnSpline(p0, p1, p2, p3, tension);
-        segment.path = splinePath(splinePts);
-      }
-      p0 = p1;
-      p1 = p2;
-      p2 = p3;
+        const currentLength = Math.abs(
+          Math.hypot(n1[0] - n2[0], n1[1] - n2[1])
+        );
+        const tension = 1 - segment.restLength / currentLength;
+
+        if (segment.layer.length == 2) {
+          const splinePtsArr = splitYarnSpline(p0, p1, p2, p3, tension);
+          segment.path = splinePtsArr.map((splinePts) => splinePath(splinePts));
+        } else {
+          const splinePts = yarnSpline(p0, p1, p2, p3, tension);
+          segment.path = splinePath(splinePts);
+        }
+        p0 = p1;
+        p1 = p2;
+        p2 = p3;
+      });
     });
   }
 
@@ -155,7 +159,7 @@ export function simulate(stitchPattern, scale) {
     }
   }
 
-  function drawYarnSegments(segments) {
+  function drawYarnSegments(yarnSegMap) {
     // const layerDS
     // let row;
     // let currentSegment = segments.length - 1;
@@ -171,22 +175,24 @@ export function simulate(stitchPattern, scale) {
     //   }
     // }
 
-    let row;
-    let currentSegment = 0;
+    Object.entries(yarnSegMap).forEach(([yarnIndex, segments]) => {
+      let row;
+      let currentSegment = 0;
 
-    while (currentSegment < segments.length) {
-      row = segments[currentSegment].row;
-      const colorIndex = yarnColor(row);
+      while (currentSegment < segments.length) {
+        row = segments[currentSegment].row;
+        const colorIndex = yarnColor(row);
 
-      while (
-        currentSegment < segments.length &&
-        segments[currentSegment].row == row
-      ) {
-        const { layer, path } = segments[currentSegment];
-        drawSegmentPathToLayer(layer, colorIndex, path);
-        currentSegment++;
+        while (
+          currentSegment < segments.length &&
+          segments[currentSegment].row == row
+        ) {
+          const { layer, path } = segments[currentSegment];
+          drawSegmentPathToLayer(layer, colorIndex, path);
+          currentSegment++;
+        }
       }
-    }
+    });
   }
 
   function clear() {

@@ -11,7 +11,6 @@ export function layoutNodes(
   // calculates the x,y values for the i,j
   const HALF_STITCH = stitchWidth / 2;
   const STITCH_HEIGHT = stitchWidth * stitchAspect;
-  console.log(rowMap);
   return DS.data.map((node, index) => {
     const i = index % DS.width;
     const j = (index - i) / DS.width;
@@ -34,107 +33,123 @@ export function layoutNodes(
 
 export function buildSegmentData(
   DS,
-  yarnPath,
+  yarnPaths,
   nodes,
   stitchWidth = 1,
   stitchAspect = 0.75
 ) {
-  const links = [];
+  // const links = [];
   const maxStack = DS.maxCNStack;
 
   // console.log("max CN stack:", maxStack);
 
-  for (let index = 0; index < yarnPath.length - 1; index++) {
-    const [sourceI, sourceJ, sourceRow, sourceLayer] = yarnPath[index];
-    const [targetI, targetJ, targetRow, targetLayer] = yarnPath[index + 1];
+  const links = Object.fromEntries(
+    Object.keys(yarnPaths).map((yarnIndex) => [yarnIndex, []])
+  );
 
-    let sourceIndex = sourceI + sourceJ * DS.width;
-    let targetIndex = targetI + targetJ * DS.width;
+  Object.entries(yarnPaths).forEach(([yarnIndex, yarnPath]) => {
+    for (let index = 0; index < yarnPath.length - 1; index++) {
+      const [sourceI, sourceJ, sourceRow, sourceLayer] = yarnPath[index];
+      const [targetI, targetJ, targetRow, targetLayer] = yarnPath[index + 1];
 
-    const source = DS.CN(sourceI, sourceJ);
-    const target = DS.CN(targetI, targetJ);
+      // const sourceYarn = yarnSequence[sourceRow];
+      // const targetYarn = yarnSequence[sourceRow];
 
-    let sourceLeg = source[4][1] === index;
-    let targetLeg = target[4][1] === index + 1;
+      // if (sourceYarn != targetYarn) continue;
 
-    const loop = sourceLeg == targetLeg;
-    const leg = sourceLeg != targetLeg;
+      let sourceIndex = sourceI + sourceJ * DS.width;
+      let targetIndex = targetI + targetJ * DS.width;
 
-    const sourceOddity = sourceI % 2 != 0;
-    const targetOddity = targetI % 2 != 0;
+      const source = DS.CN(sourceI, sourceJ);
+      const target = DS.CN(targetI, targetJ);
 
-    const paritiesEqual = sourceOddity == targetOddity;
+      let sourceLeg = source[4][1] === index;
+      let targetLeg = target[4][1] === index + 1;
 
-    let layer;
-    let startLayer, endLayer;
+      const loop = sourceLeg == targetLeg;
+      const leg = sourceLeg != targetLeg;
 
-    if (source[0] == stitches.KNIT) {
-      if (paritiesEqual) {
-        // treat as knit leg
-        startLayer = sourceLeg ? 4 * maxStack : 4 * maxStack - 2 * sourceLayer;
-      } else {
-        // treat as knit loop
-        startLayer = sourceLeg
-          ? 2 * maxStack + 1
-          : 4 * maxStack - 2 * sourceLayer - 1;
+      const sourceOddity = sourceI % 2 != 0;
+      const targetOddity = targetI % 2 != 0;
+
+      const paritiesEqual = sourceOddity == targetOddity;
+
+      let layer;
+      let startLayer, endLayer;
+
+      if (source[0] == stitches.KNIT) {
+        if (paritiesEqual) {
+          // treat as knit leg
+          startLayer = sourceLeg
+            ? 4 * maxStack
+            : 4 * maxStack - 2 * sourceLayer;
+        } else {
+          // treat as knit loop
+          startLayer = sourceLeg
+            ? 2 * maxStack + 1
+            : 4 * maxStack - 2 * sourceLayer - 1;
+        }
+      } else if (source[0] == stitches.PURL) {
+        if (paritiesEqual || (leg && !paritiesEqual)) {
+          // treat as purl leg
+          startLayer = sourceLeg ? 1 : 2 * maxStack - 2 * sourceLayer - 1;
+        } else {
+          // treat as purl loop
+          startLayer = sourceLeg
+            ? 2 * maxStack
+            : 2 * maxStack - 2 * sourceLayer;
+        }
       }
-    } else if (source[0] == stitches.PURL) {
-      if (paritiesEqual || (leg && !paritiesEqual)) {
-        // treat as purl leg
-        startLayer = sourceLeg ? 1 : 2 * maxStack - 2 * sourceLayer - 1;
-      } else {
-        // treat as purl loop
-        startLayer = sourceLeg ? 2 * maxStack : 2 * maxStack - 2 * sourceLayer;
+
+      if (target[0] == stitches.KNIT) {
+        if (paritiesEqual) {
+          // treat as knit leg
+          endLayer = targetLeg ? 4 * maxStack : 4 * maxStack - 2 * targetLayer;
+        } else {
+          // treat as knit loop
+          endLayer = targetLeg
+            ? 2 * maxStack + 1
+            : 4 * maxStack - 2 * targetLayer - 1;
+        }
+      } else if (target[0] == stitches.PURL) {
+        if (paritiesEqual || (leg && !paritiesEqual)) {
+          // treat as purl leg
+          endLayer = targetLeg ? 1 : 2 * maxStack - 2 * targetLayer - 1;
+        } else {
+          // treat as purl loop
+          endLayer = targetLeg ? 2 * maxStack : 2 * maxStack - 2 * targetLayer;
+        }
       }
+
+      if (startLayer == endLayer) {
+        layer = startLayer;
+      } else if (startLayer == undefined || endLayer == undefined) {
+        layer = startLayer != undefined ? startLayer : endLayer;
+      } else {
+        layer = [startLayer, endLayer];
+      }
+
+      // console.log(layer, sourceLayer, targetLayer, index);
+      if (layer == undefined) layer = 1;
+
+      // console.log([startLayer, endLayer]);
+      // console.log(layer);
+
+      links[yarnIndex].push({
+        source: [sourceI, sourceJ],
+        target: [targetI, targetJ],
+        sourceIndex,
+        targetIndex,
+        restLength: loop
+          ? Vec2.mag(Vec2.sub(nodes[sourceIndex].pos, nodes[targetIndex].pos))
+          : stitchWidth * stitchAspect,
+        row: targetRow,
+        layer,
+        path: null,
+      });
     }
+  });
 
-    if (target[0] == stitches.KNIT) {
-      if (paritiesEqual) {
-        // treat as knit leg
-        endLayer = targetLeg ? 4 * maxStack : 4 * maxStack - 2 * targetLayer;
-      } else {
-        // treat as knit loop
-        endLayer = targetLeg
-          ? 2 * maxStack + 1
-          : 4 * maxStack - 2 * targetLayer - 1;
-      }
-    } else if (target[0] == stitches.PURL) {
-      if (paritiesEqual || (leg && !paritiesEqual)) {
-        // treat as purl leg
-        endLayer = targetLeg ? 1 : 2 * maxStack - 2 * targetLayer - 1;
-      } else {
-        // treat as purl loop
-        endLayer = targetLeg ? 2 * maxStack : 2 * maxStack - 2 * targetLayer;
-      }
-    }
-
-    if (startLayer == endLayer) {
-      layer = startLayer;
-    } else if (startLayer == undefined || endLayer == undefined) {
-      layer = startLayer != undefined ? startLayer : endLayer;
-    } else {
-      layer = [startLayer, endLayer];
-    }
-
-    // console.log(layer, sourceLayer, targetLayer, index);
-    if (layer == undefined) layer = 1;
-
-    // console.log([startLayer, endLayer]);
-    // console.log(layer);
-
-    links.push({
-      source: [sourceI, sourceJ],
-      target: [targetI, targetJ],
-      sourceIndex,
-      targetIndex,
-      restLength: loop
-        ? Vec2.mag(Vec2.sub(nodes[sourceIndex].pos, nodes[targetIndex].pos))
-        : stitchWidth * stitchAspect,
-      row: targetRow,
-      layer,
-      path: null,
-    });
-  }
   return links;
 }
 

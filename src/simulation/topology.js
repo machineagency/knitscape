@@ -421,7 +421,7 @@ export function populateDS(pattern, populateFirstRow = true) {
   return DS;
 }
 
-export function followTheYarn(DS) {
+export function followTheYarn(DS, yarnSequence) {
   let i = 0,
     j = 0,
     legNode = true,
@@ -430,6 +430,7 @@ export function followTheYarn(DS) {
   let yarnPathIndex = 0;
 
   const yarnPath = [];
+  const yarnPaths = {};
 
   let highestLayer = 0;
 
@@ -494,6 +495,11 @@ export function followTheYarn(DS) {
       if (layer > highestLayer) highestLayer = layer;
 
       yarnPath.push([...cnLoc, currentStitchRow, layer]);
+      let currentYarn = yarnSequence[currentStitchRow];
+      if (!(currentYarn in yarnPaths)) {
+        yarnPaths[currentYarn] = [];
+      }
+      yarnPaths[currentYarn].push([...cnLoc, currentStitchRow, layer]);
       yarnPathIndex++;
     }
 
@@ -508,7 +514,7 @@ export function followTheYarn(DS) {
   }
 
   DS.maxCNStack = highestLayer + 1;
-  return yarnPath;
+  return { yarnPath, yarnPaths };
 }
 
 function addToList(i, j, legNode, yarnPath, DS) {

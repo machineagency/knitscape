@@ -92,7 +92,6 @@ function loadWorkspace(workspace) {
   // Make chart by evaluating workspace
   let { stitchChart, yarnChart, machineChart, yarnSequence, rowMap } =
     evaluateChart(boundaries, regions, yarnRegions, blocks);
-  console.log(rowMap);
   dispatch({
     ...workspace,
     chart: stitchChart,
