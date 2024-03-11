@@ -109,9 +109,13 @@ export function blockSubscriber() {
           if (lastDrawn[blockID].bitmap != block.bitmap) {
             drawChart(
               document.querySelector(`[data-blockid="${blockID}"]`),
+              state.colorMode,
               block.bitmap,
-              state.cellWidth,
-              state.cellHeight,
+              state.yarnChart,
+              state.yarnPalette,
+              scale,
+              scale * state.cellAspect,
+
               lastDrawn[blockID].bitmap
             );
           }

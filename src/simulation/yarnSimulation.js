@@ -25,7 +25,7 @@ export function simulate(stitchPattern, scale) {
 
   const DS = populateDS(stitchPattern);
   orderCNs(DS, stitchPattern);
-  const { yarnPath, yarnPaths } = followTheYarn(DS, GLOBAL_STATE.yarnSequence);
+  const yarnPaths = followTheYarn(DS, GLOBAL_STATE.yarnSequence);
   const nodes = layoutNodes(
     DS,
     GLOBAL_STATE.chart,
@@ -33,6 +33,7 @@ export function simulate(stitchPattern, scale) {
     stitchWidth,
     STITCH_ASPECT
   );
+
   const yarnSegments = buildSegmentData(
     DS,
     yarnPaths,

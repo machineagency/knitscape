@@ -127,7 +127,7 @@ export function chartPaneView() {
         id="svg-layer"
         preserveAspectRatio="xMidYMid meet"
         class="desktop-svg ${transforming ? "transforming" : "allow-hover"}"
-        style="position: absolute; z-index: 2;"
+        style="position: absolute;"
         width="100%"
         height="100%"
         @pointerdown=${chartPointerDown}
@@ -135,13 +135,6 @@ export function chartPaneView() {
         @click=${chartClick}
         @wheel=${zoom}>
         <defs>${gridPattern(cellWidth, cellHeight)} ${cellShadow()}</defs>
-
-        ${activeBoundaryMask(
-          GLOBAL_STATE.boundaries[GLOBAL_STATE.editingBoundary],
-          chartPan,
-          cellWidth,
-          cellHeight
-        )}
 
         <g transform="scale (1, -1)" transform-origin="center">
           <g transform="translate(${chartPan.x} ${chartPan.y})">
@@ -169,7 +162,7 @@ export function chartPaneView() {
       </svg>
       <div
         style="position: absolute; bottom: 0; left: 0;
-      transform: translate(${chartPan.x}px, ${-chartPan.y}px);">
+      transform: translate(${chartPan.x}px, ${-chartPan.y}px); ">
         ${when(GLOBAL_STATE.stitchSelect, stitchSelectBox)} ${stitchBlocks()}
       </div>
       ${operationPicker()} ${boundaryMenu()}

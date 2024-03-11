@@ -25,7 +25,7 @@ export function taskbar() {
         <label class="color-mode-toggle switch">
           <input
             type="checkbox"
-            checked
+            ?checked=${GLOBAL_STATE.colorMode == "operation"}
             @change=${(e) =>
               dispatch({
                 colorMode: e.target.checked ? "operation" : "yarn",

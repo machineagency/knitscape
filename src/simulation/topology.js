@@ -514,7 +514,7 @@ export function followTheYarn(DS, yarnSequence) {
   }
 
   DS.maxCNStack = highestLayer + 1;
-  return { yarnPath, yarnPaths };
+  return yarnPaths;
 }
 
 function addToList(i, j, legNode, yarnPath, DS) {
