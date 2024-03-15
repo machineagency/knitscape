@@ -3,7 +3,7 @@ import { setCanvasSize } from "../utilities/misc";
 
 export function chartSubscriber() {
   return ({ state }) => {
-    let { scale, chart, colorMode } = state;
+    let { scale, chart, colorMode, yarnPalette } = state;
 
     let width = chart.width;
     let height = chart.height;
@@ -15,12 +15,14 @@ export function chartSubscriber() {
           scale != state.scale ||
           width != state.chart.width ||
           height != state.chart.height ||
-          colorMode != state.colorMode
+          colorMode != state.colorMode ||
+          yarnPalette != state.yarnPalette
         ) {
           width = state.chart.width;
           height = state.chart.height;
           scale = state.scale;
           colorMode = state.colorMode;
+          yarnPalette = state.yarnPalette;
 
           setCanvasSize(
             document.getElementById("chart-canvas"),

@@ -34,9 +34,12 @@ export function runSimulation() {
 
     return {
       syncState(state, changes) {
-        const found = ["yarnPalette", "yarnSequence", "machineChart"].some(
-          (key) => changes.includes(key)
-        );
+        const found = [
+          "yarnPalette",
+          "yarnSequence",
+          "machineChart",
+          "flipped",
+        ].some((key) => changes.includes(key));
 
         if (found) {
           debouncedRun();

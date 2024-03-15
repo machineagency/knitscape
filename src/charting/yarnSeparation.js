@@ -1,100 +1,47 @@
 import { stitches } from "../constants";
 import { Bimp } from "../lib/Bimp";
 
-function processLeft(yarnRow, stitchRow) {
-  let passes = [Array(yarnRow.length).fill(stitches.BM)];
+function processRow(yarnRow, stitchRow, direction) {
   let sequence = [];
-  let block = [];
-
-  for (let i = yarnRow.length - 1; i >= 0; i--) {
-    let currentYarn = yarnRow[i];
-    let currentStitch = stitchRow[i];
-
-    block.push(currentStitch);
-
-    if (currentYarn == 0) {
-      // No yarn - indicates empty stitch
-      continue;
-    }
-
-    if (i == 0) {
-      // if we hit the end of the row
-      block.forEach((stitch, index) => {
-        passes.at(-1)[i + index] = stitch;
-      });
-      sequence.push(currentYarn);
-
-      block = [];
-      continue;
-    }
-
-    let nextYarn = yarnRow[i - 1];
-
-    if (nextYarn != currentYarn) {
-      // if we hit a new yarn
-      if (nextYarn == 0) {
-        // No yarn - indicates empty stitch
-        continue;
-      }
-
-      block.forEach((stitch, index) => {
-        passes.at(-1)[i + index] = stitch;
-      });
-
-      passes.push(Array(yarnRow.length).fill(stitches.BM));
-      sequence.push(currentYarn);
-
-      block = [];
-    }
-  }
-
-  return { passes, sequence };
-}
-
-function processRight(yarnRow, stitchRow) {
-  let passes = [Array(yarnRow.length).fill(stitches.BM)];
-  let sequence = [];
-  let block = [];
 
   for (let i = 0; i < yarnRow.length; i++) {
-    let currentYarn = yarnRow[i];
-    let currentStitch = stitchRow[i];
-
-    block.push(currentStitch);
-
-    if (currentYarn == 0) {
-      // No yarn - indicates empty stitch
-      continue;
-    }
-
-    if (i == yarnRow.length - 1) {
-      // if we hit the end of the row
-      block.forEach((stitch, index) => {
-        passes.at(-1)[i + 1 - block.length + index] = stitch;
-      });
+    const loc = direction == "right" ? i : yarnRow.length - i - 1;
+    const currentYarn = yarnRow[loc];
+    if (!sequence.includes(currentYarn) && currentYarn != 0)
       sequence.push(currentYarn);
+  }
 
-      block = [];
-      continue;
-    }
+  const passes = sequence.map(() => Array(yarnRow.length).fill(stitches.BM));
 
-    let nextYarn = yarnRow[i + 1];
+  for (let i = 0; i < yarnRow.length; i++) {
+    const loc = direction == "right" ? i : yarnRow.length - i - 1;
 
-    if (nextYarn != currentYarn) {
-      // if we hit a new yarn
-      if (nextYarn == 0) {
-        // No yarn - indicates empty stitch
-        continue;
+    const currentYarn = yarnRow[loc];
+    const currentStitch = stitchRow[loc];
+    const currentPassIndex = sequence.indexOf(currentYarn);
+
+    if (currentStitch == stitches.EMPTY) {
+      // When it is an empty stitch, mark all passes as empty at this location
+      passes.forEach((pass) => {
+        pass[loc] = currentStitch;
+      });
+    } else {
+      // Otherwise add this operation to the current pass
+      passes[currentPassIndex][loc] = currentStitch;
+
+      // Check yarn at next location
+      let nextLoc = direction == "right" ? loc + 1 : loc - 1;
+      let nextYarn = yarnRow[nextLoc];
+
+      // If the next yarn is different...
+      if (nextYarn != undefined && nextYarn != 0 && nextYarn != currentYarn) {
+        const nextPassIndex = sequence.indexOf(nextYarn);
+        // Add a front at the current location to join the two pieces.
+        // This is be the normal way to join intarsia.
+        // TODO: These boundary conditions should not be hard coded.
+        // What is a better way to do this ? Perhaps it is a setting on the yarn fill.
+        passes[nextPassIndex][loc] = stitches.FT;
       }
-
-      block.forEach((stitch, index) => {
-        passes.at(-1)[i + 1 - block.length + index] = stitch;
-      });
-
-      passes.push(Array(yarnRow.length).fill(stitches.BM));
-      sequence.push(currentYarn);
-
-      block = [];
     }
   }
 
@@ -114,21 +61,12 @@ export function yarnSeparation(stitchChart, yarnChart) {
     let stitchRow = st[rowIndex];
     let yarnRow = yc[rowIndex];
 
-    if (direction == "right") {
-      let { passes, sequence } = processRight(yarnRow, stitchRow);
-      yarnPasses = yarnPasses.concat(passes);
-      yarnSequence.push(...sequence);
-      rowMap.push(...Array(passes.length).fill(rowIndex));
+    let { passes, sequence } = processRow(yarnRow, stitchRow, direction);
+    yarnPasses = yarnPasses.concat(passes);
+    yarnSequence.push(...sequence);
+    rowMap.push(...Array(passes.length).fill(rowIndex));
 
-      direction = "left";
-    } else if (direction == "left") {
-      let { passes, sequence } = processLeft(yarnRow, stitchRow);
-      yarnPasses = yarnPasses.concat(passes);
-      yarnSequence.push(...sequence);
-      rowMap.push(...Array(passes.length).fill(rowIndex));
-
-      direction = "right";
-    }
+    direction = direction == "right" ? "left" : "right";
   }
 
   const machineChart = new Bimp(
