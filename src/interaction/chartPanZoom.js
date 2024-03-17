@@ -31,10 +31,12 @@ export function pan(e) {
   window.addEventListener("pointerleave", end);
 }
 
-export function fitChart(parent) {
+export function fitChart() {
   const { cellAspect, chart, bbox } = GLOBAL_STATE;
 
-  const { width, height } = parent.getBoundingClientRect();
+  const { width, height } = document
+    .getElementById("svg-layer")
+    .getBoundingClientRect();
 
   const scale = Math.floor(
     0.9 *

@@ -89,6 +89,16 @@ canvas {
 }
 /* #endregion */
 
+/* #region EXAMPLE LIBRARY */
+
+.library-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* #endregion */
+
 /* #region CHART PANE */
 #chart-pane {
   display: flex;
@@ -867,22 +877,6 @@ BOTTOM TOOLBAR
   align-items: center;
   gap: 0.4em;
   font-size: 1em;
-} */
-
-/**********************************
-
-LIBRARY MODAL
-
-**********************************/
-
-/* #library-modal {
-  max-width: 700px;
-}
-
-.library-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 } */
 
 /**********************************

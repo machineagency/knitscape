@@ -1,7 +1,7 @@
-import { GLOBAL_STATE, dispatch } from "../state";
 import { svg, html } from "lit-html";
-import { stitches } from "../constants";
-import { removeBoundary } from "../interaction/boundaries";
+import { GLOBAL_STATE, dispatch } from "../../state";
+import { stitches } from "../../constants";
+import { removeBoundary } from "../../interaction/boundaries";
 
 function boundaryPoints(boundaryIndex, pts, cellWidth, cellHeight) {
   return pts.map(

@@ -1,6 +1,6 @@
 import { html, svg } from "lit-html";
 import { when } from "lit-html/directives/when.js";
-import { GLOBAL_STATE } from "../state";
+import { GLOBAL_STATE, dispatch } from "../state";
 
 import {
   chartContextMenu,
@@ -8,19 +8,31 @@ import {
   chartClick,
 } from "../interaction/chartInteraction";
 import { zoom, fitChart } from "../interaction/chartPanZoom";
-import { yarnPanel } from "./yarnPanel";
 
-import { boundaryMenu, boundaryView } from "./boundaryView";
+import { boundaryMenu, boundaryView } from "./annotations/boundaries";
+import {
+  stitchBlocks,
+  stitchSelectBox,
+  stitchBlockToolbar,
+} from "./annotations/blocks";
 
-// import { annotationPaths } from "./annotationPaths";
 import { currentTargetPointerPos } from "../utilities/misc";
-import { stitchBlocks, stitchSelectBox } from "./stitchBlockView";
+
 import { gridPattern, cellShadow, activeBoundaryMask } from "./defs";
 import { operationPicker } from "./operationPicker";
-import { stitchBlockToolbar } from "./stitchBlockView";
 
 function toolbar() {
   return html`<div class="tool-picker">
+    <label class="color-mode-toggle switch">
+      <input
+        type="checkbox"
+        ?checked=${GLOBAL_STATE.colorMode == "operation"}
+        @change=${(e) =>
+          dispatch({
+            colorMode: e.target.checked ? "operation" : "yarn",
+          })} />
+      <span class="slider round"></span>
+    </label>
     <button
       class="btn solid ${GLOBAL_STATE.activeTool == "hand" ? "current" : ""}"
       @click=${() => (GLOBAL_STATE.activeTool = "hand")}>
@@ -111,7 +123,6 @@ export function chartPaneView() {
   const h = Math.round(cellHeight * chart.height);
 
   return html`
-    ${yarnPanel(chartPan.y + offsetY, h)}
     <div class="desktop" @pointermove=${(e) => trackPointer(e)}>
       ${contextToolbar()}
       <span class="pointer-pos">[${pointer[0]},${pointer[1]}]</span>

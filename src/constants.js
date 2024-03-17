@@ -8,6 +8,8 @@ export const SNAPSHOT_INTERVAL = 5000;
 
 export const SNAPSHOT_FIELDS = ["yarnPalette", "boundary"];
 
+export const EXAMPLE_LIBRARY = import.meta.glob("../examples/*.json");
+
 // Paths made in https://yqnn.github.io/svg-path-editor/
 export const SYMBOL_DATA = {
   EMPTY: {

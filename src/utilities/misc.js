@@ -4,14 +4,22 @@ import { dispatch } from "../state";
 export function closeModals() {
   // Close all modals (e.g., on escape or click outside taskbar)
   dispatch({
-    showLibrary: false,
+    showExampleLibrary: false,
     showSettings: false,
     showDownload: false,
+    showUpload: false,
   });
 }
 
-export function clearSelection() {
-  dispatch({ stitchSelect: null });
+export function measureWindow() {
+  document.documentElement.style.setProperty(
+    "--vh",
+    `${window.innerHeight * 0.01}px`
+  );
+  document.documentElement.style.setProperty(
+    "--vw",
+    `${window.innerWidth * 0.01}px`
+  );
 }
 
 export function setCanvasSize(canvas, width, height) {
@@ -35,16 +43,6 @@ export function getRandomColor() {
     color += letters[Math.floor(Math.random() * 16)];
   }
   return color;
-}
-
-export function download(dataStr, downloadName) {
-  const downloadAnchorNode = document.createElement("a");
-
-  downloadAnchorNode.setAttribute("href", dataStr);
-  downloadAnchorNode.setAttribute("download", downloadName);
-  document.body.appendChild(downloadAnchorNode);
-  downloadAnchorNode.click();
-  downloadAnchorNode.remove();
 }
 
 export function isMobile() {

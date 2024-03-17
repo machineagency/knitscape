@@ -1,6 +1,5 @@
 import { GLOBAL_STATE } from "../state";
 import { pan } from "./chartPanZoom";
-import { clearSelection } from "../utilities/misc";
 
 import { drawLine, dragAnnotationPath, dragAnnotationPoint } from "./lines";
 import {
@@ -40,7 +39,7 @@ export function chartPointerDown(e) {
       return;
     }
   } else if (GLOBAL_STATE.activeTool == "select") {
-    clearSelection();
+    dispatch({ stitchSelect: null }); // clear current selection
     selectBox(e);
   } else if (GLOBAL_STATE.activeTool == "hand") {
     pan(e);

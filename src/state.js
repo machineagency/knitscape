@@ -1,6 +1,12 @@
-import { SNAPSHOT_INTERVAL, SNAPSHOT_FIELDS } from "./constants";
+import {
+  SNAPSHOT_INTERVAL,
+  SNAPSHOT_FIELDS,
+  EXAMPLE_LIBRARY,
+} from "./constants";
 
 let GLOBAL_STATE = {
+  exampleLibrary: EXAMPLE_LIBRARY,
+
   heldKeys: new Set(), // Keys that are currently held down
   snapshots: [], // Array of snapshot history
   lastSnapshot: 0, // time of last snapshot
@@ -55,16 +61,14 @@ let GLOBAL_STATE = {
 
   // Various UI pane states
   showSettings: false,
+  showDownload: false,
+  showUpload: false,
+  showExampleLibrary: false,
   yarnExpanded: false,
 
   // INTERACTION
   reverseScroll: false,
 };
-
-function loadWorkspace(workspace) {
-  GLOBAL_STATE = { ...GLOBAL_STATE, ...workspace };
-  GLOBAL_STATE.updateSim = true;
-}
 
 function shouldSnapshot(action) {
   if (!(GLOBAL_STATE.lastSnapshot < Date.now() - SNAPSHOT_INTERVAL))
@@ -149,4 +153,4 @@ const StateMonitor = (() => {
   };
 })();
 
-export { GLOBAL_STATE, undo, dispatch, StateMonitor, loadWorkspace };
+export { GLOBAL_STATE, undo, dispatch, StateMonitor };

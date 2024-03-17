@@ -3,8 +3,12 @@ import { html } from "lit-html";
 import { GLOBAL_STATE, dispatch } from "../state";
 import { editYarnColor, deleteYarn, addRandomYarn } from "../charting/yarn";
 
-export function yarnPanel(chartY, chartHeight) {
-  const { cellHeight, yarnPalette, yarnExpanded } = GLOBAL_STATE;
+export function yarnPane() {
+  const { cellHeight, chartPan, chart, bbox, yarnPalette, yarnExpanded } =
+    GLOBAL_STATE;
+
+  const chartHeight = Math.round(cellHeight * chart.height);
+  const chartY = chartPan.y + Math.round(bbox.yMin * cellHeight);
 
   const panelWidth = yarnExpanded
     ? yarnPalette.length * 30

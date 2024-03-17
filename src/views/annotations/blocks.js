@@ -1,15 +1,15 @@
 import { html, svg } from "lit-html";
 import { when } from "lit-html/directives/when.js";
-import { editingTools } from "../charting/editingTools";
-import { toolData } from "../constants";
-import { GLOBAL_STATE, dispatch } from "../state";
-import { gridPattern } from "./defs";
+import { editingTools } from "../../charting/editingTools";
+import { toolData } from "../../constants";
+import { GLOBAL_STATE, dispatch } from "../../state";
+import { gridPattern } from "../defs";
 import {
   blockPointerDown,
   removeStitchBlock,
   resizeBlock,
   addStitchBlock,
-} from "../interaction/blockInteraction";
+} from "../../interaction/blockInteraction";
 
 export function stitchSelectBox() {
   const {

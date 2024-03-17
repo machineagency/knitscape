@@ -1,16 +1,18 @@
+import { GLOBAL_STATE } from "../../state";
+import { loadExampleWorkspace } from "../../utilities/importers";
 import { html } from "lit-html";
-import { loadLibraryPattern } from "../actions/importers";
-import { GLOBAL_STATE } from "../state";
 
 export function libraryModal() {
-  return html` <div id="library-modal" class="modal">
-    <h2>Pattern Library</h2>
+  return html` <div class="modal">
+    <h2>Examples</h2>
     <div class="modal-content">
-      ${Object.entries(GLOBAL_STATE.patternLibrary).map(
+      ${Object.entries(GLOBAL_STATE.exampleLibrary).map(
         ([path, _]) =>
           html`<div class="library-item">
             <span>${path.split("/").at(-1).split(".")[0]}</span>
-            <button class="btn solid" @click=${() => loadLibraryPattern(path)}>
+            <button
+              class="btn solid"
+              @click=${() => loadExampleWorkspace(path)}>
               <i class="fa-solid fa-upload"></i>
             </button>
           </div>`
