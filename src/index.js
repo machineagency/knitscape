@@ -54,62 +54,61 @@ const testWorkspace = {
   boundaries: [
     [
       [0, 0],
-      [0, 7],
-      [7, 7],
-      [7, 0],
+      [0, 50],
+      [40, 50],
+      [40, 0],
     ],
     [
-      [4, 2],
-      [4, 5],
-      [7, 5],
-      [7, 2],
+      [0, 0],
+      [0, 20],
+      [40, 20],
+      [40, 0],
     ],
-    // [
-    //   [0, 0],
-    //   [0, 60],
-    //   [50, 60],
-    //   [50, 0],
-    // ],
-    // [
-    //   [5, 5],
-    //   [5, 55],
-    //   [45, 55],
-    //   [45, 5],
-    // ],
-    // [
-    //   [30, 10],
-    //   [25, 40],
-    //   [40, 40],
-    //   [40, 10],
-    // ],
-    // [
-    //   [10, 25],
-    //   [10, 40],
-    //   [25, 40],
-    //   [30, 10],
-    // ],
+
+    [
+      [2, 20],
+      [2, 48],
+      [38, 48],
+      [38, 20],
+    ],
   ],
   regions: [
     { fillType: "stitch", stitch: stitches.KNIT, blockID: null, gap: [0, 0] },
-    // { fillType: "block", stitch: stitches.KNIT, blockID: "test", gap: [0, 0] },
-    { fillType: "stitch", stitch: stitches.KNIT, blockID: "test", gap: [0, 0] },
+    { fillType: "block", stitch: stitches.KNIT, blockID: "test", gap: [0, 0] },
+    {
+      fillType: "block",
+      stitch: stitches.KNIT,
+      blockID: "cable",
+      gap: [4, 4],
+    },
   ],
   yarnRegions: [
     { bitmap: new Bimp(1, 1, [0]), pos: [0, 0] },
-    { bitmap: new Bimp(1, 1, [1]), pos: [0, 0] },
-    // { bitmap: new Bimp(1, 1, [2]), pos: [0, 0] },
+    { bitmap: new Bimp(1, 1, [0]), pos: [0, 0] },
+    { bitmap: new Bimp(1, 1, [0]), pos: [0, 0] },
   ],
   blocks: {
-    // test: {
-    //   type: "stitch",
-    //   pos: [5, 5],
-    //   bitmap: new Bimp(4, 1, [2, 2, 1, 1]),
-    // },
+    test: {
+      type: "stitch",
+      pos: [0, 0],
+      bitmap: new Bimp(4, 1, [2, 2, 19, 19]),
+    },
+    cable: {
+      type: "stitch",
+      pos: [3, 3],
+      bitmap: new Bimp(4, 1, [8, 8, 11, 11]),
+    },
   },
   cellAspect: 7 / 11,
   stitchGauge: 7, // stitches per inch
   rowGauge: 11, // rows per inch
-  yarnPalette: ["#ebe9bbff", "#328cbcff", "#bc7532ff"],
+  yarnPalette: [
+    "#ebe9bbff",
+    "#328cbcff",
+    "#ebe9bbff",
+    "#bc7532ff",
+    "#468248ff",
+  ],
 };
 
 function loadWorkspace(workspace) {
