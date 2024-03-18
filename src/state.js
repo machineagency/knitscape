@@ -41,6 +41,7 @@ let GLOBAL_STATE = {
   yarnChart: null,
   machineChart: null,
   rowMap: null,
+  yarnSequence: [],
 
   scale: 15, // Number of pixels for each chart cell
   cellWidth: 15 / 7,

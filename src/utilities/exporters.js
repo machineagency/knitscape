@@ -1,3 +1,7 @@
+import { bmp_lib } from "../lib/bmp";
+import { hexToRgb } from "./misc";
+import { SYMBOL_DATA } from "../constants";
+
 function downloadFile(dataStr, fileName) {
   const downloadAnchorNode = document.createElement("a");
 
@@ -39,6 +43,42 @@ export function downloadWorkspace({
     );
 
   downloadFile(dataStr, "workspace.json");
+}
+
+const stitches = ".-,!#$%^&*()_+{}[]";
+
+export function downloadKniterate({ machineChart, yarnSequence }) {
+  const colors = yarnSequence.map((yarnIndex) =>
+    new Array(machineChart.width).fill(yarnIndex).join("")
+  );
+
+  const text =
+    "FILE FORMAT : DAK\nYARNS\n" +
+    colors.toReversed().join("\n") +
+    "\nYARN PALETTE\nSTITCH SYMBOLS\n" +
+    machineChart
+      .make2d()
+      .toReversed()
+      .map((row) => row.map((stitch) => stitches[stitch]).join(""))
+      .join("\n") +
+    "\nEND";
+
+  downloadFile(
+    "data:text/plain;charset=utf-8," + encodeURIComponent(text),
+    "pattern.txt"
+  );
+}
+
+export function downloadTimeNeedleBMP(machineChart) {
+  const bmp2d = machineChart.make2d().toReversed();
+  const rgbPalette = Object.values(SYMBOL_DATA).map(({ color }) =>
+    hexToRgb(color)
+  );
+
+  const im = document.createElement("img");
+  bmp_lib.render(im, bmp2d, rgbPalette);
+
+  downloadFile(im.src, "pattern.bmp");
 }
 
 // export function downloadSVG() {
@@ -102,16 +142,6 @@ export function downloadWorkspace({
 //   );
 // }
 
-// export function downloadBMP() {
-//   download(
-//     makeBMP(
-//       GLOBAL_STATE.repeats[0].bitmap,
-//       GLOBAL_STATE.yarnSequence.pixels,
-//       GLOBAL_STATE.yarnPalette
-//     ).src
-//   );
-// }
-
 // export function downloadSilverKnitTxt() {
 //   const text =
 //     "SilverKnit\n" +
@@ -126,43 +156,6 @@ export function downloadWorkspace({
 //           .join("")
 //       )
 //       .join("\n");
-
-//   download(
-//     "data:text/plain;charset=utf-8," + encodeURIComponent(text),
-//     "pattern.txt"
-//   );
-// }
-
-// export function downloadKniterate() {
-//   const width = GLOBAL_STATE.chart.width;
-//   const chartHeight = GLOBAL_STATE.chart.height;
-//   const colors = [];
-
-//   for (let y = 0; y < chartHeight; y++) {
-//     let paletteIndex = GLOBAL_STATE.yarnSequence.pixel(
-//       0,
-//       (chartHeight - y - 1) % GLOBAL_STATE.yarnSequence.height
-//     );
-
-//     colors.push(new Array(width).fill(paletteIndex).join(""));
-//   }
-
-//   const text =
-//     "FILE FORMAT : DAK\nYARNS\n" +
-//     colors.join("\n") +
-//     "\nYARN PALETTE\nSTITCH SYMBOLS\n" +
-//     GLOBAL_STATE.chart
-//       .make2d()
-//       .map((row) =>
-//         row
-//           .map((pixel) => {
-//             if (pixel == 0 || pixel == 1) return ".";
-//             else return "-";
-//           })
-//           .join("")
-//       )
-//       .join("\n") +
-//     "\nEND";
 
 //   download(
 //     "data:text/plain;charset=utf-8," + encodeURIComponent(text),

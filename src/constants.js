@@ -15,7 +15,7 @@ export const SYMBOL_DATA = {
   EMPTY: {
     pathdata: "M 0.25 0.25 L 0.75 0.75 M 0.25 0.75 L 0.75 0.25",
     path: new Path2D("M 0.25 0.25 L 0.75 0.75 M 0.25 0.75 L 0.75 0.25"),
-    color: "#555",
+    color: "#555555",
     stroke: "#ffffff",
     description: "Empty - a yarn never passes this needle.",
   },
@@ -199,7 +199,7 @@ export const SYMBOL_DATA = {
   TRANSPARENT: {
     pathdata: "",
     path: new Path2D(),
-    color: "transparent",
+    color: "#ffffff",
     description: "transparent",
   },
 };

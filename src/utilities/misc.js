@@ -1,4 +1,3 @@
-import { bmp_lib } from "../lib/bmp";
 import { dispatch } from "../state";
 
 export function closeModals() {
@@ -72,7 +71,11 @@ function leastCommonMultiple(first, second) {
   }
 }
 
-function hexToRgb(hex) {
+export function shuffle(arr) {
+  return arr.sort(() => (Math.random() > 0.5 ? 1 : -1));
+}
+
+export function hexToRgb(hex) {
   var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result
     ? [
@@ -81,34 +84,4 @@ function hexToRgb(hex) {
         parseInt(result[3], 16),
       ]
     : null;
-}
-
-export function shuffle(arr) {
-  return arr.sort(() => (Math.random() > 0.5 ? 1 : -1));
-}
-
-export function makeBMP(repeatBimp, colorRepeat, palette) {
-  console.log(repeatBimp, colorRepeat, palette);
-  const height = leastCommonMultiple(repeatBimp.height, colorRepeat.length);
-  const bmp2d = repeatBimp.make2d();
-  const bits = [];
-
-  for (let rowIndex = 0; rowIndex < height; rowIndex++) {
-    bits.push(
-      bmp2d[rowIndex % repeatBimp.height].map((bit) => {
-        if (bit == 0 || bit == 1) {
-          return colorRepeat[rowIndex % colorRepeat.length];
-        } else {
-          return palette.length;
-        }
-      })
-    );
-  }
-
-  const rgbPalette = palette.map((hex) => hexToRgb(hex));
-  rgbPalette.push([255, 255, 255]);
-
-  const im = document.createElement("img");
-  bmp_lib.render(im, bits, rgbPalette);
-  return im;
 }
