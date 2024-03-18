@@ -13,28 +13,29 @@ let GLOBAL_STATE = {
   colorMode: "yarn",
   transforming: false, // If the pointer is being used to do something
 
-  // GAUGE
-  stitchGauge: null, // stitches per inch
-  rowGauge: null, // rows per inch
   cellAspect: 11 / 7,
 
-  pointer: [-1, -1],
-
+  pointer: [0, 0], // Pointer postition in chart coordinates
   locked: false,
   activeTool: "pointer",
+
+  // Interaction mode can be path, boundary, block, or pan.
+  interactionMode: "boundary",
   activeSymbol: 1,
 
   paths: [],
   boundaries: [],
   regions: [],
-  yarnRegions: [],
+  blocks: {},
+
+  blockEditMode: "stitch",
+
+  selectedBoundary: null,
+
+  selectingBlock: false, // probably will go away
+  onBlockSelect: null, // probably will go away
 
   stitchSelect: null,
-  editingBoundary: null,
-  selectingBlock: false,
-  onBlockSelect: null,
-
-  blocks: {},
   editingBlock: null,
   activeBlockTool: "brush",
 

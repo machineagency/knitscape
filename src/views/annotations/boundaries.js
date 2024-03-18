@@ -1,7 +1,13 @@
 import { svg, html } from "lit-html";
 import { GLOBAL_STATE, dispatch } from "../../state";
 import { stitches } from "../../constants";
-import { removeBoundary } from "../../interaction/boundaries";
+import {
+  removeBoundary,
+  editStitchFill,
+  resizeFillBlock,
+} from "../../interaction/boundaries";
+import { gridPattern } from "../defs";
+import { when } from "lit-html/directives/when.js";
 
 function boundaryPoints(boundaryIndex, pts, cellWidth, cellHeight) {
   return pts.map(
@@ -42,6 +48,54 @@ function boundaryPaths(boundaryIndex, pts, cellWidth, cellHeight) {
   return paths;
 }
 
+export function boundaryBlocks() {
+  const { selectedBoundary, regions, cellWidth, cellHeight } = GLOBAL_STATE;
+
+  const { stitchBlock, yarnBlock, pos } = regions[selectedBoundary];
+
+  return html`<div
+    class="stitch-block"
+    style="left: ${Math.round(pos[0] * cellWidth) - 1}px; bottom: ${Math.round(
+      pos[1] * cellHeight
+    )}px;">
+    <canvas id="block-fill-canvas"></canvas>
+
+    <svg
+      class="block-grid"
+      style="position: absolute; top: 0px; left: 0px; overflow: hidden;"
+      width="100%"
+      height="100%"
+      @pointerdown=${(e) => editStitchFill(e)}>
+      <defs>${gridPattern(cellWidth, cellHeight)}</defs>
+      ${when(
+        cellHeight > 10,
+        () => svg`<rect
+            width="100%"
+            height="100%"
+            fill="url(#grid)"></rect>`
+      )}
+    </svg>
+    <button class="dragger up" @pointerdown=${(e) => resizeFillBlock(e, "up")}>
+      <i class="fa-solid fa-angle-up"></i>
+    </button>
+    <button
+      class="dragger down"
+      @pointerdown=${(e) => resizeFillBlock(e, "down")}>
+      <i class="fa-solid fa-angle-down"></i>
+    </button>
+    <button
+      class="dragger left"
+      @pointerdown=${(e) => resizeFillBlock(e, "left")}>
+      <i class="fa-solid fa-angle-left"></i>
+    </button>
+    <button
+      class="dragger right"
+      @pointerdown=${(e) => resizeFillBlock(e, "right")}>
+      <i class="fa-solid fa-angle-right"></i>
+    </button>
+  </div>`;
+}
+
 function activeBoundary(boundaryIndex, boundary, cellWidth, cellHeight) {
   return svg`<path
       data-boundaryindex="${boundaryIndex}"
@@ -63,7 +117,7 @@ function inactiveBoundary(boundaryIndex, boundary, cellWidth, cellHeight) {
 export function boundaryView() {
   let {
     boundaries,
-    editingBoundary,
+    selectedBoundary,
     scale: cellWidth,
     cellAspect,
   } = GLOBAL_STATE;
@@ -73,7 +127,7 @@ export function boundaryView() {
   let active = [];
 
   for (const [boundaryIndex, boundary] of Object.entries(boundaries)) {
-    if (boundaryIndex == editingBoundary) {
+    if (boundaryIndex == selectedBoundary) {
       layers.push(
         activeBoundary(boundaryIndex, boundary, cellWidth, cellHeight)
       );
@@ -93,102 +147,56 @@ export function boundaryView() {
   return layers.concat(active);
 }
 
-function blockFillMenu(regions, index) {
-  const { blockID, gap } = regions[index];
+function setYGap(regionIndex, yGap) {
+  let updatedRegions = [...GLOBAL_STATE.regions];
+  updatedRegions[regionIndex].gap[1] = yGap;
+  dispatch({ regions: updatedRegions });
+}
 
-  function selectBlock(newBlockID) {
-    let updatedRegions = [...regions];
-    updatedRegions[index].blockID = newBlockID;
-    console.log(`assigning block ${newBlockID} to region ${index}`);
-    dispatch({
-      regions: updatedRegions,
-      selectingBlock: false,
-      onBlockSelect: null,
-    });
-  }
+function setXGap(regionIndex, xGap) {
+  let updatedRegions = [...GLOBAL_STATE.regions];
+  updatedRegions[regionIndex].gap[0] = xGap;
+  dispatch({ regions: updatedRegions });
+}
 
-  function chooseBlockFill() {
-    dispatch({ selectingBlock: true, onBlockSelect: selectBlock });
-  }
+export function boundaryMenu() {
+  const { regions, blockEditMode, selectedBoundary } = GLOBAL_STATE;
 
-  function setYGap(yGap) {
-    let updatedRegions = [...regions];
-    updatedRegions[index].gap[1] = yGap;
-    dispatch({ regions: updatedRegions });
-  }
+  if (selectedBoundary == null) return;
 
-  function setXGap(xGap) {
-    let updatedRegions = [...regions];
-    updatedRegions[index].gap[0] = xGap;
-    dispatch({ regions: updatedRegions });
-  }
+  const { gap } = regions[selectedBoundary];
 
-  return html`<button @click=${() => chooseBlockFill()}>select block</button
-    >xGap<input
+  return html`<div class="boundary-menu">
+    <button class="btn" @click=${() => removeBoundary(selectedBoundary)}>
+      <i class="fa-solid fa-trash"></i>
+    </button>
+    <label class="color-mode-toggle switch">
+      <input
+        type="checkbox"
+        ?checked=${blockEditMode == "stitch"}
+        @change=${(e) =>
+          dispatch({
+            blockEditMode: e.target.checked ? "stitch" : "color",
+          })} />
+      <span class="slider round"></span>
+    </label>
+    <label>xGap</label>
+    <input
       class="num-input"
       type="number"
       min="0"
       value=${gap[0]}
-      @change=${(e) => setXGap(Number(e.target.value))} />
-    yGap<input
+      @change=${(e) => setXGap(selectedBoundary, Number(e.target.value))} />
+    <label>yGap</label>
+    <input
       class="num-input"
       type="number"
       min="0"
-      @change=${(e) => setYGap(Number(e.target.value))}
-      value=${gap[1]} /> `;
-}
-
-function stitchFillMenu(regions, index) {
-  const { stitch } = regions[index];
-
-  function changeStitchFill(st) {
-    let updatedRegions = [...regions];
-    updatedRegions[index].stitch = st;
-    dispatch({ regions: updatedRegions });
-  }
-
-  return html` <select
-    @change=${(e) => changeStitchFill(Number(e.target.value))}
-    .value=${stitch}>
-    ${Object.entries(stitches).map(
-      ([st, stIndex]) =>
-        html`<option value="${stIndex}" ?selected=${stitch == stIndex}>
-          ${st}
-        </option>`
-    )}
-  </select>`;
-}
-
-export function boundaryMenu() {
-  const { regions, editingBoundary: index } = GLOBAL_STATE;
-
-  if (index == null) return;
-
-  function changeFillType(fillType) {
-    let updatedRegions = [...regions];
-    updatedRegions[index].fillType = fillType;
-    dispatch({ regions: updatedRegions });
-  }
-
-  const { fillType } = regions[index];
-
-  return html`<div class="boundary-menu">
-    <button class="btn" @click=${() => removeBoundary(index)}>
-      <i class="fa-solid fa-trash"></i>
-    </button>
-
-    <select @change=${(e) => changeFillType(e.target.value)} .value=${fillType}>
-      <option value="stitch">stitch fill</option>
-      <option value="block">block fill</option>
-    </select>
-
-    ${fillType == "stitch"
-      ? stitchFillMenu(regions, index)
-      : blockFillMenu(regions, index)}
-
+      @change=${(e) => setYGap(selectedBoundary, Number(e.target.value))}
+      value=${gap[1]} />
     <button
       class="btn"
-      @click=${() => dispatch({ editingBoundary: null }, true)}>
+      @click=${() => dispatch({ selectedBoundary: null }, true)}>
       <i class="fa-solid fa-circle-xmark"></i>
     </button>
   </div>`;

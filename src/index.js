@@ -5,10 +5,9 @@ import { StateMonitor, dispatch } from "./state";
 import { stitches } from "./constants";
 
 import { runSimulation } from "./subscribers/runSimulation";
-import {
-  chartSubscriber,
-  blockSubscriber,
-} from "./subscribers/chartSubscriber";
+import { chartSubscriber } from "./subscribers/chartSubscriber";
+import { blockSubscriber } from "./subscribers/blockSubscriber";
+import { blockFillSubscriber } from "./subscribers/blockFillSubscriber";
 import { chartEvalSubscriber } from "./subscribers/chartEvalSubscriber";
 
 import { globalKeydown, globalKeyup } from "./interaction/globalKeypress";
@@ -26,6 +25,8 @@ function r() {
 }
 
 const testWorkspace = {
+  cellAspect: 7 / 11,
+  yarnPalette: ["#df9e72ff", "#ebe9bbff"],
   boundaries: [
     [
       [0, 0],
@@ -33,27 +34,28 @@ const testWorkspace = {
       [15, 20],
       [15, 0],
     ],
+    [
+      [2, 2],
+      [2, 18],
+      [13, 18],
+      [13, 2],
+    ],
   ],
   regions: [
     {
-      fillType: "block",
-      stitch: stitches.KNIT,
-      blockID: "rib_2x1",
       gap: [0, 0],
+      pos: [0, 0],
+      yarnBlock: new Bimp(1, 1, [0]),
+      stitchBlock: new Bimp(1, 1, [1]),
+    },
+    {
+      gap: [0, 0],
+      pos: [5, 5],
+      yarnBlock: new Bimp(1, 1, [1]),
+      stitchBlock: new Bimp(4, 1, [1, 1, 1, 1]),
     },
   ],
-  yarnRegions: [{ bitmap: new Bimp(1, 4, [0, 0, 1, 1]), pos: [0, 0] }],
-  blocks: {
-    rib_2x1: {
-      type: "stitch",
-      pos: [0, 0],
-      bitmap: new Bimp(4, 1, [2, 2, 1, 1]),
-    },
-  },
-  cellAspect: 7 / 11,
-  stitchGauge: 7, // stitches per inch
-  rowGauge: 11, // rows per inch
-  yarnPalette: ["#df9e72ff", "#ebe9bbff"],
+  blocks: {},
 };
 
 function init() {
@@ -76,6 +78,7 @@ function init() {
     chartEvalSubscriber(),
     chartSubscriber(),
     blockSubscriber(),
+    blockFillSubscriber(),
     runSimulation(),
   ]);
 

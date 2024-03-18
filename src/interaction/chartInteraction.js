@@ -1,15 +1,8 @@
-import { GLOBAL_STATE } from "../state";
+import { GLOBAL_STATE, dispatch } from "../state";
 import { pan } from "./chartPanZoom";
 
 import { drawLine, dragAnnotationPath, dragAnnotationPoint } from "./lines";
-import {
-  addPoint,
-  deletePoint,
-  dragPath,
-  dragPoint,
-  dragBoundary,
-  editBoundary,
-} from "./boundaries";
+import { boundaryModePointerDown, boundaryModeContextMenu } from "./boundaries";
 import { selectBox } from "./select";
 
 export function chartPointerDown(e) {
@@ -18,49 +11,32 @@ export function chartPointerDown(e) {
     return;
   }
 
-  const cl = e.target.classList;
+  const { interactionMode } = GLOBAL_STATE;
 
   if (GLOBAL_STATE.locked) return;
-  if (GLOBAL_STATE.activeTool == "line") {
+
+  if (interactionMode == "path") {
     drawLine(e);
-  } else if (GLOBAL_STATE.activeTool == "pointer") {
-    if (cl.contains("point")) {
-      dragPoint(e);
-    } else if (cl.contains("path")) {
-      dragPath(e);
-    } else if (cl.contains("annotation-path")) {
-      dragAnnotationPath(e);
-    } else if (cl.contains("annotation-point")) {
-      dragAnnotationPoint(e);
-    } else if (cl.contains("boundary")) {
-      editBoundary(e);
-      dragBoundary(e);
-    } else if (cl.contains("dragger")) {
-      return;
-    }
-  } else if (GLOBAL_STATE.activeTool == "select") {
+  } else if (interactionMode == "boundary") {
+    boundaryModePointerDown(e);
+  } else if (interactionMode == "block") {
     dispatch({ stitchSelect: null }); // clear current selection
     selectBox(e);
-  } else if (GLOBAL_STATE.activeTool == "hand") {
+  } else if (interactionMode == "pan") {
     pan(e);
   }
 }
 
-export function chartClick(e) {
-  const cl = e.target.classList;
-
-  if (GLOBAL_STATE.activeTool == "pointer") {
-    if (cl.contains("boundary")) {
-      editBoundary(e);
-    }
-  }
-}
+export function chartClick(e) {}
 
 export function chartContextMenu(e) {
   e.preventDefault();
-  if (e.target.classList.contains("point")) {
-    deletePoint(e);
-  } else if (e.target.classList.contains("path")) {
-    addPoint(e);
+  const { interactionMode } = GLOBAL_STATE;
+
+  if (interactionMode == "path") {
+  } else if (interactionMode == "boundary") {
+    boundaryModeContextMenu(e);
+  } else if (interactionMode == "block") {
+  } else if (interactionMode == "pan") {
   }
 }

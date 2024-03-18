@@ -3,21 +3,22 @@ import { SYMBOL_DATA, STITCH_MAP } from "../constants";
 export function drawChart(
   canvas,
   mode,
-  chart,
+  bitmap,
   yarnChart,
   yarnPalette,
   cellWidth,
   cellHeight,
-  lastDrawn = null
+  lastDrawn = null,
+  offset = [0, 0]
 ) {
-  const { width, height } = chart;
+  const { width, height } = bitmap;
 
   const ctx = canvas.getContext("2d");
   ctx.lineWidth = 0.03;
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      let stitchIndex = chart.pixel(x, y);
+      let stitchIndex = bitmap.pixel(x, y);
       let yarnIndex = yarnChart.pixel(x, y);
 
       if (
@@ -37,7 +38,8 @@ export function drawChart(
           if (yarnIndex == 0) {
             ctx.fillStyle = SYMBOL_DATA.EMPTY.color;
           } else {
-            ctx.fillStyle = yarnPalette[yarnChart.pixel(x, y) - 1];
+            ctx.fillStyle =
+              yarnPalette[yarnChart.pixel(x + offset[0], y + offset[1]) - 1];
           }
         }
 

@@ -11,11 +11,8 @@ function downloadFile(dataStr, fileName) {
 export function downloadWorkspace({
   boundaries,
   regions,
-  yarnRegions,
   blocks,
   cellAspect,
-  stitchGauge,
-  rowGauge,
   yarnPalette,
 }) {
   const dataStr =
@@ -23,14 +20,16 @@ export function downloadWorkspace({
     encodeURIComponent(
       JSON.stringify({
         boundaries,
-        regions,
-        cellAspect,
-        stitchGauge,
-        rowGauge,
-        yarnPalette,
-        yarnRegions: yarnRegions.map(({ bitmap, pos }) => {
-          return { bitmap: bitmap.toJSON(), pos };
+        regions: regions.map(({ gap, pos, yarnBlock, stitchBlock }) => {
+          return {
+            gap,
+            pos,
+            yarnBlock: yarnBlock.toJSON(),
+            stitchBlock: stitchBlock.toJSON(),
+          };
         }),
+        cellAspect,
+        yarnPalette,
         blocks: Object.fromEntries(
           Object.entries(blocks).map(([blockID, { bitmap, pos, type }]) => {
             return [blockID, { bitmap: bitmap.toJSON(), pos, type }];

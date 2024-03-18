@@ -19,7 +19,6 @@ export function chartEvalSubscriber() {
         evaluateChart(
           GLOBAL_STATE.boundaries,
           GLOBAL_STATE.regions,
-          GLOBAL_STATE.yarnRegions,
           GLOBAL_STATE.blocks
         );
 

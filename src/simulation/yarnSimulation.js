@@ -10,7 +10,7 @@ export function simulate(stitchPattern, scale) {
   let relaxed = false;
   let stitchHeight, stitchWidth, sim, offsetX, offsetY;
 
-  const STITCH_ASPECT = GLOBAL_STATE.stitchGauge / GLOBAL_STATE.rowGauge;
+  const STITCH_ASPECT = GLOBAL_STATE.cellAspect;
 
   const parentEl = document.getElementById("canvas-container");
   const bbox = document.getElementById("sim-container").getBoundingClientRect();
@@ -23,9 +23,16 @@ export function simulate(stitchPattern, scale) {
 
   init();
 
-  const DS = populateDS(stitchPattern);
-  orderCNs(DS, stitchPattern);
-  const yarnPaths = followTheYarn(DS, GLOBAL_STATE.yarnSequence);
+  let DS, yarnPaths;
+
+  try {
+    DS = populateDS(stitchPattern);
+    orderCNs(DS, stitchPattern);
+    yarnPaths = followTheYarn(DS, GLOBAL_STATE.yarnSequence);
+  } catch {
+    console.error("Error generating yarn Topology");
+    return { relax: null, stopSim: null };
+  }
   const nodes = layoutNodes(
     DS,
     GLOBAL_STATE.chart,

@@ -273,12 +273,14 @@ canvas {
 
 .allow-hover .boundary.inactive:hover {
   stroke: rgb(255, 255, 255);
+  fill: #dbdbdb33;
 }
 
 .path.bottom {
   stroke: rgb(255, 255, 255);
-  stroke-width: 3;
   filter: drop-shadow(0px 0px 2px black);
+  stroke-width: 5px;
+  stroke-dasharray: 10 4;
 }
 
 .path.top {

@@ -3,7 +3,10 @@ import { toolData } from "../constants";
 import { closeModals } from "../utilities/misc";
 
 function escapeEverything() {
-  dispatch({ editingBlock: null, editingBoundary: null, stitchSelect: null });
+  dispatch(
+    { editingBlock: null, selectedBoundary: null, stitchSelect: null },
+    true
+  );
   closeModals();
 }
 
@@ -16,7 +19,7 @@ const hotkeys = {
   ...Object.fromEntries(
     Object.entries(toolData).map(([toolId, toolData]) => [
       toolData.hotkey,
-      () => dispatch({ activeTool: toolId }),
+      () => dispatch({ interactionMode: toolId }),
     ])
   ),
 

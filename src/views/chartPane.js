@@ -9,7 +9,11 @@ import {
 } from "../interaction/chartInteraction";
 import { zoom, fitChart } from "../interaction/chartPanZoom";
 
-import { boundaryMenu, boundaryView } from "./annotations/boundaries";
+import {
+  boundaryMenu,
+  boundaryView,
+  boundaryBlocks,
+} from "./annotations/boundaries";
 import {
   stitchBlocks,
   stitchSelectBox,
@@ -22,11 +26,12 @@ import { gridPattern, cellShadow, activeBoundaryMask } from "./defs";
 import { operationPicker } from "./operationPicker";
 
 function toolbar() {
+  const { interactionMode, colorMode } = GLOBAL_STATE;
   return html`<div class="tool-picker">
     <label class="color-mode-toggle switch">
       <input
         type="checkbox"
-        ?checked=${GLOBAL_STATE.colorMode == "operation"}
+        ?checked=${colorMode == "operation"}
         @change=${(e) =>
           dispatch({
             colorMode: e.target.checked ? "operation" : "yarn",
@@ -34,29 +39,24 @@ function toolbar() {
       <span class="slider round"></span>
     </label>
     <button
-      class="btn solid ${GLOBAL_STATE.activeTool == "hand" ? "current" : ""}"
-      @click=${() => (GLOBAL_STATE.activeTool = "hand")}>
+      class="btn solid ${interactionMode == "pan" ? "current" : ""}"
+      @click=${() => (GLOBAL_STATE.interactionMode = "pan")}>
       <i class="fa-solid fa-hand"></i>
     </button>
     <button
-      class="btn solid ${GLOBAL_STATE.activeTool == "line" ? "current" : ""}"
-      @click=${() => (GLOBAL_STATE.activeTool = "line")}>
+      class="btn solid ${interactionMode == "path" ? "current" : ""}"
+      @click=${() => (GLOBAL_STATE.interactionMode = "path")}>
       <i class="fa-solid fa-minus"></i>
     </button>
     <button
-      class="btn solid ${GLOBAL_STATE.activeTool == "region" ? "current" : ""}"
-      @click=${() => (GLOBAL_STATE.activeTool = "region")}>
+      class="btn solid ${interactionMode == "boundary" ? "current" : ""}"
+      @click=${() => (GLOBAL_STATE.interactionMode = "boundary")}>
       <i class="fa-solid fa-vector-square"></i>
     </button>
     <button
-      class="btn solid ${GLOBAL_STATE.activeTool == "select" ? "current" : ""}"
-      @click=${() => (GLOBAL_STATE.activeTool = "select")}>
+      class="btn solid ${interactionMode == "block" ? "current" : ""}"
+      @click=${() => (GLOBAL_STATE.interactionMode = "block")}>
       <i class="fa-solid fa-table-cells"></i>
-    </button>
-    <button
-      class="btn solid ${GLOBAL_STATE.activeTool == "pointer" ? "current" : ""}"
-      @click=${() => (GLOBAL_STATE.activeTool = "pointer")}>
-      <i class="fa-solid fa-arrow-pointer"></i>
     </button>
     <button
       class="btn icon"
@@ -77,6 +77,7 @@ function contextToolbar() {
 function trackPointer(e) {
   const { cellWidth, cellHeight, chartPan, bbox } = GLOBAL_STATE;
   let [x, y] = currentTargetPointerPos(e);
+
   GLOBAL_STATE.pointer = [
     Math.floor((x - chartPan.x) / cellWidth - bbox.xMin),
     Math.floor((y - chartPan.y) / cellHeight - bbox.yMin),
@@ -174,6 +175,11 @@ export function chartPaneView() {
       <div
         style="position: absolute; bottom: 0; left: 0;
       transform: translate(${chartPan.x}px, ${-chartPan.y}px); ">
+        ${when(
+          GLOBAL_STATE.interactionMode == "boundary" &&
+            GLOBAL_STATE.selectedBoundary != null,
+          boundaryBlocks
+        )}
         ${when(GLOBAL_STATE.stitchSelect, stitchSelectBox)} ${stitchBlocks()}
       </div>
       ${operationPicker()} ${boundaryMenu()}

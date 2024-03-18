@@ -33,7 +33,6 @@ export function addStitchBlock() {
         },
       },
       editingBlock: uuid,
-      activeTool: "pointer",
     },
     true
   );
@@ -231,7 +230,7 @@ export function blockPointerDown(e, blockID) {
   }
 
   const activeTool = GLOBAL_STATE.activeBlockTool;
-  if (GLOBAL_STATE.activeTool == "hand") {
+  if (GLOBAL_STATE.interactionMode == "hand") {
     pan(e);
   } else if (activeTool == "move") {
     moveBlock(e, blockID);

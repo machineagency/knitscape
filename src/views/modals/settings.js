@@ -6,20 +6,6 @@ export function settingsModal() {
     <h2>Settings</h2>
 
     <div class="modal-content">
-      <label class="form-control">
-        Cell aspect
-        <input
-          class="num-input"
-          type="number"
-          .value=${String(GLOBAL_STATE.rowGauge)}
-          @change=${(e) => dispatch({ rowGauge: Number(e.target.value) })} />
-        /
-        <input
-          class="num-input"
-          type="number"
-          .value=${String(GLOBAL_STATE.stitchGauge)}
-          @change=${(e) => dispatch({ stitchGauge: Number(e.target.value) })} />
-      </label>
       <label class="form-control toggle">
         <input
           type="checkbox"
@@ -30,3 +16,18 @@ export function settingsModal() {
     </div>
   </div>`;
 }
+
+// <label class="form-control">
+//   Cell aspect
+//   <input
+//     class="num-input"
+//     type="number"
+//     .value=${String(GLOBAL_STATE.rowGauge)}
+//     @change=${(e) => dispatch({ rowGauge: Number(e.target.value) })} />
+//   /
+//   <input
+//     class="num-input"
+//     type="number"
+//     .value=${String(GLOBAL_STATE.stitchGauge)}
+//     @change=${(e) => dispatch({ stitchGauge: Number(e.target.value) })} />
+// </label>

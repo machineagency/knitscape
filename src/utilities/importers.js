@@ -5,26 +5,21 @@ import { bBoxAllBoundaries } from "../charting/helpers";
 import { fitChart } from "../interaction/chartPanZoom";
 
 function hydrateWorkspaceJSON(dryWorkspaceJSON) {
-  let {
-    boundaries,
-    regions,
-    yarnRegions,
-    blocks,
-    cellAspect,
-    stitchGauge,
-    rowGauge,
-    yarnPalette,
-  } = dryWorkspaceJSON;
+  let { boundaries, regions, blocks, cellAspect, yarnPalette } =
+    dryWorkspaceJSON;
 
   loadWorkspace({
     boundaries,
-    regions,
+
     cellAspect,
-    stitchGauge,
-    rowGauge,
     yarnPalette,
-    yarnRegions: yarnRegions.map(({ bitmap, pos }) => {
-      return { bitmap: Bimp.fromJSON(bitmap), pos };
+    regions: regions.map(({ gap, pos, yarnBlock, stitchBlock }) => {
+      return {
+        gap,
+        pos,
+        yarnBlock: Bimp.fromJSON(yarnBlock),
+        stitchBlock: Bimp.fromJSON(stitchBlock),
+      };
     }),
     blocks: Object.fromEntries(
       Object.entries(blocks).map(([blockID, { bitmap, pos, type }]) => {
@@ -50,11 +45,11 @@ export function uploadFile(cb) {
 }
 
 export function loadWorkspace(workspace) {
-  const { boundaries, regions, blocks, yarnRegions } = workspace;
+  const { boundaries, regions, blocks } = workspace;
 
   // Make chart by evaluating workspace
   let { stitchChart, yarnChart, machineChart, yarnSequence, rowMap } =
-    evaluateChart(boundaries, regions, yarnRegions, blocks);
+    evaluateChart(boundaries, regions, blocks);
   dispatch({
     ...workspace,
     chart: stitchChart,

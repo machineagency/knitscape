@@ -35,16 +35,10 @@ export function knitScanline(
   bbox,
   boundary,
   stitchBlock,
-  fillData,
-  yarnBlock
+  yarnBlock,
+  gap,
+  pos
 ) {
-  if (fillData.fillType == "stitch") {
-    if (fillData.stitch == 0) return { stitch: stitchChart, yarn: yarnChart };
-  } else if (fillData.fillType == "block") {
-    if (stitchBlock == undefined)
-      return { stitch: stitchChart, yarn: yarnChart };
-  }
-
   const points = boundary.map((pt) => toChartCoords(pt, bbox, stitchChart));
 
   let edges = [];
@@ -80,47 +74,39 @@ export function knitScanline(
 
       if (xStart == xEnd) continue;
 
-      if (fillData.fillType == "stitch") {
-        // fill in between ascending pairs
-        stitchChart = stitchChart.line(
-          { x: xStart, y },
-          { x: xEnd - 1, y }, // Fill up to but not including x
-          fillData.stitch
-        );
-      } else if (fillData.fillType == "block") {
-        // let block = blocks[fillData.blockID];
-        let { bitmap, pos } = stitchBlock;
-        let changes = [];
-        let yOffset = (y - pos[1]) % (bitmap.height + fillData.gap[1]);
-        if (yOffset < 0) yOffset = bitmap.height + fillData.gap[1] + yOffset;
-
-        for (let x = xStart; x < xEnd; x++) {
-          let xOffset = (x - pos[0]) % (bitmap.width + fillData.gap[0]);
-
-          if (xOffset < 0) xOffset = bitmap.width + fillData.gap[0] + xOffset;
-          if (xOffset >= bitmap.width || yOffset >= bitmap.height) continue;
-
-          let operation = bitmap.pixel(xOffset, yOffset);
-          if (operation == stitches.TRANSPARENT) continue;
-          changes.push({ x, y, color: operation });
-        }
-        stitchChart = stitchChart.draw(changes);
-      }
-
-      let { bitmap, pos } = yarnBlock;
-      let changes = [];
-      let yOffset = (y - pos[1]) % bitmap.height;
+      let stitchChanges = [];
+      let yOffset = (y - pos[1]) % (stitchBlock.height + gap[1]);
+      if (yOffset < 0) yOffset = stitchBlock.height + gap[1] + yOffset;
 
       for (let x = xStart; x < xEnd; x++) {
-        let xOffset = (x - pos[0]) % bitmap.width;
+        let xOffset = (x - pos[0]) % (stitchBlock.width + gap[0]);
 
-        if (xOffset < 0) xOffset = bitmap.width + xOffset;
-        if (xOffset >= bitmap.width || yOffset >= bitmap.height) continue;
+        if (xOffset < 0) xOffset = stitchBlock.width + gap[0] + xOffset;
+        if (xOffset >= stitchBlock.width || yOffset >= stitchBlock.height)
+          continue;
 
-        let yarnColor = bitmap.pixel(xOffset, yOffset) + 1;
-        changes.push({ x, y, color: yarnColor });
+        let operation = stitchBlock.pixel(xOffset, yOffset);
+        if (operation == stitches.TRANSPARENT) continue;
+        stitchChanges.push({ x, y, color: operation });
       }
-      yarnChart = yarnChart.draw(changes);
+      stitchChart = stitchChart.draw(stitchChanges);
+
+      let yarnChanges = [];
+      let yOffsetYarn = (y - pos[1]) % (yarnBlock.height + gap[1]);
+      if (yOffsetYarn < 0)
+        yOffsetYarn = yarnBlock.height + gap[1] + yOffsetYarn;
+
+      for (let x = xStart; x < xEnd; x++) {
+        let xOffset = (x - pos[0]) % (yarnBlock.width + gap[0]);
+
+        if (xOffset < 0) xOffset = yarnBlock.width + gap[0] + xOffset;
+        if (xOffset >= yarnBlock.width || yOffsetYarn >= yarnBlock.height)
+          yarnChanges.push({ x, y, color: 1 });
+
+        let yarnColor = yarnBlock.pixel(xOffset, yOffsetYarn) + 1;
+        yarnChanges.push({ x, y, color: yarnColor });
+      }
+      yarnChart = yarnChart.draw(yarnChanges);
     }
 
     y++;

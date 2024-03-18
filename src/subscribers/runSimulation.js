@@ -24,7 +24,6 @@ export function runSimulation() {
       );
 
       GLOBAL_STATE.relax = relax;
-      GLOBAL_STATE.simStart = relax;
       GLOBAL_STATE.simStop = stopSim;
     }
 
