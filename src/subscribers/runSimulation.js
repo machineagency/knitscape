@@ -19,7 +19,11 @@ export function runSimulation() {
       if (GLOBAL_STATE.stopSim) GLOBAL_STATE.stopSim();
 
       let { stopSim, relax } = simulate(
-        new Pattern(GLOBAL_STATE.machineChart, GLOBAL_STATE.yarnSequence),
+        new Pattern(
+          GLOBAL_STATE.machineChart,
+          GLOBAL_STATE.yarnSequence,
+          GLOBAL_STATE.rowMap
+        ),
         GLOBAL_STATE.simScale
       );
 

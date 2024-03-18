@@ -18,6 +18,7 @@ export function layoutNodes(
       pos: {
         x: i * HALF_STITCH,
         y: (stitchChart.height - rowMap[j] - 1) * STITCH_HEIGHT,
+        // y: (stitchChart.height - j - 1) * STITCH_HEIGHT,
       },
       f: {
         x: 0,

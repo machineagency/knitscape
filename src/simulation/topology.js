@@ -129,7 +129,6 @@ function kpLower(i, j, st, DS) {
 
   if (AV == cnStates.PCN) {
     if (MV[0] != 0) {
-      console.log("asdf");
       // it was a loop that was transferred - we do nothing
     } else {
       // Get any  CNs transferred in this row
@@ -321,24 +320,22 @@ function processStitch(st, iFirst, iSecond, j, DS) {
 }
 
 function populateGrid(pattern, DS) {
-  let movingRight = true;
-
   for (let n = 0; n < pattern.height; n++) {
     const j = n;
-    if (movingRight) {
+
+    if (pattern.carriagePasses[n] == "right") {
       // left to right
       for (let m = 0; m < pattern.width; m++) {
         const st = pattern.op(m, n); // get current operation
         processStitch(st, 2 * m, 2 * m + 1, j, DS);
       }
-    } else {
+    } else if (pattern.carriagePasses[n] == "left") {
       // right to left
       for (let m = pattern.width - 1; m > -1; m--) {
         const st = pattern.op(m, n);
         processStitch(st, 2 * m + 1, 2 * m, j, DS);
       }
     }
-    movingRight = !movingRight;
   }
 }
 
@@ -421,25 +418,25 @@ export function populateDS(pattern, populateFirstRow = true) {
   return DS;
 }
 
-export function followTheYarn(DS, yarnSequence) {
+export function followTheYarn(DS, yarnSequence, rowDirections) {
   let i = 0,
     j = 0,
     legNode = true,
     currentStitchRow = 0;
-
   let yarnPathIndex = 0;
 
-  const yarnPath = [];
   const yarnPaths = {};
-
+  const yarnPath = [];
   let highestLayer = 0;
 
   while (j < DS.height) {
-    const movingRight = currentStitchRow % 2 == 0;
+    const movingRight = rowDirections[currentStitchRow] == "right";
+    let currentYarn = yarnSequence[currentStitchRow];
+
     const evenI = i % 2 == 0;
     const side = movingRight === evenI ? "F" : "L";
 
-    if (addToList(i, j, legNode, yarnPath, DS)) {
+    if (addToList(i, j, legNode, yarnPath, DS, rowDirections)) {
       const CNL = acnsAt(i, j, DS); // Find the ACNs at this location
       DS.setCNL(i, j, CNL);
 
@@ -495,9 +492,11 @@ export function followTheYarn(DS, yarnSequence) {
       if (layer > highestLayer) highestLayer = layer;
 
       yarnPath.push([...cnLoc, currentStitchRow, layer]);
-      let currentYarn = yarnSequence[currentStitchRow];
+
       if (!(currentYarn in yarnPaths)) {
         yarnPaths[currentYarn] = [];
+        // let prevYarn = yarnSequence[currentStitchRow - 1];
+        // if (prevYarn) yarnPaths[currentYarn].push(yarnPaths[prevYarn].at(-1));
       }
       yarnPaths[currentYarn].push([...cnLoc, currentStitchRow, layer]);
       yarnPathIndex++;
@@ -509,7 +508,8 @@ export function followTheYarn(DS, yarnSequence) {
       j,
       legNode,
       currentStitchRow,
-      DS
+      DS,
+      rowDirections
     ));
   }
 
@@ -517,7 +517,7 @@ export function followTheYarn(DS, yarnSequence) {
   return yarnPaths;
 }
 
-function addToList(i, j, legNode, yarnPath, DS) {
+function addToList(i, j, legNode, yarnPath, DS, rowDirections) {
   // determines whether to add a contact node to the yarn path
   if (legNode) {
     // if it is a leg node, calculate the number of ACNs at that location
@@ -552,7 +552,8 @@ function addToList(i, j, legNode, yarnPath, DS) {
             jCurrent,
             legNodeCurrent,
             rowCurrent,
-            DS
+            DS,
+            rowDirections
           );
 
           if (check.i >= DS.width || check.j >= DS.height) {
@@ -562,7 +563,16 @@ function addToList(i, j, legNode, yarnPath, DS) {
             break;
           }
 
-          if (addToList(check.i, check.j, check.legNode, yarnPath, DS)) {
+          if (
+            addToList(
+              check.i,
+              check.j,
+              check.legNode,
+              yarnPath,
+              DS,
+              rowDirections
+            )
+          ) {
             found = true;
             [m, n] = finalLocation(check.i, check.j, DS);
           }
@@ -577,11 +587,16 @@ function addToList(i, j, legNode, yarnPath, DS) {
       // Determine final location
       const [_, jFinal] = finalLocation(i, j, DS);
 
-      if (n < jFinal) {
+      // if (i == 6 && j == 4) {
+      //   console.log(jFinal, m, n);
+      // }
+
+      if (n <= jFinal) {
         // if this CN is anchored, update it to ACN
         if (j < DS.height - 1) {
           DS.setAV(i, j, cnStates.ACN);
         }
+
         return true;
       } else {
         return false;
@@ -632,7 +647,7 @@ function acnsAt(i, j, DS) {
   if (i >= DS.width || j >= DS.height) return [];
 
   const maxHorizontal = 6; // 3 needles * 2 CNs/needle
-  const maxVertical = 4; // vertical shift
+  const maxVertical = 10; // vertical shift
 
   let iMin = i - maxHorizontal < 0 ? 0 : i - maxHorizontal;
   let iMax = i + maxHorizontal >= DS.width ? DS.width - 1 : i + maxHorizontal;
@@ -651,10 +666,10 @@ function acnsAt(i, j, DS) {
   return ACNList;
 }
 
-function nextCN(i, j, legNode, currentStitchRow, DS) {
+function nextCN(i, j, legNode, currentStitchRow, DS, rowDirections) {
   // determines which CN to process next. CNs are processed in a square wave order
-  // and reverse direction each row (as a knitting carriage does)
-  const movingRight = currentStitchRow % 2 == 0;
+
+  const movingRight = rowDirections[currentStitchRow] == "right";
   const evenI = i % 2 == 0;
 
   let iNext = i;
@@ -708,9 +723,10 @@ function nextCN(i, j, legNode, currentStitchRow, DS) {
 
   if (iNext < 0 || iNext >= DS.width) {
     // if the next i would be over the pattern edge move up one row:
+    const nextRowIsRight = rowDirections[currentStitchRow + 1] == "right";
     return {
-      i: i, // original i
-      j: j + 1, // original j+1
+      i: nextRowIsRight ? 0 : DS.width - 1, // original i
+      j: currentStitchRow + 1, // original j+1
       legNode: true, // will be leg node
       currentStitchRow: currentStitchRow + 1, // next stitch row
     };

@@ -25,14 +25,20 @@ export function simulate(stitchPattern, scale) {
 
   let DS, yarnPaths;
 
-  try {
-    DS = populateDS(stitchPattern);
-    orderCNs(DS, stitchPattern);
-    yarnPaths = followTheYarn(DS, GLOBAL_STATE.yarnSequence);
-  } catch {
-    console.error("Error generating yarn Topology");
-    return { relax: null, stopSim: null };
-  }
+  // try {
+  DS = populateDS(stitchPattern);
+  orderCNs(DS, stitchPattern);
+  yarnPaths = followTheYarn(
+    DS,
+    stitchPattern.yarnSequence,
+    stitchPattern.carriagePasses
+  );
+
+  // console.log(yarnPaths[2]);
+  // } catch {
+  //   console.error("Error generating yarn topology");
+  //   return { relax: null, stopSim: null };
+  // }
   const nodes = layoutNodes(
     DS,
     GLOBAL_STATE.chart,
@@ -63,7 +69,7 @@ export function simulate(stitchPattern, scale) {
 
   // CN grid position, stitch row, previous CN coords, next CN coords
   function nodeOffset([i, j], row, [x1, y1], [x2, y2]) {
-    const right = row % 2 == 0;
+    const right = stitchPattern.carriagePasses[row] == "right";
     const isLeg = j == row;
 
     const x = x1 - x2;

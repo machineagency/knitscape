@@ -1,11 +1,14 @@
 export class Pattern {
-  constructor(bitmap, yarnSequence) {
+  constructor(bitmap, yarnSequence, rowMap) {
     this.ops = bitmap.pixels;
     this.width = bitmap.width;
     this.height = bitmap.height;
     this.yarnSequence = yarnSequence;
     this.yarns = Array.from(
       yarnSequence.filter((value, index, arr) => arr.indexOf(value) === index)
+    );
+    this.carriagePasses = rowMap.map((ogRow) =>
+      ogRow % 2 == 0 ? "right" : "left"
     );
   }
 

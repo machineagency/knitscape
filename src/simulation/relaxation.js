@@ -43,23 +43,24 @@ export function yarnRelaxation(
     for (var k = 0; k < iterations; ++k) {
       ALPHA += (ALPHA_TARGET - ALPHA) * ALPHA_DECAY;
       // Accumulate forces to nodes
-      yarnSegments.forEach(
-        ({ sourceIndex, targetIndex, restLength, yarnIndex }) => {
-          applyYarnForce(
-            nodes[sourceIndex],
-            nodes[targetIndex],
-            restLength,
-            K_YARN
-          );
-        }
-      );
+      Object.entries(yarnSegments).forEach(([yarnIndex, yarnPath]) => {
+        yarnPath.forEach(
+          ({ sourceIndex, targetIndex, restLength, yarnIndex }) => {
+            applyYarnForce(
+              nodes[sourceIndex],
+              nodes[targetIndex],
+              restLength,
+              K_YARN
+            );
+          }
+        );
+      });
 
       // Update node positions
       nodes.forEach((node) => {
         node.v.x = (node.v.x + node.f.x) * velocityDecay;
         node.v.y = (node.v.y + node.f.y) * velocityDecay;
         node.pos = Vec2.add(node.pos, node.v);
-
         // sum forces
         total += Vec2.mag(node.f);
 
