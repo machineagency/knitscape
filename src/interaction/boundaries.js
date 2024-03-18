@@ -1,5 +1,7 @@
 import { GLOBAL_STATE, dispatch } from "../state";
 import { stitches } from "../constants";
+import { editingTools } from "../charting/editingTools";
+import { pan } from "./chartPanZoom";
 
 export function removeBoundary(index) {
   const { boundaries, regions } = GLOBAL_STATE;
@@ -201,8 +203,6 @@ function editBoundary(e) {
   dispatch({ selectedBoundary: boundaryIndex }, true);
 }
 
-export function editStitchFill(e) {}
-
 export function resizeFillBlock(e, direction) {
   const { selectedBoundary, regions, cellWidth, cellHeight, blockEditMode } =
     GLOBAL_STATE;
@@ -233,7 +233,7 @@ export function resizeFillBlock(e, direction) {
       if (blockEditMode == "stitch") {
         fill = stitches.TRANSPARENT;
       } else {
-        fill = 0;
+        fill = 1;
       }
 
       if (direction == "up") {
@@ -289,6 +289,7 @@ export function resizeFillBlock(e, direction) {
   window.addEventListener("pointerup", end);
   window.addEventListener("pointerleave", end);
 }
+
 export function boundaryModePointerDown(e) {
   const cl = e.target.classList;
 
@@ -309,5 +310,135 @@ export function boundaryModeContextMenu(e) {
     deletePoint(e);
   } else if (e.target.classList.contains("path")) {
     addPoint(e);
+  }
+}
+
+function blockPos(e) {
+  let bbox = document
+    .getElementById("block-fill-canvas")
+    .getBoundingClientRect();
+  return {
+    x: Math.floor((e.clientX - bbox.left) / GLOBAL_STATE.cellWidth),
+    y: Math.floor((bbox.bottom - e.clientY) / GLOBAL_STATE.cellHeight),
+  };
+}
+
+function moveBoundaryFill(e) {
+  const { selectedBoundary, regions } = GLOBAL_STATE;
+  const { pos } = regions[selectedBoundary];
+
+  const [x, y] = pos;
+  let last = [0, 0];
+
+  const startPos = { x: e.clientX, y: e.clientY };
+  dispatch({ transforming: true, locked: true });
+
+  function move(e) {
+    if (e.buttons == 0) {
+      end();
+    } else {
+      const { scale, cellAspect } = GLOBAL_STATE;
+
+      let dx = Math.round((startPos.x - e.clientX) / scale);
+      let dy = Math.round((startPos.y - e.clientY) / scale / cellAspect);
+
+      if (last[0] == dx && last[1] == dy) return;
+
+      let updatedRegions = [...regions];
+
+      updatedRegions[selectedBoundary].pos = [x - dx, y + dy];
+
+      last = [dx, dy];
+
+      dispatch({
+        regions: updatedRegions,
+      });
+    }
+  }
+
+  function end() {
+    window.removeEventListener("pointermove", move);
+    window.removeEventListener("pointerup", end);
+    window.removeEventListener("pointerleave", end);
+    dispatch({ transforming: false, locked: false });
+  }
+
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", end);
+  window.addEventListener("pointerleave", end);
+}
+
+function editBoundaryFill(e, tool) {
+  const { selectedBoundary, regions, blockEditMode, activeSymbol, activeYarn } =
+    GLOBAL_STATE;
+  const { stitchBlock, yarnBlock } = regions[selectedBoundary];
+  const stitchEdit = blockEditMode == "stitch";
+  let pos = blockPos(e);
+
+  dispatch({ locked: true });
+  let startBlock = stitchEdit ? stitchBlock : yarnBlock;
+
+  // tool onMove is not called unless pointer moves into another cell in the chart
+  let onMove = tool(startBlock, pos, stitchEdit ? activeSymbol : activeYarn);
+  if (!onMove) return;
+
+  let updatedRegions = [...regions];
+
+  if (stitchEdit) {
+    updatedRegions[selectedBoundary].stitchBlock = onMove(pos);
+  } else {
+    updatedRegions[selectedBoundary].yarnBlock = onMove(pos);
+  }
+  dispatch({
+    regions: updatedRegions,
+  });
+
+  function move(moveEvent) {
+    if (moveEvent.buttons == 0) {
+      end();
+    } else {
+      let newPos = blockPos(moveEvent);
+
+      if (newPos.x == pos.x && newPos.y == pos.y) return;
+
+      let updatedRegions = [...regions];
+
+      if (stitchEdit) {
+        updatedRegions[selectedBoundary].stitchBlock = onMove(newPos);
+      } else {
+        updatedRegions[selectedBoundary].yarnBlock = onMove(newPos);
+      }
+      dispatch({
+        regions: updatedRegions,
+      });
+
+      pos = newPos;
+    }
+  }
+
+  function end() {
+    dispatch({ locked: false });
+
+    window.removeEventListener("pointermove", move);
+    window.removeEventListener("pointerup", end);
+    window.removeEventListener("pointerleave", end);
+  }
+
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", end);
+  window.addEventListener("pointerleave", end);
+}
+
+export function boundaryBlockPointerDown(e) {
+  if (e.which == 2) {
+    pan(e);
+    return;
+  }
+
+  const activeTool = GLOBAL_STATE.activeBlockTool;
+  if (activeTool == "move") {
+    moveBoundaryFill(e);
+  } else if (activeTool in editingTools) {
+    editBoundaryFill(e, editingTools[activeTool]);
   }
 }

@@ -150,7 +150,7 @@ canvas {
 
 /* #endregion */
 
-/* #region SYMBOL PICKER */
+/* #region PALETTE PICKERS */
 .operation-picker {
   display: flex;
   flex-direction: column;
@@ -184,6 +184,34 @@ canvas {
 
 .operation-picker button.selected {
   outline: 1px solid white;
+  z-index: 2;
+}
+
+.yarn-color-picker {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  right: 0;
+  align-self: center;
+  margin: 8px;
+  background-color: var(--base1);
+  overflow: auto;
+  padding: 5px;
+  gap: 4px;
+  border-radius: 10px;
+}
+
+.yarn-color-picker button {
+  flex: 1 0 40px;
+  width: 40px;
+  background-color: var(--color);
+  padding: 0;
+  border: 1px solid black;
+  border-radius: 8px;
+}
+
+.yarn-color-picker button.selected {
+  outline: 2px solid white;
   z-index: 2;
 }
 
@@ -322,6 +350,11 @@ canvas {
   background-color: var(--base1);
   z-index: 10;
   align-items: center;
+}
+
+.boundary-menu .btn.current {
+  background-color: var(--accent);
+  color: var(--base2);
 }
 
 .num-input {

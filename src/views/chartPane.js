@@ -23,7 +23,7 @@ import {
 import { currentTargetPointerPos } from "../utilities/misc";
 
 import { gridPattern, cellShadow, activeBoundaryMask } from "./defs";
-import { operationPicker } from "./operationPicker";
+import { palettes } from "./palettes";
 
 function toolbar() {
   const { interactionMode, colorMode } = GLOBAL_STATE;
@@ -182,7 +182,7 @@ export function chartPaneView() {
         )}
         ${when(GLOBAL_STATE.stitchSelect, stitchSelectBox)} ${stitchBlocks()}
       </div>
-      ${operationPicker()} ${boundaryMenu()}
+      ${palettes()} ${boundaryMenu()}
     </div>
   `;
 }

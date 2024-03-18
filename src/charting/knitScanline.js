@@ -103,7 +103,7 @@ export function knitScanline(
         if (xOffset >= yarnBlock.width || yOffsetYarn >= yarnBlock.height)
           yarnChanges.push({ x, y, color: 1 });
 
-        let yarnColor = yarnBlock.pixel(xOffset, yOffsetYarn) + 1;
+        let yarnColor = yarnBlock.pixel(xOffset, yOffsetYarn);
         yarnChanges.push({ x, y, color: yarnColor });
       }
       yarnChart = yarnChart.draw(yarnChanges);

@@ -18,12 +18,23 @@ export function blockFillSubscriber() {
           height = null;
           return;
         }
-        let region = state.regions[state.selectedBoundary];
-        let block =
-          state.blockEditMode == "stitch"
-            ? region.stitchBlock
-            : region.yarnBlock;
 
+        let region = state.regions[state.selectedBoundary];
+        let block, stitchBlock, yarnBlock, yarnOffset;
+        const bbox = bBoxAllBoundaries(state.boundaries);
+
+        if (state.blockEditMode == "stitch") {
+          block = region.stitchBlock;
+          stitchBlock = region.stitchBlock;
+          yarnBlock = state.yarnChart;
+          yarnOffset = [region.pos[0] - bbox.xMin, region.pos[1] - bbox.yMin];
+        } else {
+          block = region.yarnBlock;
+
+          stitchBlock = region.stitchBlock;
+          yarnBlock = region.yarnBlock;
+          yarnOffset = [0, 0];
+        }
         if (
           scale != state.scale ||
           width != block.width ||
@@ -48,18 +59,16 @@ export function blockFillSubscriber() {
         }
 
         if (lastDrawn != block) {
-          const bbox = bBoxAllBoundaries(state.boundaries);
-
           drawChart(
             document.getElementById("block-fill-canvas"),
             state.colorMode,
-            block,
-            state.yarnChart,
+            stitchBlock,
+            yarnBlock,
             state.yarnPalette,
             scale,
             scale * state.cellAspect,
             lastDrawn,
-            [region.pos[0] - bbox.xMin, region.pos[1] - bbox.yMin]
+            yarnOffset
           );
         }
       },

@@ -22,22 +22,20 @@ let GLOBAL_STATE = {
   // Interaction mode can be path, boundary, block, or pan.
   interactionMode: "boundary",
   activeSymbol: 1,
+  activeYarn: 1,
 
   paths: [],
   boundaries: [],
   regions: [],
   blocks: {},
 
-  blockEditMode: "stitch",
+  blockEditMode: "yarn",
+  activeBlockTool: "brush",
 
   selectedBoundary: null,
 
-  selectingBlock: false, // probably will go away
-  onBlockSelect: null, // probably will go away
-
   stitchSelect: null,
   editingBlock: null,
-  activeBlockTool: "brush",
 
   chart: null,
   yarnChart: null,

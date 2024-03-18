@@ -26,7 +26,7 @@ function r() {
 
 const testWorkspace = {
   cellAspect: 7 / 11,
-  yarnPalette: ["#df9e72ff", "#ebe9bbff"],
+  yarnPalette: ["#df9e72ff", "#ebe9bbff", "#5fb6e9ff"],
   boundaries: [
     [
       [0, 0],
@@ -36,22 +36,22 @@ const testWorkspace = {
     ],
     [
       [2, 2],
-      [2, 18],
-      [13, 18],
-      [13, 2],
+      [10, 18],
+      [15, 18],
+      [15, 2],
     ],
   ],
   regions: [
     {
       gap: [0, 0],
       pos: [0, 0],
-      yarnBlock: new Bimp(1, 1, [0]),
+      yarnBlock: new Bimp(1, 1, [1]),
       stitchBlock: new Bimp(1, 1, [1]),
     },
     {
       gap: [0, 0],
       pos: [5, 5],
-      yarnBlock: new Bimp(1, 1, [1]),
+      yarnBlock: new Bimp(1, 1, [2]),
       stitchBlock: new Bimp(4, 1, [1, 1, 1, 1]),
     },
   ],

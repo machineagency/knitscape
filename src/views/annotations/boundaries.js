@@ -3,11 +3,13 @@ import { GLOBAL_STATE, dispatch } from "../../state";
 import { stitches } from "../../constants";
 import {
   removeBoundary,
-  editStitchFill,
+  boundaryBlockPointerDown,
   resizeFillBlock,
 } from "../../interaction/boundaries";
 import { gridPattern } from "../defs";
 import { when } from "lit-html/directives/when.js";
+import { editingTools } from "../../charting/editingTools";
+import { toolData } from "../../constants";
 
 function boundaryPoints(boundaryIndex, pts, cellWidth, cellHeight) {
   return pts.map(
@@ -65,7 +67,7 @@ export function boundaryBlocks() {
       style="position: absolute; top: 0px; left: 0px; overflow: hidden;"
       width="100%"
       height="100%"
-      @pointerdown=${(e) => editStitchFill(e)}>
+      @pointerdown=${boundaryBlockPointerDown}>
       <defs>${gridPattern(cellWidth, cellHeight)}</defs>
       ${when(
         cellHeight > 10,
@@ -160,40 +162,54 @@ function setXGap(regionIndex, xGap) {
 }
 
 export function boundaryMenu() {
-  const { regions, blockEditMode, selectedBoundary } = GLOBAL_STATE;
+  const { regions, blockEditMode, selectedBoundary, activeBlockTool } =
+    GLOBAL_STATE;
 
   if (selectedBoundary == null) return;
 
-  const { gap } = regions[selectedBoundary];
+  const { stitchBlock, yarnBlock, pos, gap } = regions[selectedBoundary];
+
+  let block = blockEditMode == "stitch" ? stitchBlock : yarnBlock;
 
   return html`<div class="boundary-menu">
     <button class="btn" @click=${() => removeBoundary(selectedBoundary)}>
       <i class="fa-solid fa-trash"></i>
     </button>
+    <span>yarn</span>
+
     <label class="color-mode-toggle switch">
       <input
         type="checkbox"
         ?checked=${blockEditMode == "stitch"}
         @change=${(e) =>
           dispatch({
-            blockEditMode: e.target.checked ? "stitch" : "color",
+            blockEditMode: e.target.checked ? "stitch" : "yarn",
           })} />
       <span class="slider round"></span>
     </label>
-    <label>xGap</label>
-    <input
-      class="num-input"
-      type="number"
-      min="0"
-      value=${gap[0]}
-      @change=${(e) => setXGap(selectedBoundary, Number(e.target.value))} />
-    <label>yGap</label>
-    <input
-      class="num-input"
-      type="number"
-      min="0"
-      @change=${(e) => setYGap(selectedBoundary, Number(e.target.value))}
-      value=${gap[1]} />
+    <span>stitch</span>
+    <span>${block.width} x ${block.height} </span>
+    ${Object.keys(editingTools).map(
+      (toolName) => html`<button
+        class="btn solid ${activeBlockTool == toolName ? "current" : ""}"
+        @click=${() =>
+          dispatch({
+            activeBlockTool: toolName,
+          })}>
+        <i class=${toolData[toolName].icon}></i>
+      </button>`
+    )}
+    <button
+      class="btn solid move-repeat ${activeBlockTool == "move"
+        ? "current"
+        : ""}"
+      @click=${() =>
+        dispatch({
+          activeBlockTool: "move",
+        })}>
+      <i class="fa-solid fa-arrows-up-down-left-right"></i>
+    </button>
+
     <button
       class="btn"
       @click=${() => dispatch({ selectedBoundary: null }, true)}>
@@ -201,3 +217,17 @@ export function boundaryMenu() {
     </button>
   </div>`;
 }
+//  <label>xGap</label>
+//     <input
+//       class="num-input"
+//       type="number"
+//       min="0"
+//       value=${gap[0]}
+//       @change=${(e) => setXGap(selectedBoundary, Number(e.target.value))} />
+//     <label>yGap</label>
+//     <input
+//       class="num-input"
+//       type="number"
+//       min="0"
+//       @change=${(e) => setYGap(selectedBoundary, Number(e.target.value))}
+//       value=${gap[1]} />
