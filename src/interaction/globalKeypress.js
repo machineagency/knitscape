@@ -4,7 +4,7 @@ import { closeModals } from "../utilities/misc";
 
 function escapeEverything() {
   dispatch(
-    { editingBlock: null, selectedBoundary: null, stitchSelect: null },
+    { selectedBlock: null, selectedBoundary: null, stitchSelect: null },
     true
   );
   closeModals();

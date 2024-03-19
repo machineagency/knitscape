@@ -1,5 +1,4 @@
 import { drawStitchBlock, drawYarnBlock } from "../charting/drawing";
-import { Bimp } from "../lib/Bimp";
 import { setCanvasSize } from "../utilities/misc";
 import { bBoxAllBoundaries } from "../charting/helpers";
 

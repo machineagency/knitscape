@@ -13,21 +13,21 @@ let GLOBAL_STATE = {
   colorMode: "yarn",
   transforming: false, // If the pointer is being used to do something
 
-  cellAspect: 11 / 7,
-
+  // Interaction mode can be path, boundary, block, or pan.
+  interactionMode: "block",
   pointer: [0, 0], // Pointer postition in chart coordinates
   locked: false,
-  activeTool: "pointer",
 
-  // Interaction mode can be path, boundary, block, or pan.
-  interactionMode: "boundary",
+  cellAspect: 11 / 7,
+
+  activeTool: "pointer",
   activeSymbol: 1,
   activeYarn: 1,
 
   paths: [],
   boundaries: [],
   regions: [],
-  blocks: {},
+  blocks: [],
 
   blockEditMode: "yarn",
   activeBlockTool: "brush",
@@ -35,7 +35,7 @@ let GLOBAL_STATE = {
   selectedBoundary: null,
 
   stitchSelect: null,
-  editingBlock: null,
+  selectedBlock: null,
 
   chart: null,
   yarnChart: null,

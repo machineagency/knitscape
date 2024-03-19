@@ -75,13 +75,13 @@ export function knitScanline(
       if (xStart == xEnd) continue;
 
       let stitchChanges = [];
-      let yOffset = (y - pos[1]) % (stitchBlock.height + gap[1]);
-      if (yOffset < 0) yOffset = stitchBlock.height + gap[1] + yOffset;
+      let yOffset = (y - pos[1]) % stitchBlock.height;
+      if (yOffset < 0) yOffset = stitchBlock.height + yOffset;
 
       for (let x = xStart; x < xEnd; x++) {
-        let xOffset = (x - pos[0]) % (stitchBlock.width + gap[0]);
+        let xOffset = (x - pos[0]) % stitchBlock.width;
 
-        if (xOffset < 0) xOffset = stitchBlock.width + gap[0] + xOffset;
+        if (xOffset < 0) xOffset = stitchBlock.width + xOffset;
         if (xOffset >= stitchBlock.width || yOffset >= stitchBlock.height)
           continue;
 
@@ -93,14 +93,13 @@ export function knitScanline(
 
       // Apply the yarn block texture
       let yarnChanges = [];
-      let yOffsetYarn = (y - pos[1]) % (yarnBlock.height + gap[1]);
-      if (yOffsetYarn < 0)
-        yOffsetYarn = yarnBlock.height + gap[1] + yOffsetYarn;
+      let yOffsetYarn = (y - pos[1]) % yarnBlock.height;
+      if (yOffsetYarn < 0) yOffsetYarn = yarnBlock.height + yOffsetYarn;
 
       for (let x = xStart; x < xEnd; x++) {
-        let xOffset = (x - pos[0]) % (yarnBlock.width + gap[0]);
+        let xOffset = (x - pos[0]) % yarnBlock.width;
 
-        if (xOffset < 0) xOffset = yarnBlock.width + gap[0] + xOffset;
+        if (xOffset < 0) xOffset = yarnBlock.width + xOffset;
         if (xOffset >= yarnBlock.width || yOffsetYarn >= yarnBlock.height)
           yarnChanges.push({ x, y, color: 1 });
 

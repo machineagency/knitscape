@@ -1,30 +1,27 @@
-import { drawChart } from "../charting/drawing";
+import { drawStitchBlock, drawYarnBlock } from "../charting/drawing";
 import { setCanvasSize } from "../utilities/misc";
+import { bBoxAllBoundaries } from "../charting/helpers";
 
 function clearLastDrawn(blocks) {
-  return Object.fromEntries(
-    Object.entries(blocks).map(([blockID, block]) => {
-      return [
-        blockID,
-        { bitmap: null, pos: [...block.pos], width: null, height: null },
-      ];
-    })
-  );
+  return blocks.map((block) => {
+    return { bitmap: null, pos: [...block.pos], width: null, height: null };
+  });
 }
 
-function rescaleAll(blocks, cellWidth, cellHeight) {
-  for (const [blockID, block] of Object.entries(blocks)) {
+function rescaleAll(blocks, editMode, cellWidth, cellHeight) {
+  blocks.forEach((block, blockIndex) => {
+    let bitmap = editMode == "stitch" ? block.stitchBlock : block.yarnBlock;
     setCanvasSize(
-      document.querySelector(`[data-blockid="${blockID}"]`),
-      Math.round(block.bitmap.width * cellWidth),
-      Math.round(block.bitmap.height * cellHeight)
+      document.querySelector(`[data-blockindex="${blockIndex}"]`),
+      Math.round(bitmap.width * cellWidth),
+      Math.round(bitmap.height * cellHeight)
     );
-  }
+  });
 }
 
 export function blockSubscriber() {
   return ({ state }) => {
-    let { scale, blocks } = state;
+    let { scale, blocks, blockEditMode, colorMode, interactionMode } = state;
 
     let lastDrawn = clearLastDrawn(blocks);
 
@@ -32,43 +29,80 @@ export function blockSubscriber() {
       syncState(state) {
         if (
           Object.keys(lastDrawn).length != Object.keys(state.blocks).length ||
-          scale != state.scale
+          scale != state.scale ||
+          blockEditMode != state.blockEditMode ||
+          blocks != state.blocks ||
+          colorMode != state.colorMode ||
+          interactionMode != state.interactionMode
         ) {
-          // A repeat was added or removed, or we scaled, update lastdrawn
           scale = state.scale;
-          rescaleAll(state.blocks, state.cellWidth, state.cellHeight);
+          blockEditMode = state.blockEditMode;
+          blocks = state.blocks;
+          colorMode = state.colorMode;
+          interactionMode = state.interactionMode;
+
+          if (interactionMode != "block") return;
+
+          rescaleAll(
+            state.blocks,
+            state.blockEditMode,
+            state.cellWidth,
+            state.cellHeight
+          );
           lastDrawn = clearLastDrawn(state.blocks);
         }
 
-        for (const [blockID, block] of Object.entries(state.blocks)) {
+        state.blocks.forEach((block, blockIndex) => {
+          let bitmap =
+            blockEditMode == "stitch" ? block.stitchBlock : block.yarnBlock;
+
           if (
-            lastDrawn[blockID].width != block.bitmap.width ||
-            lastDrawn[blockID].height != block.bitmap.height
+            lastDrawn[blockIndex].width != bitmap.width ||
+            lastDrawn[blockIndex].height != bitmap.height
           ) {
             setCanvasSize(
-              document.querySelector(`[data-blockid="${blockID}"]`),
-              Math.round(block.bitmap.width * state.cellWidth),
-              Math.round(block.bitmap.height * state.cellHeight)
+              document.querySelector(`[data-blockindex="${blockIndex}"]`),
+              Math.round(bitmap.width * state.cellWidth),
+              Math.round(bitmap.height * state.cellHeight)
             );
 
-            lastDrawn[blockID].width = block.bitmap.width;
-            lastDrawn[blockID].height = block.bitmap.height;
+            lastDrawn[blockIndex].width = bitmap.width;
+            lastDrawn[blockIndex].height = bitmap.height;
           }
 
-          if (lastDrawn[blockID].bitmap != block.bitmap) {
-            drawChart(
-              document.querySelector(`[data-blockid="${blockID}"]`),
-              state.colorMode,
-              block.bitmap,
-              state.yarnChart,
-              state.yarnPalette,
-              scale,
-              scale * state.cellAspect,
+          if (lastDrawn[blockIndex].bitmap != bitmap) {
+            const bbox = bBoxAllBoundaries(state.boundaries);
 
-              lastDrawn[blockID].bitmap
-            );
+            let offset = [block.pos[0] - bbox.xMin, block.pos[1] - bbox.yMin];
+
+            if (blockEditMode == "stitch") {
+              drawStitchBlock(
+                document.querySelector(`[data-blockindex="${blockIndex}"]`),
+                state.colorMode,
+                bitmap,
+                offset,
+                state.yarnChart,
+                state.chart,
+                state.yarnPalette,
+                scale,
+                scale * state.cellAspect,
+                lastDrawn[blockIndex].bitmap
+              );
+            } else if (blockEditMode == "yarn") {
+              drawYarnBlock(
+                document.querySelector(`[data-blockindex="${blockIndex}"]`),
+                bitmap,
+                offset,
+                state.yarnChart,
+                state.yarnPalette,
+                scale,
+                scale * state.cellAspect,
+                lastDrawn[blockIndex].bitmap
+              );
+            }
+            lastDrawn[blockIndex].bitmap = bitmap;
           }
-        }
+        });
       },
     };
   };

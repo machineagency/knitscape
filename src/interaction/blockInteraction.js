@@ -4,9 +4,9 @@ import { editingTools } from "../charting/editingTools";
 import { stitches } from "../constants";
 import { Bimp } from "../lib/Bimp";
 
-function blockPos(e, blockID) {
+function blockPos(e, blockIndex) {
   let bbox = document
-    .querySelector(`[data-blockid="${blockID}"]`)
+    .querySelector(`[data-blockindex="${blockIndex}"]`)
     .getBoundingClientRect();
   return {
     x: Math.floor((e.clientX - bbox.left) / GLOBAL_STATE.cellWidth),
@@ -14,48 +14,51 @@ function blockPos(e, blockID) {
   };
 }
 
-export function addStitchBlock() {
+export function addBlock() {
   const { stitchSelect, blocks } = GLOBAL_STATE;
 
-  let uuid = self.crypto.randomUUID();
   let [bl, tr] = stitchSelect;
   let [width, height] = [tr[0] - bl[0], tr[1] - bl[1]];
+
+  let updated = [...blocks];
+  updated.push({
+    pos: bl,
+    stitchBlock: Bimp.empty(width, height, stitches.TRANSPARENT),
+    yarnBlock: Bimp.empty(width, height, 0),
+  });
 
   dispatch(
     {
       stitchSelect: null,
-      blocks: {
-        ...blocks,
-        [uuid]: {
-          pos: bl,
-          bitmap: Bimp.empty(width, height, 1),
-          type: "stitch",
-        },
-      },
-      editingBlock: uuid,
+      blocks: updated,
+      selectedBlock: updated.length - 1,
+      interactionMode: "block",
     },
     true
   );
 }
 
-export function removeStitchBlock(blockID) {
-  const { blocks } = GLOBAL_STATE;
-  const updated = { ...blocks };
-  delete updated[blockID];
+export function removeBlock(blockIndex) {
+  const updated = [...GLOBAL_STATE.blocks];
+  updated.splice(blockIndex, 1);
 
   dispatch(
     {
       blocks: updated,
-      editingBlock: null,
+      selectedBlock: null,
     },
     true
   );
 }
 
-export function resizeBlock(e, blockID, direction) {
-  const block = GLOBAL_STATE.blocks[blockID];
-  const bmp = block.bitmap;
-  const [x, y] = block.pos;
+export function resizeBlock(e, blockIndex, direction) {
+  const { blocks, blockEditMode, activeSymbol, activeYarn } = GLOBAL_STATE;
+
+  const blockType = blockEditMode == "stitch" ? "stitchBlock" : "yarnBlock";
+  const fill = blockEditMode == "stitch" ? stitches.TRANSPARENT : 0;
+  const bmp = blocks[blockIndex][blockType];
+  const [x, y] = blocks[blockIndex].pos;
+
   let last = [0, 0];
 
   const startPos = { x: e.clientX, y: e.clientY };
@@ -72,44 +75,44 @@ export function resizeBlock(e, blockID, direction) {
 
       if (last[0] == dx && last[1] == dy) return;
 
-      let updatedBlocks = { ...blocks };
+      let updatedBlocks = [...blocks];
 
       if (direction == "up") {
         let newHeight = bmp.height + dy;
         if (newHeight < 1) return;
 
-        updatedBlocks[blockID].bitmap = bmp.resize(
+        updatedBlocks[blockIndex][blockType] = bmp.resize(
           bmp.width,
           newHeight,
-          stitches.TRANSPARENT
+          fill
         );
       } else if (direction == "right") {
         let newWidth = bmp.width - dx;
         if (newWidth < 1) return;
 
-        updatedBlocks[blockID].bitmap = bmp.resize(
+        updatedBlocks[blockIndex][blockType] = bmp.resize(
           newWidth,
           bmp.height,
-          stitches.TRANSPARENT
+          fill
         );
       } else if (direction == "down") {
         let newHeight = bmp.height - dy;
         if (newHeight < 1) return;
 
-        updatedBlocks[blockID].bitmap = bmp
+        updatedBlocks[blockIndex][blockType] = bmp
           .vFlip()
-          .resize(bmp.width, newHeight, stitches.TRANSPARENT)
+          .resize(bmp.width, newHeight, fill)
           .vFlip();
-        updatedBlocks[blockID].pos = [x, y + dy];
+        updatedBlocks[blockIndex].pos = [x, y + dy];
       } else if (direction == "left") {
         let newWidth = bmp.width + dx;
         if (newWidth < 1) return;
 
-        updatedBlocks[blockID].bitmap = bmp
+        updatedBlocks[blockIndex][blockType] = bmp
           .hFlip()
-          .resize(newWidth, bmp.height, stitches.TRANSPARENT)
+          .resize(newWidth, bmp.height, fill)
           .hFlip();
-        updatedBlocks[blockID].pos = [x - dx, y];
+        updatedBlocks[blockIndex].pos = [x - dx, y];
       }
 
       last = [dx, dy];
@@ -132,12 +135,12 @@ export function resizeBlock(e, blockID, direction) {
   window.addEventListener("pointerleave", end);
 }
 
-function moveBlock(e, blockID) {
-  const [x, y] = GLOBAL_STATE.blocks[blockID].pos;
+function moveBlock(e, blockIndex) {
+  const [x, y] = GLOBAL_STATE.blocks[blockIndex].pos;
   let last = [0, 0];
 
   const startPos = { x: e.clientX, y: e.clientY };
-  dispatch({ transforming: true, locked: true });
+  dispatch({ transforming: true });
 
   function move(e) {
     if (e.buttons == 0) {
@@ -150,15 +153,12 @@ function moveBlock(e, blockID) {
 
       if (last[0] == dx && last[1] == dy) return;
 
-      let updatedBlocks = { ...blocks };
-
-      updatedBlocks[blockID].pos = [x - dx, y + dy];
+      let updated = [...blocks];
+      updated[blockIndex].pos = [x - dx, y + dy];
 
       last = [dx, dy];
 
-      dispatch({
-        blocks: updatedBlocks,
-      });
+      dispatch({ blocks: updated });
     }
   }
 
@@ -166,7 +166,7 @@ function moveBlock(e, blockID) {
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerup", end);
     window.removeEventListener("pointerleave", end);
-    dispatch({ transforming: false, locked: false });
+    dispatch({ transforming: false });
   }
 
   window.addEventListener("pointermove", move);
@@ -174,44 +174,48 @@ function moveBlock(e, blockID) {
   window.addEventListener("pointerleave", end);
 }
 
-function editBlock(e, blockID, tool) {
-  let pos = blockPos(e, blockID);
+function editBlock(e, blockIndex, tool) {
+  let pos = blockPos(e, blockIndex);
 
-  dispatch({ locked: true });
-  let startBlock = GLOBAL_STATE.blocks[blockID];
+  const { blocks, blockEditMode, activeSymbol, activeYarn } = GLOBAL_STATE;
+  const blockType = blockEditMode == "stitch" ? "stitchBlock" : "yarnBlock";
+  dispatch({ transforming: true });
+  let startBlock = blocks[blockIndex][blockType];
 
-  // tool onMove is not called unless pointer moves into another cell in the chart
-  let onMove = tool(startBlock.bitmap, pos, GLOBAL_STATE.activeSymbol);
+  let onMove = tool(
+    startBlock,
+    pos,
+    blockEditMode == "stitch" ? activeSymbol : activeYarn
+  );
   if (!onMove) return;
 
+  let init = [...blocks];
+  init[blockIndex][blockType] = onMove(pos);
+
   dispatch({
-    blocks: {
-      ...GLOBAL_STATE.blocks,
-      [blockID]: { ...startBlock, bitmap: onMove(pos) },
-    },
+    blocks: init,
   });
 
   function move(moveEvent) {
     if (moveEvent.buttons == 0) {
       end();
     } else {
-      let newPos = blockPos(moveEvent, blockID);
+      let newPos = blockPos(moveEvent, blockIndex);
 
       if (newPos.x == pos.x && newPos.y == pos.y) return;
-      let updated = onMove(newPos);
+
+      let updated = [...blocks];
+      updated[blockIndex][blockType] = onMove(newPos);
 
       dispatch({
-        blocks: {
-          ...GLOBAL_STATE.blocks,
-          [blockID]: { ...startBlock, bitmap: updated },
-        },
+        blocks: updated,
       });
       pos = newPos;
     }
   }
 
   function end() {
-    dispatch({ locked: false });
+    dispatch({ transforming: false });
 
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerup", end);
@@ -223,7 +227,7 @@ function editBlock(e, blockID, tool) {
   window.addEventListener("pointerleave", end);
 }
 
-export function blockPointerDown(e, blockID) {
+export function blockPointerDown(e, blockIndex) {
   if (e.which == 2) {
     pan(e);
     return;
@@ -233,8 +237,8 @@ export function blockPointerDown(e, blockID) {
   if (GLOBAL_STATE.interactionMode == "hand") {
     pan(e);
   } else if (activeTool == "move") {
-    moveBlock(e, blockID);
+    moveBlock(e, blockIndex);
   } else if (activeTool in editingTools) {
-    editBlock(e, blockID, editingTools[activeTool]);
+    editBlock(e, blockIndex, editingTools[activeTool]);
   }
 }

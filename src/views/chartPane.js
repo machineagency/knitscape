@@ -1,30 +1,38 @@
 import { html, svg } from "lit-html";
 import { when } from "lit-html/directives/when.js";
+import { classMap } from "lit-html/directives/class-map.js";
+
 import { GLOBAL_STATE, dispatch } from "../state";
 
 import {
   chartContextMenu,
   chartPointerDown,
-  chartClick,
 } from "../interaction/chartInteraction";
 import { zoom, fitChart } from "../interaction/chartPanZoom";
 
 import {
-  boundaryMenu,
   boundaryView,
   activeBoundaryPath,
   boundaryBlocks,
 } from "./annotations/boundaries";
-import {
-  stitchBlocks,
-  stitchSelectBox,
-  stitchBlockToolbar,
-} from "./annotations/blocks";
+import { blocks, stitchSelectBox, blockToolbar } from "./annotations/blocks";
 
 import { currentTargetPointerPos } from "../utilities/misc";
 
 import { gridPattern, cellShadow, activeBoundaryMask } from "./defs";
 import { palettes } from "./palettes";
+
+function setInteractionMode(mode) {
+  dispatch(
+    {
+      interactionMode: mode,
+      stitchSelect: null,
+      selectedBlock: null,
+      selectedBoundary: null,
+    },
+    true
+  );
+}
 
 function toolbar() {
   const { interactionMode, colorMode } = GLOBAL_STATE;
@@ -41,22 +49,22 @@ function toolbar() {
     </label>
     <button
       class="btn solid ${interactionMode == "pan" ? "current" : ""}"
-      @click=${() => (GLOBAL_STATE.interactionMode = "pan")}>
+      @click=${() => setInteractionMode("pan")}>
       <i class="fa-solid fa-hand"></i>
     </button>
     <button
-      class="btn solid ${interactionMode == "path" ? "current" : ""}"
-      @click=${() => (GLOBAL_STATE.interactionMode = "path")}>
-      <i class="fa-solid fa-minus"></i>
-    </button>
-    <button
       class="btn solid ${interactionMode == "boundary" ? "current" : ""}"
-      @click=${() => (GLOBAL_STATE.interactionMode = "boundary")}>
+      @click=${() => setInteractionMode("boundary")}>
       <i class="fa-solid fa-vector-square"></i>
     </button>
     <button
+      class="btn solid ${interactionMode == "path" ? "current" : ""}"
+      @click=${() => setInteractionMode("path")}>
+      <i class="fa-solid fa-minus"></i>
+    </button>
+    <button
       class="btn solid ${interactionMode == "block" ? "current" : ""}"
-      @click=${() => (GLOBAL_STATE.interactionMode = "block")}>
+      @click=${() => setInteractionMode("block")}>
       <i class="fa-solid fa-table-cells"></i>
     </button>
     <button
@@ -65,14 +73,6 @@ function toolbar() {
       <i class="fa-solid fa-expand"></i>
     </button>
   </div>`;
-}
-
-function contextToolbar() {
-  if (GLOBAL_STATE.editingBlock != null) {
-    return stitchBlockToolbar();
-  } else {
-    return toolbar();
-  }
 }
 
 function trackPointer(e) {
@@ -107,7 +107,6 @@ function pointerCellHighlight() {
 
 export function chartPaneView() {
   const {
-    scale,
     boundaries,
     selectedBoundary,
     cellWidth,
@@ -115,9 +114,10 @@ export function chartPaneView() {
     chartPan,
     chart,
     pointer,
-    editingBlock,
+    selectedBlock,
     bbox,
     transforming,
+    interactionMode,
   } = GLOBAL_STATE;
 
   const offsetX = Math.round(bbox.xMin * cellWidth);
@@ -126,31 +126,46 @@ export function chartPaneView() {
   const w = Math.round(cellWidth * chart.width);
   const h = Math.round(cellHeight * chart.height);
 
+  const classes = {
+    allowHover: !transforming && interactionMode == "boundary",
+  };
+
   return html`
-    <div class="desktop" @pointermove=${(e) => trackPointer(e)}>
-      ${contextToolbar()}
+    <div class="desktop" @pointermove=${(e) => trackPointer(e)} @wheel=${zoom}>
+      ${toolbar()}
       <span class="pointer-pos">[${pointer[0]},${pointer[1]}]</span>
       <div
         style="position: absolute; bottom: 0; left: 0; transform: translate(${chartPan.x}px,${-chartPan.y}px);">
         <canvas
-          style="transform: translate(${offsetX}px,${-offsetY}px); outline: 1px solid black; filter: ${editingBlock
-            ? "grayscale(1)"
+          style="transform: translate(${offsetX}px,${-offsetY}px); outline: 1px solid black; filter: ${interactionMode ==
+          "block"
+            ? "grayscale(0.5)"
             : "none"}"
           id="chart-canvas"></canvas>
       </div>
       <svg
         id="svg-layer"
         preserveAspectRatio="xMidYMid meet"
-        class="desktop-svg ${transforming ? "transforming" : "allow-hover"}"
+        class="desktop-svg  ${classMap(classes)}"
         style="position: absolute;"
         width="100%"
         height="100%"
         @pointerdown=${chartPointerDown}
-        @contextmenu=${chartContextMenu}
-        @click=${chartClick}
-        @wheel=${zoom}>
+        @contextmenu=${chartContextMenu}>
+        <defs>${gridPattern(cellWidth, cellHeight)}</defs>
+
         <g transform="scale (1, -1)" transform-origin="center">
           <g transform="translate(${chartPan.x} ${chartPan.y})">
+            <g transform="translate(${offsetX} ${offsetY})">
+              ${cellHeight > 10
+                ? svg`
+              <rect
+                width=${w}
+                height=${h}
+                fill="url(#grid)">
+              </rect>`
+                : ""}
+            </g>
             ${boundaryView()}
           </g>
         </g>
@@ -163,21 +178,19 @@ export function chartPaneView() {
             GLOBAL_STATE.selectedBoundary != null,
           boundaryBlocks
         )}
-        ${when(GLOBAL_STATE.stitchSelect, stitchSelectBox)} ${stitchBlocks()}
+        ${when(GLOBAL_STATE.stitchSelect, stitchSelectBox)}
+        ${when(GLOBAL_STATE.interactionMode == "block", blocks)}
       </div>
       <svg
         preserveAspectRatio="xMidYMid meet"
-        class="desktop-svg vector-overlay ${transforming
-          ? "transforming"
-          : "allow-hover"}"
+        class="desktop-svg vector-overlay"
         style="position: absolute;"
         width="100%"
         height="100%"
         @pointerdown=${chartPointerDown}
         @contextmenu=${chartContextMenu}
-        @click=${chartClick}
         @wheel=${zoom}>
-        <defs>${gridPattern(cellWidth, cellHeight)} ${cellShadow()}</defs>
+        <defs>${cellShadow()}</defs>
         ${selectedBoundary != null
           ? activeBoundaryMask(
               boundaries[selectedBoundary],
@@ -188,28 +201,11 @@ export function chartPaneView() {
           : ""}
         <g transform="scale (1, -1)" transform-origin="center">
           <g transform="translate(${chartPan.x} ${chartPan.y})">
-            <g transform="translate(${offsetX} ${offsetY})">
-              ${cellHeight > 10
-                ? svg`
-              <rect
-
-                width=${w}
-                height=${h}
-                fill="url(#grid)">
-              </rect>`
-                : ""}
-
-              <!-- <rect
-                width=${w}
-                height=${h}
-                fill=${editingBlock ? "#00000033" : "transparent"}></rect> -->
-              ${pointerCellHighlight()}
-            </g>
             ${activeBoundaryPath()}
           </g>
         </g>
       </svg>
-      ${palettes()} ${boundaryMenu()}
+      ${palettes()} ${blockToolbar()}
     </div>
   `;
 }

@@ -32,12 +32,17 @@ function yarnButton(paletteIndex, color) {
 }
 
 export function palettes() {
-  const { selectedBoundary, blockEditMode, editingBlock, blocks, yarnPalette } =
-    GLOBAL_STATE;
+  const {
+    selectedBoundary,
+    blockEditMode,
+    selectedBlock,
+    blocks,
+    yarnPalette,
+  } = GLOBAL_STATE;
 
   if (
     (selectedBoundary != null && blockEditMode == "stitch") ||
-    (editingBlock && blockEditMode == "stitch")
+    (selectedBlock != null && blockEditMode == "stitch")
   ) {
     return html` <div class="operation-picker scroller">
       ${Object.entries(SYMBOL_DATA).map(([symbolName, data], index) =>
@@ -46,7 +51,7 @@ export function palettes() {
     </div>`;
   } else if (
     (selectedBoundary != null && blockEditMode == "yarn") ||
-    (editingBlock && blockEditMode == "yarn")
+    (selectedBlock != null && blockEditMode == "yarn")
   ) {
     return html` <div class="yarn-color-picker scroller">
       ${yarnButton(0, TRANSPARENT_YARN)}

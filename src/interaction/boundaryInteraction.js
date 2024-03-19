@@ -2,6 +2,8 @@ import { GLOBAL_STATE, dispatch } from "../state";
 import { stitches } from "../constants";
 import { editingTools } from "../charting/editingTools";
 import { pan } from "./chartPanZoom";
+import { selectBox } from "./select";
+import { Bimp } from "../lib/Bimp";
 
 export function removeBoundary(index) {
   const { boundaries, regions } = GLOBAL_STATE;
@@ -10,6 +12,39 @@ export function removeBoundary(index) {
     boundaries: boundaries.slice(0, index).concat(boundaries.slice(index + 1)),
     regions: regions.slice(0, index).concat(regions.slice(index + 1)),
     selectedBoundary: null,
+  });
+}
+
+export function addBoundary() {
+  const {
+    boundaries,
+    regions,
+    stitchSelect: [[xMin, yMin], [xMax, yMax]],
+  } = GLOBAL_STATE;
+
+  boundaries.push([
+    [xMin, yMin],
+    [xMin, yMax],
+    [xMax, yMax],
+    [xMax, yMin],
+  ]);
+
+  regions.push({
+    pos: [
+      xMin + Math.floor((xMax - xMin) / 2),
+      yMin + Math.floor((yMax - yMin) / 2),
+    ],
+    yarnBlock: new Bimp(1, 1, [1]),
+    stitchBlock: new Bimp(1, 1, [1]),
+  });
+
+  dispatch({
+    boundaries,
+    regions,
+    selectedBoundary: boundaries.length - 1,
+    stitchSelect: null,
+    interactionMode: "boundary",
+    selectedBlock: null,
   });
 }
 
@@ -200,7 +235,7 @@ function dragBoundary(e) {
 function editBoundary(e) {
   const boundaryIndex = Number(e.target.dataset.boundaryindex);
 
-  dispatch({ selectedBoundary: boundaryIndex }, true);
+  dispatch({ selectedBoundary: boundaryIndex, stitchSelect: null }, true);
 }
 
 export function resizeFillBlock(e, direction) {
@@ -289,6 +324,47 @@ export function resizeFillBlock(e, direction) {
   window.addEventListener("pointerleave", end);
 }
 
+function beginDrag(e) {
+  const startPos = { x: e.clientX, y: e.clientY };
+
+  let moved = false;
+
+  dispatch({ transforming: true });
+
+  function move(moveEvent) {
+    let dx = Math.abs(startPos.x - moveEvent.clientX);
+    let dy = Math.abs(startPos.y - moveEvent.clientY);
+
+    if (moveEvent.buttons == 0) {
+      end(moveEvent);
+    } else if (!moved) {
+      if (dx > 5 || dy > 5) {
+        moved = true;
+      }
+    } else {
+      // if we have moved, start a selection
+      dispatch({ selectedBoundary: null });
+      end(moveEvent);
+      selectBox();
+    }
+  }
+
+  function end(e) {
+    if (!moved && e.target.classList.contains("boundary")) {
+      //if we didn't move
+      editBoundary(e);
+    }
+    window.removeEventListener("pointermove", move);
+    window.removeEventListener("pointerup", end);
+    window.removeEventListener("pointerleave", end);
+    dispatch({ transforming: false });
+  }
+
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", end);
+  window.addEventListener("pointerleave", end);
+}
+
 export function boundaryModePointerDown(e) {
   const cl = e.target.classList;
 
@@ -299,8 +375,15 @@ export function boundaryModePointerDown(e) {
     // path is only shown if the boundary is selected
     dragPath(e);
   } else if (cl.contains("boundary")) {
-    editBoundary(e);
-    dragBoundary(e);
+    if (
+      GLOBAL_STATE.selectedBoundary == Number(e.target.dataset.boundaryindex)
+    ) {
+      dragBoundary(e);
+    } else {
+      beginDrag(e);
+    }
+  } else {
+    beginDrag(e);
   }
 }
 

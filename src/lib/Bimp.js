@@ -28,14 +28,17 @@ export class Bimp {
     return new Bimp(width, height, tiled);
   }
 
-  overlay(overlayBimp, pos) {
+  overlay(overlayBimp, pos, skip) {
     const changes = [];
+
     for (let y = 0; y < overlayBimp.height; y++) {
       for (let x = 0; x < overlayBimp.width; x++) {
+        let color = overlayBimp.pixel(x, y);
+        if (color == skip) continue;
         changes.push({
           x: pos[0] + x,
-          y: pos[1] + overlayBimp.height - y - 1,
-          color: overlayBimp.pixel(x, y),
+          y: pos[1] + y,
+          color,
         });
       }
     }

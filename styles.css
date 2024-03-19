@@ -303,7 +303,7 @@ canvas {
   stroke: rgb(69, 69, 69);
 }
 
-.allow-hover .boundary.inactive:hover {
+.allowHover .boundary.inactive:hover {
   stroke: rgb(255, 255, 255);
   fill: #dbdbdb33;
 }
@@ -344,28 +344,6 @@ canvas {
   stroke-width: 3px;
 }
 
-.boundary-menu {
-  position: absolute;
-  display: flex;
-  justify-content: center;
-
-  bottom: 8px;
-  display: flex;
-  text-wrap: nowrap;
-  gap: 0.4em;
-  padding: 0.4em;
-  border-radius: 12px;
-  box-shadow: 0 0 4px 0 black;
-  background-color: var(--base1);
-  z-index: 10;
-  align-items: center;
-}
-
-.boundary-menu .btn.current {
-  background-color: var(--accent);
-  color: var(--base2);
-}
-
 .num-input {
   width: 40px;
 }
@@ -395,9 +373,11 @@ canvas {
 
 .select-tools {
   position: absolute;
-  bottom: 100%;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  height: 100%;
 }
 
 .add-block {
@@ -412,7 +392,7 @@ canvas {
 
 /* #region STITCH BLOCKS */
 
-.stitch-block {
+.block {
   position: absolute;
   display: flex;
   align-items: center;
@@ -428,8 +408,8 @@ canvas {
   pointer-events: none;
 }
 
-.stitch-block-toolbar {
-  margin: 8px;
+.block-toolbar {
+  bottom: 8px;
   justify-self: center;
   position: absolute;
   display: flex;
@@ -442,20 +422,26 @@ canvas {
   align-items: center;
 }
 
-.stitch-block-toolbar > button {
+.block-remove {
+  position: absolute;
+  left: 100%;
+  bottom: 100%;
+}
+
+.block-toolbar > button {
   cursor: pointer;
 }
 
-.stitch-block-toolbar .btn.current {
+.block-toolbar .btn.current {
   background-color: var(--accent);
   color: var(--base2);
 }
 
-.stitch-block:hover .stitch-block-hover {
+.block:hover .hover-overlay {
   display: flex;
 }
 
-.stitch-block-hover {
+.hover-overlay {
   display: none;
   position: absolute;
   align-items: center;
@@ -665,346 +651,4 @@ canvas {
   text-shadow: 0px 0px 3px black;
 }
 
-/* #endregion */
-
-/* #region EVERYTHING ELSE */
-
-/**********************************
-
-RESIZE DRAGGER
-
-**********************************/
-
-/* .grabbing {
-  cursor: grabbing !important;
-}
-
-.grab {
-  cursor: grab !important;
-}
-
-.punchcard-preview {
-  height: 15rem;
-  position: relative;
-}
-
-#punchcard {
-  height: 100%;
-  background-color: #fff;
-} */
-
-/**********************************
-
-REPEAT CANVAS UI
-
-**********************************/
-/* #repeat-container {
-  position: absolute;
-  left: 0;
-  top: 0;
-}
-
-.repeat-canvas-container {
-  position: absolute;
-  display: flex;
-  justify-content: center;
-}
-
-.repeat-bounds {
-  position: absolute;
-  z-index: 2;
-  bottom: 0;
-  left: 0;
-  outline: 2px solid white;
-  outline-offset: -2px;
-  border: 4px solid black;
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.repeat-area-dragger {
-  position: absolute;
-  border: 0;
-  display: flex;
-  align-items: center;
-  box-shadow: 0 0 1px 0;
-  pointer-events: all;
-}
-
-.repeat-area-dragger > i {
-  pointer-events: none;
-}
-
-.repeat-area-dragger.y-axis {
-  bottom: calc(100% + 4px);
-  border-radius: 12px 12px 0 0;
-  padding: 0.3em 0.7em 0.2em 0.7em;
-}
-
-.repeat-area-dragger.x-axis {
-  left: calc(100% + 4px);
-  border-radius: 0 12px 12px 0;
-  padding: 0.7em 0.3em 0.7em 0.2em;
-}
-
-.repeat-canvas {
-  position: relative;
-  display: block;
-  outline: 1px solid black;
-  outline-offset: -1px;
-  z-index: 1;
-}
-
-.repeat-ui {
-  position: absolute;
-  background-color: var(--base2);
-  box-shadow: 0 0 5px 0 black;
-  border-radius: 8px;
-  display: flex;
-  padding: 5px;
-  gap: 5px;
-  z-index: 2;
-}
-
-.repeat-controls {
-  bottom: calc(100% + 8px);
-  right: 0;
-}
-
-.move-repeat {
-  cursor: move;
-}
-
-.delete-repeat {
-  position: absolute;
-  z-index: 10;
-  top: 100%;
-}
-
-.resize-repeat {
-  cursor: move;
-  bottom: 100%;
-  left: 100%;
-  position: absolute;
-}
-
-.resize-repeat > i {
-  pointer-events: none;
-}
-
-.repeat-ui .btn.solid {
-  aspect-ratio: 1;
-}
-
-.resize-repeat {
-  cursor: unset;
-} */
-
-/**********************************
-
-YARN SEQUENCE
-
-**********************************/
-
-/* #yarn-sequence {
-  position: absolute;
-  right: calc(100% + 10px);
-  bottom: 0;
-  display: flex;
-  flex-direction: column;
-  z-index: 100;
-}
-
-#yarn-sequence > button {
-  width: 100%;
-  position: absolute;
-  bottom: 100%;
-  border-radius: 8px 8px 0 0;
-  color: var(--text-inactive);
-  overflow: hidden;
-  padding: 0;
-}
-
-#yarn-sequence > canvas {
-  outline: 1px solid black;
-} */
-
-/**********************************
-
-LEFT BAR
-
-**********************************/
-
-/* .sidebar {
-  z-index: 3;
-  background-color: var(--base1);
-  display: flex;
-  flex-direction: column;
-  gap: 1em;
-  padding: 0 6px;
-  overflow-y: auto;
-}
-
-.btn.add-repeat {
-  align-self: stretch;
-} */
-
-/**********************************
-
-YARN PICKER
-
-**********************************/
-
-/* #yarn-picker {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4em;
-}
-
-.btn.color-select {
-  align-self: auto;
-  flex: 0 0 50px;
-  padding: 0;
-  border-radius: 8px;
-  border: 1px solid black;
-  overflow: hidden;
-  justify-content: space-between;
-}
-
-.color-preview {
-  aspect-ratio: 1;
-  height: 100%;
-  position: relative;
-  background: var(--current);
-}
-
-.color-label {
-  font-size: larger;
-  font-weight: 900;
-  flex: 1;
-  line-height: 0;
-}
-
-#yarn-picker .btn.selected {
-  outline: 1px solid white;
-  color: var(--text-highlight);
-  background-color: hsla(var(--accH), var(--accS), var(--accL), 0.3);
-}
-
-.edit-color-btn {
-  border: 0;
-  outline: 0;
-  padding: 0;
-  cursor: pointer;
-  background-color: transparent;
-  height: 100%;
-  width: 100%;
-}
-
-.edit-color-icon {
-  color: var(--text-highlight);
-
-  position: absolute;
-  line-height: 1;
-  top: 5px;
-  left: 5px;
-}
-
-.edit-color-icon > i {
-  line-height: 0;
-  text-shadow: 0px 0px 2px black;
-} */
-
-/**********************************
-
-BOTTOM TOOLBAR
-
-**********************************/
-
-/* #chart-size-controls {
-  display: flex;
-  align-items: center;
-  gap: 0.4em;
-  font-size: 1em;
-} */
-
-/**********************************
-
-REPEAT LIBRARY
-
-**********************************/
-
-/* #repeat-library-button {
-  font-size: inherit;
-  aspect-ratio: 1;
-}
-
-#repeat-library {
-
-  flex-direction: column;
-  overflow: hidden;
-}
-
-#repeat-library > h2 {
-  font-size: 1.2em;
-  padding: 0.4em;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.5em;
-}
-
-#repeat-library-content {
-  display: grid;
-  grid-template-columns: auto auto auto;
-  grid-auto-rows: 40px;
-  grid-row-gap: 1px;
-  overflow-y: auto;
-  height: 100%;
-  transition: 150ms;
-}
-
-#repeat-library-content.open {
-  height: 400px;
-  min-width: 150px;
-}
-
-#repeat-library-content.closed {
-  height: 0px;
-  width: 0px;
-}
-
-.repeat-title {
-  font-weight: 600;
-  text-align: end;
-  display: flex;
-  background-color: var(--modal-background);
-  align-items: center;
-  justify-content: end;
-  padding: 0 5px;
-}
-
-.repeat-size {
-  font-family: monospace;
-  display: flex;
-  background-color: var(--modal-background);
-  align-items: center;
-  justify-content: end;
-  padding: 0 8px;
-}
-
-.repeat-library-canvas {
-  display: flex;
-  justify-content: center;
-  background-color: var(--modal-background);
-}
-
-.repeat-library-canvas > canvas {
-  height: 100%;
-  image-rendering: pixelated;
-  outline: 1px solid black;
-  cursor: grab;
-} */
 /* #endregion */

@@ -23,53 +23,6 @@ function r() {
   window.requestAnimationFrame(r);
 }
 
-// const testWorkspace = {
-//   cellAspect: 7 / 11,
-//   yarnPalette: ["#df9e72ff", "#ebe9bbff", "#5fb6e9ff"],
-//   boundaries: [
-//     [
-//       [0, 0],
-//       [0, 100],
-//       [60, 100],
-//       [60, 0],
-//     ],
-//     [
-//       [20, 20],
-//       [20, 80],
-//       [40, 80],
-//       [40, 20],
-//     ],
-//     [
-//       [40, 20],
-//       [40, 80],
-//       [60, 80],
-//       [60, 20],
-//     ],
-
-//   ],
-//   regions: [
-//     {
-//       gap: [0, 0],
-//       pos: [0, 0],
-//       yarnBlock: new Bimp(1, 1, [1]),
-//       stitchBlock: new Bimp(1, 1, [1]),
-//     },
-//     {
-//       gap: [0, 0],
-//       pos: [20,20],
-//       yarnBlock: new Bimp(1, 1, [2]),
-//       stitchBlock: new Bimp(1, 1, [1]),
-//     },
-//     {
-//       gap: [0, 0],
-//       pos: [40,20],
-//       yarnBlock: new Bimp(1, 1, [3]),
-//       stitchBlock: new Bimp(1, 1, [1]),
-//     },
-//   ],
-//   blocks: {},
-// };
-
 const testWorkspace = {
   cellAspect: 7 / 11,
   yarnPalette: ["#df9e72ff", "#ebe9bbff", "#5fb6e9ff"],
@@ -89,14 +42,19 @@ const testWorkspace = {
   ],
   regions: [
     {
-      gap: [0, 0],
       pos: [0, 0],
       yarnBlock: new Bimp(2, 2, [1, 1, 0, 1]),
       stitchBlock: new Bimp(1, 1, [1]),
     },
     {
-      gap: [0, 0],
       pos: [2, 2],
+      yarnBlock: new Bimp(1, 1, [1]),
+      stitchBlock: new Bimp(1, 1, [1]),
+    },
+  ],
+  blocks: [
+    {
+      pos: [5, 5],
       yarnBlock: new Bimp(
         4,
         4,
@@ -105,7 +63,6 @@ const testWorkspace = {
       stitchBlock: new Bimp(1, 1, [1]),
     },
   ],
-  blocks: {},
 };
 
 function init() {

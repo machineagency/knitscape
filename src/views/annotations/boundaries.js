@@ -4,7 +4,7 @@ import {
   removeBoundary,
   boundaryBlockPointerDown,
   resizeFillBlock,
-} from "../../interaction/boundaries";
+} from "../../interaction/boundaryInteraction";
 import { editingTools } from "../../charting/editingTools";
 import { toolData } from "../../constants";
 
@@ -53,7 +53,7 @@ export function boundaryBlocks() {
   const { pos } = regions[selectedBoundary];
 
   return html`<div
-    class="stitch-block"
+    class="block"
     style="left: ${Math.round(pos[0] * cellWidth)}px; bottom: ${Math.round(
       pos[1] * cellHeight
     )}px;">
@@ -136,85 +136,59 @@ export function activeBoundaryPath() {
   ];
 }
 
-function setYGap(regionIndex, yGap) {
-  let updatedRegions = [...GLOBAL_STATE.regions];
-  updatedRegions[regionIndex].gap[1] = yGap;
-  dispatch({ regions: updatedRegions });
-}
+// export function boundaryMenu() {
+//   const { regions, blockEditMode, selectedBoundary, activeBlockTool } =
+//     GLOBAL_STATE;
 
-function setXGap(regionIndex, xGap) {
-  let updatedRegions = [...GLOBAL_STATE.regions];
-  updatedRegions[regionIndex].gap[0] = xGap;
-  dispatch({ regions: updatedRegions });
-}
+//   if (selectedBoundary == null) return;
 
-export function boundaryMenu() {
-  const { regions, blockEditMode, selectedBoundary, activeBlockTool } =
-    GLOBAL_STATE;
+//   const { stitchBlock, yarnBlock } = regions[selectedBoundary];
 
-  if (selectedBoundary == null) return;
+//   let block = blockEditMode == "stitch" ? stitchBlock : yarnBlock;
 
-  const { stitchBlock, yarnBlock, pos, gap } = regions[selectedBoundary];
+//   return html`<div class="boundary-menu">
+//     <button class="btn" @click=${() => removeBoundary(selectedBoundary)}>
+//       <i class="fa-solid fa-trash"></i>
+//     </button>
+//     <span>yarn</span>
 
-  let block = blockEditMode == "stitch" ? stitchBlock : yarnBlock;
+//     <label class="color-mode-toggle switch">
+//       <input
+//         type="checkbox"
+//         ?checked=${blockEditMode == "stitch"}
+//         @change=${(e) =>
+//           dispatch({
+//             blockEditMode: e.target.checked ? "stitch" : "yarn",
+//           })} />
+//       <span class="slider round"></span>
+//     </label>
+//     <span>stitch</span>
+//     <span>${block.width} x ${block.height} </span>
+//     ${Object.keys(editingTools).map(
+//       (toolName) => html`<button
+//         class="btn solid ${activeBlockTool == toolName ? "current" : ""}"
+//         @click=${() =>
+//           dispatch({
+//             activeBlockTool: toolName,
+//           })}>
+//         <i class=${toolData[toolName].icon}></i>
+//       </button>`
+//     )}
+//     <button
+//       class="btn solid move-repeat ${activeBlockTool == "move"
+//         ? "current"
+//         : ""}"
+//       @click=${() =>
+//         dispatch({
+//           activeBlockTool: "move",
+//         })}>
+//       <i class="fa-solid fa-arrows-up-down-left-right"></i>
+//     </button>
 
-  return html`<div class="boundary-menu">
-    <button class="btn" @click=${() => removeBoundary(selectedBoundary)}>
-      <i class="fa-solid fa-trash"></i>
-    </button>
-    <span>yarn</span>
-
-    <label class="color-mode-toggle switch">
-      <input
-        type="checkbox"
-        ?checked=${blockEditMode == "stitch"}
-        @change=${(e) =>
-          dispatch({
-            blockEditMode: e.target.checked ? "stitch" : "yarn",
-          })} />
-      <span class="slider round"></span>
-    </label>
-    <span>stitch</span>
-    <span>${block.width} x ${block.height} </span>
-    ${Object.keys(editingTools).map(
-      (toolName) => html`<button
-        class="btn solid ${activeBlockTool == toolName ? "current" : ""}"
-        @click=${() =>
-          dispatch({
-            activeBlockTool: toolName,
-          })}>
-        <i class=${toolData[toolName].icon}></i>
-      </button>`
-    )}
-    <button
-      class="btn solid move-repeat ${activeBlockTool == "move"
-        ? "current"
-        : ""}"
-      @click=${() =>
-        dispatch({
-          activeBlockTool: "move",
-        })}>
-      <i class="fa-solid fa-arrows-up-down-left-right"></i>
-    </button>
-
-    <button
-      class="btn"
-      @click=${() => dispatch({ selectedBoundary: null }, true)}>
-      <i class="fa-solid fa-circle-xmark"></i>
-    </button>
-  </div>`;
-}
-//  <label>xGap</label>
-//     <input
-//       class="num-input"
-//       type="number"
-//       min="0"
-//       value=${gap[0]}
-//       @change=${(e) => setXGap(selectedBoundary, Number(e.target.value))} />
-//     <label>yGap</label>
-//     <input
-//       class="num-input"
-//       type="number"
-//       min="0"
-//       @change=${(e) => setYGap(selectedBoundary, Number(e.target.value))}
-//       value=${gap[1]} />
+//     <button
+//       class="btn"
+//       @click=${() => dispatch({ selectedBoundary: null }, true)}>
+//       <i class="fa-solid fa-circle-xmark"></i>
+//     </button>
+//   </div>`;
+// }

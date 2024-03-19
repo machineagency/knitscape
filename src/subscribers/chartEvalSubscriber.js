@@ -24,7 +24,7 @@ export function chartEvalSubscriber() {
 
       dispatch({
         chart: stitchChart,
-        yarnChart: yarnChart,
+        yarnChart,
         machineChart,
         yarnSequence,
         rowMap,

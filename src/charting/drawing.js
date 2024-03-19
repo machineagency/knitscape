@@ -135,14 +135,17 @@ export function drawStitchBlock(
 
         let path = null;
 
-        if (mode == "operation") {
-          ctx.fillStyle = SYMBOL_DATA[op].color;
-          path = SYMBOL_DATA[op].path;
-        } else if (mode == "yarn") {
-          ctx.fillStyle = yarnPalette[yarnIndex];
-          path = SYMBOL_DATA[op].path;
+        if (SYMBOL_DATA[op]) {
+          if (mode == "operation") {
+            ctx.fillStyle = SYMBOL_DATA[op].color;
+            path = SYMBOL_DATA[op].path;
+          } else if (mode == "yarn") {
+            ctx.fillStyle = yarnPalette[yarnIndex];
+            path = SYMBOL_DATA[op].path;
+          }
+        } else {
+          ctx.fillStyle = "transparent";
         }
-
         ctx.fillRect(0, 0, 1, 1);
 
         if (path) ctx.stroke(path);

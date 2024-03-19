@@ -1,8 +1,12 @@
 import { GLOBAL_STATE, dispatch } from "../state";
 import { pan } from "./chartPanZoom";
 
-import { drawLine, dragAnnotationPath, dragAnnotationPoint } from "./lines";
-import { boundaryModePointerDown, boundaryModeContextMenu } from "./boundaries";
+// import { drawLine, dragAnnotationPath, dragAnnotationPoint } from "./lines";
+import {
+  boundaryModePointerDown,
+  boundaryModeContextMenu,
+} from "./boundaryInteraction";
+
 import { selectBox } from "./select";
 
 export function chartPointerDown(e) {
@@ -16,7 +20,7 @@ export function chartPointerDown(e) {
   if (GLOBAL_STATE.locked) return;
 
   if (interactionMode == "path") {
-    drawLine(e);
+    // drawLine(e);
   } else if (interactionMode == "boundary") {
     boundaryModePointerDown(e);
   } else if (interactionMode == "block") {
@@ -27,8 +31,6 @@ export function chartPointerDown(e) {
   }
 }
 
-export function chartClick(e) {}
-
 export function chartContextMenu(e) {
   e.preventDefault();
   const { interactionMode } = GLOBAL_STATE;
@@ -36,7 +38,6 @@ export function chartContextMenu(e) {
   if (interactionMode == "path") {
   } else if (interactionMode == "boundary") {
     boundaryModeContextMenu(e);
-  } else if (interactionMode == "block") {
   } else if (interactionMode == "pan") {
   }
 }

@@ -4,20 +4,6 @@ import { knitScanline } from "./knitScanline";
 import { bBoxAllBoundaries } from "./helpers";
 import { yarnSeparation } from "./yarnSeparation";
 
-function shiftBlocks(bbox, blocks) {
-  return Object.fromEntries(
-    Object.entries(blocks).map(([blockID, block]) => {
-      return [
-        blockID,
-        {
-          ...block,
-          pos: [block.pos[0] - bbox.xMin, block.pos[1] - bbox.yMin],
-        },
-      ];
-    })
-  );
-}
-
 function shiftFills(bbox, fills) {
   return fills.map((fill) => {
     return {
@@ -33,7 +19,7 @@ export function evaluateChart(boundaries, regions, blocks) {
   const chartWidth = bbox.xMax - bbox.xMin;
   const chartHeight = bbox.yMax - bbox.yMin;
 
-  const shiftedBlocks = shiftBlocks(bbox, blocks);
+  const shiftedBlocks = shiftFills(bbox, blocks);
   const shiftedFills = shiftFills(bbox, regions);
 
   // First, create an empty chart that is fit to the boundaries
@@ -56,6 +42,11 @@ export function evaluateChart(boundaries, regions, blocks) {
 
     stitchChart = stitch;
     yarnChart = yarn;
+  }
+
+  for (const { stitchBlock, yarnBlock, pos } of shiftedBlocks) {
+    stitchChart = stitchChart.overlay(stitchBlock, pos, stitches.TRANSPARENT);
+    yarnChart = yarnChart.overlay(yarnBlock, pos, 0);
   }
 
   const { machineChart, yarnSequence, rowMap } = yarnSeparation(

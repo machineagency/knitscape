@@ -6,10 +6,11 @@ import { GLOBAL_STATE, dispatch } from "../../state";
 import { gridPattern } from "../defs";
 import {
   blockPointerDown,
-  removeStitchBlock,
+  removeBlock,
   resizeBlock,
-  addStitchBlock,
+  addBlock,
 } from "../../interaction/blockInteraction";
+import { addBoundary } from "../../interaction/boundaryInteraction";
 
 export function stitchSelectBox() {
   const {
@@ -27,108 +28,122 @@ export function stitchSelectBox() {
       <rect class="stitch-select" width="100%" height="100%"></rect>
     </svg>
     <div class="select-tools">
-      <button class="add-block" @click=${addStitchBlock}>
+      <button class="add-block" @click=${addBlock}>
         <i class="fa-solid fa-plus"></i>
-        stitch block
+        block
+      </button>
+      <button class="add-block" @click=${addBoundary}>
+        <i class="fa-solid fa-plus"></i>
+        boundary
+      </button>
+      <button
+        class="add-block"
+        @click=${() => dispatch({ stitchSelect: null })}>
+        <i class="fa-solid fa-cancel"></i>
+        cancel
       </button>
     </div>
   </div>`;
 }
 
-export function stitchBlocks() {
-  const {
-    blocks,
-    cellWidth,
-    cellHeight,
-    editingBlock,
-    selectingBlock,
-    onBlockSelect,
-  } = GLOBAL_STATE;
-  const blockTemplates = [];
-
-  for (const [blockID, block] of Object.entries(blocks)) {
-    const { pos } = block;
-    blockTemplates.push(
+export function blocks() {
+  const { blocks, cellWidth, cellHeight, selectedBlock } = GLOBAL_STATE;
+  return blocks.map(
+    (block, blockIndex) =>
       html`<div
-        class="stitch-block"
-        style="left: ${Math.round(pos[0] * cellWidth) -
-        1}px; bottom: ${Math.round(pos[1] * cellHeight)}px;"
-        @pointerdown=${(e) => {
-          if (selectingBlock) {
-            onBlockSelect(blockID);
-            return;
-          }
-        }}>
-        <canvas data-blockid=${blockID}></canvas>
-
-        <svg
-          class="block-grid"
-          style="position: absolute; top: 0px; left: 0px; overflow: hidden;"
-          width="100%"
-          height="100%"
+        class="block"
+        style="left: ${Math.round(block.pos[0] * cellWidth) -
+        1}px; bottom: ${Math.round(block.pos[1] * cellHeight)}px;">
+        <canvas
+          data-blockindex=${blockIndex}
           @pointerdown=${(e) => {
-            if (editingBlock == blockID) blockPointerDown(e, blockID);
-          }}>
-          <defs>${gridPattern(cellWidth, cellHeight)}</defs>
-          ${when(
-            cellHeight > 10,
-            () => svg`<rect
-            width="100%"
-            height="100%"
-            fill="url(#grid)"></rect>`
-          )}
-        </svg>
-
+            if (selectedBlock == blockIndex) blockPointerDown(e, blockIndex);
+          }}></canvas>
+        <div class="block-inset-shadow"></div>
         ${when(
-          editingBlock == blockID,
-          () => draggers(blockID),
-          () => html` <div class="stitch-block-hover">
+          selectedBlock == blockIndex,
+          () => draggers(blockIndex),
+          () => html` <div class="hover-overlay">
             <button
               class=" btn solid"
-              @click=${() => dispatch({ editingBlock: blockID })}>
+              @click=${() => dispatch({ selectedBlock: blockIndex })}>
               <i class="fa-solid fa-pen"></i>
             </button>
           </div>`
         )}
       </div>`
-    );
-  }
-
-  return blockTemplates;
+  );
 }
 
-function draggers(blockID) {
-  return html`<button
+function draggers(blockIndex) {
+  return html` <button
+      class="btn solid block-remove"
+      @click=${() => removeBlock(blockIndex)}>
+      <i class="fa-solid fa-trash"></i>
+    </button>
+
+    <button
       class="dragger up"
-      @pointerdown=${(e) => resizeBlock(e, blockID, "up")}>
+      @pointerdown=${(e) => resizeBlock(e, blockIndex, "up")}>
       <i class="fa-solid fa-angle-up"></i>
     </button>
     <button
       class="dragger down"
-      @pointerdown=${(e) => resizeBlock(e, blockID, "down")}>
+      @pointerdown=${(e) => resizeBlock(e, blockIndex, "down")}>
       <i class="fa-solid fa-angle-down"></i>
     </button>
     <button
       class="dragger left"
-      @pointerdown=${(e) => resizeBlock(e, blockID, "left")}>
+      @pointerdown=${(e) => resizeBlock(e, blockIndex, "left")}>
       <i class="fa-solid fa-angle-left"></i>
     </button>
     <button
       class="dragger right"
-      @pointerdown=${(e) => resizeBlock(e, blockID, "right")}>
+      @pointerdown=${(e) => resizeBlock(e, blockIndex, "right")}>
       <i class="fa-solid fa-angle-right"></i>
     </button>`;
 }
 
-export function stitchBlockToolbar() {
-  let { blocks, editingBlock: blockID, activeBlockTool } = GLOBAL_STATE;
-  let block = blocks[blockID];
+function getCurrentBlock() {
+  const { blocks, selectedBlock, blockEditMode, selectedBoundary, regions } =
+    GLOBAL_STATE;
 
-  return html` <div class="stitch-block-toolbar">
-    <button class="btn" @click=${() => removeStitchBlock(blockID)}>
-      <i class="fa-solid fa-trash"></i>
-    </button>
-    <span>${block.bitmap.width} x ${block.bitmap.height} </span>
+  let currentBlock = null;
+
+  if (selectedBoundary != null) {
+    currentBlock =
+      blockEditMode == "stitch"
+        ? regions[selectedBoundary].stitchBlock
+        : regions[selectedBoundary].yarnBlock;
+  } else if (selectedBlock != null) {
+    currentBlock =
+      blockEditMode == "stitch"
+        ? blocks[selectedBlock].stitchBlock
+        : regions[selectedBlock].yarnBlock;
+  }
+
+  return currentBlock;
+}
+
+export function blockToolbar() {
+  let block = getCurrentBlock();
+  if (block == null) return;
+
+  const { activeBlockTool, blockEditMode } = GLOBAL_STATE;
+
+  return html` <div class="block-toolbar">
+    <label class="color-mode-toggle switch">
+      <input
+        type="checkbox"
+        ?checked=${blockEditMode == "stitch"}
+        @change=${(e) =>
+          dispatch({
+            blockEditMode: e.target.checked ? "stitch" : "yarn",
+          })} />
+      <span class="slider round"></span>
+    </label>
+
+    <span>${block.width} x ${block.height} </span>
     ${Object.keys(editingTools).map(
       (toolName) => html`<button
         class="btn solid ${activeBlockTool == toolName ? "current" : ""}"
@@ -149,7 +164,7 @@ export function stitchBlockToolbar() {
         })}>
       <i class="fa-solid fa-arrows-up-down-left-right"></i>
     </button>
-    <button class="btn" @click=${() => dispatch({ editingBlock: null }, true)}>
+    <button class="btn" @click=${() => dispatch({ selectedBlock: null }, true)}>
       <i class="fa-solid fa-circle-xmark"></i>
     </button>
   </div>`;
