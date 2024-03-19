@@ -26,7 +26,7 @@ export const activeBoundaryMask = (
   if (!boundary) return;
   return svg`
 <mask id="boundarymask">
-  <rect x="0" y="0" width="100%" height="100%" fill="#969696ff" />
+  <rect x="0" y="0" width="100%" height="100%" fill="#717171ff" />
   <g transform="scale (1, -1)" transform-origin="center">
     <g transform="translate(${chartPan.x} ${chartPan.y})">
       <path d="M ${boundary.reduce(

@@ -108,6 +108,8 @@ function pointerCellHighlight() {
 export function chartPaneView() {
   const {
     scale,
+    boundaries,
+    selectedBoundary,
     cellWidth,
     cellHeight,
     chartPan,
@@ -147,11 +149,6 @@ export function chartPaneView() {
         @contextmenu=${chartContextMenu}
         @click=${chartClick}
         @wheel=${zoom}>
-        <!-- <defs>${gridPattern(
-          cellWidth,
-          cellHeight
-        )} ${cellShadow()}</defs> -->
-
         <g transform="scale (1, -1)" transform-origin="center">
           <g transform="translate(${chartPan.x} ${chartPan.y})">
             ${boundaryView()}
@@ -181,7 +178,14 @@ export function chartPaneView() {
         @click=${chartClick}
         @wheel=${zoom}>
         <defs>${gridPattern(cellWidth, cellHeight)} ${cellShadow()}</defs>
-
+        ${selectedBoundary != null
+          ? activeBoundaryMask(
+              boundaries[selectedBoundary],
+              chartPan,
+              cellWidth,
+              cellHeight
+            )
+          : ""}
         <g transform="scale (1, -1)" transform-origin="center">
           <g transform="translate(${chartPan.x} ${chartPan.y})">
             <g transform="translate(${offsetX} ${offsetY})">
@@ -195,13 +199,13 @@ export function chartPaneView() {
               </rect>`
                 : ""}
 
-              <rect
+              <!-- <rect
                 width=${w}
                 height=${h}
-                fill=${editingBlock ? "#00000033" : "transparent"}></rect>
+                fill=${editingBlock ? "#00000033" : "transparent"}></rect> -->
               ${pointerCellHighlight()}
             </g>
-            ${activeBoundaryPath()} ${activeBoundaryMask()}
+            ${activeBoundaryPath()}
           </g>
         </g>
       </svg>
