@@ -1,13 +1,10 @@
 import { svg, html } from "lit-html";
 import { GLOBAL_STATE, dispatch } from "../../state";
-import { stitches } from "../../constants";
 import {
   removeBoundary,
   boundaryBlockPointerDown,
   resizeFillBlock,
 } from "../../interaction/boundaries";
-import { gridPattern } from "../defs";
-import { when } from "lit-html/directives/when.js";
 import { editingTools } from "../../charting/editingTools";
 import { toolData } from "../../constants";
 
@@ -53,30 +50,18 @@ function boundaryPaths(boundaryIndex, pts, cellWidth, cellHeight) {
 export function boundaryBlocks() {
   const { selectedBoundary, regions, cellWidth, cellHeight } = GLOBAL_STATE;
 
-  const { stitchBlock, yarnBlock, pos } = regions[selectedBoundary];
+  const { pos } = regions[selectedBoundary];
 
   return html`<div
     class="stitch-block"
-    style="left: ${Math.round(pos[0] * cellWidth) - 1}px; bottom: ${Math.round(
+    style="left: ${Math.round(pos[0] * cellWidth)}px; bottom: ${Math.round(
       pos[1] * cellHeight
     )}px;">
-    <canvas id="block-fill-canvas"></canvas>
+    <canvas
+      id="block-fill-canvas"
+      @pointerdown=${boundaryBlockPointerDown}></canvas>
+    <div class="block-inset-shadow"></div>
 
-    <svg
-      class="block-grid"
-      style="position: absolute; top: 0px; left: 0px; overflow: hidden;"
-      width="100%"
-      height="100%"
-      @pointerdown=${boundaryBlockPointerDown}>
-      <defs>${gridPattern(cellWidth, cellHeight)}</defs>
-      ${when(
-        cellHeight > 10,
-        () => svg`<rect
-            width="100%"
-            height="100%"
-            fill="url(#grid)"></rect>`
-      )}
-    </svg>
     <button class="dragger up" @pointerdown=${(e) => resizeFillBlock(e, "up")}>
       <i class="fa-solid fa-angle-up"></i>
     </button>
@@ -117,36 +102,38 @@ function inactiveBoundary(boundaryIndex, boundary, cellWidth, cellHeight) {
 }
 
 export function boundaryView() {
-  let {
-    boundaries,
-    selectedBoundary,
-    scale: cellWidth,
-    cellAspect,
-  } = GLOBAL_STATE;
-  const cellHeight = cellWidth * cellAspect;
+  let { boundaries, selectedBoundary, scale, cellAspect } = GLOBAL_STATE;
+  const cellHeight = scale * cellAspect;
 
-  let layers = [];
-  let active = [];
-
-  for (const [boundaryIndex, boundary] of Object.entries(boundaries)) {
+  return Object.entries(boundaries).map(([boundaryIndex, boundary]) => {
     if (boundaryIndex == selectedBoundary) {
-      layers.push(
-        activeBoundary(boundaryIndex, boundary, cellWidth, cellHeight)
-      );
-      active.push(
-        boundaryPaths(boundaryIndex, boundary, cellWidth, cellHeight)
-      );
-      active.push(
-        boundaryPoints(boundaryIndex, boundary, cellWidth, cellHeight)
-      );
+      return activeBoundary(boundaryIndex, boundary, scale, cellHeight);
     } else {
-      layers.push(
-        inactiveBoundary(boundaryIndex, boundary, cellWidth, cellHeight)
-      );
+      return inactiveBoundary(boundaryIndex, boundary, scale, cellHeight);
     }
-  }
+  });
+}
 
-  return layers.concat(active);
+export function activeBoundaryPath() {
+  let { boundaries, selectedBoundary, scale, cellAspect } = GLOBAL_STATE;
+  if (selectedBoundary == null) return;
+
+  const cellHeight = scale * cellAspect;
+
+  return [
+    boundaryPaths(
+      selectedBoundary,
+      boundaries[selectedBoundary],
+      scale,
+      cellHeight
+    ),
+    boundaryPoints(
+      selectedBoundary,
+      boundaries[selectedBoundary],
+      scale,
+      cellHeight
+    ),
+  ];
 }
 
 function setYGap(regionIndex, yGap) {

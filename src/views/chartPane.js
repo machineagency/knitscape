@@ -12,6 +12,7 @@ import { zoom, fitChart } from "../interaction/chartPanZoom";
 import {
   boundaryMenu,
   boundaryView,
+  activeBoundaryPath,
   boundaryBlocks,
 } from "./annotations/boundaries";
 import {
@@ -146,6 +147,39 @@ export function chartPaneView() {
         @contextmenu=${chartContextMenu}
         @click=${chartClick}
         @wheel=${zoom}>
+        <!-- <defs>${gridPattern(
+          cellWidth,
+          cellHeight
+        )} ${cellShadow()}</defs> -->
+
+        <g transform="scale (1, -1)" transform-origin="center">
+          <g transform="translate(${chartPan.x} ${chartPan.y})">
+            ${boundaryView()}
+          </g>
+        </g>
+      </svg>
+      <div
+        style="position: absolute; bottom: 0; left: 0;
+      transform: translate(${chartPan.x}px, ${-chartPan.y}px); ">
+        ${when(
+          GLOBAL_STATE.interactionMode == "boundary" &&
+            GLOBAL_STATE.selectedBoundary != null,
+          boundaryBlocks
+        )}
+        ${when(GLOBAL_STATE.stitchSelect, stitchSelectBox)} ${stitchBlocks()}
+      </div>
+      <svg
+        preserveAspectRatio="xMidYMid meet"
+        class="desktop-svg vector-overlay ${transforming
+          ? "transforming"
+          : "allow-hover"}"
+        style="position: absolute;"
+        width="100%"
+        height="100%"
+        @pointerdown=${chartPointerDown}
+        @contextmenu=${chartContextMenu}
+        @click=${chartClick}
+        @wheel=${zoom}>
         <defs>${gridPattern(cellWidth, cellHeight)} ${cellShadow()}</defs>
 
         <g transform="scale (1, -1)" transform-origin="center">
@@ -167,21 +201,10 @@ export function chartPaneView() {
                 fill=${editingBlock ? "#00000033" : "transparent"}></rect>
               ${pointerCellHighlight()}
             </g>
-
-            ${boundaryView()}
+            ${activeBoundaryPath()} ${activeBoundaryMask()}
           </g>
         </g>
       </svg>
-      <div
-        style="position: absolute; bottom: 0; left: 0;
-      transform: translate(${chartPan.x}px, ${-chartPan.y}px); ">
-        ${when(
-          GLOBAL_STATE.interactionMode == "boundary" &&
-            GLOBAL_STATE.selectedBoundary != null,
-          boundaryBlocks
-        )}
-        ${when(GLOBAL_STATE.stitchSelect, stitchSelectBox)} ${stitchBlocks()}
-      </div>
       ${palettes()} ${boundaryMenu()}
     </div>
   `;

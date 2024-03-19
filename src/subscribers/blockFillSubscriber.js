@@ -1,4 +1,5 @@
-import { drawChart } from "../charting/drawing";
+import { drawStitchBlock, drawYarnBlock } from "../charting/drawing";
+import { Bimp } from "../lib/Bimp";
 import { setCanvasSize } from "../utilities/misc";
 import { bBoxAllBoundaries } from "../charting/helpers";
 
@@ -9,6 +10,10 @@ export function blockFillSubscriber() {
     let lastDrawn = null;
     let width = null;
     let height = null;
+    let posX = null;
+    let posY = null;
+    let yarnChart = null;
+    let globalStitchChart = null;
 
     return {
       syncState(state) {
@@ -20,56 +25,73 @@ export function blockFillSubscriber() {
         }
 
         let region = state.regions[state.selectedBoundary];
-        let block, stitchBlock, yarnBlock, yarnOffset;
+        let currentBlock =
+          state.blockEditMode == "stitch"
+            ? region.stitchBlock
+            : region.yarnBlock;
+
         const bbox = bBoxAllBoundaries(state.boundaries);
 
-        if (state.blockEditMode == "stitch") {
-          block = region.stitchBlock;
-          stitchBlock = region.stitchBlock;
-          yarnBlock = state.yarnChart;
-          yarnOffset = [region.pos[0] - bbox.xMin, region.pos[1] - bbox.yMin];
-        } else {
-          block = region.yarnBlock;
+        let offset = [region.pos[0] - bbox.xMin, region.pos[1] - bbox.yMin];
 
-          stitchBlock = region.stitchBlock;
-          yarnBlock = region.yarnBlock;
-          yarnOffset = [0, 0];
-        }
         if (
           scale != state.scale ||
-          width != block.width ||
-          height != block.height ||
+          width != currentBlock.width ||
+          height != currentBlock.height ||
           colorMode != state.colorMode ||
           yarnPalette != state.yarnPalette ||
-          blockEditMode != state.blockEditMode
+          blockEditMode != state.blockEditMode ||
+          yarnChart != state.yarnChart ||
+          globalStitchChart != state.chart ||
+          posX != region.pos[0] ||
+          posY != region.pos[1]
         ) {
-          width = block.width;
-          height = block.height;
+          width = currentBlock.width;
+          height = currentBlock.height;
           scale = state.scale;
           colorMode = state.colorMode;
           yarnPalette = state.yarnPalette;
           blockEditMode = state.blockEditMode;
+          posX = region.pos[0];
+          posY = region.pos[1];
+          yarnChart = state.yarnChart;
+          globalStitchChart = state.chart;
           setCanvasSize(
             document.getElementById("block-fill-canvas"),
-            Math.round(block.width * state.cellWidth),
-            Math.round(block.height * state.cellHeight)
+            Math.round(currentBlock.width * state.cellWidth),
+            Math.round(currentBlock.height * state.cellHeight)
           );
 
           lastDrawn = null;
         }
 
-        if (lastDrawn != block) {
-          drawChart(
-            document.getElementById("block-fill-canvas"),
-            state.colorMode,
-            stitchBlock,
-            yarnBlock,
-            state.yarnPalette,
-            scale,
-            scale * state.cellAspect,
-            lastDrawn,
-            yarnOffset
-          );
+        if (lastDrawn != currentBlock) {
+          if (state.blockEditMode == "stitch") {
+            drawStitchBlock(
+              document.getElementById("block-fill-canvas"),
+              state.colorMode,
+              currentBlock,
+              offset,
+              yarnChart,
+              globalStitchChart,
+              state.yarnPalette,
+              scale,
+              scale * state.cellAspect,
+              lastDrawn
+            );
+          } else if (state.blockEditMode == "yarn") {
+            drawYarnBlock(
+              document.getElementById("block-fill-canvas"),
+              currentBlock,
+              offset,
+              yarnChart,
+              state.yarnPalette,
+              scale,
+              scale * state.cellAspect,
+              lastDrawn
+            );
+          }
+          lastDrawn = currentBlock;
         }
       },
     };

@@ -1,8 +1,7 @@
 import Split from "split.js";
 import { render } from "lit-html";
 
-import { StateMonitor, dispatch } from "./state";
-import { stitches } from "./constants";
+import { StateMonitor } from "./state";
 
 import { runSimulation } from "./subscribers/runSimulation";
 import { chartSubscriber } from "./subscribers/chartSubscriber";
@@ -24,35 +23,86 @@ function r() {
   window.requestAnimationFrame(r);
 }
 
+// const testWorkspace = {
+//   cellAspect: 7 / 11,
+//   yarnPalette: ["#df9e72ff", "#ebe9bbff", "#5fb6e9ff"],
+//   boundaries: [
+//     [
+//       [0, 0],
+//       [0, 100],
+//       [60, 100],
+//       [60, 0],
+//     ],
+//     [
+//       [20, 20],
+//       [20, 80],
+//       [40, 80],
+//       [40, 20],
+//     ],
+//     [
+//       [40, 20],
+//       [40, 80],
+//       [60, 80],
+//       [60, 20],
+//     ],
+
+//   ],
+//   regions: [
+//     {
+//       gap: [0, 0],
+//       pos: [0, 0],
+//       yarnBlock: new Bimp(1, 1, [1]),
+//       stitchBlock: new Bimp(1, 1, [1]),
+//     },
+//     {
+//       gap: [0, 0],
+//       pos: [20,20],
+//       yarnBlock: new Bimp(1, 1, [2]),
+//       stitchBlock: new Bimp(1, 1, [1]),
+//     },
+//     {
+//       gap: [0, 0],
+//       pos: [40,20],
+//       yarnBlock: new Bimp(1, 1, [3]),
+//       stitchBlock: new Bimp(1, 1, [1]),
+//     },
+//   ],
+//   blocks: {},
+// };
+
 const testWorkspace = {
   cellAspect: 7 / 11,
   yarnPalette: ["#df9e72ff", "#ebe9bbff", "#5fb6e9ff"],
   boundaries: [
     [
       [0, 0],
-      [0, 7],
-      [5, 7],
-      [5, 0],
+      [0, 20],
+      [15, 20],
+      [15, 0],
     ],
     [
-      [3, 2],
-      [3, 4],
-      [5, 4],
-      [5, 2],
+      [2, 2],
+      [2, 18],
+      [13, 18],
+      [13, 2],
     ],
   ],
   regions: [
     {
       gap: [0, 0],
       pos: [0, 0],
-      yarnBlock: new Bimp(1, 1, [1]),
+      yarnBlock: new Bimp(2, 2, [1, 1, 0, 1]),
       stitchBlock: new Bimp(1, 1, [1]),
     },
     {
       gap: [0, 0],
-      pos: [5, 5],
-      yarnBlock: new Bimp(1, 1, [2]),
-      stitchBlock: new Bimp(4, 1, [1, 1, 1, 1]),
+      pos: [2, 2],
+      yarnBlock: new Bimp(
+        4,
+        4,
+        [3, 3, 2, 2, 3, 3, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]
+      ),
+      stitchBlock: new Bimp(1, 1, [1]),
     },
   ],
   blocks: {},

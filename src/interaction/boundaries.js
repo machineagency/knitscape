@@ -204,8 +204,7 @@ function editBoundary(e) {
 }
 
 export function resizeFillBlock(e, direction) {
-  const { selectedBoundary, regions, cellWidth, cellHeight, blockEditMode } =
-    GLOBAL_STATE;
+  const { selectedBoundary, regions, blockEditMode } = GLOBAL_STATE;
   const { stitchBlock, yarnBlock, pos } = regions[selectedBoundary];
 
   const bmp = blockEditMode == "stitch" ? stitchBlock : yarnBlock;
@@ -219,7 +218,7 @@ export function resizeFillBlock(e, direction) {
     if (e.buttons == 0) {
       end();
     } else {
-      const { scale, cellAspect, blocks } = GLOBAL_STATE;
+      const { scale, cellAspect } = GLOBAL_STATE;
 
       let dx = Math.round((startPos.x - e.clientX) / scale);
       let dy = Math.round((startPos.y - e.clientY) / scale / cellAspect);
@@ -233,7 +232,7 @@ export function resizeFillBlock(e, direction) {
       if (blockEditMode == "stitch") {
         fill = stitches.TRANSPARENT;
       } else {
-        fill = 1;
+        fill = 0;
       }
 
       if (direction == "up") {

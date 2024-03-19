@@ -3,6 +3,7 @@ import { classMap } from "lit-html/directives/class-map.js";
 
 import { dispatch, GLOBAL_STATE } from "../state";
 import { SYMBOL_DATA } from "../constants";
+const TRANSPARENT_YARN = "#585858";
 
 function operationButton(symbolName, data, index) {
   const classes = { selected: GLOBAL_STATE.activeSymbol == index };
@@ -22,12 +23,12 @@ function operationButton(symbolName, data, index) {
 }
 
 function yarnButton(paletteIndex, color) {
-  const classes = { selected: GLOBAL_STATE.activeYarn == paletteIndex + 1 };
+  const classes = { selected: GLOBAL_STATE.activeYarn == paletteIndex };
 
   return html`<button
     style="--color: ${color};"
     class=${classMap(classes)}
-    @click=${() => dispatch({ activeYarn: paletteIndex + 1 })}></button>`;
+    @click=${() => dispatch({ activeYarn: paletteIndex })}></button>`;
 }
 
 export function palettes() {
@@ -48,7 +49,8 @@ export function palettes() {
     (editingBlock && blockEditMode == "yarn")
   ) {
     return html` <div class="yarn-color-picker scroller">
-      ${yarnPalette.map((color, index) => yarnButton(index, color))}
+      ${yarnButton(0, TRANSPARENT_YARN)}
+      ${yarnPalette.map((color, index) => yarnButton(index + 1, color))}
     </div>`;
   }
 }

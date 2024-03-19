@@ -199,7 +199,7 @@ export const SYMBOL_DATA = {
   TRANSPARENT: {
     pathdata: "",
     path: new Path2D(),
-    color: "#ffffff",
+    color: "#dfdfdf7f",
     description: "transparent",
   },
 };

@@ -91,6 +91,7 @@ export function knitScanline(
       }
       stitchChart = stitchChart.draw(stitchChanges);
 
+      // Apply the yarn block texture
       let yarnChanges = [];
       let yOffsetYarn = (y - pos[1]) % (yarnBlock.height + gap[1]);
       if (yOffsetYarn < 0)
@@ -104,6 +105,14 @@ export function knitScanline(
           yarnChanges.push({ x, y, color: 1 });
 
         let yarnColor = yarnBlock.pixel(xOffset, yOffsetYarn);
+        if (yarnColor == 0) {
+          // if there's no assigned yarn check what's below it in the chart
+          if (yarnChart.pixel(x, y) == 0) {
+            // if it's also transparent, assign yarn index 1 to make sure we have a yarn
+            yarnChanges.push({ x, y, color: 1 });
+          }
+          continue;
+        }
         yarnChanges.push({ x, y, color: yarnColor });
       }
       yarnChart = yarnChart.draw(yarnChanges);
