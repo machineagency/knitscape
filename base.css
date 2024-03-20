@@ -384,14 +384,14 @@ button.btn {
 a.btn,
 button.btn {
   display: inline-flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: center;
 
-  border-radius: 8px;
+  border-radius: 6px;
   color: var(--text-accent);
 
   text-align: center;
-  padding: 0.5em;
+  padding: 0.4em;
 }
 
 a.btn:hover,
@@ -444,6 +444,14 @@ button.btn.icon {
 button.btn.solid {
   background-color: #343434;
   box-shadow: 0 0 2px 0 black;
+}
+
+/* Solid button */
+button.btn:disabled {
+  background-color: #222222;
+  box-shadow: 0 0 2px 0 black;
+  color: var(--disabled);
+  cursor: not-allowed;
 }
 
 /***********************************

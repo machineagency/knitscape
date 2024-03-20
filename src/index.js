@@ -33,33 +33,23 @@ const testWorkspace = {
       [15, 20],
       [15, 0],
     ],
-    [
-      [2, 2],
-      [2, 18],
-      [13, 18],
-      [13, 2],
-    ],
   ],
   regions: [
     {
       pos: [0, 0],
-      yarnBlock: new Bimp(2, 2, [1, 1, 0, 1]),
-      stitchBlock: new Bimp(1, 1, [1]),
-    },
-    {
-      pos: [2, 2],
       yarnBlock: new Bimp(1, 1, [1]),
       stitchBlock: new Bimp(1, 1, [1]),
     },
   ],
-  blocks: [
+  blocks: [],
+  paths: [
     {
-      pos: [5, 5],
-      yarnBlock: new Bimp(
-        4,
-        4,
-        [3, 3, 2, 2, 3, 3, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]
-      ),
+      pts: [
+        [2, 2],
+        [10, 10],
+      ],
+      pos: [4, 4],
+      yarnBlock: new Bimp(1, 1, [1]),
       stitchBlock: new Bimp(1, 1, [1]),
     },
   ],

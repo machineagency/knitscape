@@ -5,27 +5,42 @@ import { bBoxAllBoundaries } from "../charting/helpers";
 import { fitChart } from "../interaction/chartPanZoom";
 
 function hydrateWorkspaceJSON(dryWorkspaceJSON) {
-  let { boundaries, regions, blocks, cellAspect, yarnPalette } =
-    dryWorkspaceJSON;
+  // TODO: Make a default workspace and pull from there
+  let {
+    cellAspect = 7 / 11,
+    yarnPalette = ["#ebe9bbff"],
+    boundaries = [],
+    regions = [],
+    blocks = [],
+    paths = [],
+  } = dryWorkspaceJSON;
 
   loadWorkspace({
-    boundaries,
-
     cellAspect,
     yarnPalette,
-    regions: regions.map(({ gap, pos, yarnBlock, stitchBlock }) => {
+    boundaries,
+    regions: regions.map(({ pos, yarnBlock, stitchBlock }) => {
       return {
-        gap,
         pos,
         yarnBlock: Bimp.fromJSON(yarnBlock),
         stitchBlock: Bimp.fromJSON(stitchBlock),
       };
     }),
-    blocks: Object.fromEntries(
-      Object.entries(blocks).map(([blockID, { bitmap, pos, type }]) => {
-        return [blockID, { bitmap: Bimp.fromJSON(bitmap), pos, type }];
-      })
-    ),
+    paths: paths.map(({ pts, pos, yarnBlock, stitchBlock }) => {
+      return {
+        pts,
+        pos,
+        yarnBlock: Bimp.fromJSON(yarnBlock),
+        stitchBlock: Bimp.fromJSON(stitchBlock),
+      };
+    }),
+    blocks: blocks.map(({ pos, yarnBlock, stitchBlock }) => {
+      return {
+        pos,
+        yarnBlock: Bimp.fromJSON(yarnBlock),
+        stitchBlock: Bimp.fromJSON(stitchBlock),
+      };
+    }),
   });
 }
 

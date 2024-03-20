@@ -6,6 +6,7 @@ import {
   simZoom,
   centerZoomSimulation,
 } from "../interaction/simPanZoom";
+import { drawYarns } from "../subscribers/runSimulation";
 
 export function simulationView() {
   let { x, y } = GLOBAL_STATE.simPan;
@@ -23,16 +24,25 @@ export function simulationView() {
 }
 
 function simToolbar() {
+  const { simScale, flipped, relax, simLive } = GLOBAL_STATE;
   return html` <div id="sim-controls" class="panzoom-controls">
-    <button @click=${GLOBAL_STATE.relax} class="btn solid">relax</button>
-    <button
-      @click=${() => dispatch({ flipped: !GLOBAL_STATE.flipped })}
-      class="btn solid">
+    <label class="form-control toggle">
+      Live
+      <input
+        type="checkbox"
+        ?checked=${simLive}
+        @change=${() => dispatch({ simLive: !simLive })} />
+    </label>
+    <button @click=${drawYarns} ?disabled=${simLive} class="btn solid">
+      refresh
+    </button>
+    <button @click=${relax} class="btn solid">relax</button>
+    <button @click=${() => dispatch({ flipped: !flipped })} class="btn solid">
       flip
     </button>
     <button
       class="btn icon"
-      @click=${() => centerZoomSimulation(GLOBAL_STATE.simScale * 0.9)}>
+      @click=${() => centerZoomSimulation(simScale * 0.9)}>
       <i class="fa-solid fa-magnifying-glass-minus"></i>
     </button>
     <input
@@ -40,11 +50,11 @@ function simToolbar() {
       min=${MIN_SIM_SCALE}
       max=${MAX_SIM_SCALE}
       step="0.1"
-      .value=${String(GLOBAL_STATE.simScale)}
+      .value=${String(simScale)}
       @input=${(e) => centerZoomSimulation(Number(e.target.value))} />
     <button
       class="btn icon"
-      @click=${() => centerZoomSimulation(GLOBAL_STATE.simScale * 1.1)}>
+      @click=${() => centerZoomSimulation(simScale * 1.1)}>
       <i class="fa-solid fa-magnifying-glass-plus"></i>
     </button>
     <button

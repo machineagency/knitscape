@@ -35,18 +35,8 @@ function setInteractionMode(mode) {
 }
 
 function toolbar() {
-  const { interactionMode, colorMode } = GLOBAL_STATE;
+  const { interactionMode } = GLOBAL_STATE;
   return html`<div class="tool-picker">
-    <label class="color-mode-toggle switch">
-      <input
-        type="checkbox"
-        ?checked=${colorMode == "operation"}
-        @change=${(e) =>
-          dispatch({
-            colorMode: e.target.checked ? "operation" : "yarn",
-          })} />
-      <span class="slider round"></span>
-    </label>
     <button
       class="btn solid ${interactionMode == "pan" ? "current" : ""}"
       @click=${() => setInteractionMode("pan")}>
@@ -55,7 +45,7 @@ function toolbar() {
     <button
       class="btn solid ${interactionMode == "boundary" ? "current" : ""}"
       @click=${() => setInteractionMode("boundary")}>
-      <i class="fa-solid fa-vector-square"></i>
+      <i class="fa-solid fa-draw-polygon"></i>
     </button>
     <button
       class="btn solid ${interactionMode == "path" ? "current" : ""}"
@@ -85,25 +75,25 @@ function trackPointer(e) {
   ];
 }
 
-function pointerCellHighlight() {
-  const {
-    cellWidth,
-    cellHeight,
-    chart,
-    transforming,
-    pointer: [x, y],
-  } = GLOBAL_STATE;
+// function pointerCellHighlight() {
+//   const {
+//     cellWidth,
+//     cellHeight,
+//     chart,
+//     transforming,
+//     pointer: [x, y],
+//   } = GLOBAL_STATE;
 
-  if (transforming || x < 0 || y < 0 || x >= chart.width || y >= chart.height)
-    return;
+//   if (transforming || x < 0 || y < 0 || x >= chart.width || y >= chart.height)
+//     return;
 
-  return svg`<rect
-      class="cell-highlight"
-      transform="translate(${x * cellWidth + 2} ${y * cellHeight + 2})"
-      filter="url(#path-shadow)"
-      width=${cellWidth - 3}
-      height=${cellHeight - 3}></rect>`;
-}
+//   return svg`<rect
+//       class="cell-highlight"
+//       transform="translate(${x * cellWidth + 2} ${y * cellHeight + 2})"
+//       filter="url(#path-shadow)"
+//       width=${cellWidth - 3}
+//       height=${cellHeight - 3}></rect>`;
+// }
 
 export function chartPaneView() {
   const {
@@ -114,10 +104,10 @@ export function chartPaneView() {
     chartPan,
     chart,
     pointer,
-    selectedBlock,
     bbox,
     transforming,
     interactionMode,
+    stitchSelect,
   } = GLOBAL_STATE;
 
   const offsetX = Math.round(bbox.xMin * cellWidth);
@@ -174,12 +164,11 @@ export function chartPaneView() {
         style="position: absolute; bottom: 0; left: 0;
       transform: translate(${chartPan.x}px, ${-chartPan.y}px); ">
         ${when(
-          GLOBAL_STATE.interactionMode == "boundary" &&
-            GLOBAL_STATE.selectedBoundary != null,
+          interactionMode == "boundary" && selectedBoundary != null,
           boundaryBlocks
         )}
-        ${when(GLOBAL_STATE.stitchSelect, stitchSelectBox)}
-        ${when(GLOBAL_STATE.interactionMode == "block", blocks)}
+        ${when(stitchSelect, stitchSelectBox)}
+        ${when(interactionMode == "block", blocks)}
       </div>
       <svg
         preserveAspectRatio="xMidYMid meet"

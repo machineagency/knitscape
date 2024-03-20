@@ -1,6 +1,8 @@
 import { GLOBAL_STATE, dispatch, undo } from "../state";
 import { toolData } from "../constants";
 import { closeModals } from "../utilities/misc";
+import { removeBlock } from "./blockInteraction";
+import { removeBoundary } from "./boundaryInteraction";
 
 function escapeEverything() {
   dispatch(
@@ -8,6 +10,16 @@ function escapeEverything() {
     true
   );
   closeModals();
+}
+
+function deleteSelected() {
+  let { selectedBlock, selectedBoundary } = GLOBAL_STATE;
+
+  if (selectedBlock != null) {
+    removeBlock(selectedBlock);
+  } else if (selectedBoundary != null) {
+    removeBoundary(selectedBoundary);
+  }
 }
 
 const ctrlShortcuts = {
@@ -25,6 +37,7 @@ const hotkeys = {
 
   // UI
   Escape: escapeEverything,
+  Delete: deleteSelected,
 };
 
 function numberPressed(num) {

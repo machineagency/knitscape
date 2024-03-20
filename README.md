@@ -5,62 +5,60 @@ KnitScape is a design and simulation tool for machine knitting.
 - Chart
   - [x] Toggle color mode between yarn color and operation color.
   - [ ] Back bed operations should be slightly dimmed in chart view.
+- Box Selection
+  - [x] Drag to select an area, and add new stitch block or boundary
+  - [ ] Show size of selection
 - path
   - [ ] select path
   - [ ] constrain to stitch slope?
-- boundary/regions
-  - [x] drag boundary and points
-  - [x] add and remove points
-  - [x] drag region
-  - [x] remove boundary/region
-  - [x] change stitch fill
-  - [x] add block fill
-  - [x] active boundary/region
-  - [ ] select multiple
-  - [ ] change yarn fill
-  - [ ] add boundary/region
+- Boundaries/block fill
+  - [x] Add and remove boundary
+  - [x] Drag whole boundary, paths, and points
+  - [x] Add and remove points
+  - [x] Yarn and stitch fill blocks
+  - [x] Move yarn and stitch fill origin
+  - [ ] show boundary size when selected?
   - [ ] copy and paste boundary
-  - [ ] simple constraints
-  - [ ] curves?
-- yarn sequencer
-  - [x] visualize active yarns in each row
-  - [ ] show carriage direction
-- stitch blocks
-  - [x] select stitch areas and add new stitch block
-  - [x] select stitch block to edit
-  - [x] edit stitch block with bitmap tools
-  - [x] delete stitch block
-  - [x] dim rest of chart while editing
-  - [x] show operation select when editing stitch block
-  - [x] evaluate chart on block edit
-  - [x] move stitch block
-  - [x] resize stitch block
-  - [x] update block position on boundary resize/reposition
-  - [ ] block copy and paste
-  - [ ] Download bitmap for block
-- stitch path
+  - [ ] select multiple boundaries
+- Paths
   - [x] secret thicker path for hover styles
-  - [ ] path has "add stitch path" menu
   - [ ] evaluate chart on stitch path edit
   - [ ] create blockpath
-- gauge
-  - [ ] edit overall gauge/stitch aspect
-  - [ ] re-fit chart on gauge change
+- Free blocks
+  - [x] Add, edit, remove, resize, reposition, and select block
+  - [x] Toggle block edit mode between Yarn and stitch
+  - [x] Dim rest of chart while editing
+    - Should this be a setting? Should it be dimmed, or grayscale? Blurred?
+  - [x] show operation select when editing stitch block
+  - [x] evaluate chart on block edit
+  - [ ] Copy and paste block
+  - [ ] Select multiple blocks to move together
+  - [ ] Download bitmap for block
+- Yarn Sequencer
+  - [x] visualize active yarns in each row
+  - [ ] show carriage direction
 
 ## ideas
 
-- synchronized simulation/chart view mode (pan/zoom updates both views)
-- different line types: short rows, cast on/bind off, waste yarn, fashioned?
-- how to define different gauges for different regions of the chart? is that
-  even a good idea?
-- You should be able to download the
+- UI
+  - synchronized simulation/chart view mode (pan/zoom updates both views)
+- gauge
+  - edit overall gauge/stitch aspect, and fit chart on gauge change
+  - how to define different gauges for different regions of the chart? is that
+    even a good idea?
+- blocks
+  - You should be able to download any block as a bitmap. should be not hard to
+    implement. perhaps also download any block as a punchcard.
+  - As you create blocks, they get added to a library of active blocks. Any
+    fill/path/free block could use an existing block in the library.
+- Constraints!
+  - Stitch slope
+  -
+- [ ] curves?
 
 ## bugs, fixes
 
 - polygon fill scanline is sometimes slightly off?
-- carriage direction is currently always right->left->right->left, ignoring yarn
-  changes. will need to track carriage direction separately for each yarn, and
-  maybe make it a controllable option in the yarn pane?
 
 - simulation/yarn view
   - shouldn't regenerate yarn topology/cancel relaxation on zoom or when yarn

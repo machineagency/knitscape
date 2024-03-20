@@ -119,7 +119,7 @@ function getCurrentBlock() {
     currentBlock =
       blockEditMode == "stitch"
         ? blocks[selectedBlock].stitchBlock
-        : regions[selectedBlock].yarnBlock;
+        : blocks[selectedBlock].yarnBlock;
   }
 
   return currentBlock;
@@ -132,17 +132,18 @@ export function blockToolbar() {
   const { activeBlockTool, blockEditMode } = GLOBAL_STATE;
 
   return html` <div class="block-toolbar">
-    <label class="color-mode-toggle switch">
-      <input
-        type="checkbox"
-        ?checked=${blockEditMode == "stitch"}
-        @change=${(e) =>
-          dispatch({
-            blockEditMode: e.target.checked ? "stitch" : "yarn",
-          })} />
-      <span class="slider round"></span>
-    </label>
-
+    <button
+      class="btn solid mode-toggle"
+      @click=${() =>
+        dispatch({
+          blockEditMode: blockEditMode == "stitch" ? "yarn" : "stitch",
+        })}>
+      ${when(
+        blockEditMode == "stitch",
+        () => html`<span>editing commands</span>`,
+        () => html`<span>editing yarn</span>`
+      )}
+    </button>
     <span>${block.width} x ${block.height} </span>
     ${Object.keys(editingTools).map(
       (toolName) => html`<button

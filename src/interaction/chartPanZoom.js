@@ -81,23 +81,26 @@ function zoomAtPoint(pt, newScale) {
 
 export function zoom(e) {
   const bounds = e.currentTarget.getBoundingClientRect();
-  let scale;
+  let { scale } = GLOBAL_STATE;
 
+  // Scale is the cell width in pixels.
   if (Math.sign(e.deltaY) < 0) {
     scale = GLOBAL_STATE.reverseScroll
-      ? GLOBAL_STATE.scale * 0.9
-      : GLOBAL_STATE.scale * 1.1;
+      ? Math.floor(scale * 0.9)
+      : Math.ceil(scale * 1.1);
   } else {
     scale = GLOBAL_STATE.reverseScroll
-      ? GLOBAL_STATE.scale * 1.1
-      : GLOBAL_STATE.scale * 0.9;
+      ? Math.ceil(scale * 1.1)
+      : Math.floor(scale * 0.9);
   }
+
+  scale = scale < 2 ? 2 : scale;
 
   zoomAtPoint(
     {
       x: e.clientX - bounds.left,
       y: bounds.height - (e.clientY - bounds.top),
     },
-    Math.floor(scale)
+    scale
   );
 }

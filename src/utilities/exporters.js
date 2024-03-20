@@ -12,33 +12,44 @@ function downloadFile(dataStr, fileName) {
   downloadAnchorNode.remove();
 }
 
+// TODO: Actually check these inputs
 export function downloadWorkspace({
-  boundaries,
-  regions,
-  blocks,
-  cellAspect,
-  yarnPalette,
+  cellAspect = 7 / 11,
+  yarnPalette = ["#ebe9bbff"],
+  boundaries = [],
+  regions = [],
+  blocks = [],
+  paths = [],
 }) {
   const dataStr =
     "data:text/json;charset=utf-8," +
     encodeURIComponent(
       JSON.stringify({
+        cellAspect,
+        yarnPalette,
         boundaries,
-        regions: regions.map(({ gap, pos, yarnBlock, stitchBlock }) => {
+        regions: regions.map(({ pos, yarnBlock, stitchBlock }) => {
           return {
-            gap,
             pos,
             yarnBlock: yarnBlock.toJSON(),
             stitchBlock: stitchBlock.toJSON(),
           };
         }),
-        cellAspect,
-        yarnPalette,
-        blocks: Object.fromEntries(
-          Object.entries(blocks).map(([blockID, { bitmap, pos, type }]) => {
-            return [blockID, { bitmap: bitmap.toJSON(), pos, type }];
-          })
-        ),
+        paths: paths.map(({ pts, pos, yarnBlock, stitchBlock }) => {
+          return {
+            pts,
+            pos,
+            yarnBlock: yarnBlock.toJSON(),
+            stitchBlock: stitchBlock.toJSON(),
+          };
+        }),
+        blocks: blocks.map(({ pos, yarnBlock, stitchBlock }) => {
+          return {
+            pos,
+            yarnBlock: yarnBlock.toJSON(),
+            stitchBlock: stitchBlock.toJSON(),
+          };
+        }),
       })
     );
 

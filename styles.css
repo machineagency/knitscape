@@ -84,8 +84,9 @@ canvas {
   max-width: 700px;
 }
 
-.color-mode-toggle {
-  margin: 2px 5px;
+.mode-toggle {
+  gap: 6px;
+  font-size: small;
 }
 /* #endregion */
 

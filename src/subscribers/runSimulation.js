@@ -13,30 +13,31 @@ function debounce(callback, wait) {
   };
 }
 
+export function drawYarns() {
+  if (GLOBAL_STATE.stopSim) GLOBAL_STATE.stopSim();
+
+  let { stopSim, relax } = simulate(
+    new Pattern(
+      GLOBAL_STATE.machineChart,
+      GLOBAL_STATE.yarnSequence,
+      GLOBAL_STATE.rowMap
+    ),
+    GLOBAL_STATE.simScale
+  );
+
+  GLOBAL_STATE.relax = relax;
+  GLOBAL_STATE.simStop = stopSim;
+}
+
 export function runSimulation() {
   return () => {
-    function run() {
-      if (GLOBAL_STATE.stopSim) GLOBAL_STATE.stopSim();
+    const debouncedRun = debounce(drawYarns, 30);
 
-      let { stopSim, relax } = simulate(
-        new Pattern(
-          GLOBAL_STATE.machineChart,
-          GLOBAL_STATE.yarnSequence,
-          GLOBAL_STATE.rowMap
-        ),
-        GLOBAL_STATE.simScale
-      );
-
-      GLOBAL_STATE.relax = relax;
-      GLOBAL_STATE.simStop = stopSim;
-    }
-
-    const debouncedRun = debounce(run, 30);
-
-    run();
+    drawYarns();
 
     return {
       syncState(state, changes) {
+        if (!state.simLive) return;
         const found = [
           "yarnPalette",
           "yarnSequence",
@@ -49,7 +50,7 @@ export function runSimulation() {
         }
 
         if (changes.includes("simScale")) {
-          run();
+          drawYarns();
         }
       },
     };
