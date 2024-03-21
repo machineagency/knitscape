@@ -2,6 +2,7 @@ import { html } from "lit-html";
 import { GLOBAL_STATE, dispatch } from "../state";
 import { removeBlock } from "../interaction/blockInteraction";
 import { removeBoundary } from "../interaction/boundaryInteraction";
+import { boundaryBbox } from "../utilities/misc";
 
 export function freeBlockToolbar() {
   const { interactionMode, blockEditMode, selectedBlock } = GLOBAL_STATE;
@@ -47,12 +48,15 @@ export function pathToolbar() {
     <span class="toolbar-message">Editing boundary ${selectedPath}</span>
     <button class="btn">edit yarn tile</button>
     <button class="btn">edit stitch tile</button>
-    <button class="btn">delete</button>
+    <button class="btn">
+      <i class="fa-solid fa-trash"></i>
+    </button>
   </div>`;
 }
 
 export function boundaryToolbar() {
-  const { interactionMode, blockEditMode, selectedBoundary } = GLOBAL_STATE;
+  const { interactionMode, blockEditMode, selectedBoundary, boundaries } =
+    GLOBAL_STATE;
 
   if (interactionMode != "boundary") return;
   if (selectedBoundary == null)
@@ -62,20 +66,28 @@ export function boundaryToolbar() {
       </div>
     </div> `;
 
+  let bbox = boundaryBbox(boundaries[selectedBoundary]);
+
   return html`<div class="mode-toolbar">
-    <span class="toolbar-message">Editing boundary ${selectedBoundary}</span>
-    <button
-      class="btn ${blockEditMode == "yarn" ? "solid" : ""}"
-      @click=${() => dispatch({ blockEditMode: "yarn" }, true)}>
-      yarn fill
+    <span class="toolbar-message"
+      >Editing ${blockEditMode != null ? `${blockEditMode} fill of ` : ""}
+      boundary ${selectedBoundary}</span
+    >
+    <button class="delete btn" @click=${() => removeBoundary(selectedBoundary)}>
+      <i class="fa-solid fa-trash"></i>
     </button>
-    <button
-      class="btn ${blockEditMode == "stitch" ? "solid" : ""}"
-      @click=${() => dispatch({ blockEditMode: "stitch" }, true)}>
-      stitch fill
-    </button>
-    <button class="btn" @click=${() => removeBoundary(selectedBoundary)}>
-      delete
-    </button>
+    <span class="select-size">${bbox.width}x${bbox.height}</span>
+    <div class="h-group">
+      <button
+        class="btn ${blockEditMode == "yarn" ? "solid" : ""}"
+        @click=${() => dispatch({ blockEditMode: "yarn" }, true)}>
+        yarn fill
+      </button>
+      <button
+        class="btn ${blockEditMode == "stitch" ? "solid" : ""}"
+        @click=${() => dispatch({ blockEditMode: "stitch" }, true)}>
+        stitch fill
+      </button>
+    </div>
   </div>`;
 }

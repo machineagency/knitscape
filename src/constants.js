@@ -46,14 +46,14 @@ export const SYMBOL_DATA = {
     yarnModeColor: "#FFFFFF",
     description: "Front miss",
   },
-  BM: {
-    pathdata: "M 0 0.5 L 1 0.5",
+  // BM: {
+  //   pathdata: "M 0 0.5 L 1 0.5",
 
-    path: new Path2D("M 0 0.5 L 1 0.5"),
-    color: "#de75b2",
-    yarnModeColor: "#FFFFFF",
-    description: "Back miss",
-  },
+  //   path: new Path2D("M 0 0.5 L 1 0.5"),
+  //   color: "#de75b2",
+  //   yarnModeColor: "#FFFFFF",
+  //   description: "Back miss",
+  // },
   FT: {
     pathdata:
       "M 1 0.5 L 0.8 0.5 C 0.7 0.5 0.65 0.5 0.6 0.55 C 0.55 0.6 0.6 0.8 0.5 0.8 C 0.4 0.8 0.45 0.6 0.4 0.55 C 0.35 0.5 0.3 0.5 0.2 0.5 L 0 0.5",
@@ -204,8 +204,6 @@ export const SYMBOL_DATA = {
   },
 };
 
-// export const DEFAULT_PATTERN_LIBRARY = import.meta.glob("../examples/*.json");
-
 export const toolData = {
   brush: { icon: "fa-solid fa-paintbrush", hotkey: "b" },
   flood: { icon: "fa-solid fa-fill-drip fa-flip-horizontal", hotkey: "f" },
@@ -220,7 +218,7 @@ export const stitches = {
   KNIT: 1,
   PURL: 2,
   FM: 3, // Front miss
-  BM: 4, // Back miss
+  // BM: 4, // Back miss
   FT: 5, // Front tuck
   BT: 6, // Back tuck
   FXR1: 7, // Front right transfers

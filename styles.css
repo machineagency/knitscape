@@ -205,142 +205,85 @@ canvas {
 /* #region MODE TOOLBARS */
 
 .mode-toolbar {
+  display: flex;
+  align-items: center;
   gap: 0.4em;
   padding: 0.2em 0 0.2em 0.4em;
+  justify-content: space-between;
 }
 
 .toolbar-message {
   font-style: italic;
-  /* text-align: center; */
+}
+
+.select-size {
+  font-family: monospace;
+}
+
+.delete.btn:hover {
+  color: rgb(165, 39, 39);
 }
 
 /* #endregion */
 
-/* #region TOOL PICKER */
+/* #region PICKERS */
 
-.block-toolbar {
-  bottom: 100%;
-  margin: 0.4em;
-  position: absolute;
+.picker-container {
   display: flex;
-  gap: 0.4em;
-  padding: 0.4em;
-  border-radius: 0.3em;
-  box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.5);
-  background-color: var(--base1);
+  align-self: flex-end;
+  align-items: end;
+  margin: 0.5em;
   z-index: 10;
-  align-items: center;
+  pointer-events: none;
 }
 
-/* .tool-picker {
-  margin: 8px;
-  justify-self: center;
-  position: absolute;
+.tool-picker {
   display: flex;
-  gap: 0.4em;
-  padding: 0.4em;
-  border-radius: 12px;
-  box-shadow: 0 0 4px 0 black;
+  gap: 0.3em;
+  padding: 0.3em 0 0.3em 0.3em;
   background-color: var(--base1);
-  z-index: 10;
-  align-items: center;
+  border-radius: 0.5em 0 0 0.5em;
+  pointer-events: all;
 }
 
-.tool-picker .btn.current {
-  background-color: var(--accent);
-  color: var(--base2);
-} */
+.tool-picker button {
+  width: 40px;
+  height: 40px;
+  border-radius: 0.4em;
+  border: 1px solid black;
+}
 
-/* #endregion */
+.palette .close-picker {
+  background-color: transparent;
+  border: none;
+}
 
-/* #region PALETTE PICKERS */
-.operation-picker {
+.palette {
+  --color: var(--base0);
   display: flex;
   flex-direction: column;
-  position: absolute;
-  right: 0;
-  align-self: center;
-  height: 80%;
-  margin: 8px;
+  border-radius: 0.5em 0.5em 0.5em 0;
   background-color: var(--base1);
   overflow: auto;
-  padding: 4px;
-  gap: 4px;
-  border-radius: 8px;
+  padding: 0.3em;
+  gap: 0.3em;
+  pointer-events: all;
 }
 
-.operation-picker button {
-  flex: 1 1 40px;
-  max-width: 40px;
-  background-color: var(--base0);
-  padding: 0;
-  border: 0;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.symbol-preview {
-  aspect-ratio: 1;
-  width: 100%;
-  display: block;
-}
-
-.operation-picker button.selected {
-  outline: 1px solid white;
-  z-index: 2;
-}
-
-.yarn-color-picker {
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  margin: 8px;
-  background-color: var(--base1);
-  overflow: auto;
-  padding: 5px;
-  gap: 4px;
-  border-radius: 10px;
-}
-
-.yarn-color-picker button {
+.palette button {
   flex: 1 0 40px;
   width: 40px;
   background-color: var(--color);
   padding: 0;
   border: 1px solid black;
-  border-radius: 8px;
+  border-radius: 0.4em;
+  overflow: hidden;
 }
 
-.yarn-color-picker button.selected {
+.palette button.selected {
   outline: 2px solid white;
   z-index: 2;
 }
-
-/* #endregion */
-
-/* #region MODE PICKER */
-/* .mode-picker {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.btn.solid.mode-select {
-  justify-content: start;
-  gap: 5px;
-  cursor: pointer;
-}
-
-.btn.solid.mode-select i {
-  line-height: 0;
-}
-
-.btn.solid.mode-select.selected {
-  color: var(--base1);
-  background-color: var(--accent);
-} */
 
 /* #endregion */
 

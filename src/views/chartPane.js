@@ -15,14 +15,14 @@ import {
   activeBoundaryPath,
   boundaryBlocks,
 } from "./annotations/boundaries";
-import { blocks, stitchSelectBox, blockToolbar } from "./annotations/blocks";
-
+import { blocks } from "./annotations/blocks";
+import { stitchSelectBox } from "./annotations/selectBox";
 import { currentTargetPointerPos } from "../utilities/misc";
 
 import { boundaryToolbar, pathToolbar, freeBlockToolbar } from "./toolbars";
 
 import { gridPattern, cellShadow, activeBoundaryMask } from "./defs";
-import { palettes } from "./palettes";
+import { pickers } from "./palettes";
 
 function setInteractionMode(mode) {
   dispatch(
@@ -221,11 +221,10 @@ export function chartPaneView() {
           </g>
         </g>
       </svg>
-      <div style="position: relative;">${palettes()}${blockToolbar()}</div>
+      ${pickers()}
       <div class="bottom-bars-container">
         ${freeBlockToolbar()} ${boundaryToolbar()} ${pathToolbar()}
         ${bottomBar()}
-        <div></div>
       </div>
     </div>
   `;

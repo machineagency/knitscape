@@ -1,7 +1,6 @@
 import { html } from "lit-html";
 import { when } from "lit-html/directives/when.js";
-import { editingTools } from "../../charting/editingTools";
-import { toolData } from "../../constants";
+
 import { GLOBAL_STATE, dispatch } from "../../state";
 import {
   blockPointerDown,
@@ -10,40 +9,6 @@ import {
   addBlock,
 } from "../../interaction/blockInteraction";
 import { addBoundary } from "../../interaction/boundaryInteraction";
-
-export function stitchSelectBox() {
-  const {
-    stitchSelect: [bl, tr],
-    cellWidth,
-    cellHeight,
-  } = GLOBAL_STATE;
-
-  return html`<div
-    class="stitch-select-box"
-    style="width: ${(tr[0] - bl[0]) * cellWidth}px; height: ${(tr[1] - bl[1]) *
-    cellHeight}px; left: ${bl[0] * cellWidth}px; bottom: ${bl[1] *
-    cellHeight}px;">
-    <svg>
-      <rect class="stitch-select" width="100%" height="100%"></rect>
-    </svg>
-    <div class="select-tools">
-      <button class="add-block" @click=${addBlock}>
-        <i class="fa-solid fa-plus"></i>
-        block
-      </button>
-      <button class="add-block" @click=${addBoundary}>
-        <i class="fa-solid fa-plus"></i>
-        boundary
-      </button>
-      <button
-        class="add-block"
-        @click=${() => dispatch({ stitchSelect: null })}>
-        <i class="fa-solid fa-cancel"></i>
-        cancel
-      </button>
-    </div>
-  </div>`;
-}
 
 export function blocks() {
   const { blocks, cellWidth, cellHeight, selectedBlock } = GLOBAL_STATE;
@@ -104,51 +69,4 @@ function draggers(blockIndex) {
       @pointerdown=${(e) => resizeBlock(e, blockIndex, "right")}>
       <i class="fa-solid fa-angle-right"></i>
     </button>`;
-}
-
-function getCurrentBlock() {
-  const { blocks, selectedBlock, blockEditMode, selectedBoundary, regions } =
-    GLOBAL_STATE;
-
-  let currentBlock = null;
-
-  if (selectedBoundary != null) {
-    currentBlock =
-      blockEditMode == "stitch"
-        ? regions[selectedBoundary].stitchBlock
-        : regions[selectedBoundary].yarnBlock;
-  } else if (selectedBlock != null) {
-    currentBlock =
-      blockEditMode == "stitch"
-        ? blocks[selectedBlock].stitchBlock
-        : blocks[selectedBlock].yarnBlock;
-  }
-
-  return currentBlock;
-}
-
-export function blockToolbar() {
-  const { activeBlockTool, blockEditMode } = GLOBAL_STATE;
-  if (blockEditMode == null) return;
-  let block = getCurrentBlock();
-  if (block == null) return;
-
-  return html` <div class="block-toolbar">
-    <span>${block.width} x ${block.height} </span>
-
-    ${Object.keys(editingTools).map(
-      (toolName) => html`<button
-        class="btn solid ${activeBlockTool == toolName ? "current" : ""}"
-        @click=${() =>
-          dispatch({
-            activeBlockTool: toolName,
-          })}>
-        <i class=${toolData[toolName].icon}></i>
-      </button>`
-    )}
-
-    <button class="btn" @click=${() => dispatch({ blockEditMode: null }, true)}>
-      <i class="fa-solid fa-circle-xmark"></i>
-    </button>
-  </div>`;
 }

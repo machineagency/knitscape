@@ -6,7 +6,12 @@ import { removeBoundary } from "./boundaryInteraction";
 
 function escapeEverything() {
   dispatch(
-    { selectedBlock: null, selectedBoundary: null, stitchSelect: null },
+    {
+      selectedBlock: null,
+      selectedBoundary: null,
+      stitchSelect: null,
+      blockEditMode: null,
+    },
     true
   );
   closeModals();
