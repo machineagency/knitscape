@@ -60,7 +60,7 @@ export function fitChart() {
   });
 }
 
-function zoomAtPoint(pt, newScale) {
+export function zoomAtPoint(pt, newScale) {
   const { chartPan, cellAspect, scale } = GLOBAL_STATE;
 
   const start = {
@@ -77,6 +77,11 @@ function zoomAtPoint(pt, newScale) {
       y: Math.round(pt.y - start.y * newScale),
     },
   });
+}
+
+export function centerZoom(newScale) {
+  let bbox = document.getElementById("svg-layer").getBoundingClientRect();
+  zoomAtPoint({ x: bbox.width / 2, y: bbox.height / 2 }, newScale);
 }
 
 export function zoom(e) {

@@ -14,7 +14,7 @@ let GLOBAL_STATE = {
   transforming: false, // If the pointer is being used to do something
 
   // Interaction mode can be path, boundary, block, or pan.
-  interactionMode: "path",
+  interactionMode: "boundary",
   pointer: [0, 0], // Pointer postition in chart coordinates
   locked: false,
 
@@ -29,7 +29,7 @@ let GLOBAL_STATE = {
   paths: [],
   blocks: [],
 
-  blockEditMode: "yarn",
+  blockEditMode: null, // Can be yarn, stitch, or null
   activeBlockTool: "brush",
 
   selectedBoundary: null,

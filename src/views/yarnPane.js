@@ -1,5 +1,4 @@
 import { html } from "lit-html";
-
 import { GLOBAL_STATE, dispatch } from "../state";
 import { editYarnColor, deleteYarn, addRandomYarn } from "../charting/yarn";
 
@@ -10,30 +9,45 @@ export function yarnPane() {
   const chartHeight = Math.round(cellHeight * chart.height);
   const chartY = chartPan.y + Math.round(bbox.yMin * cellHeight);
 
-  const panelWidth = yarnExpanded
-    ? yarnPalette.length * 30
-    : yarnPalette.length * 10;
-
-  return html` <div class="yarn-panel" style="width: ${panelWidth}px">
+  return html` <div
+    class="yarn-panel ${yarnExpanded ? "expanded" : "collapsed"}">
     <div
-      class="yarn-panel-container"
+      class="yarn-row-assignments"
       style="transform: translate(0px, ${-chartY}px);
       height: ${chartHeight}px;
-      width: ${panelWidth}px;
       gap: ${cellHeight < 10 ? 0 : 1}px;">
       ${yarnSequence()}
     </div>
-    <button
-      class="yarn-panel-toggle btn"
-      @click=${() => dispatch({ yarnExpanded: !yarnExpanded })}>
-      <i class="fa-solid fa-angles-${yarnExpanded ? "left" : "right"}"></i>
-    </button>
 
-    <button class="add-yarn btn" @click=${addRandomYarn}>
-      <i class="fa-solid fa-plus"></i>
-    </button>
-
-    <div class="yarn-settings">${editYarns()}</div>
+    <div class="manage-yarns">
+      <div class="yarn-btns">
+        <div @click=${() => dispatch({ yarnExpanded: !yarnExpanded })}>
+          <i
+            class="fa-solid ${yarnExpanded
+              ? "fa-angles-left"
+              : "fa-angles-right"}"></i>
+        </div>
+        <div @click=${addRandomYarn}>
+          <i class="fa-solid fa-plus"></i>
+        </div>
+      </div>
+      <div class="available-yarns">
+        ${yarnPalette.map(
+          (color, index) =>
+            html`<div
+              class="edit-yarn yarn-cell"
+              style="--color: ${color};"
+              @click=${(e) => editYarnColor(e, index)}>
+              <i class="fa-solid fa-pen edit-yarn-icon"></i>
+              <div class="delete-yarn">
+                <button @click=${() => deleteYarn(index)}>
+                  <i class="fa-solid fa-circle-xmark"></i>
+                </button>
+              </div>
+            </div>`
+        )}
+      </div>
+    </div>
   </div>`;
 }
 
@@ -63,25 +77,4 @@ export function yarnSequence() {
   }
 
   return yarns;
-}
-
-export function editYarns() {
-  let { yarnExpanded, yarnPalette } = GLOBAL_STATE;
-
-  return yarnPalette.map(
-    (color, index) =>
-      html`<div
-        class="edit-yarn-btn"
-        style="--color: ${color};"
-        @click=${(e) => editYarnColor(e, index)}>
-        ${yarnExpanded
-          ? html` <i class="fa-solid fa-pen"></i>
-              <button
-                class="delete-color-button"
-                @click=${() => deleteYarn(index)}>
-                <i class="fa-solid fa-circle-xmark"></i>
-              </button>`
-          : ""}
-      </div>`
-  );
 }

@@ -8,7 +8,7 @@ import {
   chartContextMenu,
   chartPointerDown,
 } from "../interaction/chartInteraction";
-import { zoom, fitChart } from "../interaction/chartPanZoom";
+import { zoom, fitChart, centerZoom } from "../interaction/chartPanZoom";
 
 import {
   boundaryView,
@@ -18,6 +18,8 @@ import {
 import { blocks, stitchSelectBox, blockToolbar } from "./annotations/blocks";
 
 import { currentTargetPointerPos } from "../utilities/misc";
+
+import { boundaryToolbar, pathToolbar, freeBlockToolbar } from "./toolbars";
 
 import { gridPattern, cellShadow, activeBoundaryMask } from "./defs";
 import { palettes } from "./palettes";
@@ -29,39 +31,69 @@ function setInteractionMode(mode) {
       stitchSelect: null,
       selectedBlock: null,
       selectedBoundary: null,
+      selectedPath: null,
+      blockEditMode: null,
     },
     true
   );
 }
 
-function toolbar() {
-  const { interactionMode } = GLOBAL_STATE;
-  return html`<div class="tool-picker">
+function bottomBar() {
+  const { pointer, colorMode, interactionMode, scale } = GLOBAL_STATE;
+  return html`<div class="chart-bottom-bar">
     <button
-      class="btn solid ${interactionMode == "pan" ? "current" : ""}"
-      @click=${() => setInteractionMode("pan")}>
-      <i class="fa-solid fa-hand"></i>
+      class="btn solid mode-toggle"
+      @click=${() =>
+        dispatch({
+          colorMode: colorMode == "operation" ? "yarn" : "operation",
+        })}>
+      ${colorMode == "operation" ? "command view" : "yarn view"}
     </button>
-    <button
-      class="btn solid ${interactionMode == "boundary" ? "current" : ""}"
-      @click=${() => setInteractionMode("boundary")}>
-      <i class="fa-solid fa-draw-polygon"></i>
-    </button>
-    <button
-      class="btn solid ${interactionMode == "path" ? "current" : ""}"
-      @click=${() => setInteractionMode("path")}>
-      <i class="fa-solid fa-minus"></i>
-    </button>
-    <button
-      class="btn solid ${interactionMode == "block" ? "current" : ""}"
-      @click=${() => setInteractionMode("block")}>
-      <i class="fa-solid fa-table-cells"></i>
-    </button>
-    <button
-      class="btn icon"
-      @click=${() => fitChart(document.getElementById("svg-layer"))}>
-      <i class="fa-solid fa-expand"></i>
-    </button>
+
+    <div class="h-group">
+      <button
+        class="btn ${interactionMode == "boundary" ? "solid" : ""}"
+        @click=${() => setInteractionMode("boundary")}>
+        boundaries
+      </button>
+      <button
+        class="btn ${interactionMode == "path" ? "solid" : ""}"
+        @click=${() => setInteractionMode("path")}>
+        paths
+      </button>
+      <button
+        class="btn ${interactionMode == "block" ? "solid" : ""}"
+        @click=${() => setInteractionMode("block")}>
+        blocks
+      </button>
+    </div>
+    <div class="h-group">
+      <div class="pointer-pos">
+        <div><span>col</span> <span>${pointer[0] + 1}</span></div>
+        <div><span>row</span> <span>${pointer[1] + 1}</span></div>
+      </div>
+      <div class="chart-scale">
+        <input
+          class="input"
+          type="number"
+          min="2"
+          max="200"
+          step="1"
+          .value=${scale}
+          @change=${(e) => centerZoom(Number(e.target.value))} />
+        <div class="spinners">
+          <button @click=${() => centerZoom(scale + 1)}>
+            <i class="fa-solid fa-angle-up fa-xs"></i>
+          </button>
+          <button @click=${() => centerZoom(scale - 1)}>
+            <i class="fa-solid fa-angle-down fa-xs"></i>
+          </button>
+        </div>
+      </div>
+      <button class="btn" @click=${fitChart}>
+        <i class="fa-solid fa-expand"></i>
+      </button>
+    </div>
   </div>`;
 }
 
@@ -122,15 +154,10 @@ export function chartPaneView() {
 
   return html`
     <div class="desktop" @pointermove=${(e) => trackPointer(e)} @wheel=${zoom}>
-      ${toolbar()}
-      <span class="pointer-pos">[${pointer[0]},${pointer[1]}]</span>
       <div
         style="position: absolute; bottom: 0; left: 0; transform: translate(${chartPan.x}px,${-chartPan.y}px);">
         <canvas
-          style="transform: translate(${offsetX}px,${-offsetY}px); outline: 1px solid black; filter: ${interactionMode ==
-          "block"
-            ? "grayscale(0.5)"
-            : "none"}"
+          style="transform: translate(${offsetX}px,${-offsetY}px); outline: 1px solid black;"
           id="chart-canvas"></canvas>
       </div>
       <svg
@@ -194,7 +221,12 @@ export function chartPaneView() {
           </g>
         </g>
       </svg>
-      ${palettes()} ${blockToolbar()}
+      <div style="position: relative;">${palettes()}${blockToolbar()}</div>
+      <div class="bottom-bars-container">
+        ${freeBlockToolbar()} ${boundaryToolbar()} ${pathToolbar()}
+        ${bottomBar()}
+        <div></div>
+      </div>
     </div>
   `;
 }

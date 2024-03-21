@@ -84,10 +84,6 @@ canvas {
   max-width: 700px;
 }
 
-.mode-toggle {
-  gap: 6px;
-  font-size: small;
-}
 /* #endregion */
 
 /* #region EXAMPLE LIBRARY */
@@ -115,26 +111,128 @@ canvas {
   flex: 1;
   position: relative;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: end;
   box-shadow: inset 0 0 6px 0px rgba(0, 0, 0, 0.5);
 }
 
-.cell-highlight {
+/* .cell-highlight {
   fill: transparent;
   pointer-events: none;
   stroke: #ffffff;
+} */
+
+.bottom-bars-container {
+  box-shadow: 0 0 6px 0px rgba(0, 0, 0, 0.5);
+  z-index: 10;
+  background-color: var(--base1);
+  color: var(--text-inactive);
+}
+
+.chart-bottom-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 0.4em;
+  padding: 0.2em 0 0.2em 0.4em;
+  font-size: 0.9em;
+}
+
+.h-group {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
+.mode-toggle {
+  width: 8em;
+  justify-self: flex-start;
 }
 
 .pointer-pos {
-  position: absolute;
-  bottom: 0;
-  right: 0;
+  font-family: monospace;
+  font-size: 0.8em;
+  width: 9ch;
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+}
+
+.chart-scale {
+  font-family: monospace;
+  font-size: 0.9em;
+  display: flex;
+  border: 1px solid var(--base4);
+  background-color: var(--base4);
+  gap: 1px;
+}
+
+.chart-scale .input {
+  z-index: 1;
+  font-size: 1em;
+  border: none;
+  text-align: end;
+  width: 3em;
+  border-radius: 0;
+}
+
+.spinners {
+  display: flex;
+  background-color: var(--base3);
+  flex-direction: column;
+}
+
+.spinners button {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  padding: 0;
+  border-radius: 0;
+  background-color: var(--base2);
+  width: 1em;
+  line-height: 0;
+  color: var(--text-inactive);
+}
+
+.spinners button:hover {
+  background-color: var(--base4);
+  color: var(--text-highlight);
+}
+
+/* #endregion */
+
+/* #region MODE TOOLBARS */
+
+.mode-toolbar {
+  gap: 0.4em;
+  padding: 0.2em 0 0.2em 0.4em;
+}
+
+.toolbar-message {
+  font-style: italic;
+  /* text-align: center; */
 }
 
 /* #endregion */
 
 /* #region TOOL PICKER */
-.tool-picker {
+
+.block-toolbar {
+  bottom: 100%;
+  margin: 0.4em;
+  position: absolute;
+  display: flex;
+  gap: 0.4em;
+  padding: 0.4em;
+  border-radius: 0.3em;
+  box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.5);
+  background-color: var(--base1);
+  z-index: 10;
+  align-items: center;
+}
+
+/* .tool-picker {
   margin: 8px;
   justify-self: center;
   position: absolute;
@@ -151,7 +249,7 @@ canvas {
 .tool-picker .btn.current {
   background-color: var(--accent);
   color: var(--base2);
-}
+} */
 
 /* #endregion */
 
@@ -196,8 +294,8 @@ canvas {
   display: flex;
   flex-direction: column;
   position: absolute;
+  bottom: 0;
   right: 0;
-  align-self: center;
   margin: 8px;
   background-color: var(--base1);
   overflow: auto;
@@ -223,7 +321,7 @@ canvas {
 /* #endregion */
 
 /* #region MODE PICKER */
-.mode-picker {
+/* .mode-picker {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -242,7 +340,7 @@ canvas {
 .btn.solid.mode-select.selected {
   color: var(--base1);
   background-color: var(--accent);
-}
+} */
 
 /* #endregion */
 
@@ -391,7 +489,7 @@ canvas {
 
 /* #endregion */
 
-/* #region STITCH BLOCKS */
+/* #region BLOCKS */
 
 .block {
   position: absolute;
@@ -407,26 +505,6 @@ canvas {
   height: 100%;
   position: absolute;
   pointer-events: none;
-}
-
-.block-toolbar {
-  bottom: 8px;
-  justify-self: center;
-  position: absolute;
-  display: flex;
-  gap: 0.4em;
-  padding: 0.4em;
-  border-radius: 12px;
-  box-shadow: 0 0 4px 0 black;
-  background-color: var(--base1);
-  z-index: 10;
-  align-items: center;
-}
-
-.block-remove {
-  position: absolute;
-  left: 100%;
-  bottom: 100%;
 }
 
 .block-toolbar > button {
@@ -452,6 +530,17 @@ canvas {
   outline: 4px solid white;
   border: 3px solid black;
   background-color: #ffffff3c;
+}
+
+.move-block {
+  position: absolute;
+  right: 100%;
+  top: 100%;
+  line-height: 0;
+  font-size: 0.9em;
+  padding: 0.3em;
+  border: 1px solid black;
+  border-radius: 0.5em;
 }
 
 .dragger {
@@ -489,60 +578,23 @@ canvas {
 
 /* #endregion */
 
-/* #region PATH ANNOTATIONS */
-
-/* .path-annotation {
-  position: absolute;
-  box-shadow: 0 0 5px black;
-  background-color: var(--base13);
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  align-items: center;
-  padding: 5px;
-  border-radius: 5px;
-  outline: 1px solid var(--base1);
-  color: var(--base0);
-}
-
-.stitch-slope {
-  color: var(--base0);
-}
-
-.fashioning-input {
-  flex: 1;
-  width: 40px;
-} */
-
-/* #endregion */
-
 /* #region YARN PANEL */
 .yarn-panel {
-  position: relative;
+  display: flex;
+  flex-direction: column;
   z-index: 10;
+  padding: 0 1px;
   background-color: var(--base1);
-  border-right: 3px solid var(--base0);
   box-sizing: content-box;
+  justify-content: end;
 }
 
-.yarn-panel-toggle.btn {
-  z-index: 0;
-
-  position: absolute;
-  left: 100%;
-  top: 5px;
-  background-color: var(--base1);
-  cursor: pointer;
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
-
-.yarn-panel-container {
+.yarn-row-assignments {
   position: absolute;
   bottom: 0;
   display: flex;
   flex-direction: column-reverse;
-  padding: 1px;
+  z-index: 0;
 }
 
 .yarn-row {
@@ -564,6 +616,17 @@ canvas {
   flex: 1;
 }
 
+.yarn-panel.collapsed .yarn-cell {
+  width: 8px;
+
+  max-width: 8px;
+}
+
+.yarn-panel.expanded .yarn-cell {
+  width: 25px;
+  max-width: 25px;
+}
+
 .yarn-cell.active {
   background-color: var(--color);
 }
@@ -572,84 +635,92 @@ canvas {
   background-color: #343434;
 }
 
-.yarn-select-box {
-  position: absolute;
-  width: 100%;
-  z-index: 20;
-  border: 3px solid black;
-  outline: 2px solid white;
-  background-color: #ffffff0c;
-}
-
-.yarn-settings {
-  position: absolute;
-  bottom: 0;
+.manage-yarns {
   background-color: var(--base1);
-  width: 100%;
-
-  height: 40px;
-  display: flex;
-  gap: 2px;
-  padding: 2px 1px;
-  transition: 100ms;
-  box-shadow: 0 0 5px black;
-}
-
-.yarn-settings:hover {
-  height: 100px;
-}
-
-.add-yarn.btn {
-  z-index: 0;
-  position: absolute;
-  left: 100%;
-  bottom: 5px;
-  background-color: var(--base1);
-  cursor: pointer;
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
-
-.edit-yarn-btn {
-  flex: 1;
-  cursor: pointer;
-  border: none;
+  z-index: 2;
   position: relative;
-  display: flex;
-  justify-content: center;
-  background-color: var(--color);
-  transition: 100ms;
-  align-items: center;
 }
 
-.edit-yarn-btn > i {
+.yarn-btns {
+  background-color: var(--base1);
+  position: absolute;
+  bottom: 100%;
+  min-width: fit-content;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  color: var(--text-inactive);
+}
+
+.yarn-btns div {
+  padding: 4px;
+  width: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.yarn-btns div:hover {
+  color: var(--text);
+}
+
+.available-yarns {
+  display: flex;
+  gap: 1px;
+}
+
+.edit-yarn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--color);
+  padding-top: 8px;
+  gap: 8px;
+}
+.yarn-panel.collapsed .edit-yarn {
+  cursor: default;
+  pointer-events: none;
+}
+
+.yarn-panel.expanded .edit-yarn {
+  cursor: pointer;
+  pointer-events: all;
+}
+
+.delete-yarn,
+.edit-yarn-icon {
+  visibility: hidden;
   color: var(--base0);
 }
 
-.edit-yarn-btn:hover {
-  border-radius: 12px;
+.yarn-panel.expanded .edit-yarn:hover .delete-yarn,
+.yarn-panel.expanded .edit-yarn-icon {
+  visibility: visible;
 }
 
-.edit-yarn-btn:hover .delete-color-button {
+.delete-yarn {
+  background-color: var(--base0);
+  width: 100%;
   display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4px 0;
 }
 
-.delete-color-button {
-  display: none;
-  position: absolute;
+.delete-yarn button {
   padding: 0;
   border: 0;
   outline: 0;
+  color: var(--text-inactive);
+
   background-color: transparent;
-  color: #343434;
-  top: 2px;
-  font-size: x-large;
-  cursor: pointer;
 }
 
-.delete-color-button:hover {
+.delete-yarn button:hover {
   color: red;
-  text-shadow: 0px 0px 3px black;
 }
 
 /* #endregion */

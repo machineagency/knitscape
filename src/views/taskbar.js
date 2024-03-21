@@ -3,6 +3,18 @@ import { when } from "lit-html/directives/when.js";
 import { GLOBAL_STATE, dispatch, undo } from "../state";
 import { toggleFullscreen, currentlyFullscreen } from "../utilities/fullscreen";
 
+function setInteractionMode(mode) {
+  dispatch(
+    {
+      interactionMode: mode,
+      stitchSelect: null,
+      selectedBlock: null,
+      selectedBoundary: null,
+    },
+    true
+  );
+}
+
 export function taskbar() {
   const {
     showExampleLibrary,
@@ -10,24 +22,10 @@ export function taskbar() {
     showUpload,
     showSettings,
     colorMode,
+    interactionMode,
   } = GLOBAL_STATE;
   return html` <div id="taskbar">
     <h1 class="site-title">KnitScape</h1>
-    <button
-      class="btn solid mode-toggle"
-      @click=${() =>
-        dispatch({
-          colorMode: colorMode == "operation" ? "yarn" : "operation",
-        })}>
-      ${when(
-        colorMode == "operation",
-        () => html`<i class="fa-solid fa-terminal"></i><span>commands</span>`,
-        () => html`<i class="fa-solid fa-palette"></i><span>yarn color</span>`
-      )}
-    </button>
-    <button class="btn icon" @click=${undo}>
-      <i class="fa-solid fa-undo"></i>
-    </button>
     <div class="button-group">
       <button
         class="btn icon ${showExampleLibrary ? "open" : ""}"
@@ -49,12 +47,6 @@ export function taskbar() {
         @click=${() => dispatch({ showSettings: !showSettings })}>
         <i class="fa-solid fa-gear"></i>
       </button>
-      <button
-        class="btn icon"
-        @click=${() => window.open("https://github.com/knitscape/knitscape")}>
-        <i class="fa-brands fa-github"></i>
-      </button>
-
       <button class="btn icon" @click=${() => toggleFullscreen()}>
         <i
           class="fa-solid fa-${currentlyFullscreen()

@@ -40,19 +40,15 @@ export function palettes() {
     yarnPalette,
   } = GLOBAL_STATE;
 
-  if (
-    (selectedBoundary != null && blockEditMode == "stitch") ||
-    (selectedBlock != null && blockEditMode == "stitch")
-  ) {
+  if (blockEditMode == null) {
+    return;
+  } else if (blockEditMode == "stitch") {
     return html` <div class="operation-picker scroller">
       ${Object.entries(SYMBOL_DATA).map(([symbolName, data], index) =>
         operationButton(symbolName, data, index)
       )}
     </div>`;
-  } else if (
-    (selectedBoundary != null && blockEditMode == "yarn") ||
-    (selectedBlock != null && blockEditMode == "yarn")
-  ) {
+  } else if (blockEditMode == "yarn") {
     return html` <div class="yarn-color-picker scroller">
       ${yarnButton(0, TRANSPARENT_YARN)}
       ${yarnPalette.map((color, index) => yarnButton(index + 1, color))}

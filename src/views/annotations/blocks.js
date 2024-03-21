@@ -1,9 +1,8 @@
-import { html, svg } from "lit-html";
+import { html } from "lit-html";
 import { when } from "lit-html/directives/when.js";
 import { editingTools } from "../../charting/editingTools";
 import { toolData } from "../../constants";
 import { GLOBAL_STATE, dispatch } from "../../state";
-import { gridPattern } from "../defs";
 import {
   blockPointerDown,
   removeBlock,
@@ -76,10 +75,13 @@ export function blocks() {
 }
 
 function draggers(blockIndex) {
-  return html` <button
-      class="btn solid block-remove"
-      @click=${() => removeBlock(blockIndex)}>
-      <i class="fa-solid fa-trash"></i>
+  return html`<button
+      class="move-block"
+      @click=${() =>
+        dispatch({
+          activeBlockTool: "move",
+        })}>
+      <i class="fa-solid fa-arrows-up-down-left-right"></i>
     </button>
 
     <button
@@ -126,25 +128,14 @@ function getCurrentBlock() {
 }
 
 export function blockToolbar() {
+  const { activeBlockTool, blockEditMode } = GLOBAL_STATE;
+  if (blockEditMode == null) return;
   let block = getCurrentBlock();
   if (block == null) return;
 
-  const { activeBlockTool, blockEditMode } = GLOBAL_STATE;
-
   return html` <div class="block-toolbar">
-    <button
-      class="btn solid mode-toggle"
-      @click=${() =>
-        dispatch({
-          blockEditMode: blockEditMode == "stitch" ? "yarn" : "stitch",
-        })}>
-      ${when(
-        blockEditMode == "stitch",
-        () => html`<span>editing commands</span>`,
-        () => html`<span>editing yarn</span>`
-      )}
-    </button>
     <span>${block.width} x ${block.height} </span>
+
     ${Object.keys(editingTools).map(
       (toolName) => html`<button
         class="btn solid ${activeBlockTool == toolName ? "current" : ""}"
@@ -155,17 +146,8 @@ export function blockToolbar() {
         <i class=${toolData[toolName].icon}></i>
       </button>`
     )}
-    <button
-      class="btn solid move-repeat ${activeBlockTool == "move"
-        ? "current"
-        : ""}"
-      @click=${() =>
-        dispatch({
-          activeBlockTool: "move",
-        })}>
-      <i class="fa-solid fa-arrows-up-down-left-right"></i>
-    </button>
-    <button class="btn" @click=${() => dispatch({ selectedBlock: null }, true)}>
+
+    <button class="btn" @click=${() => dispatch({ blockEditMode: null }, true)}>
       <i class="fa-solid fa-circle-xmark"></i>
     </button>
   </div>`;

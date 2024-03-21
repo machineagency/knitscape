@@ -16,7 +16,7 @@ export function blockFillSubscriber() {
 
     return {
       syncState(state) {
-        if (state.selectedBoundary == null) {
+        if (state.selectedBoundary == null || state.blockEditMode == null) {
           lastDrawn = null;
           width = null;
           height = null;

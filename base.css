@@ -43,7 +43,7 @@ ROOT STYLES
 
   --accent: hsla(var(--accent-h), var(--accent-s), var(--accent-l));
 
-  --input-border: var(--base7);
+  --input-border: var(--base4);
   --input-focus-h: var(--accent-h);
   --input-focus-s: 60%;
   --input-focus-l: 42%;
@@ -149,7 +149,7 @@ FORM CONTROL
 
 .form-control.toggle {
   display: grid;
-  gap: 0.5em;
+  gap: 1.2em;
   grid-template-columns: 1em auto;
 }
 
@@ -384,14 +384,13 @@ button.btn {
 a.btn,
 button.btn {
   display: inline-flex;
-  align-items: baseline;
   justify-content: center;
-
-  border-radius: 6px;
+  align-items: center;
+  border-radius: 0.2em;
   color: var(--text-accent);
-
+  line-height: 1;
   text-align: center;
-  padding: 0.4em;
+  padding: 0.3em;
 }
 
 a.btn:hover,
@@ -405,13 +404,13 @@ button.btn:hover {
   );
 }
 
-a.btn:focus,
+/* a.btn:focus,
 button.btn:focus {
   outline-style: solid;
   outline-color: transparent;
   box-shadow: 0 0 0 2px
     hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.8);
-}
+} */
 
 /* Image button */
 button.btn.img {
@@ -435,9 +434,8 @@ button.btn.icon-text > i {
 
 /* Icon button */
 button.btn.icon {
-  aspect-ratio: 1;
   padding: 0.3em;
-  font-size: 1.5em;
+  font-size: 1.2em;
 }
 
 /* Solid button */
@@ -495,16 +493,15 @@ TEXT INPUT
   font-size: max(16px, 1em);
   font-family: inherit;
   padding: 0.25em 0.5em;
-  background-color: var(--base3);
-  border: 2px solid var(--input-border);
-  border-radius: 7px;
+  background-color: var(--base2);
+  border: 1px solid var(--input-border);
+  border-radius: 0.2em;
   color: var(--text-inactive);
-  transition: 100ms ease-in-out;
+  transition: 50ms ease-in-out;
 }
 
 .input:not(textarea) {
   line-height: 1;
-  height: 1.5rem;
 }
 
 .input:focus {
@@ -516,15 +513,15 @@ TEXT INPUT
 
   color: var(--text-highlight);
 
-  box-shadow: 0 0 0 3px
+  box-shadow: 0 0 0 1px
     hsla(
       var(--input-focus-h),
       var(--input-focus-s),
-      calc(var(--input-focus-l) + 40%),
+      calc(var(--input-focus-l) + 60%),
       0.8
     );
 
-  outline: 3px solid transparent;
+  outline: 2px solid transparent;
 }
 
 /***********************************

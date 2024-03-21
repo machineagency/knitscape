@@ -8,11 +8,22 @@ import { Bimp } from "../lib/Bimp";
 export function removeBoundary(index) {
   const { boundaries, regions } = GLOBAL_STATE;
 
-  dispatch({
-    boundaries: boundaries.slice(0, index).concat(boundaries.slice(index + 1)),
-    regions: regions.slice(0, index).concat(regions.slice(index + 1)),
-    selectedBoundary: null,
-  });
+  if (boundaries.length == 1) {
+    alert("You need at least one boundary!");
+    return;
+  }
+
+  dispatch(
+    {
+      boundaries: boundaries
+        .slice(0, index)
+        .concat(boundaries.slice(index + 1)),
+      regions: regions.slice(0, index).concat(regions.slice(index + 1)),
+      selectedBoundary: null,
+      blockEditMode: null,
+    },
+    true
+  );
 }
 
 export function addBoundary() {

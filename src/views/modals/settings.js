@@ -13,6 +13,12 @@ export function settingsModal() {
           @change=${(e) => dispatch({ reverseScroll: e.target.checked })} />
         Invert Scroll
       </label>
+
+      <button
+        class="btn solid"
+        @click=${() => window.open("https://github.com/knitscape/knitscape")}>
+        <i class="fa-brands fa-github"></i>
+      </button>
     </div>
   </div>`;
 }

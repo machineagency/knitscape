@@ -1,7 +1,6 @@
 import { svg, html } from "lit-html";
 import { GLOBAL_STATE, dispatch } from "../../state";
 import {
-  removeBoundary,
   boundaryBlockPointerDown,
   resizeFillBlock,
 } from "../../interaction/boundaryInteraction";
@@ -48,7 +47,9 @@ function boundaryPaths(boundaryIndex, pts, cellWidth, cellHeight) {
 }
 
 export function boundaryBlocks() {
-  const { selectedBoundary, regions, cellWidth, cellHeight } = GLOBAL_STATE;
+  const { selectedBoundary, regions, cellWidth, cellHeight, blockEditMode } =
+    GLOBAL_STATE;
+  if (blockEditMode == null) return;
 
   const { pos } = regions[selectedBoundary];
 
@@ -135,60 +136,3 @@ export function activeBoundaryPath() {
     ),
   ];
 }
-
-// export function boundaryMenu() {
-//   const { regions, blockEditMode, selectedBoundary, activeBlockTool } =
-//     GLOBAL_STATE;
-
-//   if (selectedBoundary == null) return;
-
-//   const { stitchBlock, yarnBlock } = regions[selectedBoundary];
-
-//   let block = blockEditMode == "stitch" ? stitchBlock : yarnBlock;
-
-//   return html`<div class="boundary-menu">
-//     <button class="btn" @click=${() => removeBoundary(selectedBoundary)}>
-//       <i class="fa-solid fa-trash"></i>
-//     </button>
-//     <span>yarn</span>
-
-//     <label class="color-mode-toggle switch">
-//       <input
-//         type="checkbox"
-//         ?checked=${blockEditMode == "stitch"}
-//         @change=${(e) =>
-//           dispatch({
-//             blockEditMode: e.target.checked ? "stitch" : "yarn",
-//           })} />
-//       <span class="slider round"></span>
-//     </label>
-//     <span>stitch</span>
-//     <span>${block.width} x ${block.height} </span>
-//     ${Object.keys(editingTools).map(
-//       (toolName) => html`<button
-//         class="btn solid ${activeBlockTool == toolName ? "current" : ""}"
-//         @click=${() =>
-//           dispatch({
-//             activeBlockTool: toolName,
-//           })}>
-//         <i class=${toolData[toolName].icon}></i>
-//       </button>`
-//     )}
-//     <button
-//       class="btn solid move-repeat ${activeBlockTool == "move"
-//         ? "current"
-//         : ""}"
-//       @click=${() =>
-//         dispatch({
-//           activeBlockTool: "move",
-//         })}>
-//       <i class="fa-solid fa-arrows-up-down-left-right"></i>
-//     </button>
-
-//     <button
-//       class="btn"
-//       @click=${() => dispatch({ selectedBoundary: null }, true)}>
-//       <i class="fa-solid fa-circle-xmark"></i>
-//     </button>
-//   </div>`;
-// }
