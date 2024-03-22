@@ -3,11 +3,13 @@ import { setCanvasSize } from "../utilities/misc";
 
 export function chartSubscriber() {
   return ({ state }) => {
-    let { scale, chart, colorMode, yarnPalette } = state;
+    let { scale, chart, colorMode, yarnPalette, yarnChart } = state;
 
     let width = chart.width;
     let height = chart.height;
-    let lastDrawn = colorMode == "operation" ? state.chart : state.yarnChart;
+
+    let lastYarn = yarnChart;
+    let lastStitch = chart;
 
     return {
       syncState(state) {
@@ -30,13 +32,11 @@ export function chartSubscriber() {
             Math.round(state.cellHeight * height)
           );
 
-          lastDrawn = null;
+          lastStitch = null;
+          lastYarn = null;
         }
 
-        if (
-          (colorMode == "operation" && lastDrawn != state.chart) ||
-          (colorMode == "yarn" && lastDrawn != state.yarnChart)
-        ) {
+        if (lastStitch != state.chart || lastYarn != state.yarnChart) {
           drawChart(
             document.getElementById("chart-canvas"),
             state.colorMode,
@@ -45,9 +45,12 @@ export function chartSubscriber() {
             state.yarnPalette,
             scale,
             scale * state.cellAspect,
-            lastDrawn
+            lastStitch,
+            lastYarn
           );
-          lastDrawn = colorMode == "operation" ? state.chart : state.yarnChart;
+
+          lastYarn = state.yarnChart;
+          lastStitch = state.chart;
         }
       },
     };

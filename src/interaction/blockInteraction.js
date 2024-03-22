@@ -135,7 +135,7 @@ export function resizeBlock(e, blockIndex, direction) {
   window.addEventListener("pointerleave", end);
 }
 
-function moveBlock(e, blockIndex) {
+export function moveBlock(e, blockIndex) {
   const [x, y] = GLOBAL_STATE.blocks[blockIndex].pos;
   let last = [0, 0];
 
@@ -174,11 +174,21 @@ function moveBlock(e, blockIndex) {
   window.addEventListener("pointerleave", end);
 }
 
-function editBlock(e, blockIndex, tool) {
+export function editBlock(e, blockIndex) {
+  if (e.which == 2) {
+    pan(e);
+    return;
+  }
+
+  const { blocks, blockEditMode, activeBlockTool, activeSymbol, activeYarn } =
+    GLOBAL_STATE;
+  const blockType = blockEditMode == "stitch" ? "stitchBlock" : "yarnBlock";
+
+  let tool = editingTools[activeBlockTool];
+  if (!tool) return;
+
   let pos = blockPos(e, blockIndex);
 
-  const { blocks, blockEditMode, activeSymbol, activeYarn } = GLOBAL_STATE;
-  const blockType = blockEditMode == "stitch" ? "stitchBlock" : "yarnBlock";
   dispatch({ transforming: true });
   let startBlock = blocks[blockIndex][blockType];
 
@@ -227,18 +237,15 @@ function editBlock(e, blockIndex, tool) {
   window.addEventListener("pointerleave", end);
 }
 
-export function blockPointerDown(e, blockIndex) {
-  if (e.which == 2) {
-    pan(e);
-    return;
-  }
+// export function blockPointerDown(e, blockIndex) {
+//   if (e.which == 2) {
+//     pan(e);
+//     return;
+//   }
 
-  const activeTool = GLOBAL_STATE.activeBlockTool;
-  if (GLOBAL_STATE.interactionMode == "hand") {
-    pan(e);
-  } else if (activeTool == "move") {
-    moveBlock(e, blockIndex);
-  } else if (activeTool in editingTools) {
-    editBlock(e, blockIndex, editingTools[activeTool]);
-  }
-}
+//   const activeTool = GLOBAL_STATE.activeBlockTool;
+
+//   if (activeTool in editingTools) {
+//     editBlock(e, blockIndex, editingTools[activeTool]);
+//   }
+// }

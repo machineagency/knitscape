@@ -1,44 +1,66 @@
 import { html } from "lit-html";
+import { when } from "lit-html/directives/when.js";
+
 import { GLOBAL_STATE, dispatch } from "../state";
 import { removeBlock } from "../interaction/blockInteraction";
 import { removeBoundary } from "../interaction/boundaryInteraction";
 import { boundaryBbox } from "../utilities/misc";
 
 export function freeBlockToolbar() {
-  const { interactionMode, blockEditMode, selectedBlock } = GLOBAL_STATE;
+  const { blockEditMode, selectedBlock } = GLOBAL_STATE;
 
-  if (interactionMode != "block") return;
   if (selectedBlock == null)
-    return html`<div class="mode-toolbar">
+    return html`
       <div class="toolbar-message">
         Select a block to edit it or drag to add a new block.
       </div>
     </div> `;
 
   return html`<div class="mode-toolbar">
-    <span class="toolbar-message">Editing block ${selectedBlock}</span>
-    <button
-      class="btn ${blockEditMode == "yarn" ? "solid" : ""}"
-      @click=${() => dispatch({ blockEditMode: "yarn" }, true)}>
-      yarn fill
-    </button>
-    <button
-      class="btn ${blockEditMode == "stitch" ? "solid" : ""}"
-      @click=${() => dispatch({ blockEditMode: "stitch" }, true)}>
-      stitch fill
-    </button>
-    <button class="btn" @click=${() => removeBlock(selectedBlock)}>
-      <i class="fa-solid fa-trash"></i>
-    </button>
+    <div class="h-group">
+      <div class="has-dropdown">
+        <button class="btn dropdown-toggle">
+          <i class="fa-solid fa-ellipsis-vertical"></i>
+        </button>
+        <div class="dropdown above">
+          <button class="btn delete" @click=${() => removeBlock(selectedBlock)}>
+            <i class="fa-solid fa-trash fa-sm"></i>
+            Remove
+          </button>
+        </div>
+      </div>
+      <span class="toolbar-message">Editing block ${selectedBlock}</span>
+    </div>
+
+    <div class="has-dropdown">
+      <button class="btn dropdown-toggle">edit</button>
+      <div class="dropdown above align-right">
+        <button
+          class="btn ${blockEditMode == "yarn" ? "solid" : ""}"
+          @click=${(e) => {
+            dispatch({ blockEditMode: "yarn" }, true);
+            e.target.blur();
+          }}>
+          yarn
+        </button>
+        <button
+          class="btn ${blockEditMode == "stitch" ? "solid" : ""}"
+          @click=${(e) => {
+            dispatch({ blockEditMode: "stitch" }, true);
+            e.target.blur();
+          }}>
+          stitch
+        </button>
+      </div>
+    </div>
   </div>`;
 }
 
 export function pathToolbar() {
-  const { interactionMode, blockEditMode, selectedPath } = GLOBAL_STATE;
+  const { blockEditMode, selectedPath } = GLOBAL_STATE;
 
-  if (interactionMode != "path") return;
   if (selectedPath == null)
-    return html`<div class="mode-toolbar">
+    return html`
       <div class="toolbar-message">
         Select a path to edit it or drag to add a new path.
       </div>
@@ -55,10 +77,8 @@ export function pathToolbar() {
 }
 
 export function boundaryToolbar() {
-  const { interactionMode, blockEditMode, selectedBoundary, boundaries } =
-    GLOBAL_STATE;
+  const { blockEditMode, selectedBoundary, boundaries } = GLOBAL_STATE;
 
-  if (interactionMode != "boundary") return;
   if (selectedBoundary == null)
     return html`<div class="mode-toolbar">
       <div class="toolbar-message">
@@ -68,26 +88,58 @@ export function boundaryToolbar() {
 
   let bbox = boundaryBbox(boundaries[selectedBoundary]);
 
-  return html`<div class="mode-toolbar">
-    <span class="toolbar-message"
-      >Editing ${blockEditMode != null ? `${blockEditMode} fill of ` : ""}
-      boundary ${selectedBoundary}</span
-    >
-    <button class="delete btn" @click=${() => removeBoundary(selectedBoundary)}>
-      <i class="fa-solid fa-trash"></i>
-    </button>
-    <span class="select-size">${bbox.width}x${bbox.height}</span>
-    <div class="h-group">
-      <button
-        class="btn ${blockEditMode == "yarn" ? "solid" : ""}"
-        @click=${() => dispatch({ blockEditMode: "yarn" }, true)}>
-        yarn fill
-      </button>
-      <button
-        class="btn ${blockEditMode == "stitch" ? "solid" : ""}"
-        @click=${() => dispatch({ blockEditMode: "stitch" }, true)}>
-        stitch fill
-      </button>
+  return html` <div class="h-group">
+      <div class="has-dropdown">
+        <button class="btn dropdown-toggle">
+          <i class="fa-solid fa-ellipsis-vertical"></i>
+        </button>
+        <div class="dropdown above">
+          <button
+            class="btn delete"
+            @click=${() => removeBoundary(selectedBoundary)}>
+            <i class="fa-solid fa-trash fa-sm"></i>
+            Remove
+          </button>
+        </div>
+      </div>
+      <span class="toolbar-message">
+        Editing ${blockEditMode != null ? `${blockEditMode} fill of ` : ""}
+        boundary ${selectedBoundary}
+      </span>
     </div>
+
+    <div class="has-dropdown">
+      <button class="btn dropdown-toggle">edit fill</button>
+      <div class="dropdown above align-right">
+        <button
+          class="btn ${blockEditMode == "yarn" ? "solid" : ""}"
+          @click=${(e) => {
+            dispatch({ blockEditMode: "yarn" }, true);
+            e.target.blur();
+          }}>
+          yarn fill
+        </button>
+        <button
+          class="btn ${blockEditMode == "stitch" ? "solid" : ""}"
+          @click=${(e) => {
+            dispatch({ blockEditMode: "stitch" }, true);
+            e.target.blur();
+          }}>
+          stitch fill
+        </button>
+      </div>
+    </div>
+
+    <span class="area-size">
+      ${bbox.width}<i class="fa-solid fa-xmark fa-xs"></i>${bbox.height}
+    </span>`;
+}
+
+export function modeToolbar() {
+  const { interactionMode } = GLOBAL_STATE;
+  return html`<div class="mode-toolbar">
+    ${when(interactionMode == "boundary", boundaryToolbar)}
+    ${when(interactionMode == "path", pathToolbar)}
+    ${when(interactionMode == "block", freeBlockToolbar)}
   </div>`;
 }

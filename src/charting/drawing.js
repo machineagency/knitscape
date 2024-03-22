@@ -1,5 +1,6 @@
-import { SYMBOL_DATA, STITCH_MAP } from "../constants";
+import { SYMBOL_DATA, STITCH_MAP, BACK_OPS } from "../constants";
 const TRANSPARENT = "#dfdfdf7f";
+const DIM = "#0000002a";
 
 export function drawChart(
   canvas,
@@ -10,7 +11,7 @@ export function drawChart(
   cellWidth,
   cellHeight,
   lastDrawn = null,
-  yarnOffset = [0, 0]
+  lastYarn = null
 ) {
   const { width, height } = stitchChart;
 
@@ -20,12 +21,13 @@ export function drawChart(
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       let stitchIndex = stitchChart.pixel(x, y);
-      let yarnIndex = yarnChart.pixel(x + yarnOffset[0], y + yarnOffset[1]);
+      let yarnIndex = yarnChart.pixel(x, y);
 
       if (
         lastDrawn == null ||
-        (mode == "operation" && lastDrawn.pixel(x, y) != stitchIndex) ||
-        (mode == "yarn" && lastDrawn.pixel(x, y) != yarnIndex)
+        lastYarn == null ||
+        lastDrawn.pixel(x, y) != stitchIndex ||
+        lastYarn.pixel(x, y) != yarnIndex
       ) {
         ctx.save();
         ctx.translate(x * cellWidth, (height - y - 1) * cellHeight);
@@ -35,15 +37,21 @@ export function drawChart(
 
         if (mode == "operation") {
           ctx.fillStyle = SYMBOL_DATA[operation].color;
+          ctx.fillRect(0, 0, 1, 1);
         } else if (mode == "yarn") {
           if (yarnIndex == 0) {
             ctx.fillStyle = SYMBOL_DATA.EMPTY.color;
           } else {
             ctx.fillStyle = yarnPalette[yarnIndex - 1];
           }
-        }
+          ctx.fillRect(0, 0, 1, 1);
 
-        ctx.fillRect(0, 0, 1, 1);
+          if (BACK_OPS.has(operation)) {
+            // Dim any back bed operations
+            ctx.fillStyle = DIM;
+            ctx.fillRect(0, 0, 1, 1);
+          }
+        }
 
         const { path } = SYMBOL_DATA[operation];
 
@@ -139,14 +147,22 @@ export function drawStitchBlock(
           if (mode == "operation") {
             ctx.fillStyle = SYMBOL_DATA[op].color;
             path = SYMBOL_DATA[op].path;
+            ctx.fillRect(0, 0, 1, 1);
           } else if (mode == "yarn") {
             ctx.fillStyle = yarnPalette[yarnIndex];
             path = SYMBOL_DATA[op].path;
           }
+          ctx.fillRect(0, 0, 1, 1);
+
+          if (BACK_OPS.has(op)) {
+            // Dim any back bed operations
+            ctx.fillStyle = DIM;
+            ctx.fillRect(0, 0, 1, 1);
+          }
         } else {
           ctx.fillStyle = "transparent";
+          ctx.fillRect(0, 0, 1, 1);
         }
-        ctx.fillRect(0, 0, 1, 1);
 
         if (path) ctx.stroke(path);
 

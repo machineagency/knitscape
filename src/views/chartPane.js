@@ -19,10 +19,10 @@ import { blocks } from "./annotations/blocks";
 import { stitchSelectBox } from "./annotations/selectBox";
 import { currentTargetPointerPos } from "../utilities/misc";
 
-import { boundaryToolbar, pathToolbar, freeBlockToolbar } from "./toolbars";
+import { modeToolbar } from "./toolbars";
 
 import { gridPattern, cellShadow, activeBoundaryMask } from "./defs";
-import { pickers } from "./palettes";
+import { pickers } from "./pickers";
 
 function setInteractionMode(mode) {
   dispatch(
@@ -79,7 +79,7 @@ function bottomBar() {
           min="2"
           max="200"
           step="1"
-          .value=${scale}
+          .value=${String(scale)}
           @change=${(e) => centerZoom(Number(e.target.value))} />
         <div class="spinners">
           <button @click=${() => centerZoom(scale + 1)}>
@@ -222,10 +222,7 @@ export function chartPaneView() {
         </g>
       </svg>
       ${pickers()}
-      <div class="bottom-bars-container">
-        ${freeBlockToolbar()} ${boundaryToolbar()} ${pathToolbar()}
-        ${bottomBar()}
-      </div>
+      <div class="bottom-bars-container">${modeToolbar()} ${bottomBar()}</div>
     </div>
   `;
 }

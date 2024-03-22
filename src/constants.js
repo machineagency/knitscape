@@ -10,6 +10,17 @@ export const SNAPSHOT_FIELDS = ["yarnPalette", "boundary"];
 
 export const EXAMPLE_LIBRARY = import.meta.glob("../examples/*.json");
 
+export const BACK_OPS = new Set([
+  "PURL",
+  "BT",
+  "BXR1",
+  "BXR2",
+  "BXR3",
+  "BXL1",
+  "BXL2",
+  "BXL3",
+]);
+
 // Paths made in https://yqnn.github.io/svg-path-editor/
 export const SYMBOL_DATA = {
   EMPTY: {
@@ -46,14 +57,14 @@ export const SYMBOL_DATA = {
     yarnModeColor: "#FFFFFF",
     description: "Front miss",
   },
-  // BM: {
-  //   pathdata: "M 0 0.5 L 1 0.5",
+  BM: {
+    pathdata: "M 0 0.5 L 1 0.5",
 
-  //   path: new Path2D("M 0 0.5 L 1 0.5"),
-  //   color: "#de75b2",
-  //   yarnModeColor: "#FFFFFF",
-  //   description: "Back miss",
-  // },
+    path: new Path2D("M 0 0.5 L 1 0.5"),
+    color: "#de75b2",
+    yarnModeColor: "#FFFFFF",
+    description: "Back miss",
+  },
   FT: {
     pathdata:
       "M 1 0.5 L 0.8 0.5 C 0.7 0.5 0.65 0.5 0.6 0.55 C 0.55 0.6 0.6 0.8 0.5 0.8 C 0.4 0.8 0.45 0.6 0.4 0.55 C 0.35 0.5 0.3 0.5 0.2 0.5 L 0 0.5",
@@ -218,7 +229,7 @@ export const stitches = {
   KNIT: 1,
   PURL: 2,
   FM: 3, // Front miss
-  // BM: 4, // Back miss
+  BM: 4, // Back miss
   FT: 5, // Front tuck
   BT: 6, // Back tuck
   FXR1: 7, // Front right transfers

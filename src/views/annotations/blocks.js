@@ -3,9 +3,10 @@ import { when } from "lit-html/directives/when.js";
 
 import { GLOBAL_STATE, dispatch } from "../../state";
 import {
-  blockPointerDown,
+  editBlock,
   removeBlock,
   resizeBlock,
+  moveBlock,
   addBlock,
 } from "../../interaction/blockInteraction";
 import { addBoundary } from "../../interaction/boundaryInteraction";
@@ -21,7 +22,7 @@ export function blocks() {
         <canvas
           data-blockindex=${blockIndex}
           @pointerdown=${(e) => {
-            if (selectedBlock == blockIndex) blockPointerDown(e, blockIndex);
+            if (selectedBlock == blockIndex) editBlock(e, blockIndex);
           }}></canvas>
         <div class="block-inset-shadow"></div>
         ${when(
@@ -42,13 +43,9 @@ export function blocks() {
 function draggers(blockIndex) {
   return html`<button
       class="move-block"
-      @click=${() =>
-        dispatch({
-          activeBlockTool: "move",
-        })}>
+      @pointerdown=${(e) => moveBlock(e, blockIndex)}>
       <i class="fa-solid fa-arrows-up-down-left-right"></i>
     </button>
-
     <button
       class="dragger up"
       @pointerdown=${(e) => resizeBlock(e, blockIndex, "up")}>

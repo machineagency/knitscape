@@ -11,7 +11,8 @@ import { toolData } from "../constants";
 const TRANSPARENT_YARN = "#585858";
 
 function operationButton(symbolName, data, index) {
-  if (symbolName == "EMPTY") return;
+  // TODO: handle these cases somewhere else probably
+  if (symbolName == "EMPTY" || symbolName == "BM") return;
   const classes = { selected: GLOBAL_STATE.activeSymbol == index };
 
   return html`<button
@@ -38,19 +39,18 @@ function yarnButton(paletteIndex, color) {
 }
 
 export function pickers() {
-  const {
-    selectedBoundary,
-    blockEditMode,
-    selectedBlock,
-    blocks,
-    yarnPalette,
-  } = GLOBAL_STATE;
+  const { blockEditMode, yarnPalette } = GLOBAL_STATE;
 
-  if (blockEditMode == null) return;
-
-  return html`<div class="picker-container">
+  return html`<div
+    class="picker-container ${blockEditMode == null ? "hidden" : "shown"}">
     ${toolPicker()}
+
     <div class="palette scroller">
+      <button
+        class="btn close-picker"
+        @click=${() => dispatch({ blockEditMode: null }, true)}>
+        <i class="fa-solid fa-circle-xmark fa-xl"></i>
+      </button>
       ${when(
         blockEditMode == "stitch",
         () =>
@@ -60,11 +60,6 @@ export function pickers() {
         () => html`${yarnButton(0, TRANSPARENT_YARN)}
         ${yarnPalette.map((color, index) => yarnButton(index + 1, color))}`
       )}
-      <button
-        class="btn close-picker"
-        @click=${() => dispatch({ blockEditMode: null }, true)}>
-        <i class="fa-solid fa-circle-xmark fa-xl"></i>
-      </button>
     </div>
   </div>`;
 }
@@ -97,7 +92,7 @@ function toolPicker() {
   if (block == null) return;
 
   return html`<div class="tool-picker">
-    <!-- <span>${block.width} x ${block.height} </span> -->
+    <span class="block-size">${block.width}x${block.height} </span>
 
     ${Object.keys(editingTools).map(
       (toolName) => html`<button

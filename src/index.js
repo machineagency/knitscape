@@ -63,7 +63,7 @@ function init() {
   Split(["#chart-pane", "#sim-pane"], {
     sizes: [60, 40],
     minSize: 100,
-    gutterSize: 11,
+    gutterSize: 8,
   });
 
   window.addEventListener("keydown", globalKeydown);

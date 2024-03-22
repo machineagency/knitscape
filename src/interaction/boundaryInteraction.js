@@ -276,7 +276,7 @@ export function resizeFillBlock(e, direction) {
 
       let fill;
       if (blockEditMode == "stitch") {
-        fill = stitches.TRANSPARENT;
+        fill = regions.length == 1 ? stitches.KNIT : stitches.TRANSPARENT;
       } else {
         fill = 0;
       }
@@ -416,7 +416,7 @@ function blockPos(e) {
   };
 }
 
-function moveBoundaryFill(e) {
+export function moveBoundaryFill(e) {
   const { selectedBoundary, regions } = GLOBAL_STATE;
   const { pos } = regions[selectedBoundary];
 
@@ -461,9 +461,23 @@ function moveBoundaryFill(e) {
   window.addEventListener("pointerleave", end);
 }
 
-function editBoundaryFill(e, tool) {
-  const { selectedBoundary, regions, blockEditMode, activeSymbol, activeYarn } =
-    GLOBAL_STATE;
+export function editBoundaryFill(e) {
+  if (e.which == 2) {
+    pan(e);
+    return;
+  }
+  const {
+    selectedBoundary,
+    regions,
+    blockEditMode,
+    activeBlockTool,
+    activeSymbol,
+    activeYarn,
+  } = GLOBAL_STATE;
+
+  let tool = editingTools[activeBlockTool];
+  if (!tool) return;
+
   const { stitchBlock, yarnBlock } = regions[selectedBoundary];
   const stitchEdit = blockEditMode == "stitch";
   let pos = blockPos(e);
@@ -520,18 +534,4 @@ function editBoundaryFill(e, tool) {
   window.addEventListener("pointermove", move);
   window.addEventListener("pointerup", end);
   window.addEventListener("pointerleave", end);
-}
-
-export function boundaryBlockPointerDown(e) {
-  if (e.which == 2) {
-    pan(e);
-    return;
-  }
-
-  const activeTool = GLOBAL_STATE.activeBlockTool;
-  if (activeTool == "move") {
-    moveBoundaryFill(e);
-  } else if (activeTool in editingTools) {
-    editBoundaryFill(e, editingTools[activeTool]);
-  }
 }

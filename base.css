@@ -51,8 +51,8 @@ ROOT STYLES
   --text: var(--base12);
   --text-highlight: var(--base13);
   --text-accent: var(--base10);
-  --text-inactive: var(--base8);
-  --disabled: var(--base8);
+  --text-inactive: var(--base7);
+  --disabled: var(--base7);
 
   --background: var(--base2);
 
@@ -371,6 +371,7 @@ a.btn {
 
 button {
   cursor: pointer;
+  white-space: nowrap;
 }
 
 /* Reset button style */
@@ -540,4 +541,44 @@ NUMBER INPUT
   text-align: center;
   font-family: monospace;
   -moz-appearance: textfield;
+}
+
+/***********************************
+
+DROPDOWN
+
+***********************************/
+
+.has-dropdown {
+  position: relative;
+}
+
+.dropdown {
+  opacity: 0;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2em;
+  background-color: var(--base1);
+
+  padding: 0.3em;
+  border-radius: 0.3em;
+}
+
+.dropdown.align-right {
+  right: 0;
+}
+
+.dropdown.above {
+  bottom: calc(100% + 0.5em);
+}
+
+.has-dropdown:focus-within .dropdown {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.has-dropdown:focus-within .dropdown-toggle {
+  background-color: #343434;
+  box-shadow: 0 0 2px 0 black;
 }

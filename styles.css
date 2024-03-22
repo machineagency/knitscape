@@ -1,3 +1,5 @@
+/* #region MAIN */
+
 @font-face {
   font-family: "National Park";
   src: url("/assets/fonts/NP-VariableVF.woff2")
@@ -31,8 +33,6 @@ canvas {
   overflow: hidden;
 }
 
-/* #region SPLIT JS */
-
 .gutter {
   background-color: var(--base1);
   background-repeat: no-repeat;
@@ -44,10 +44,6 @@ canvas {
   cursor: col-resize;
 }
 
-.gutter.gutter-vertical {
-  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=");
-  cursor: row-resize;
-}
 /* #endregion */
 
 /* #region TASKBAR */
@@ -65,6 +61,7 @@ canvas {
   font-size: 1.2em;
   margin-left: 0.3em;
   cursor: default;
+  color: var(--text-inactive);
 }
 
 .button-group {
@@ -105,6 +102,7 @@ canvas {
 
 .vector-overlay {
   pointer-events: none;
+  box-shadow: inset 0 0 6px 0px rgba(0, 0, 0, 0.5);
 }
 
 .desktop {
@@ -112,8 +110,7 @@ canvas {
   position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: end;
-  box-shadow: inset 0 0 6px 0px rgba(0, 0, 0, 0.5);
+  justify-content: space-between;
 }
 
 /* .cell-highlight {
@@ -205,6 +202,7 @@ canvas {
 /* #region MODE TOOLBARS */
 
 .mode-toolbar {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.4em;
@@ -216,12 +214,32 @@ canvas {
   font-style: italic;
 }
 
-.select-size {
+.area-size {
   font-family: monospace;
+}
+
+.mode-toolbar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.2em 0 0.2em 0.4em;
+  justify-content: space-between;
+}
+
+.mode-toolbar .dropdown {
+  box-shadow: 0 0 6px 0px rgba(0, 0, 0, 0.5);
+}
+
+.delete.btn {
+  color: var(--text-inactive);
+  display: flex;
+  gap: 0.4em;
 }
 
 .delete.btn:hover {
   color: rgb(165, 39, 39);
+  background-color: transparent;
 }
 
 /* #endregion */
@@ -231,19 +249,31 @@ canvas {
 .picker-container {
   display: flex;
   align-self: flex-end;
-  align-items: end;
-  margin: 0.5em;
+  align-items: flex-start;
+  opacity: 0;
+  margin: 0.4em;
   z-index: 10;
   pointer-events: none;
 }
 
+.picker-container.shown {
+  opacity: 1;
+}
+
 .tool-picker {
   display: flex;
+  align-items: center;
   gap: 0.3em;
   padding: 0.3em 0 0.3em 0.3em;
   background-color: var(--base1);
   border-radius: 0.5em 0 0 0.5em;
   pointer-events: all;
+  z-index: 1;
+  box-shadow: 0 0 6px 0px rgba(0, 0, 0, 0.5);
+}
+
+.block-size {
+  font-family: monospace;
 }
 
 .tool-picker button {
@@ -251,6 +281,11 @@ canvas {
   height: 40px;
   border-radius: 0.4em;
   border: 1px solid black;
+}
+
+.tool-picker .btn.current {
+  background-color: var(--accent);
+  color: var(--base2);
 }
 
 .palette .close-picker {
@@ -262,12 +297,14 @@ canvas {
   --color: var(--base0);
   display: flex;
   flex-direction: column;
-  border-radius: 0.5em 0.5em 0.5em 0;
+  border-radius: 0 0.5em 0.5em 0.5em;
   background-color: var(--base1);
   overflow: auto;
   padding: 0.3em;
   gap: 0.3em;
   pointer-events: all;
+
+  box-shadow: 0 0 6px 0px rgba(0, 0, 0, 0.5);
 }
 
 .palette button {
@@ -337,7 +374,7 @@ canvas {
 
 /* #endregion */
 
-/* #region BOUNDARY REGIONS */
+/* #region PATHS */
 
 .boundary {
   fill: transparent;
@@ -357,13 +394,14 @@ canvas {
 .path.bottom {
   stroke: rgb(255, 255, 255);
   filter: drop-shadow(0px 0px 2px black);
-  stroke-width: 5px;
+  stroke-width: 4px;
   stroke-dasharray: 10 4;
 }
 
 .path.top {
   stroke: transparent;
-  stroke-width: 5;
+  stroke-width: 7px;
+  stroke-dasharray: 10 4;
 }
 
 .path.top:hover {
@@ -373,8 +411,8 @@ canvas {
 
 .point {
   fill: rgb(223, 223, 223);
-  r: 6;
   stroke: rgb(255, 255, 255);
+  r: 6;
   stroke-width: 2px;
   filter: drop-shadow(0px 0px 2px black);
   pointer-events: all;
@@ -384,10 +422,6 @@ canvas {
   stroke: rgb(224, 255, 102);
   fill: rgb(224, 255, 102);
   stroke-width: 3px;
-}
-
-.num-input {
-  width: 40px;
 }
 
 /* #endregion */
@@ -450,21 +484,13 @@ canvas {
   pointer-events: none;
 }
 
-.block-toolbar > button {
-  cursor: pointer;
-}
-
-.block-toolbar .btn.current {
-  background-color: var(--accent);
-  color: var(--base2);
-}
-
 .block:hover .hover-overlay {
-  display: flex;
+  opacity: 1;
 }
 
 .hover-overlay {
-  display: none;
+  opacity: 0;
+  display: flex;
   position: absolute;
   align-items: center;
   justify-content: center;

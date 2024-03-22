@@ -1,7 +1,8 @@
 import { svg, html } from "lit-html";
 import { GLOBAL_STATE, dispatch } from "../../state";
 import {
-  boundaryBlockPointerDown,
+  moveBoundaryFill,
+  editBoundaryFill,
   resizeFillBlock,
 } from "../../interaction/boundaryInteraction";
 import { editingTools } from "../../charting/editingTools";
@@ -58,11 +59,11 @@ export function boundaryBlocks() {
     style="left: ${Math.round(pos[0] * cellWidth)}px; bottom: ${Math.round(
       pos[1] * cellHeight
     )}px;">
-    <canvas
-      id="block-fill-canvas"
-      @pointerdown=${boundaryBlockPointerDown}></canvas>
+    <canvas id="block-fill-canvas" @pointerdown=${editBoundaryFill}></canvas>
     <div class="block-inset-shadow"></div>
-
+    <button class="move-block" @pointerdown=${(e) => moveBoundaryFill(e)}>
+      <i class="fa-solid fa-arrows-up-down-left-right"></i>
+    </button>
     <button class="dragger up" @pointerdown=${(e) => resizeFillBlock(e, "up")}>
       <i class="fa-solid fa-angle-up"></i>
     </button>

@@ -2,12 +2,7 @@ import { html } from "lit-html";
 import { when } from "lit-html/directives/when.js";
 
 import { GLOBAL_STATE, dispatch } from "../../state";
-import {
-  blockPointerDown,
-  removeBlock,
-  resizeBlock,
-  addBlock,
-} from "../../interaction/blockInteraction";
+import { addBlock } from "../../interaction/blockInteraction";
 import { addBoundary } from "../../interaction/boundaryInteraction";
 
 export function stitchSelectBox() {
