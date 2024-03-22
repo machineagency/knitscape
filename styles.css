@@ -119,6 +119,10 @@ canvas {
   stroke: #ffffff;
 } */
 
+#svg-layer.blockMode {
+  cursor: crosshair;
+}
+
 .bottom-bars-container {
   box-shadow: 0 0 6px 0px rgba(0, 0, 0, 0.5);
   z-index: 10;
@@ -384,7 +388,9 @@ canvas {
 
 .allowHover .boundary.inactive:hover {
   stroke: rgb(255, 255, 255);
-  fill: #dbdbdb33;
+  stroke-width: 3;
+  cursor: pointer;
+  /* fill: #dbdbdb33; */
 }
 
 .path {

@@ -8,7 +8,7 @@ import {
   chartContextMenu,
   chartPointerDown,
 } from "../interaction/chartInteraction";
-import { zoom, fitChart, centerZoom } from "../interaction/chartPanZoom";
+import { zoom } from "../interaction/chartPanZoom";
 
 import {
   boundaryView,
@@ -19,83 +19,9 @@ import { blocks } from "./annotations/blocks";
 import { stitchSelectBox } from "./annotations/selectBox";
 import { currentTargetPointerPos } from "../utilities/misc";
 
+import { bottomBar } from "./bottomBar";
 import { modeToolbar } from "./toolbars";
-
-import { gridPattern, cellShadow, activeBoundaryMask } from "./defs";
 import { pickers } from "./pickers";
-
-function setInteractionMode(mode) {
-  dispatch(
-    {
-      interactionMode: mode,
-      stitchSelect: null,
-      selectedBlock: null,
-      selectedBoundary: null,
-      selectedPath: null,
-      blockEditMode: null,
-    },
-    true
-  );
-}
-
-function bottomBar() {
-  const { pointer, colorMode, interactionMode, scale } = GLOBAL_STATE;
-  return html`<div class="chart-bottom-bar">
-    <button
-      class="btn solid mode-toggle"
-      @click=${() =>
-        dispatch({
-          colorMode: colorMode == "operation" ? "yarn" : "operation",
-        })}>
-      ${colorMode == "operation" ? "command view" : "yarn view"}
-    </button>
-
-    <div class="h-group">
-      <button
-        class="btn ${interactionMode == "boundary" ? "solid" : ""}"
-        @click=${() => setInteractionMode("boundary")}>
-        boundaries
-      </button>
-      <button
-        class="btn ${interactionMode == "path" ? "solid" : ""}"
-        @click=${() => setInteractionMode("path")}>
-        paths
-      </button>
-      <button
-        class="btn ${interactionMode == "block" ? "solid" : ""}"
-        @click=${() => setInteractionMode("block")}>
-        blocks
-      </button>
-    </div>
-    <div class="h-group">
-      <div class="pointer-pos">
-        <div><span>col</span> <span>${pointer[0] + 1}</span></div>
-        <div><span>row</span> <span>${pointer[1] + 1}</span></div>
-      </div>
-      <div class="chart-scale">
-        <input
-          class="input"
-          type="number"
-          min="2"
-          max="200"
-          step="1"
-          .value=${String(scale)}
-          @change=${(e) => centerZoom(Number(e.target.value))} />
-        <div class="spinners">
-          <button @click=${() => centerZoom(scale + 1)}>
-            <i class="fa-solid fa-angle-up fa-xs"></i>
-          </button>
-          <button @click=${() => centerZoom(scale - 1)}>
-            <i class="fa-solid fa-angle-down fa-xs"></i>
-          </button>
-        </div>
-      </div>
-      <button class="btn" @click=${fitChart}>
-        <i class="fa-solid fa-expand"></i>
-      </button>
-    </div>
-  </div>`;
-}
 
 function trackPointer(e) {
   const { cellWidth, cellHeight, chartPan, bbox } = GLOBAL_STATE;
@@ -135,7 +61,6 @@ export function chartPaneView() {
     cellHeight,
     chartPan,
     chart,
-    pointer,
     bbox,
     transforming,
     interactionMode,
@@ -150,6 +75,9 @@ export function chartPaneView() {
 
   const classes = {
     allowHover: !transforming && interactionMode == "boundary",
+    boundaryMode: interactionMode == "boundary",
+    pathMode: interactionMode == "path",
+    blockMode: interactionMode == "block",
   };
 
   return html`
@@ -163,14 +91,12 @@ export function chartPaneView() {
       <svg
         id="svg-layer"
         preserveAspectRatio="xMidYMid meet"
-        class="desktop-svg  ${classMap(classes)}"
+        class="${classMap(classes)}"
         style="position: absolute;"
         width="100%"
         height="100%"
         @pointerdown=${chartPointerDown}
         @contextmenu=${chartContextMenu}>
-        <defs>${gridPattern(cellWidth, cellHeight)}</defs>
-
         <g transform="scale (1, -1)" transform-origin="center">
           <g transform="translate(${chartPan.x} ${chartPan.y})">
             <g transform="translate(${offsetX} ${offsetY})">
@@ -199,22 +125,13 @@ export function chartPaneView() {
       </div>
       <svg
         preserveAspectRatio="xMidYMid meet"
-        class="desktop-svg vector-overlay"
-        style="position: absolute;"
+        class="vector-overlay"
+        style="position: absolute; "
         width="100%"
         height="100%"
         @pointerdown=${chartPointerDown}
         @contextmenu=${chartContextMenu}
         @wheel=${zoom}>
-        <defs>${cellShadow()}</defs>
-        ${selectedBoundary != null
-          ? activeBoundaryMask(
-              boundaries[selectedBoundary],
-              chartPan,
-              cellWidth,
-              cellHeight
-            )
-          : ""}
         <g transform="scale (1, -1)" transform-origin="center">
           <g transform="translate(${chartPan.x} ${chartPan.y})">
             ${activeBoundaryPath()}

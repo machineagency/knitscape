@@ -4,7 +4,7 @@ KnitScape is a design and simulation tool for machine knitting.
 
 - Chart
   - [x] Toggle color mode between yarn color and operation color.
-  - [ ] Back bed operations should be slightly dimmed in chart view.
+  - [x] Back bed operations should be slightly dimmed in chart view.
 - Box Selection
   - [x] Drag to select an area, and add new stitch block or boundary
   - [ ] Show size of selection
@@ -17,9 +17,10 @@ KnitScape is a design and simulation tool for machine knitting.
   - [x] Add and remove points
   - [x] Yarn and stitch fill blocks
   - [x] Move yarn and stitch fill origin
-  - [ ] show boundary size when selected?
-  - [ ] copy and paste boundary
-  - [ ] select multiple boundaries
+  - [x] show boundary size when selected
+  - [ ] copy and paste
+  - [ ] affine transforms (reflect, scale, shear, rotate)
+  - [ ] multiselect
 - Paths
   - [x] secret thicker path for hover styles
   - [ ] evaluate chart on stitch path edit

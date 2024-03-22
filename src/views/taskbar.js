@@ -1,29 +1,10 @@
 import { html } from "lit-html";
-import { when } from "lit-html/directives/when.js";
-import { GLOBAL_STATE, dispatch, undo } from "../state";
+import { GLOBAL_STATE, dispatch } from "../state";
 import { toggleFullscreen, currentlyFullscreen } from "../utilities/fullscreen";
 
-function setInteractionMode(mode) {
-  dispatch(
-    {
-      interactionMode: mode,
-      stitchSelect: null,
-      selectedBlock: null,
-      selectedBoundary: null,
-    },
-    true
-  );
-}
-
 export function taskbar() {
-  const {
-    showExampleLibrary,
-    showDownload,
-    showUpload,
-    showSettings,
-    colorMode,
-    interactionMode,
-  } = GLOBAL_STATE;
+  const { showExampleLibrary, showDownload, showUpload, showSettings } =
+    GLOBAL_STATE;
   return html` <div id="taskbar">
     <h1 class="site-title">KnitScape</h1>
     <div class="button-group">

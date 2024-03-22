@@ -25,7 +25,7 @@ function r() {
 
 const testWorkspace = {
   cellAspect: 7 / 11,
-  yarnPalette: ["#df9e72ff", "#ebe9bbff", "#5fb6e9ff"],
+  yarnPalette: ["#7babc7ff", "#ebe9bbff"],
   boundaries: [
     [
       [0, 0],
