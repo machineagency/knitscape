@@ -15,8 +15,7 @@ export function simulationView() {
       <div id="sim-container">
         <div
           id="canvas-container"
-          style="transform: translate(${x}px, ${y}px)"
-          class=${GLOBAL_STATE.flipped ? "mirrored" : ""}></div>
+          style="transform: translate(${x}px, ${y}px)"></div>
       </div>
       ${simToolbar()}
     </div>

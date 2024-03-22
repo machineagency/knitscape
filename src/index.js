@@ -29,9 +29,9 @@ const testWorkspace = {
   boundaries: [
     [
       [0, 0],
-      [0, 20],
-      [15, 20],
-      [15, 0],
+      [0, 5],
+      [5, 5],
+      [5, 0],
     ],
   ],
   regions: [

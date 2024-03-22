@@ -100,32 +100,54 @@ export function simulate(stitchPattern, scale) {
   }
 
   function calculateSegmentControlPoints(yarnSegMap) {
-    Object.entries(yarnSegMap).map(([yarnIndex, links]) => {
+    Object.entries(yarnSegMap).map(([yarnIndex, segmentArr]) => {
       let p0 = [nodes[0].pos.x - stitchWidth, nodes[0].pos.y];
       let p1 = nodeOffset(
-        links[0].source,
-        links[0].row,
+        segmentArr[0].source,
+        segmentArr[0].row,
         p0,
-        getCoords(links[0].target)
+        getCoords(segmentArr[0].target)
       );
+
       let p2 = nodeOffset(
-        links[0].target,
-        links[0].row,
+        segmentArr[0].target,
+        segmentArr[0].row,
         p1,
-        getCoords(links[1].target)
+        getCoords(segmentArr[1].target)
       );
 
-      links.forEach((segment, index) => {
-        if (index > links.length - 3) return;
-        let p3 = nodeOffset(
-          links[index + 1].target,
-          links[index].row,
-          p2,
-          getCoords(links[index + 2].target)
-        );
+      segmentArr.forEach((segment, index) => {
+        let p3;
+        if (index == segmentArr.length - 1) {
+          let [x, y] = getCoords(segmentArr[index].target);
+          let patternRow = segmentArr[index].row;
 
-        let n1 = getCoords(links[index].source);
-        let n2 = getCoords(links[index].target);
+          let xPos =
+            stitchPattern.carriagePasses[patternRow] == "right"
+              ? x + stitchWidth
+              : x - stitchWidth;
+
+          p3 = [xPos, y];
+        } else if (index == segmentArr.length - 2) {
+          let [x, y] = getCoords(segmentArr[index].target);
+
+          p3 = nodeOffset(
+            segmentArr[index + 1].target,
+            segmentArr[index].row,
+            p2,
+            [x + stitchWidth, y]
+          );
+        } else {
+          p3 = nodeOffset(
+            segmentArr[index + 1].target,
+            segmentArr[index].row,
+            p2,
+            getCoords(segmentArr[index + 2].target)
+          );
+        }
+
+        let n1 = getCoords(segmentArr[index].source);
+        let n2 = getCoords(segmentArr[index].target);
 
         const currentLength = Math.abs(
           Math.hypot(n1[0] - n2[0], n1[1] - n2[1])
@@ -139,6 +161,7 @@ export function simulate(stitchPattern, scale) {
           const splinePts = yarnSpline(p0, p1, p2, p3, tension);
           segment.path = splinePath(splinePts);
         }
+
         p0 = p1;
         p1 = p2;
         p2 = p3;
@@ -150,62 +173,35 @@ export function simulate(stitchPattern, scale) {
   // DRAW
   ///////////////////////
 
-  function drawSegmentPathToLayer(layer, colorIndex, path) {
-    if (!path) return;
-    if (layer.length == 2) {
-      layer.forEach((layerID, index) => {
-        let ctx =
-          canvasLayers[
-            GLOBAL_STATE.flipped ? numLayers - layerID : layerID - 1
-          ];
-        ctx.strokeStyle = GLOBAL_STATE.yarnPalette[colorIndex];
-        ctx.stroke(new Path2D(path[index]));
-      });
-    } else {
-      let ctx =
-        canvasLayers[GLOBAL_STATE.flipped ? numLayers - layer : layer - 1];
-
-      // console.log(layer);
-      ctx.strokeStyle = GLOBAL_STATE.yarnPalette[colorIndex];
-      // ctx.lineCap = "round";
-
-      ctx.stroke(new Path2D(path));
-    }
-  }
-
   function drawYarnSegments(yarnSegMap) {
-    // const layerDS
-    // let row;
-    // let currentSegment = segments.length - 1;
-
-    // while (currentSegment >= 0) {
-    //   row = segments[currentSegment].row;
-    //   const colorIndex = yarnColor(row);
-
-    //   while (currentSegment >= 0 && segments[currentSegment].row == row) {
-    //     const { layer, path } = segments[currentSegment];
-    //     drawSegmentPathToLayer(layer, colorIndex, path);
-    //     currentSegment--;
-    //   }
-    // }
+    // yarnSegMap is an object mapping yarns to their segment paths
 
     Object.entries(yarnSegMap).forEach(([yarnIndex, segments]) => {
-      let row;
-      let currentSegment = 0;
+      // For each yarn
+      const pathLayers = Array.from(Array(canvasLayers.length), () => []);
 
-      while (currentSegment < segments.length) {
-        row = segments[currentSegment].row;
-        const colorIndex = yarnColor(row);
-
-        while (
-          currentSegment < segments.length &&
-          segments[currentSegment].row == row
-        ) {
-          const { layer, path } = segments[currentSegment];
-          drawSegmentPathToLayer(layer, colorIndex, path);
-          currentSegment++;
+      segments.forEach(({ layer, path }) => {
+        if (!path) return;
+        if (layer.length == 2) {
+          // Draw the path across two layers
+          layer.forEach((layerID, index) => {
+            let layerIndex = GLOBAL_STATE.flipped
+              ? numLayers - layerID
+              : layerID - 1;
+            pathLayers[layerIndex].push(path[index]);
+          });
+        } else {
+          // Path is all on one layer
+          let layerIndex = GLOBAL_STATE.flipped ? numLayers - layer : layer - 1;
+          pathLayers[layerIndex].push(path);
         }
-      }
+      });
+
+      pathLayers.forEach((path, layerIndex) => {
+        let ctx = canvasLayers[layerIndex];
+        ctx.strokeStyle = GLOBAL_STATE.yarnPalette[yarnIndex - 1];
+        ctx.stroke(new Path2D(path));
+      });
     });
   }
 
@@ -255,10 +251,10 @@ export function simulate(stitchPattern, scale) {
 
       if (layer < DS.maxCNStack * 2) {
         //purl layer
-        brightness = layer % 2 == 0 ? 0.7 - l * b : 0.9 - l * b;
+        brightness = layer % 2 == 0 ? 0.6 - l * b : 0.8 - l * b;
       } else {
         //knit layer
-        brightness = layer % 2 == 0 ? 0.8 - l * b : 1 - l * b;
+        brightness = layer % 2 == 0 ? 0.7 - l * b : 1 - l * b;
       }
 
       canvas.style.cssText = `width: ${width}px; height: ${height}px; z-index: ${layer}; filter: brightness(${brightness});`;
@@ -269,6 +265,21 @@ export function simulate(stitchPattern, scale) {
       // ctx.shadowBlur = 1;
       canvasLayers.push(ctx);
       parentEl.appendChild(canvas);
+    }
+
+    let debugCanvas = document.createElement("canvas");
+    debugCanvas.id = "debug";
+    debugCanvas.width = canvasWidth;
+    debugCanvas.height = canvasHeight;
+    debugCanvas.style.cssText = `width: ${width}px; height: ${height}px; z-index: ${1000};`;
+    let ctx = debugCanvas.getContext("2d");
+    ctx.translate(offsetX, offsetY);
+    parentEl.appendChild(debugCanvas);
+
+    if (GLOBAL_STATE.flipped) {
+      parentEl.classList.add("mirrored");
+    } else {
+      parentEl.classList.remove("mirrored");
     }
   }
 

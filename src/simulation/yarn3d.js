@@ -11,13 +11,17 @@ export function layoutNodes(
   // calculates the x,y values for the i,j
   const HALF_STITCH = stitchWidth / 2;
   const STITCH_HEIGHT = stitchWidth * stitchAspect;
+
   return DS.data.map((node, index) => {
     const i = index % DS.width;
     const j = (index - i) / DS.width;
+
+    const chartRow = j < rowMap.length ? rowMap[j] : stitchChart.height;
+
     return {
       pos: {
         x: i * HALF_STITCH,
-        y: (stitchChart.height - rowMap[j] - 1) * STITCH_HEIGHT,
+        y: (stitchChart.height - chartRow) * STITCH_HEIGHT,
         // y: (stitchChart.height - j - 1) * STITCH_HEIGHT,
       },
       f: {
@@ -130,8 +134,11 @@ export function buildSegmentData(
         layer = [startLayer, endLayer];
       }
 
-      // console.log(layer, sourceLayer, targetLayer, index);
-      if (layer == undefined) layer = 1;
+      if (layer == undefined) {
+        // This happens at the top row?
+        // console.log(layer, sourceLayer, targetLayer, index);
+        layer = 1;
+      }
 
       // console.log([startLayer, endLayer]);
       // console.log(layer);
