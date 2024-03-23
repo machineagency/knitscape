@@ -5,6 +5,36 @@ import { pan } from "./chartPanZoom";
 import { selectBox } from "./select";
 import { Bimp } from "../lib/Bimp";
 
+export function boundaryModePointerDown(e) {
+  const cl = e.target.classList;
+
+  if (cl.contains("point")) {
+    // point is only shown if the boundary is selected
+    dragBoundaryPoint(e);
+  } else if (cl.contains("path")) {
+    // path is only shown if the boundary is selected
+    dragBoundaryLine(e);
+  } else if (cl.contains("boundary")) {
+    if (
+      GLOBAL_STATE.selectedBoundary == Number(e.target.dataset.boundaryindex)
+    ) {
+      dragBoundary(e);
+    } else {
+      beginDrag(e);
+    }
+  } else {
+    beginDrag(e);
+  }
+}
+
+export function boundaryModeContextMenu(e) {
+  if (e.target.classList.contains("point")) {
+    deletePoint(e);
+  } else if (e.target.classList.contains("path")) {
+    addPoint(e);
+  }
+}
+
 export function removeBoundary(index) {
   const { boundaries, regions } = GLOBAL_STATE;
 
@@ -95,7 +125,7 @@ function deletePoint(e) {
   });
 }
 
-function dragPoint(e) {
+function dragBoundaryPoint(e) {
   const boundaryIndex = Number(e.target.dataset.boundaryindex);
   const pointIndex = Number(e.target.dataset.index);
 
@@ -140,7 +170,7 @@ function dragPoint(e) {
   window.addEventListener("pointerleave", end);
 }
 
-function dragPath(e) {
+function dragBoundaryLine(e) {
   const boundaryIndex = Number(e.target.dataset.boundaryindex);
   const pointIndex = Number(e.target.dataset.index);
 
@@ -158,10 +188,10 @@ function dragPath(e) {
     if (e.buttons == 0) {
       end();
     } else {
-      const { scale, cellAspect, boundaries } = GLOBAL_STATE;
+      const { cellWidth, cellHeight, boundaries } = GLOBAL_STATE;
 
-      let dx = Math.round((startPos.x - e.clientX) / scale);
-      let dy = Math.round((startPos.y - e.clientY) / scale / cellAspect);
+      let dx = Math.round((startPos.x - e.clientX) / cellWidth);
+      let dy = Math.round((startPos.y - e.clientY) / cellHeight);
 
       if (last[0] == dx && last[1] == dy) return;
 
@@ -173,8 +203,7 @@ function dragPath(e) {
         y1 + dy,
       ];
 
-      last[0] = dx;
-      last[1] = dy;
+      last = [dx, dy];
 
       dispatch({
         boundaries: newBounds,
@@ -243,7 +272,7 @@ function dragBoundary(e) {
   window.addEventListener("pointerleave", end);
 }
 
-function editBoundary(e) {
+function selectBoundary(e) {
   const boundaryIndex = Number(e.target.dataset.boundaryindex);
 
   dispatch({ selectedBoundary: boundaryIndex, stitchSelect: null }, true);
@@ -363,7 +392,7 @@ function beginDrag(e) {
   function end(e) {
     if (!moved && e.target.classList.contains("boundary")) {
       //if we didn't move
-      editBoundary(e);
+      selectBoundary(e);
     }
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerup", end);
@@ -374,36 +403,6 @@ function beginDrag(e) {
   window.addEventListener("pointermove", move);
   window.addEventListener("pointerup", end);
   window.addEventListener("pointerleave", end);
-}
-
-export function boundaryModePointerDown(e) {
-  const cl = e.target.classList;
-
-  if (cl.contains("point")) {
-    // point is only shown if the boundary is selected
-    dragPoint(e);
-  } else if (cl.contains("path")) {
-    // path is only shown if the boundary is selected
-    dragPath(e);
-  } else if (cl.contains("boundary")) {
-    if (
-      GLOBAL_STATE.selectedBoundary == Number(e.target.dataset.boundaryindex)
-    ) {
-      dragBoundary(e);
-    } else {
-      beginDrag(e);
-    }
-  } else {
-    beginDrag(e);
-  }
-}
-
-export function boundaryModeContextMenu(e) {
-  if (e.target.classList.contains("point")) {
-    deletePoint(e);
-  } else if (e.target.classList.contains("path")) {
-    addPoint(e);
-  }
 }
 
 function blockPos(e) {
@@ -430,10 +429,10 @@ export function moveBoundaryFill(e) {
     if (e.buttons == 0) {
       end();
     } else {
-      const { scale, cellAspect } = GLOBAL_STATE;
+      const { cellWidth, cellHeight } = GLOBAL_STATE;
 
-      let dx = Math.round((startPos.x - e.clientX) / scale);
-      let dy = Math.round((startPos.y - e.clientY) / scale / cellAspect);
+      let dx = Math.round((startPos.x - e.clientX) / cellWidth);
+      let dy = Math.round((startPos.y - e.clientY) / cellHeight);
 
       if (last[0] == dx && last[1] == dy) return;
 

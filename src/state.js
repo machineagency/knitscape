@@ -14,7 +14,7 @@ let GLOBAL_STATE = {
   transforming: false, // If the pointer is being used to do something
 
   // Interaction mode can be path, boundary, block, or pan.
-  interactionMode: "boundary",
+  interactionMode: "path",
   pointer: [0, 0], // Pointer postition in chart coordinates
   locked: false,
 
@@ -29,16 +29,15 @@ let GLOBAL_STATE = {
   paths: [],
   blocks: [],
 
-  blockEditMode: null, // Can be yarn, stitch, or null
+  blockEditMode: "yarn", // Can be yarn, stitch, or null
   activeBlockTool: "brush",
 
   selectedBoundary: null,
-
-  // TODO: Rename to "selection"?
-  stitchSelect: null,
-
-  // TODO: This should be a reference to any block (path, fill, free)
+  selectedPath: 0,
+  // TODO: ? This should be a reference to any block (path, fill, free)
   selectedBlock: null,
+
+  stitchSelect: null,
 
   chart: null,
   yarnChart: null,
@@ -56,7 +55,7 @@ let GLOBAL_STATE = {
   // SIMULATION
   simScale: 1,
   simPan: { x: 0, y: 0 },
-  flipped: true,
+  flipped: false,
   simLive: true,
 
   // YARN

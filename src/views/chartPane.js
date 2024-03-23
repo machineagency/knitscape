@@ -2,7 +2,7 @@ import { html, svg } from "lit-html";
 import { when } from "lit-html/directives/when.js";
 import { classMap } from "lit-html/directives/class-map.js";
 
-import { GLOBAL_STATE, dispatch } from "../state";
+import { GLOBAL_STATE } from "../state";
 
 import {
   chartContextMenu,
@@ -11,11 +11,13 @@ import {
 import { zoom } from "../interaction/chartPanZoom";
 
 import {
-  boundaryView,
+  backgroundBoundaryView,
   activeBoundaryPath,
   boundaryBlocks,
 } from "./annotations/boundaries";
 import { blocks } from "./annotations/blocks";
+
+import { backgroundPathView, activePath, pathTiles } from "./paths";
 import { stitchSelectBox } from "./annotations/selectBox";
 import { currentTargetPointerPos } from "../utilities/misc";
 
@@ -55,8 +57,6 @@ function trackPointer(e) {
 
 export function chartPaneView() {
   const {
-    boundaries,
-    selectedBoundary,
     cellWidth,
     cellHeight,
     chartPan,
@@ -74,7 +74,9 @@ export function chartPaneView() {
   const h = Math.round(cellHeight * chart.height);
 
   const classes = {
-    allowHover: !transforming && interactionMode == "boundary",
+    allowHover:
+      !transforming &&
+      (interactionMode == "boundary" || interactionMode == "path"),
     boundaryMode: interactionMode == "boundary",
     pathMode: interactionMode == "path",
     blockMode: interactionMode == "block",
@@ -109,19 +111,17 @@ export function chartPaneView() {
               </rect>`
                 : ""}
             </g>
-            ${boundaryView()}
+            ${backgroundBoundaryView()} ${backgroundPathView()}
           </g>
         </g>
       </svg>
       <div
         style="position: absolute; bottom: 0; left: 0;
       transform: translate(${chartPan.x}px, ${-chartPan.y}px); ">
-        ${when(
-          interactionMode == "boundary" && selectedBoundary != null,
-          boundaryBlocks
-        )}
-        ${when(stitchSelect, stitchSelectBox)}
+        ${when(interactionMode == "boundary", boundaryBlocks)}
+        ${when(interactionMode == "path", pathTiles)}
         ${when(interactionMode == "block", blocks)}
+        ${when(stitchSelect, stitchSelectBox)}
       </div>
       <svg
         preserveAspectRatio="xMidYMid meet"
@@ -134,7 +134,7 @@ export function chartPaneView() {
         @wheel=${zoom}>
         <g transform="scale (1, -1)" transform-origin="center">
           <g transform="translate(${chartPan.x} ${chartPan.y})">
-            ${activeBoundaryPath()}
+            ${activeBoundaryPath()} ${activePath()}
           </g>
         </g>
       </svg>

@@ -34,12 +34,12 @@ const testWorkspace = {
       [10, 0],
     ],
 
-    [
-      [5, 5],
-      [5, 15],
-      [10, 15],
-      [10, 5],
-    ],
+    // [
+    //   [5, 5],
+    //   [5, 15],
+    //   [10, 15],
+    //   [10, 5],
+    // ],
     // [
     //   [0, 0],
     //   [0, 4],
@@ -58,22 +58,33 @@ const testWorkspace = {
       yarnBlock: new Bimp(1, 1, [1]),
       stitchBlock: new Bimp(1, 1, [1]),
     },
-    {
-      pos: [0, 0],
-      yarnBlock: new Bimp(1, 1, [2]),
-      stitchBlock: new Bimp(1, 1, [1]),
-    },
+    // {
+    //   pos: [0, 0],
+    //   yarnBlock: new Bimp(1, 1, [2]),
+    //   stitchBlock: new Bimp(1, 1, [1]),
+    // },
   ],
   blocks: [],
   paths: [
     {
       pts: [
         [2, 2],
-        [10, 10],
+        [5, 5],
+        [3, 8],
       ],
-      pos: [4, 4],
+      offset: [0, 0],
       yarnBlock: new Bimp(1, 1, [1]),
       stitchBlock: new Bimp(1, 1, [1]),
+    },
+
+    {
+      pts: [
+        [7, 7],
+        [6, 12],
+      ],
+      offset: [-2, 0],
+      yarnBlock: new Bimp(2, 2, [1, 1, 1, 1]),
+      stitchBlock: new Bimp(2, 2, [1, 1, 1, 1]),
     },
   ],
 };
@@ -84,7 +95,7 @@ function init() {
   r();
 
   Split(["#chart-pane", "#sim-pane"], {
-    sizes: [40, 60],
+    sizes: [70, 30],
     minSize: 100,
     gutterSize: 8,
   });

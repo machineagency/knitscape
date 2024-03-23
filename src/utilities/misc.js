@@ -35,6 +35,11 @@ export function currentTargetPointerPos(e) {
   return [e.clientX - rect.left, rect.height - (e.clientY - rect.top)];
 }
 
+export function pointerPosInElement(e, el) {
+  const rect = el.getBoundingClientRect();
+  return [e.clientX - rect.left, rect.height - (e.clientY - rect.top)];
+}
+
 export function getRandomColor() {
   const letters = "0123456789ABCDEF";
   let color = "#";

@@ -1,12 +1,10 @@
 import { svg, html } from "lit-html";
-import { GLOBAL_STATE, dispatch } from "../../state";
+import { GLOBAL_STATE } from "../../state";
 import {
   moveBoundaryFill,
   editBoundaryFill,
   resizeFillBlock,
 } from "../../interaction/boundaryInteraction";
-import { editingTools } from "../../charting/editingTools";
-import { toolData } from "../../constants";
 
 function boundaryPoints(boundaryIndex, pts, cellWidth, cellHeight) {
   return pts.map(
@@ -50,7 +48,7 @@ function boundaryPaths(boundaryIndex, pts, cellWidth, cellHeight) {
 export function boundaryBlocks() {
   const { selectedBoundary, regions, cellWidth, cellHeight, blockEditMode } =
     GLOBAL_STATE;
-  if (blockEditMode == null) return;
+  if (blockEditMode == null || selectedBoundary == null) return;
 
   const { pos } = regions[selectedBoundary];
 
@@ -103,7 +101,7 @@ function inactiveBoundary(boundaryIndex, boundary, cellWidth, cellHeight) {
       )} Z">`;
 }
 
-export function boundaryView() {
+export function backgroundBoundaryView() {
   let { boundaries, selectedBoundary, scale, cellAspect } = GLOBAL_STATE;
   const cellHeight = scale * cellAspect;
 
