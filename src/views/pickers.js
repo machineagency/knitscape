@@ -65,8 +65,15 @@ export function pickers() {
 }
 
 function getCurrentBlock() {
-  const { blocks, selectedBlock, blockEditMode, selectedBoundary, regions } =
-    GLOBAL_STATE;
+  const {
+    blocks,
+    selectedBlock,
+    blockEditMode,
+    selectedBoundary,
+    regions,
+    selectedPath,
+    paths,
+  } = GLOBAL_STATE;
 
   let currentBlock = null;
 
@@ -80,6 +87,11 @@ function getCurrentBlock() {
       blockEditMode == "stitch"
         ? blocks[selectedBlock].stitchBlock
         : blocks[selectedBlock].yarnBlock;
+  } else if (selectedPath != null) {
+    currentBlock =
+      blockEditMode == "stitch"
+        ? paths[selectedPath].stitchBlock
+        : paths[selectedPath].yarnBlock;
   }
 
   return currentBlock;

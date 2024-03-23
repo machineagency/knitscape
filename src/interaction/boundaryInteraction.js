@@ -35,6 +35,12 @@ export function boundaryModeContextMenu(e) {
   }
 }
 
+export function setBoundaryJoinMode(boundaryIndex, mode) {
+  const updatedRegions = [...GLOBAL_STATE.regions];
+  updatedRegions[boundaryIndex].joinMode = mode;
+  dispatch({ regions: updatedRegions });
+}
+
 export function removeBoundary(index) {
   const { boundaries, regions } = GLOBAL_STATE;
 

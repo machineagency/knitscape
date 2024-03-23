@@ -3,7 +3,10 @@ import { when } from "lit-html/directives/when.js";
 
 import { GLOBAL_STATE, dispatch } from "../state";
 import { removeBlock } from "../interaction/blockInteraction";
-import { removeBoundary } from "../interaction/boundaryInteraction";
+import {
+  removeBoundary,
+  setBoundaryJoinMode,
+} from "../interaction/boundaryInteraction";
 import { removePath, setPathTileMode } from "../interaction/pathInteraction";
 import { boundaryBbox } from "../utilities/misc";
 
@@ -123,7 +126,7 @@ export function pathToolbar() {
 }
 
 export function boundaryToolbar() {
-  const { blockEditMode, selectedBoundary, boundaries } = GLOBAL_STATE;
+  const { blockEditMode, selectedBoundary, boundaries, regions } = GLOBAL_STATE;
 
   if (selectedBoundary == null)
     return html`
@@ -133,6 +136,7 @@ export function boundaryToolbar() {
     `;
 
   let bbox = boundaryBbox(boundaries[selectedBoundary]);
+  let region = regions[selectedBoundary];
 
   return html` <div class="h-group">
       <div class="has-dropdown">
@@ -154,26 +158,36 @@ export function boundaryToolbar() {
       </span>
     </div>
 
-    <div class="has-dropdown">
-      <button class="btn dropdown-toggle">edit fill</button>
-      <div class="dropdown above align-right">
-        <button
-          class="btn ${blockEditMode == "yarn" ? "solid" : ""}"
-          @click=${(e) => {
-            dispatch({ blockEditMode: "yarn" }, true);
-            e.target.blur();
-          }}>
-          yarn fill
-        </button>
-        <button
-          class="btn ${blockEditMode == "stitch" ? "solid" : ""}"
-          @click=${(e) => {
-            dispatch({ blockEditMode: "stitch" }, true);
-            e.target.blur();
-          }}>
-          stitch fill
-        </button>
-      </div>
+    <div class="radio-group">
+      <button
+        class="${region.joinMode == "none" ? "selected" : ""}"
+        @click=${() => setBoundaryJoinMode(selectedBoundary, "none")}>
+        none
+      </button>
+      <button
+        class="${region.joinMode == "tucks" ? "selected" : ""}"
+        @click=${() => setBoundaryJoinMode(selectedBoundary, "tucks")}>
+        tucks
+      </button>
+    </div>
+
+    <div class="h-group">
+      <button
+        class="btn ${blockEditMode == "yarn" ? "solid" : ""}"
+        @click=${(e) => {
+          dispatch({ blockEditMode: "yarn" }, true);
+          e.target.blur();
+        }}>
+        yarn tile
+      </button>
+      <button
+        class="btn ${blockEditMode == "stitch" ? "solid" : ""}"
+        @click=${(e) => {
+          dispatch({ blockEditMode: "stitch" }, true);
+          e.target.blur();
+        }}>
+        stitch tile
+      </button>
     </div>
 
     <span class="area-size">

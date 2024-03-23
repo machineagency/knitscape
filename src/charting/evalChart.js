@@ -13,7 +13,7 @@ function shiftFills(bbox, fills) {
   });
 }
 
-export function evaluateChart(boundaries, regions, blocks) {
+export function evaluateChart(boundaries, regions, blocks, paths) {
   const bbox = bBoxAllBoundaries(boundaries);
 
   const chartWidth = bbox.xMax - bbox.xMin;

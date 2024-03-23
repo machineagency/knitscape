@@ -15,12 +15,10 @@ function debounce(callback, wait) {
 export function chartEvalSubscriber() {
   return () => {
     function evalChart() {
+      const { boundaries, regions, blocks, paths } = GLOBAL_STATE;
+
       let { stitchChart, yarnChart, machineChart, yarnSequence, rowMap } =
-        evaluateChart(
-          GLOBAL_STATE.boundaries,
-          GLOBAL_STATE.regions,
-          GLOBAL_STATE.blocks
-        );
+        evaluateChart(boundaries, regions, blocks, paths);
 
       dispatch({
         chart: stitchChart,
@@ -28,17 +26,17 @@ export function chartEvalSubscriber() {
         machineChart,
         yarnSequence,
         rowMap,
-        bbox: bBoxAllBoundaries(GLOBAL_STATE.boundaries),
+        bbox: bBoxAllBoundaries(boundaries),
       });
     }
 
-    const debouncedEval = debounce(evalChart, 10);
+    const debouncedEval = debounce(evalChart, 30);
 
     evalChart();
 
     return {
       syncState(state, changes) {
-        const found = ["boundaries", "regions", "blocks"].some((key) =>
+        const found = ["boundaries", "regions", "blocks", "paths"].some((key) =>
           changes.includes(key)
         );
 

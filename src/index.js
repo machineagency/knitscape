@@ -58,6 +58,7 @@ const testWorkspace = {
       pos: [0, 0],
       yarnBlock: new Bimp(1, 1, [1]),
       stitchBlock: new Bimp(1, 1, [1]),
+      joinMode: "tucks",
     },
     // {
     //   pos: [0, 0],

@@ -28,21 +28,25 @@ export function downloadWorkspace({
         cellAspect,
         yarnPalette,
         boundaries,
-        regions: regions.map(({ pos, yarnBlock, stitchBlock }) => {
+        regions: regions.map(({ pos, joinMode, yarnBlock, stitchBlock }) => {
           return {
             pos,
+            joinMode,
             yarnBlock: yarnBlock.toJSON(),
             stitchBlock: stitchBlock.toJSON(),
           };
         }),
-        paths: paths.map(({ pts, pos, yarnBlock, stitchBlock }) => {
-          return {
-            pts,
-            pos,
-            yarnBlock: yarnBlock.toJSON(),
-            stitchBlock: stitchBlock.toJSON(),
-          };
-        }),
+        paths: paths.map(
+          ({ pts, offset, tileMode, yarnBlock, stitchBlock }) => {
+            return {
+              pts,
+              offset,
+              tileMode,
+              yarnBlock: yarnBlock.toJSON(),
+              stitchBlock: stitchBlock.toJSON(),
+            };
+          }
+        ),
         blocks: blocks.map(({ pos, yarnBlock, stitchBlock }) => {
           return {
             pos,
@@ -91,33 +95,6 @@ export function downloadTimeNeedleBMP(machineChart) {
 
   downloadFile(im.src, "pattern.bmp");
 }
-
-// export function downloadSVG() {
-//   const svg = document.getElementById("simulation");
-
-//   //get svg source.
-//   const serializer = new XMLSerializer();
-//   let source = serializer.serializeToString(svg);
-
-//   //add name spaces.
-//   if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
-//     source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
-//   }
-//   if (!source.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)) {
-//     source = source.replace(
-//       /^<svg/,
-//       '<svg xmlns:xlink="http://www.w3.org/1999/xlink"'
-//     );
-//   }
-
-//   //add xml declaration
-//   source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
-
-//   download(
-//     "data:image/svg+xml;charset=utf-8," + encodeURIComponent(source),
-//     "swatch.svg"
-//   );
-// }
 
 // export function downloadPunchcard() {
 //   const svg = document.getElementById("punchcard");

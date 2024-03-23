@@ -19,17 +19,19 @@ function hydrateWorkspaceJSON(dryWorkspaceJSON) {
     cellAspect,
     yarnPalette,
     boundaries,
-    regions: regions.map(({ pos, yarnBlock, stitchBlock }) => {
+    regions: regions.map(({ pos, joinMode, yarnBlock, stitchBlock }) => {
       return {
         pos,
+        joinMode,
         yarnBlock: Bimp.fromJSON(yarnBlock),
         stitchBlock: Bimp.fromJSON(stitchBlock),
       };
     }),
-    paths: paths.map(({ pts, pos, yarnBlock, stitchBlock }) => {
+    paths: paths.map(({ pts, offset, tileMode, yarnBlock, stitchBlock }) => {
       return {
         pts,
-        pos,
+        offset,
+        tileMode,
         yarnBlock: Bimp.fromJSON(yarnBlock),
         stitchBlock: Bimp.fromJSON(stitchBlock),
       };
@@ -60,11 +62,11 @@ export function uploadFile(cb) {
 }
 
 export function loadWorkspace(workspace) {
-  const { boundaries, regions, blocks } = workspace;
+  const { boundaries, regions, blocks, paths } = workspace;
 
   // Make chart by evaluating workspace
   let { stitchChart, yarnChart, machineChart, yarnSequence, rowMap } =
-    evaluateChart(boundaries, regions, blocks);
+    evaluateChart(boundaries, regions, blocks, paths);
   dispatch({
     ...workspace,
     chart: stitchChart,

@@ -18,8 +18,10 @@ export function pathModePointerDown(e) {
     dragPathLine(e);
   } else if (cl.contains("background-path-hover")) {
     selectPath(e);
-  } else {
+  } else if (GLOBAL_STATE.selectedPath == null) {
     drawPathLine(e);
+  } else if (GLOBAL_STATE.selectedPath != null) {
+    dispatch({ selectedPath: null }, true);
   }
 }
 
