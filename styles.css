@@ -212,6 +212,7 @@ canvas {
   gap: 0.4em;
   padding: 0.2em 0 0.2em 0.4em;
   justify-content: space-between;
+  font-size: 0.9em;
 }
 
 .toolbar-message {

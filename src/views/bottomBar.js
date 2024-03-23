@@ -1,6 +1,6 @@
-import { html, svg } from "lit-html";
+import { html } from "lit-html";
 import { GLOBAL_STATE, dispatch } from "../state";
-import { zoom, fitChart, centerZoom } from "../interaction/chartPanZoom";
+import { fitChart, centerZoom } from "../interaction/chartPanZoom";
 
 function setInteractionMode(mode) {
   dispatch(
@@ -19,28 +19,32 @@ function setInteractionMode(mode) {
 export function bottomBar() {
   const { pointer, colorMode, interactionMode, scale } = GLOBAL_STATE;
   return html`<div class="chart-bottom-bar">
-    <button
-      class="btn solid mode-toggle"
-      @click=${() =>
-        dispatch({
-          colorMode: colorMode == "operation" ? "yarn" : "operation",
-        })}>
-      ${colorMode == "operation" ? "command view" : "yarn view"}
-    </button>
-
-    <div class="h-group">
+    <div class="radio-group">
       <button
-        class="btn ${interactionMode == "boundary" ? "solid" : ""}"
+        class="${colorMode == "operation" ? "selected" : ""}"
+        @click=${() => dispatch({ colorMode: "operation" })}>
+        command view
+      </button>
+      <button
+        class="${colorMode == "yarn" ? "selected" : ""}"
+        @click=${() => dispatch({ colorMode: "yarn" })}>
+        yarn view
+      </button>
+    </div>
+
+    <div class="radio-group">
+      <button
+        class="${interactionMode == "boundary" ? "selected" : ""}"
         @click=${() => setInteractionMode("boundary")}>
         boundaries
       </button>
       <button
-        class="btn ${interactionMode == "path" ? "solid" : ""}"
+        class="${interactionMode == "path" ? "selected" : ""}"
         @click=${() => setInteractionMode("path")}>
         paths
       </button>
       <button
-        class="btn ${interactionMode == "block" ? "solid" : ""}"
+        class="${interactionMode == "block" ? "selected" : ""}"
         @click=${() => setInteractionMode("block")}>
         blocks
       </button>

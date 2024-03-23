@@ -37,6 +37,12 @@ function selectPath(e) {
   dispatch({ selectedPath: pathIndex }, true);
 }
 
+export function setPathTileMode(pathIndex, mode) {
+  const updatedPaths = [...GLOBAL_STATE.paths];
+  updatedPaths[pathIndex].tileMode = mode;
+  dispatch({ paths: updatedPaths });
+}
+
 function addPathPoint(e) {
   const rect = e.currentTarget.getBoundingClientRect();
 
@@ -413,6 +419,7 @@ export function drawPathLine(e) {
     offset: [0, 0],
     yarnBlock: new Bimp(1, 1, [1]),
     stitchBlock: new Bimp(1, 1, [1]),
+    tileMode: "continuous",
   });
 
   dispatch({
@@ -461,17 +468,13 @@ export function drawPathLine(e) {
   function escapePath(e) {
     if (e.key == "Escape") {
       const updatedPaths = [...GLOBAL_STATE.paths];
-      console.log(GLOBAL_STATE.paths.at(-1));
 
       if (updatedPaths.at(-1).pts.length > 2) {
         updatedPaths[updatedPaths.length - 1].pts.pop();
         dispatch({ paths: updatedPaths });
       } else {
-        console.log(GLOBAL_STATE.paths);
-
         updatedPaths.pop();
-        console.log(updatedPaths);
-        dispatch({ paths: updatedPaths });
+        dispatch({ paths: updatedPaths, selectedPath: null });
       }
       end();
     }

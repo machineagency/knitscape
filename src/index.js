@@ -8,6 +8,7 @@ import { chartSubscriber } from "./subscribers/chartSubscriber";
 import { blockSubscriber } from "./subscribers/blockSubscriber";
 import { blockFillSubscriber } from "./subscribers/blockFillSubscriber";
 import { chartEvalSubscriber } from "./subscribers/chartEvalSubscriber";
+import { pathTileSubscriber } from "./subscribers/pathTileSubscriber";
 
 import { globalKeydown, globalKeyup } from "./interaction/globalKeypress";
 
@@ -75,6 +76,7 @@ const testWorkspace = {
       offset: [0, 0],
       yarnBlock: new Bimp(1, 1, [1]),
       stitchBlock: new Bimp(1, 1, [1]),
+      tileMode: "continuous",
     },
 
     {
@@ -85,6 +87,7 @@ const testWorkspace = {
       offset: [-2, 0],
       yarnBlock: new Bimp(2, 2, [1, 1, 1, 1]),
       stitchBlock: new Bimp(2, 2, [1, 1, 1, 1]),
+      tileMode: "continuous",
     },
   ],
 };
@@ -110,6 +113,7 @@ function init() {
     chartSubscriber(),
     blockSubscriber(),
     blockFillSubscriber(),
+    pathTileSubscriber(),
     runSimulation(),
   ]);
 

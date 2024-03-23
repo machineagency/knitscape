@@ -3,12 +3,16 @@ import { toolData } from "../constants";
 import { closeModals } from "../utilities/misc";
 import { removeBlock } from "./blockInteraction";
 import { removeBoundary } from "./boundaryInteraction";
+import { removePath } from "./pathInteraction";
 
 function escapeEverything() {
+  if (GLOBAL_STATE.transforming) return;
+
   dispatch(
     {
       selectedBlock: null,
       selectedBoundary: null,
+      selectedPath: null,
       stitchSelect: null,
       blockEditMode: null,
     },
@@ -18,12 +22,14 @@ function escapeEverything() {
 }
 
 function deleteSelected() {
-  let { selectedBlock, selectedBoundary } = GLOBAL_STATE;
+  let { selectedBlock, selectedBoundary, selectedPath } = GLOBAL_STATE;
 
   if (selectedBlock != null) {
     removeBlock(selectedBlock);
   } else if (selectedBoundary != null) {
     removeBoundary(selectedBoundary);
+  } else if (selectedPath != null) {
+    removePath(selectedPath);
   }
 }
 

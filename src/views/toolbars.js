@@ -4,7 +4,7 @@ import { when } from "lit-html/directives/when.js";
 import { GLOBAL_STATE, dispatch } from "../state";
 import { removeBlock } from "../interaction/blockInteraction";
 import { removeBoundary } from "../interaction/boundaryInteraction";
-import { removePath } from "../interaction/pathInteraction";
+import { removePath, setPathTileMode } from "../interaction/pathInteraction";
 import { boundaryBbox } from "../utilities/misc";
 
 export function freeBlockToolbar() {
@@ -58,7 +58,7 @@ export function freeBlockToolbar() {
 }
 
 export function pathToolbar() {
-  const { blockEditMode, selectedPath } = GLOBAL_STATE;
+  const { blockEditMode, selectedPath, paths } = GLOBAL_STATE;
 
   if (selectedPath == null)
     return html`
@@ -66,6 +66,8 @@ export function pathToolbar() {
         Select a path to edit it or drag to add a new boundary.
       </div>
     `;
+
+  const currentPath = paths[selectedPath];
 
   return html`
     <div class="h-group">
@@ -86,26 +88,36 @@ export function pathToolbar() {
       </span>
     </div>
 
-    <div class="has-dropdown">
-      <button class="btn dropdown-toggle">edit fill</button>
-      <div class="dropdown above align-right">
-        <button
-          class="btn ${blockEditMode == "yarn" ? "solid" : ""}"
-          @click=${(e) => {
-            dispatch({ blockEditMode: "yarn" }, true);
-            e.target.blur();
-          }}>
-          yarn fill
-        </button>
-        <button
-          class="btn ${blockEditMode == "stitch" ? "solid" : ""}"
-          @click=${(e) => {
-            dispatch({ blockEditMode: "stitch" }, true);
-            e.target.blur();
-          }}>
-          stitch fill
-        </button>
-      </div>
+    <div class="radio-group">
+      <button
+        class="${currentPath.tileMode == "continuous" ? "selected" : ""}"
+        @click=${() => setPathTileMode(selectedPath, "continuous")}>
+        continuous
+      </button>
+      <button
+        class="${currentPath.tileMode == "stepped" ? "selected" : ""}"
+        @click=${() => setPathTileMode(selectedPath, "stepped")}>
+        stepped
+      </button>
+    </div>
+
+    <div class="h-group">
+      <button
+        class="btn ${blockEditMode == "yarn" ? "solid" : ""}"
+        @click=${(e) => {
+          dispatch({ blockEditMode: "yarn" }, true);
+          e.target.blur();
+        }}>
+        yarn tile
+      </button>
+      <button
+        class="btn ${blockEditMode == "stitch" ? "solid" : ""}"
+        @click=${(e) => {
+          dispatch({ blockEditMode: "stitch" }, true);
+          e.target.blur();
+        }}>
+        stitch tile
+      </button>
     </div>
   `;
 }

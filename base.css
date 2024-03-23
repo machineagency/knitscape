@@ -582,3 +582,33 @@ DROPDOWN
   background-color: #343434;
   box-shadow: 0 0 2px 0 black;
 }
+
+/***********************************
+
+TOGGLE BUTTON GROUP
+
+***********************************/
+
+.radio-group {
+  display: flex;
+  box-shadow: 0 0 2px 0 black;
+  background-color: var(--base0);
+  border-radius: 0.2em;
+}
+
+.radio-group button {
+  border: none;
+  background-color: transparent;
+  font-family: inherit;
+  padding: 0.2em 0.4em;
+  border-radius: 0.2em;
+  color: var(--text-inactive);
+}
+
+.radio-group button:hover {
+  color: var(--text);
+}
+
+.radio-group button.selected {
+  background-color: var(--base2);
+}
