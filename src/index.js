@@ -29,15 +29,38 @@ const testWorkspace = {
   boundaries: [
     [
       [0, 0],
-      [0, 5],
-      [5, 5],
-      [5, 0],
+      [0, 20],
+      [10, 20],
+      [10, 0],
     ],
+
+    [
+      [5, 5],
+      [5, 15],
+      [10, 15],
+      [10, 5],
+    ],
+    // [
+    //   [0, 0],
+    //   [0, 4],
+    //   [5, 4],
+    //   [5, 0],
+    // ],
   ],
   regions: [
+    // {
+    //   pos: [0, 0],
+    //   yarnBlock: new Bimp(1, 1, [1]),
+    //   stitchBlock: new Bimp(3, 3, [1, 1, 1, 1, 1, 1, 1, 1, 5]),
+    // },
     {
       pos: [0, 0],
       yarnBlock: new Bimp(1, 1, [1]),
+      stitchBlock: new Bimp(1, 1, [1]),
+    },
+    {
+      pos: [0, 0],
+      yarnBlock: new Bimp(1, 1, [2]),
       stitchBlock: new Bimp(1, 1, [1]),
     },
   ],
@@ -61,7 +84,7 @@ function init() {
   r();
 
   Split(["#chart-pane", "#sim-pane"], {
-    sizes: [60, 40],
+    sizes: [40, 60],
     minSize: 100,
     gutterSize: 8,
   });

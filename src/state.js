@@ -56,7 +56,7 @@ let GLOBAL_STATE = {
   // SIMULATION
   simScale: 1,
   simPan: { x: 0, y: 0 },
-  flipped: false,
+  flipped: true,
   simLive: true,
 
   // YARN

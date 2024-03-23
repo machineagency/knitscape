@@ -23,7 +23,8 @@ export function simulate(stitchPattern, scale) {
 
   init();
 
-  let DS, yarnPaths;
+  let debug = false;
+  let DS, yarnPaths, debugCtx;
 
   // try {
   DS = populateDS(stitchPattern);
@@ -85,10 +86,34 @@ export function simulate(stitchPattern, scale) {
     const normal = right != isLeg ? [-y / mag, x / mag] : [y / mag, -x / mag];
 
     const [posX, posY] = getCoords([i, j]);
+
+    // if ((right && x1 < x2 && x2 < posX) || (!right && x1 > x2 && x2 > posX)) {
+    //   // Special case which happens with the intarsia tucks
+    //   // TODO: find a better fix than this?
+    //   // this messes up the simulation - we really need to calculate offset direction based on the position in the cn grid?
+    //   return [
+    //     posX - (yarnWidth() / 2) * normal[0],
+    //     posY + (yarnWidth() / 2) * normal[1],
+    //   ];
+    // }
+
     return [
       posX + (yarnWidth() / 2) * normal[0],
       posY + (yarnWidth() / 2) * normal[1],
     ];
+  }
+
+  // CN grid position, stitch row, previous CN coords, next CN coords
+  function selvageOffset([i, j], row) {
+    const right = stitchPattern.carriagePasses[row] == "right";
+
+    const [posX, posY] = getCoords([i, j]);
+
+    if (right) {
+      return [posX - yarnWidth() * 0.75, posY + yarnWidth() / 3];
+    } else {
+      return [posX + yarnWidth() * 0.75, posY + yarnWidth() / 3];
+    }
   }
 
   function getCoords([i, j]) {
@@ -116,6 +141,8 @@ export function simulate(stitchPattern, scale) {
         getCoords(segmentArr[1].target)
       );
 
+      let row = segmentArr[0].row;
+
       segmentArr.forEach((segment, index) => {
         let p3;
         if (index == segmentArr.length - 1) {
@@ -138,12 +165,22 @@ export function simulate(stitchPattern, scale) {
             [x + stitchWidth, y]
           );
         } else {
-          p3 = nodeOffset(
-            segmentArr[index + 1].target,
-            segmentArr[index].row,
-            p2,
-            getCoords(segmentArr[index + 2].target)
-          );
+          if (segmentArr[index + 2].row != row) {
+            // Special case for the selvage
+            p3 = selvageOffset(
+              segmentArr[index + 1].target,
+              segmentArr[index].row
+            );
+
+            row = segmentArr[index + 2].row;
+          } else {
+            p3 = nodeOffset(
+              segmentArr[index + 1].target,
+              segmentArr[index].row,
+              p2,
+              getCoords(segmentArr[index + 2].target)
+            );
+          }
         }
 
         let n1 = getCoords(segmentArr[index].source);
@@ -153,7 +190,8 @@ export function simulate(stitchPattern, scale) {
           Math.hypot(n1[0] - n2[0], n1[1] - n2[1])
         );
         const tension = 1 - segment.restLength / currentLength;
-
+        // console.log(tension);
+        // const tension = -0.5;
         if (segment.layer.length == 2) {
           const splinePtsArr = splitYarnSpline(p0, p1, p2, p3, tension);
           segment.path = splinePtsArr.map((splinePts) => splinePath(splinePts));
@@ -180,7 +218,7 @@ export function simulate(stitchPattern, scale) {
       // For each yarn
       const pathLayers = Array.from(Array(canvasLayers.length), () => []);
 
-      segments.forEach(({ layer, path }) => {
+      segments.toReversed().forEach(({ layer, path }) => {
         if (!path) return;
         if (layer.length == 2) {
           // Draw the path across two layers
@@ -262,19 +300,21 @@ export function simulate(stitchPattern, scale) {
       ctx.translate(offsetX, offsetY);
       ctx.lineWidth = yarnWidth();
       // ctx.shadowColor = "#444";
-      // ctx.shadowBlur = 1;
+      // ctx.shadowBlur = 3;
       canvasLayers.push(ctx);
       parentEl.appendChild(canvas);
     }
 
-    let debugCanvas = document.createElement("canvas");
-    debugCanvas.id = "debug";
-    debugCanvas.width = canvasWidth;
-    debugCanvas.height = canvasHeight;
-    debugCanvas.style.cssText = `width: ${width}px; height: ${height}px; z-index: ${1000};`;
-    let ctx = debugCanvas.getContext("2d");
-    ctx.translate(offsetX, offsetY);
-    parentEl.appendChild(debugCanvas);
+    if (debug) {
+      let debugCanvas = document.createElement("canvas");
+      debugCanvas.id = "debug";
+      debugCanvas.width = canvasWidth;
+      debugCanvas.height = canvasHeight;
+      debugCanvas.style.cssText = `width: ${width}px; height: ${height}px; z-index: ${1000};`;
+      debugCtx = debugCanvas.getContext("2d");
+      debugCtx.translate(offsetX, offsetY);
+      parentEl.appendChild(debugCanvas);
+    }
 
     if (GLOBAL_STATE.flipped) {
       parentEl.classList.add("mirrored");

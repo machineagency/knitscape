@@ -43,11 +43,10 @@ export function buildSegmentData(
   stitchWidth = 1,
   stitchAspect = 0.75
 ) {
-  // const links = [];
   const maxStack = DS.maxCNStack;
 
   // console.log("max CN stack:", maxStack);
-
+  // console.log(stitchAspect, stitchWidth);
   const links = Object.fromEntries(
     Object.keys(yarnPaths).map((yarnIndex) => [yarnIndex, []])
   );
@@ -57,17 +56,13 @@ export function buildSegmentData(
       const [sourceI, sourceJ, sourceRow, sourceLayer] = yarnPath[index];
       const [targetI, targetJ, targetRow, targetLayer] = yarnPath[index + 1];
 
-      // const sourceYarn = yarnSequence[sourceRow];
-      // const targetYarn = yarnSequence[sourceRow];
-
-      // if (sourceYarn != targetYarn) continue;
-
       let sourceIndex = sourceI + sourceJ * DS.width;
       let targetIndex = targetI + targetJ * DS.width;
 
       const source = DS.CN(sourceI, sourceJ);
       const target = DS.CN(targetI, targetJ);
 
+      // Check the yarn path index list - the first element is always a head and the second is always a leg.
       let sourceLeg = source[4][1] === index;
       let targetLeg = target[4][1] === index + 1;
 
@@ -82,8 +77,12 @@ export function buildSegmentData(
       let layer;
       let startLayer, endLayer;
 
+      // if (sourceLayer > 0) {
+      //   console.log(sourceI, sourceJ, targetJ);
+      // }
+
       if (source[0] == stitches.KNIT) {
-        if (paritiesEqual) {
+        if (paritiesEqual || (leg && !paritiesEqual && sourceJ > targetJ)) {
           // treat as knit leg
           startLayer = sourceLeg
             ? 4 * maxStack
@@ -107,7 +106,7 @@ export function buildSegmentData(
       }
 
       if (target[0] == stitches.KNIT) {
-        if (paritiesEqual) {
+        if (paritiesEqual || (leg && !paritiesEqual && targetJ > sourceJ)) {
           // treat as knit leg
           endLayer = targetLeg ? 4 * maxStack : 4 * maxStack - 2 * targetLayer;
         } else {
@@ -126,6 +125,36 @@ export function buildSegmentData(
         }
       }
 
+      // Special case for the selvage edge
+      if (sourceRow != targetRow) {
+        if (source[0] == stitches.KNIT) {
+          startLayer = startLayer = sourceLeg
+            ? 1
+            : 2 * maxStack - 2 * sourceLayer - 1;
+        } else if (source[0] == stitches.PURL) {
+          startLayer = sourceLeg
+            ? 2 * maxStack + 1
+            : 4 * maxStack - 2 * sourceLayer - 1;
+        }
+
+        if (target[0] == stitches.KNIT) {
+          endLayer = targetLeg ? 1 : 2 * maxStack - 2 * targetLayer - 1;
+        } else if (source[0] == stitches.PURL) {
+          endLayer = targetLeg
+            ? 2 * maxStack + 1
+            : 4 * maxStack - 2 * sourceLayer - 1;
+        }
+      }
+      // if (sourceRow != targetRow) {
+      //   if (source[0] == stitches.KNIT) {
+      //     startLayer = 2;
+      //   }
+
+      //   if (target[0] == stitches.KNIT) {
+      //     endLayer = 4 * maxStack - 2;
+      //   }
+      // }
+
       if (startLayer == endLayer) {
         layer = startLayer;
       } else if (startLayer == undefined || endLayer == undefined) {
@@ -136,21 +165,30 @@ export function buildSegmentData(
 
       if (layer == undefined) {
         // This happens at the top row?
-        // console.log(layer, sourceLayer, targetLayer, index);
-        layer = 1;
+        layer = 2 * maxStack;
       }
 
-      // console.log([startLayer, endLayer]);
-      // console.log(layer);
+      let restLength = loop
+        ? Vec2.mag(Vec2.sub(nodes[sourceIndex].pos, nodes[targetIndex].pos)) *
+          stitchAspect
+        : Vec2.mag(Vec2.sub(nodes[sourceIndex].pos, nodes[targetIndex].pos));
+      // : (Math.abs(sourceI - targetI) / 2) * stitchWidth;
 
+      // let restLength = Vec2.mag(
+      //   Vec2.sub(nodes[sourceIndex].pos, nodes[targetIndex].pos)
+      // );
+
+      // console.log(stitchWidth * stitchAspect);
       links[yarnIndex].push({
         source: [sourceI, sourceJ],
         target: [targetI, targetJ],
         sourceIndex,
         targetIndex,
-        restLength: loop
-          ? Vec2.mag(Vec2.sub(nodes[sourceIndex].pos, nodes[targetIndex].pos))
-          : stitchWidth * stitchAspect,
+        // restLength: loop
+        //   ? Vec2.mag(Vec2.sub(nodes[sourceIndex].pos, nodes[targetIndex].pos))
+        //   : stitchWidth * stitchAspect,
+        restLength,
+
         row: targetRow,
         layer,
         path: null,
