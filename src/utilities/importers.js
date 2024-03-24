@@ -4,7 +4,7 @@ import { evaluateChart } from "../charting/evalChart";
 import { bBoxAllBoundaries } from "../charting/helpers";
 import { fitChart } from "../interaction/chartPanZoom";
 
-function hydrateWorkspaceJSON(dryWorkspaceJSON) {
+export function hydrateWorkspaceJSON(dryWorkspaceJSON) {
   // TODO: Make a default workspace and pull from there
   let {
     cellAspect = 7 / 11,
@@ -13,9 +13,13 @@ function hydrateWorkspaceJSON(dryWorkspaceJSON) {
     regions = [],
     blocks = [],
     paths = [],
+    annotations = true,
+    simLive = true,
   } = dryWorkspaceJSON;
 
   loadWorkspace({
+    annotations,
+    simLive,
     cellAspect,
     yarnPalette,
     boundaries,
@@ -75,6 +79,10 @@ export function loadWorkspace(workspace) {
     yarnSequence,
     rowMap,
     bbox: bBoxAllBoundaries(boundaries),
+    selectedBoundary: null,
+    selectedPath: null,
+    selectedBlock: null,
+    blockEditMode: null,
   });
   setTimeout(() => fitChart());
 }

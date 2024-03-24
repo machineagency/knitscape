@@ -1,16 +1,28 @@
 import { GLOBAL_STATE, dispatch } from "../state";
+import { pointerPosInElement } from "../utilities/misc";
 
-export function selectBox() {
-  const [startX, startY] = [...GLOBAL_STATE.pointer];
+function pointerCell(e) {
+  const { cellWidth, cellHeight, bbox } = GLOBAL_STATE;
+
+  let [x, y] = pointerPosInElement(e, document.getElementById("chart-canvas"));
+
+  return [
+    Math.floor(x / cellWidth) + bbox.xMin,
+    Math.floor(y / cellHeight) + bbox.yMin,
+  ];
+}
+
+export function selectBox(e) {
+  const [startX, startY] = pointerCell(e);
   let [lastX, lastY] = [startX, startY];
 
   dispatch({ transforming: true });
 
-  function move(e) {
-    if (e.buttons == 0) {
+  function move(moveEvent) {
+    if (moveEvent.buttons == 0) {
       end();
     } else {
-      const [currX, currY] = [...GLOBAL_STATE.pointer];
+      const [currX, currY] = pointerCell(moveEvent);
 
       if (lastX == currX && lastY == currY) return;
 

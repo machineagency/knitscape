@@ -10,11 +10,14 @@ let GLOBAL_STATE = {
   heldKeys: new Set(), // Keys that are currently held down
   snapshots: [], // Array of snapshot history
   lastSnapshot: 0, // time of last snapshot
-  colorMode: "yarn",
   transforming: false, // If the pointer is being used to do something
 
-  // Interaction mode can be path, boundary, block, or pan.
-  interactionMode: "path",
+  // Chart view states
+  colorMode: "yarn",
+  annotations: true, // slope and point annotations for paths and boundaries
+
+  // Interaction mode can be path, boundary, or block.
+  interactionMode: "boundary",
   pointer: [0, 0], // Pointer postition in chart coordinates
   locked: false,
 
@@ -29,12 +32,12 @@ let GLOBAL_STATE = {
   paths: [],
   blocks: [],
 
-  blockEditMode: "stitch", // Can be yarn, stitch, or null
+  blockEditMode: null, // Can be yarn, stitch, or null
   activeBlockTool: "brush",
 
+  // TODO: How to handle selections better? How to implement multi-select?
   selectedBoundary: null,
-  selectedPath: 0,
-  // TODO: ? This should be a reference to any block (path, fill, free)
+  selectedPath: null,
   selectedBlock: null,
 
   stitchSelect: null,
@@ -106,7 +109,9 @@ function normalUpdate(action) {
 }
 
 function updateState(action) {
-  return shouldSnapshot(action) ? snapshotUpdate(action) : normalUpdate(action);
+  // return shouldSnapshot(action) ? snapshotUpdate(action) : normalUpdate(action);
+
+  return normalUpdate(action);
 }
 
 function undo() {

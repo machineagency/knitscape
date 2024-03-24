@@ -1,7 +1,7 @@
 import Split from "split.js";
 import { render } from "lit-html";
 
-import { StateMonitor } from "./state";
+import { GLOBAL_STATE, StateMonitor } from "./state";
 
 import { runSimulation } from "./subscribers/runSimulation";
 import { chartSubscriber } from "./subscribers/chartSubscriber";
@@ -12,55 +12,25 @@ import { pathTileSubscriber } from "./subscribers/pathTileSubscriber";
 
 import { globalKeydown, globalKeyup } from "./interaction/globalKeypress";
 
-import { loadWorkspace } from "./utilities/importers";
+import { hydrateWorkspaceJSON } from "./utilities/importers";
 import { measureWindow } from "./utilities/misc";
 import { fitChart } from "./interaction/chartPanZoom";
-import { Bimp } from "./lib/Bimp";
 
 import { mainView } from "./views/mainView";
+
+const DEFAULT_WORKSPACE = "origami";
 
 function r() {
   render(mainView(), document.body);
   window.requestAnimationFrame(r);
 }
 
-const testWorkspace = {
-  cellAspect: 7 / 11,
-  yarnPalette: ["#7babc7ff", "#ebe9bbff"],
-  boundaries: [
-    [
-      [20, 0],
-      [20, 30],
-      [25, 30],
-      [30, 12],
-      [30, 0],
-    ],
-  ],
-  regions: [
-    {
-      pos: [0, 0],
-      yarnBlock: new Bimp(1, 1, [1]),
-      stitchBlock: new Bimp(1, 1, [1]),
-      joinMode: "tucks",
-    },
-  ],
-  blocks: [],
-  paths: [
-    {
-      pts: [
-        [30, 12],
-        [25, 30],
-      ],
-      offset: [-1, -1],
-      yarnBlock: new Bimp(1, 1, [0]),
-      stitchBlock: new Bimp(2, 1, [2, 2]),
-      tileMode: "step",
-    },
-  ],
-};
+async function init() {
+  const workspace = await GLOBAL_STATE.exampleLibrary[
+    `../examples/${DEFAULT_WORKSPACE}.json`
+  ]();
 
-function init() {
-  loadWorkspace(testWorkspace);
+  hydrateWorkspaceJSON(workspace);
 
   r();
 

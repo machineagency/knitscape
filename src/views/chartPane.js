@@ -65,6 +65,7 @@ export function chartPaneView() {
     transforming,
     interactionMode,
     stitchSelect,
+    annotations,
   } = GLOBAL_STATE;
 
   const offsetX = Math.round(bbox.xMin * cellWidth);
@@ -80,10 +81,14 @@ export function chartPaneView() {
     boundaryMode: interactionMode == "boundary",
     pathMode: interactionMode == "path",
     blockMode: interactionMode == "block",
+    showAnnotations: annotations,
   };
 
   return html`
-    <div class="desktop" @pointermove=${(e) => trackPointer(e)} @wheel=${zoom}>
+    <div
+      class="desktop ${classMap(classes)}"
+      @pointermove=${(e) => trackPointer(e)}
+      @wheel=${zoom}>
       <div
         style="position: absolute; bottom: 0; left: 0; transform: translate(${chartPan.x}px,${-chartPan.y}px);">
         <canvas
@@ -93,7 +98,6 @@ export function chartPaneView() {
       <svg
         id="svg-layer"
         preserveAspectRatio="xMidYMid meet"
-        class="${classMap(classes)}"
         style="position: absolute;"
         width="100%"
         height="100%"

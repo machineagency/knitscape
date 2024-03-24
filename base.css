@@ -591,14 +591,19 @@ TOGGLE BUTTON GROUP
 
 .radio-group {
   display: flex;
-  box-shadow: 0 0 2px 0 black;
-  background-color: var(--base0);
+  box-shadow: 0 0 3px 0 black;
   border-radius: 0.2em;
+  align-items: center;
+}
+
+.radio-group span {
+  font-style: italic;
+  padding: 0 0.4em;
 }
 
 .radio-group button {
   border: none;
-  background-color: transparent;
+  background-color: var(--base0);
   font-family: inherit;
   padding: 0.2em 0.4em;
   border-radius: 0.2em;

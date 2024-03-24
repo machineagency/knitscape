@@ -10,6 +10,39 @@ import { toolData } from "../constants";
 
 const TRANSPARENT_YARN = "#585858";
 
+function getCurrentBlock() {
+  const {
+    blocks,
+    selectedBlock,
+    blockEditMode,
+    selectedBoundary,
+    regions,
+    selectedPath,
+    paths,
+  } = GLOBAL_STATE;
+
+  let currentBlock = null;
+
+  if (selectedBoundary != null) {
+    currentBlock =
+      blockEditMode == "stitch"
+        ? regions[selectedBoundary].stitchBlock
+        : regions[selectedBoundary].yarnBlock;
+  } else if (selectedBlock != null) {
+    currentBlock =
+      blockEditMode == "stitch"
+        ? blocks[selectedBlock].stitchBlock
+        : blocks[selectedBlock].yarnBlock;
+  } else if (selectedPath != null) {
+    currentBlock =
+      blockEditMode == "stitch"
+        ? paths[selectedPath].stitchBlock
+        : paths[selectedPath].yarnBlock;
+  }
+
+  return currentBlock;
+}
+
 function operationButton(symbolName, data, index) {
   // TODO: handle these cases somewhere else probably
   if (symbolName == "EMPTY" || symbolName == "BM") return;
@@ -62,39 +95,6 @@ export function pickers() {
       )}
     </div>
   </div>`;
-}
-
-function getCurrentBlock() {
-  const {
-    blocks,
-    selectedBlock,
-    blockEditMode,
-    selectedBoundary,
-    regions,
-    selectedPath,
-    paths,
-  } = GLOBAL_STATE;
-
-  let currentBlock = null;
-
-  if (selectedBoundary != null) {
-    currentBlock =
-      blockEditMode == "stitch"
-        ? regions[selectedBoundary].stitchBlock
-        : regions[selectedBoundary].yarnBlock;
-  } else if (selectedBlock != null) {
-    currentBlock =
-      blockEditMode == "stitch"
-        ? blocks[selectedBlock].stitchBlock
-        : blocks[selectedBlock].yarnBlock;
-  } else if (selectedPath != null) {
-    currentBlock =
-      blockEditMode == "stitch"
-        ? paths[selectedPath].stitchBlock
-        : paths[selectedPath].yarnBlock;
-  }
-
-  return currentBlock;
 }
 
 function toolPicker() {

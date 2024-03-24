@@ -4,12 +4,9 @@ import { when } from "lit-html/directives/when.js";
 import { GLOBAL_STATE, dispatch } from "../../state";
 import {
   editBlock,
-  removeBlock,
   resizeBlock,
   moveBlock,
-  addBlock,
 } from "../../interaction/blockInteraction";
-import { addBoundary } from "../../interaction/boundaryInteraction";
 
 export function blocks() {
   const { blocks, cellWidth, cellHeight, selectedBlock } = GLOBAL_STATE;

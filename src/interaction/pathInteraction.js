@@ -21,7 +21,7 @@ export function pathModePointerDown(e) {
   } else if (GLOBAL_STATE.selectedPath == null) {
     drawPathLine(e);
   } else if (GLOBAL_STATE.selectedPath != null) {
-    dispatch({ selectedPath: null }, true);
+    dispatch({ selectedPath: null, blockEditMode: null }, true);
   }
 }
 
@@ -117,6 +117,7 @@ export function dragPathLine(e) {
 
   const path = GLOBAL_STATE.paths[pathIndex];
 
+  const pts = path.pts.map((pt) => [pt[0], pt[1]]);
   const [x0, y0] = path.pts[pointIndex];
   const [x1, y1] = path.pts[pointIndex + 1];
   let last = [0, 0];
@@ -138,8 +139,16 @@ export function dragPathLine(e) {
 
       let updated = [...paths];
 
-      updated[pathIndex].pts[pointIndex] = [x0 - dx, y0 + dy];
-      updated[pathIndex].pts[pointIndex + 1] = [x1 - dx, y1 + dy];
+      if (e.shiftKey) {
+        // If shift is pressed, just drag the segment
+        updated[pathIndex].pts[pointIndex] = [x0 - dx, y0 + dy];
+        updated[pathIndex].pts[pointIndex + 1] = [x1 - dx, y1 + dy];
+      } else {
+        // Otherwise drag the whole path
+        for (let i = 0; i < updated[pathIndex].pts.length; i++) {
+          updated[pathIndex].pts[i] = [pts[i][0] - dx, pts[i][1] + dy];
+        }
+      }
 
       last = [dx, dy];
 
@@ -434,9 +443,9 @@ export function drawPathLine(e) {
   updatedPaths.push({
     pts: [[...startPoint], [...startPoint]],
     offset: [0, 0],
-    yarnBlock: new Bimp(1, 1, [1]),
-    stitchBlock: new Bimp(1, 1, [1]),
-    tileMode: "continuous",
+    yarnBlock: new Bimp(1, 1, [0]),
+    stitchBlock: new Bimp(1, 1, [stitches.TRANSPARENT]),
+    tileMode: "round",
   });
 
   dispatch({

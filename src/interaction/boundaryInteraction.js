@@ -81,6 +81,7 @@ export function addBoundary() {
       xMin + Math.floor((xMax - xMin) / 2),
       yMin + Math.floor((yMax - yMin) / 2),
     ],
+    joinMode: "none",
     yarnBlock: new Bimp(1, 1, [1]),
     stitchBlock: new Bimp(1, 1, [1]),
   });
@@ -391,7 +392,7 @@ function beginDrag(e) {
       // if we have moved, start a selection
       dispatch({ selectedBoundary: null });
       end(moveEvent);
-      selectBox();
+      selectBox(moveEvent);
     }
   }
 

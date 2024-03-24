@@ -20,11 +20,15 @@ export function downloadWorkspace({
   regions = [],
   blocks = [],
   paths = [],
+  annotations = true,
+  simLive = true,
 }) {
   const dataStr =
     "data:text/json;charset=utf-8," +
     encodeURIComponent(
       JSON.stringify({
+        annotations,
+        simLive,
         cellAspect,
         yarnPalette,
         boundaries,
