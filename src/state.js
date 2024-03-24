@@ -29,7 +29,7 @@ let GLOBAL_STATE = {
   paths: [],
   blocks: [],
 
-  blockEditMode: "yarn", // Can be yarn, stitch, or null
+  blockEditMode: "stitch", // Can be yarn, stitch, or null
   activeBlockTool: "brush",
 
   selectedBoundary: null,

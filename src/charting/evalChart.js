@@ -1,50 +1,74 @@
 import { Bimp } from "../lib/Bimp";
 import { stitches } from "../constants";
 import { knitScanline } from "./knitScanline";
+import { pathTiling } from "./pathTiling";
 import { bBoxAllBoundaries } from "./helpers";
 import { yarnSeparation } from "./yarnSeparation";
 
-function shiftFills(bbox, fills) {
-  return fills.map((fill) => {
-    return {
-      ...fill,
-      pos: [fill.pos[0] - bbox.xMin, fill.pos[1] - bbox.yMin],
-    };
-  });
+function rootAtZero(bbox, boundaries, regions, blocks, paths) {
+  return {
+    boundaries: boundaries.map((pts) =>
+      pts.map(([x, y]) => [x - bbox.xMin, y - bbox.yMin])
+    ),
+    regions: regions.map((region) => {
+      return {
+        ...region,
+        pos: [region.pos[0] - bbox.xMin, region.pos[1] - bbox.yMin],
+      };
+    }),
+    blocks: blocks.map((block) => {
+      return {
+        ...block,
+        pos: [block.pos[0] - bbox.xMin, block.pos[1] - bbox.yMin],
+      };
+    }),
+    paths: paths.map((path) => {
+      return {
+        ...path,
+        pts: path.pts.map(([x, y]) => [x - bbox.xMin, y - bbox.yMin]),
+      };
+    }),
+  };
 }
 
-export function evaluateChart(boundaries, regions, blocks, paths) {
-  const bbox = bBoxAllBoundaries(boundaries);
+export function evaluateChart(rawBounds, rawRegions, rawBlocks, rawPaths) {
+  const bbox = bBoxAllBoundaries(rawBounds);
 
-  const chartWidth = bbox.xMax - bbox.xMin;
-  const chartHeight = bbox.yMax - bbox.yMin;
+  const { boundaries, regions, blocks, paths } = rootAtZero(
+    bbox,
+    rawBounds,
+    rawRegions,
+    rawBlocks,
+    rawPaths
+  );
 
-  const shiftedBlocks = shiftFills(bbox, blocks);
-  const shiftedFills = shiftFills(bbox, regions);
+  const chartWidth = bbox.width;
+  const chartHeight = bbox.height;
 
   // First, create an empty chart that is fit to the boundaries
   let stitchChart = Bimp.empty(chartWidth, chartHeight, stitches.EMPTY);
   let yarnChart = Bimp.empty(chartWidth, chartHeight, 0);
 
-  for (const [index, { stitchBlock, yarnBlock, gap, pos }] of Object.entries(
-    shiftedFills
-  )) {
+  regions.forEach((region, regionIndex) => {
     let { stitch, yarn } = knitScanline(
       stitchChart,
       yarnChart,
-      bbox,
-      boundaries[index],
-      stitchBlock,
-      yarnBlock,
-      gap,
-      pos
+      boundaries[regionIndex],
+      region
     );
 
     stitchChart = stitch;
     yarnChart = yarn;
-  }
+  });
 
-  for (const { stitchBlock, yarnBlock, pos } of shiftedBlocks) {
+  paths.forEach((path) => {
+    let { stitch, yarn } = pathTiling(stitchChart, yarnChart, path);
+
+    stitchChart = stitch;
+    yarnChart = yarn;
+  });
+
+  for (const { stitchBlock, yarnBlock, pos } of blocks) {
     stitchChart = stitchChart.overlay(stitchBlock, pos, stitches.TRANSPARENT);
     yarnChart = yarnChart.overlay(yarnBlock, pos, 0);
   }

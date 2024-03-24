@@ -1,16 +1,5 @@
 import { stitches } from "../constants";
 
-function mapCoords(number, inMin, inMax, outMin, outMax) {
-  return ((number - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
-}
-
-function toChartCoords(pt, bbox, chart) {
-  return [
-    mapCoords(pt[0], bbox.xMin, bbox.xMax, 0, chart.width),
-    mapCoords(pt[1], bbox.yMin, bbox.yMax, 0, chart.height),
-  ];
-}
-
 function addEdge(edgeTable, [x1, y1], [x2, y2]) {
   if (y1 > y2) {
     [x1, x2] = [x2, x1];
@@ -22,7 +11,7 @@ function addEdge(edgeTable, [x1, y1], [x2, y2]) {
   let slope = (x2 - x1) / (y2 - y1);
 
   edgeTable.push({
-    x: x1 + slope / 2,
+    x: x1,
     yMin: y1,
     yMax: y2,
     slope,
@@ -32,15 +21,9 @@ function addEdge(edgeTable, [x1, y1], [x2, y2]) {
 export function knitScanline(
   stitchChart,
   yarnChart,
-  bbox,
-  boundary,
-  stitchBlock,
-  yarnBlock,
-  gap,
-  pos
+  points,
+  { stitchBlock, yarnBlock, pos }
 ) {
-  const points = boundary.map((pt) => toChartCoords(pt, bbox, stitchChart));
-
   let edges = [];
 
   for (let i = 0; i < points.length; i++) {
@@ -55,7 +38,7 @@ export function knitScanline(
   while (edges.length > 0 || activeEdges.length > 0) {
     while (edges.length > 0) {
       // while there are still edges we haven't processed
-      if (edges[0].yMin <= y + 0.5) {
+      if (edges[0].yMin <= y) {
         // add any edges that start at or below the current Y value
         activeEdges.push(edges.shift());
       } else break;
@@ -120,7 +103,7 @@ export function knitScanline(
     y++;
 
     // filter out any edges we've passed
-    activeEdges = activeEdges.filter((edge) => edge.yMax > y + 0.5);
+    activeEdges = activeEdges.filter((edge) => edge.yMax > y);
 
     // update the x value for each edge
     for (let i = 0; i < activeEdges.length; i++) {

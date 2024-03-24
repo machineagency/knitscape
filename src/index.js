@@ -29,66 +29,32 @@ const testWorkspace = {
   yarnPalette: ["#7babc7ff", "#ebe9bbff"],
   boundaries: [
     [
-      [0, 0],
-      [0, 20],
-      [10, 20],
-      [10, 0],
+      [20, 0],
+      [20, 30],
+      [25, 30],
+      [30, 12],
+      [30, 0],
     ],
-
-    // [
-    //   [5, 5],
-    //   [5, 15],
-    //   [10, 15],
-    //   [10, 5],
-    // ],
-    // [
-    //   [0, 0],
-    //   [0, 4],
-    //   [5, 4],
-    //   [5, 0],
-    // ],
   ],
   regions: [
-    // {
-    //   pos: [0, 0],
-    //   yarnBlock: new Bimp(1, 1, [1]),
-    //   stitchBlock: new Bimp(3, 3, [1, 1, 1, 1, 1, 1, 1, 1, 5]),
-    // },
     {
       pos: [0, 0],
       yarnBlock: new Bimp(1, 1, [1]),
       stitchBlock: new Bimp(1, 1, [1]),
       joinMode: "tucks",
     },
-    // {
-    //   pos: [0, 0],
-    //   yarnBlock: new Bimp(1, 1, [2]),
-    //   stitchBlock: new Bimp(1, 1, [1]),
-    // },
   ],
   blocks: [],
   paths: [
     {
       pts: [
-        [2, 2],
-        [5, 5],
-        [3, 8],
+        [30, 12],
+        [25, 30],
       ],
-      offset: [0, 0],
-      yarnBlock: new Bimp(1, 1, [1]),
-      stitchBlock: new Bimp(1, 1, [1]),
-      tileMode: "continuous",
-    },
-
-    {
-      pts: [
-        [7, 7],
-        [6, 12],
-      ],
-      offset: [-2, 0],
-      yarnBlock: new Bimp(2, 2, [1, 1, 1, 1]),
-      stitchBlock: new Bimp(2, 2, [1, 1, 1, 1]),
-      tileMode: "continuous",
+      offset: [-1, -1],
+      yarnBlock: new Bimp(1, 1, [0]),
+      stitchBlock: new Bimp(2, 1, [2, 2]),
+      tileMode: "step",
     },
   ],
 };

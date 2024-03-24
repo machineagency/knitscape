@@ -93,14 +93,14 @@ export function pathToolbar() {
 
     <div class="radio-group">
       <button
-        class="${currentPath.tileMode == "continuous" ? "selected" : ""}"
-        @click=${() => setPathTileMode(selectedPath, "continuous")}>
-        continuous
+        class="${currentPath.tileMode == "round" ? "selected" : ""}"
+        @click=${() => setPathTileMode(selectedPath, "round")}>
+        round
       </button>
       <button
-        class="${currentPath.tileMode == "stepped" ? "selected" : ""}"
-        @click=${() => setPathTileMode(selectedPath, "stepped")}>
-        stepped
+        class="${currentPath.tileMode == "step" ? "selected" : ""}"
+        @click=${() => setPathTileMode(selectedPath, "step")}>
+        step
       </button>
     </div>
 

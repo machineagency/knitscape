@@ -125,7 +125,6 @@ export function drawStitchBlock(
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       let stitchIndex = stitchBlock.pixel(x, y);
-      let yarnIndex = globalYarns.pixel(x + offX, y + offY) - 1;
 
       if (lastDrawn == null || lastDrawn.pixel(x, y) != stitchIndex) {
         ctx.save();
@@ -149,7 +148,10 @@ export function drawStitchBlock(
             path = SYMBOL_DATA[op].path;
             ctx.fillRect(0, 0, 1, 1);
           } else if (mode == "yarn") {
-            ctx.fillStyle = yarnPalette[yarnIndex];
+            let yarnIndex = globalYarns.pixel(x + offX, y + offY) - 1;
+
+            ctx.fillStyle =
+              yarnIndex >= 0 ? yarnPalette[yarnIndex] : TRANSPARENT;
             path = SYMBOL_DATA[op].path;
           }
           ctx.fillRect(0, 0, 1, 1);
