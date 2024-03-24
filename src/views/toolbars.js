@@ -7,7 +7,11 @@ import {
   removeBoundary,
   setBoundaryJoinMode,
 } from "../interaction/boundaryInteraction";
-import { removePath, setPathTileMode } from "../interaction/pathInteraction";
+import {
+  removePath,
+  duplicatePath,
+  setPathTileMode,
+} from "../interaction/pathInteraction";
 import { boundaryBbox } from "../utilities/misc";
 
 export function freeBlockToolbar() {
@@ -89,6 +93,9 @@ export function pathToolbar() {
         Editing ${blockEditMode != null ? `${blockEditMode} tile of ` : ""} path
         ${selectedPath}
       </span>
+      <button class="btn" @click=${() => duplicatePath(selectedPath)}>
+        duplicate
+      </button>
     </div>
 
     <div class="radio-group">

@@ -29,7 +29,16 @@ function lines(pathIndex, pts, cellWidth, cellHeight) {
       x1=${x1 * cellWidth}
       y1=${y1 * cellHeight}
       x2=${x2 * cellWidth}
-      y2=${y2 * cellHeight}></line>`
+      y2=${y2 * cellHeight}></line>
+      <g transform="translate(${(x1 - (x1 - x2) / 2) * cellWidth} ${
+        (y1 - (y1 - y2) / 2) * cellHeight
+      })  scale (1, -1)" >
+        <rect x="0" y="0" width="60" height="20" class="annotation-container" rx="5" fill="white"></rect>
+        <text x="10" y="14" textLength="40" class="annotation">${(
+          (y1 - y2) /
+          (x1 - x2)
+        ).toFixed(1)}</text>
+      </g>`
     );
   }
 
@@ -43,7 +52,17 @@ function points(pathIndex, pts, cellWidth, cellHeight) {
       data-pathindex="${pathIndex}"
       data-pointindex="${i}"
       cx="${x * cellWidth}"
-      cy="${y * cellHeight}" />`
+      cy="${y * cellHeight}" />
+
+      <g transform="translate(${x * cellWidth} ${
+      y * cellHeight
+    })  scale (1, -1)" >
+      <rect x="10" y="-30" width="70" height="20" class="annotation-container" rx="5" fill="white">
+
+      </rect>
+     <text x="15" y="-15" textLength="60" class="annotation">[${x},${y}]</text>
+     </g>
+    `
   );
 }
 

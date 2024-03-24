@@ -45,6 +45,21 @@ export function setPathTileMode(pathIndex, mode) {
   dispatch({ paths: updatedPaths });
 }
 
+export function duplicatePath(pathIndex) {
+  const updatedPaths = [...GLOBAL_STATE.paths];
+  const pathToCopy = updatedPaths[pathIndex];
+
+  const pathCopy = {
+    tileMode: pathToCopy.tileMode,
+    offset: [...pathToCopy.offset],
+    pts: pathToCopy.pts.map((pt) => [...pt]),
+    yarnBlock: pathToCopy.yarnBlock,
+    stitchBlock: pathToCopy.stitchBlock,
+  };
+  updatedPaths.push(pathCopy);
+  dispatch({ paths: updatedPaths });
+}
+
 function addPathPoint(e) {
   const rect = e.currentTarget.getBoundingClientRect();
 
