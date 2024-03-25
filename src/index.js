@@ -18,7 +18,7 @@ import { fitChart } from "./interaction/chartPanZoom";
 
 import { mainView } from "./views/mainView";
 
-const DEFAULT_WORKSPACE = "origami";
+const DEFAULT_WORKSPACE = "Origami";
 
 function r() {
   render(mainView(), document.body);
@@ -35,7 +35,7 @@ async function init() {
   r();
 
   Split(["#chart-pane", "#sim-pane"], {
-    sizes: [70, 30],
+    sizes: [60, 40],
     minSize: 100,
     gutterSize: 8,
   });

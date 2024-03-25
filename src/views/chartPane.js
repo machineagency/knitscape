@@ -119,14 +119,6 @@ export function chartPaneView() {
           </g>
         </g>
       </svg>
-      <div
-        style="position: absolute; bottom: 0; left: 0;
-      transform: translate(${chartPan.x}px, ${-chartPan.y}px); ">
-        ${when(interactionMode == "boundary", boundaryBlocks)}
-        ${when(interactionMode == "path", pathTiles)}
-        ${when(interactionMode == "block", blocks)}
-        ${when(stitchSelect, stitchSelectBox)}
-      </div>
       <svg
         preserveAspectRatio="xMidYMid meet"
         class="vector-overlay"
@@ -142,6 +134,14 @@ export function chartPaneView() {
           </g>
         </g>
       </svg>
+      <div
+        style="position: absolute; bottom: 0; left: 0;
+      transform: translate(${chartPan.x}px, ${-chartPan.y}px); ">
+        ${when(interactionMode == "boundary", boundaryBlocks)}
+        ${when(interactionMode == "path", pathTiles)}
+        ${when(interactionMode == "block", blocks)}
+        ${when(stitchSelect, stitchSelectBox)}
+      </div>
       ${pickers()}
       <div class="bottom-bars-container">${modeToolbar()} ${bottomBar()}</div>
     </div>

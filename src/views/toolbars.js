@@ -4,13 +4,21 @@ import { when } from "lit-html/directives/when.js";
 import { GLOBAL_STATE, dispatch } from "../state";
 import { removeBlock } from "../interaction/blockInteraction";
 import {
+  bringBoundaryToFront,
+  lowerBoundary,
+  raiseBoundary,
   removeBoundary,
+  sendBoundaryToBack,
   setBoundaryJoinMode,
 } from "../interaction/boundaryInteraction";
 import {
   removePath,
   duplicatePath,
   setPathTileMode,
+  raisePath,
+  lowerPath,
+  bringPathToFront,
+  sendPathToBack,
 } from "../interaction/pathInteraction";
 import { boundaryBbox } from "../utilities/misc";
 
@@ -20,7 +28,7 @@ export function freeBlockToolbar() {
   if (selectedBlock == null)
     return html`
       <div class="toolbar-message">
-        Select a block to edit it or drag to add a new block.
+        Select a block to edit it. Drag to add a new block.
       </div>
     </div> `;
 
@@ -70,7 +78,7 @@ export function pathToolbar() {
   if (selectedPath == null)
     return html`
       <div class="toolbar-message">
-        Select a path to edit it or drag to add a new boundary.
+        Select a path to edit it. Drag to add a new path.
       </div>
     `;
 
@@ -94,7 +102,19 @@ export function pathToolbar() {
         ${selectedPath}
       </span>
       <button class="btn" @click=${() => duplicatePath(selectedPath)}>
-        duplicate
+        <i class="fa-solid fa-copy"></i>
+      </button>
+      <button class="btn" @click=${() => sendPathToBack(selectedPath)}>
+        <i class="fa-solid fa-arrows-down-to-line"></i>
+      </button>
+      <button class="btn" @click=${() => lowerPath(selectedPath)}>
+        <i class="fa-solid fa-arrow-down"></i>
+      </button>
+      <button class="btn" @click=${() => raisePath(selectedPath)}>
+        <i class="fa-solid fa-arrow-up"></i>
+      </button>
+      <button class="btn" @click=${() => bringPathToFront(selectedPath)}>
+        <i class="fa-solid fa-arrows-up-to-line"></i>
       </button>
     </div>
 
@@ -138,7 +158,7 @@ export function boundaryToolbar() {
   if (selectedBoundary == null)
     return html`
       <div class="toolbar-message">
-        Select a boundary to edit it or drag to add a new boundary.
+        Select a boundary to edit it. Drag to add a new boundary.
       </div>
     `;
 
@@ -163,6 +183,20 @@ export function boundaryToolbar() {
         Editing ${blockEditMode != null ? `${blockEditMode} fill of ` : ""}
         boundary ${selectedBoundary}
       </span>
+      <button class="btn" @click=${() => sendBoundaryToBack(selectedBoundary)}>
+        <i class="fa-solid fa-arrows-down-to-line"></i>
+      </button>
+      <button class="btn" @click=${() => lowerBoundary(selectedBoundary)}>
+        <i class="fa-solid fa-arrow-down"></i>
+      </button>
+      <button class="btn" @click=${() => raiseBoundary(selectedBoundary)}>
+        <i class="fa-solid fa-arrow-up"></i>
+      </button>
+      <button
+        class="btn"
+        @click=${() => bringBoundaryToFront(selectedBoundary)}>
+        <i class="fa-solid fa-arrows-up-to-line"></i>
+      </button>
     </div>
 
     <div class="radio-group">

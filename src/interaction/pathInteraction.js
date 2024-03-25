@@ -33,6 +33,39 @@ export function pathModeContextMenu(e) {
   }
 }
 
+export function bringPathToFront(pathIndex) {
+  const updatedPaths = [...GLOBAL_STATE.paths];
+  let path = updatedPaths.splice(pathIndex, 1);
+  updatedPaths.splice(GLOBAL_STATE.paths.length - 1, 0, path[0]);
+  dispatch({
+    paths: updatedPaths,
+    selectedPath: GLOBAL_STATE.paths.length - 1,
+  });
+}
+
+export function sendPathToBack(pathIndex) {
+  const updatedPaths = [...GLOBAL_STATE.paths];
+  let path = updatedPaths.splice(pathIndex, 1);
+  updatedPaths.splice(0, 0, path[0]);
+  dispatch({ paths: updatedPaths, selectedPath: 0 });
+}
+
+export function lowerPath(pathIndex) {
+  if (pathIndex <= 0) return;
+  const updatedPaths = [...GLOBAL_STATE.paths];
+  let path = updatedPaths.splice(pathIndex, 1);
+  updatedPaths.splice(pathIndex - 1, 0, path[0]);
+  dispatch({ paths: updatedPaths, selectedPath: pathIndex - 1 });
+}
+
+export function raisePath(pathIndex) {
+  if (pathIndex >= GLOBAL_STATE.paths.length - 1) return;
+  const updatedPaths = [...GLOBAL_STATE.paths];
+  let path = updatedPaths.splice(pathIndex, 1);
+  updatedPaths.splice(pathIndex + 1, 0, path[0]);
+  dispatch({ paths: updatedPaths, selectedPath: pathIndex + 1 });
+}
+
 function selectPath(e) {
   const pathIndex = Number(e.target.dataset.pathindex);
 

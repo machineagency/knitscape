@@ -27,6 +27,76 @@ export function boundaryModePointerDown(e) {
   }
 }
 
+export function bringBoundaryToFront(boundaryIndex) {
+  const updatedBoundaries = [...GLOBAL_STATE.boundaries];
+  const updatedRegions = [...GLOBAL_STATE.regions];
+
+  let boundary = updatedBoundaries.splice(boundaryIndex, 1);
+  let region = updatedRegions.splice(boundaryIndex, 1);
+
+  updatedBoundaries.splice(GLOBAL_STATE.boundaries.length - 1, 0, boundary[0]);
+  updatedRegions.splice(GLOBAL_STATE.boundaries.length - 1, 0, region[0]);
+
+  dispatch({
+    boundaries: updatedBoundaries,
+    regions: updatedRegions,
+    selectedBoundary: GLOBAL_STATE.boundaries.length - 1,
+  });
+}
+
+export function sendBoundaryToBack(boundaryIndex) {
+  const updatedBoundaries = [...GLOBAL_STATE.boundaries];
+  const updatedRegions = [...GLOBAL_STATE.regions];
+
+  let boundary = updatedBoundaries.splice(boundaryIndex, 1);
+  let region = updatedRegions.splice(boundaryIndex, 1);
+
+  updatedBoundaries.splice(0, 0, boundary[0]);
+  updatedRegions.splice(0, 0, region[0]);
+
+  dispatch({
+    boundaries: updatedBoundaries,
+    regions: updatedRegions,
+    selectedBoundary: 0,
+  });
+}
+
+export function lowerBoundary(boundaryIndex) {
+  if (boundaryIndex <= 0) return;
+  const updatedBoundaries = [...GLOBAL_STATE.boundaries];
+  const updatedRegions = [...GLOBAL_STATE.regions];
+
+  let boundary = updatedBoundaries.splice(boundaryIndex, 1);
+  let region = updatedRegions.splice(boundaryIndex, 1);
+
+  updatedBoundaries.splice(boundaryIndex - 1, 0, boundary[0]);
+  updatedRegions.splice(boundaryIndex - 1, 0, region[0]);
+
+  dispatch({
+    boundaries: updatedBoundaries,
+    regions: updatedRegions,
+    selectedBoundary: boundaryIndex - 1,
+  });
+}
+
+export function raiseBoundary(boundaryIndex) {
+  if (boundaryIndex >= GLOBAL_STATE.boundaries.length - 1) return;
+  const updatedBoundaries = [...GLOBAL_STATE.boundaries];
+  const updatedRegions = [...GLOBAL_STATE.regions];
+
+  let boundary = updatedBoundaries.splice(boundaryIndex, 1);
+  let region = updatedRegions.splice(boundaryIndex, 1);
+
+  updatedBoundaries.splice(boundaryIndex + 1, 0, boundary[0]);
+  updatedRegions.splice(boundaryIndex + 1, 0, region[0]);
+
+  dispatch({
+    boundaries: updatedBoundaries,
+    regions: updatedRegions,
+    selectedBoundary: boundaryIndex + 1,
+  });
+}
+
 export function boundaryModeContextMenu(e) {
   if (e.target.classList.contains("point")) {
     deletePoint(e);
