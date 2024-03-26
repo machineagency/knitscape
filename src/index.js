@@ -18,7 +18,7 @@ import { fitChart } from "./interaction/chartPanZoom";
 
 import { mainView } from "./views/mainView";
 
-const DEFAULT_WORKSPACE = "Origami";
+const DEFAULT_WORKSPACE = "test";
 
 function r() {
   render(mainView(), document.body);

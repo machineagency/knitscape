@@ -8,9 +8,17 @@ KnitScape is a design and simulation tool for machine knitting.
 - Box Selection
   - [x] Drag to select an area, and add new stitch block or boundary
   - [ ] Show size of selection
+- Interaction
+  - [ ] select multiple points in path and move them together
+  - [ ] use arrow keys to translate boundaries and paths
 - path
-  - [ ] select path
+  - [x] select path
+  - [x] duplicate
+  - [x] change layer: raise/lower/front/back
+  - [ ] attach path to boundary segment(s)
   - [ ] constrain to stitch slope?
+  - [ ] group paths
+  - [ ] linear pattern paths
 - Boundaries/block fill
   - [x] Add and remove boundary
   - [x] Drag whole boundary, paths, and points
@@ -18,13 +26,10 @@ KnitScape is a design and simulation tool for machine knitting.
   - [x] Yarn and stitch fill blocks
   - [x] Move yarn and stitch fill origin
   - [x] show boundary size when selected
+  - [x] change layer: raise/lower/front/back
   - [ ] copy and paste
   - [ ] affine transforms (reflect, scale, shear, rotate)
   - [ ] multiselect
-- Paths
-  - [x] secret thicker path for hover styles
-  - [ ] evaluate chart on stitch path edit
-  - [ ] create blockpath
 - Free blocks
   - [x] Add, edit, remove, resize, reposition, and select block
   - [x] Toggle block edit mode between Yarn and stitch
@@ -35,6 +40,7 @@ KnitScape is a design and simulation tool for machine knitting.
   - [ ] Copy and paste block
   - [ ] Select multiple blocks to move together
   - [ ] Download bitmap for block
+  - [ ] download punchcard just for block
 - Yarn Sequencer
   - [x] visualize active yarns in each row
   - [ ] show carriage direction
@@ -47,6 +53,11 @@ KnitScape is a design and simulation tool for machine knitting.
   - edit overall gauge/stitch aspect, and fit chart on gauge change
   - how to define different gauges for different regions of the chart? is that
     even a good idea?
+- errors/verification
+  - highlight floats over max float distance
+  - highlight unstable loops in sim
+  - highlight stitch slopes?
+  - how to show if loops are transferred outside bounds?
 - blocks
   - You should be able to download any block as a bitmap. should be not hard to
     implement. perhaps also download any block as a punchcard.
@@ -54,7 +65,6 @@ KnitScape is a design and simulation tool for machine knitting.
     fill/path/free block could use an existing block in the library.
 - Constraints!
   - Stitch slope
-  -
 - [ ] curves?
 
 ## bugs, fixes

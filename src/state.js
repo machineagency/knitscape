@@ -17,7 +17,7 @@ let GLOBAL_STATE = {
   annotations: true, // slope and point annotations for paths and boundaries
 
   // Interaction mode can be path, boundary, or block.
-  interactionMode: "boundary",
+  interactionMode: "path",
   pointer: [0, 0], // Pointer postition in chart coordinates
   locked: false,
 

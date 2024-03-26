@@ -120,14 +120,24 @@ export function pathToolbar() {
 
     <div class="radio-group">
       <button
-        class="${currentPath.tileMode == "round" ? "selected" : ""}"
-        @click=${() => setPathTileMode(selectedPath, "round")}>
-        round
+        class="${currentPath.tileMode == "overlap" ? "selected" : ""}"
+        @click=${() => setPathTileMode(selectedPath, "overlap")}>
+        overlap
       </button>
       <button
-        class="${currentPath.tileMode == "step" ? "selected" : ""}"
-        @click=${() => setPathTileMode(selectedPath, "step")}>
-        step
+        class="${currentPath.tileMode == "tiled" ? "selected" : ""}"
+        @click=${() => setPathTileMode(selectedPath, "tiled")}>
+        tiled
+      </button>
+      <button
+        class="${currentPath.tileMode == "xDiff" ? "selected" : ""}"
+        @click=${() => setPathTileMode(selectedPath, "xDiff")}>
+        X
+      </button>
+      <button
+        class="${currentPath.tileMode == "yDiff" ? "selected" : ""}"
+        @click=${() => setPathTileMode(selectedPath, "yDiff")}>
+        Y
       </button>
     </div>
 
