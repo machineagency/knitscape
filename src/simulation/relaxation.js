@@ -1,7 +1,7 @@
 import { Vec2 } from "../lib/Vec2";
-const K_YARN = 0.01;
 
 export function yarnRelaxation(
+  kYarn = 0.05,
   alphaMin = 0.001,
   alphaTarget = 0,
   iterations = 5,
@@ -50,7 +50,7 @@ export function yarnRelaxation(
               nodes[sourceIndex],
               nodes[targetIndex],
               restLength,
-              K_YARN
+              kYarn
             );
           }
         );

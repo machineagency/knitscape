@@ -60,6 +60,7 @@ let GLOBAL_STATE = {
   simPan: { x: 0, y: 0 },
   flipped: false,
   simLive: true,
+  kYarn: 0.06,
 
   // YARN
   yarnPalette: null,

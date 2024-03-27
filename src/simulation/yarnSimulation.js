@@ -333,7 +333,7 @@ export function simulate(stitchPattern, scale) {
 
   function relax() {
     if (relaxed) return;
-    sim = yarnRelaxation();
+    sim = yarnRelaxation(GLOBAL_STATE.kYarn);
     simLoop();
     relaxed = true;
   }
