@@ -79,7 +79,6 @@ export function simulate(stitchPattern, scale) {
     const mag = Math.sqrt(x ** 2 + y ** 2);
 
     if (mag == 0) {
-      console.log(i, j);
       return [0, 0];
     }
 
@@ -126,6 +125,10 @@ export function simulate(stitchPattern, scale) {
 
   function calculateSegmentControlPoints(yarnSegMap) {
     Object.entries(yarnSegMap).map(([yarnIndex, segmentArr]) => {
+      if (segmentArr.length == 0) {
+        console.warn(`Segment array for yarn ${yarnIndex} is empty`);
+        return;
+      }
       let p0 = [nodes[0].pos.x - stitchWidth, nodes[0].pos.y];
       let p1 = nodeOffset(
         segmentArr[0].source,

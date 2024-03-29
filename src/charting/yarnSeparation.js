@@ -27,6 +27,10 @@ function processRow(yarnRow, stitchRow, direction, yarnSides) {
       });
     } else {
       // Otherwise add this operation to the current pass
+      if (currentPassIndex < 0) {
+        //Something is wrong here, debug this
+        continue;
+      }
       passes[currentPassIndex][loc] = currentStitch;
 
       // Check yarn at next location

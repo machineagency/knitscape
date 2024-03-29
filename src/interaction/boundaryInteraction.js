@@ -111,6 +111,12 @@ export function setBoundaryJoinMode(boundaryIndex, mode) {
   dispatch({ regions: updatedRegions });
 }
 
+export function setBoundaryShaping(boundaryIndex, shaping) {
+  const updatedRegions = [...GLOBAL_STATE.regions];
+  updatedRegions[boundaryIndex].shaping = shaping;
+  dispatch({ regions: updatedRegions });
+}
+
 export function removeBoundary(index) {
   const { boundaries, regions } = GLOBAL_STATE;
 
@@ -151,6 +157,7 @@ export function addBoundary() {
       xMin + Math.floor((xMax - xMin) / 2),
       yMin + Math.floor((yMax - yMin) / 2),
     ],
+    shaping: 0,
     joinMode: "none",
     yarnBlock: new Bimp(1, 1, [1]),
     stitchBlock: new Bimp(1, 1, [1]),

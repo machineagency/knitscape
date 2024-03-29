@@ -13,27 +13,23 @@ export function settingsModal() {
           @change=${(e) => dispatch({ reverseScroll: e.target.checked })} />
         Invert Scroll
       </label>
-
+      <label class="form-control">
+        K yarn
+        <input
+          class="input"
+          type="number"
+          min="0.01"
+          max="0.2"
+          step="0.01"
+          .value=${String(GLOBAL_STATE.kYarn)}
+          @change=${(e) => dispatch({ kYarn: Number(e.target.value) })} />
+      </label>
       <button
         class="btn solid"
+        style="align-self: center;"
         @click=${() => window.open("https://github.com/knitscape/knitscape")}>
         <i class="fa-brands fa-github"></i>
       </button>
     </div>
   </div>`;
 }
-
-// <label class="form-control">
-//   Cell aspect
-//   <input
-//     class="num-input"
-//     type="number"
-//     .value=${String(GLOBAL_STATE.rowGauge)}
-//     @change=${(e) => dispatch({ rowGauge: Number(e.target.value) })} />
-//   /
-//   <input
-//     class="num-input"
-//     type="number"
-//     .value=${String(GLOBAL_STATE.stitchGauge)}
-//     @change=${(e) => dispatch({ stitchGauge: Number(e.target.value) })} />
-// </label>

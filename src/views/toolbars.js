@@ -10,6 +10,7 @@ import {
   removeBoundary,
   sendBoundaryToBack,
   setBoundaryJoinMode,
+  setBoundaryShaping,
 } from "../interaction/boundaryInteraction";
 import {
   removePath,
@@ -210,6 +211,7 @@ export function boundaryToolbar() {
     </div>
 
     <div class="radio-group">
+      <span>yarn join</span>
       <button
         class="${region.joinMode == "none" ? "selected" : ""}"
         @click=${() => setBoundaryJoinMode(selectedBoundary, "none")}>
@@ -220,6 +222,29 @@ export function boundaryToolbar() {
         @click=${() => setBoundaryJoinMode(selectedBoundary, "tucks")}>
         tucks
       </button>
+      <span>shaping</span>
+      <div class="chart-scale">
+        <input
+          class="input"
+          type="number"
+          min="0"
+          max="7"
+          step="1"
+          .value=${String(region.shaping)}
+          @change=${(e) => setBoundaryShaping(Number(e.target.value))} />
+        <div class="spinners">
+          <button
+            @click=${() =>
+              setBoundaryShaping(selectedBoundary, region.shaping + 1)}>
+            <i class="fa-solid fa-angle-up fa-xs"></i>
+          </button>
+          <button
+            @click=${() =>
+              setBoundaryShaping(selectedBoundary, region.shaping - 1)}>
+            <i class="fa-solid fa-angle-down fa-xs"></i>
+          </button>
+        </div>
+      </div>
     </div>
 
     <div class="h-group">

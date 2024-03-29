@@ -13,11 +13,11 @@ let GLOBAL_STATE = {
   transforming: false, // If the pointer is being used to do something
 
   // Chart view states
-  colorMode: "yarn",
+  colorMode: "yarn", // operation or yarn
   annotations: true, // slope and point annotations for paths and boundaries
 
   // Interaction mode can be path, boundary, or block.
-  interactionMode: "path",
+  interactionMode: "boundary",
   pointer: [0, 0], // Pointer postition in chart coordinates
   locked: false,
 
@@ -47,6 +47,8 @@ let GLOBAL_STATE = {
   machineChart: null,
   rowMap: null,
   yarnSequence: [],
+  passSchedule: [],
+  yarnSchedule: [],
 
   scale: 15, // Number of pixels for each chart cell
   cellWidth: 15 / 7,
@@ -72,6 +74,7 @@ let GLOBAL_STATE = {
   showUpload: false,
   showExampleLibrary: false,
   yarnExpanded: false,
+  showTimeNeedleView: false,
 
   // INTERACTION
   reverseScroll: false,

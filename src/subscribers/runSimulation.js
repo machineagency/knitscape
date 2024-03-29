@@ -14,6 +14,7 @@ function debounce(callback, wait) {
 }
 
 export function drawYarns() {
+  if (GLOBAL_STATE.showTimeNeedleView) return;
   if (GLOBAL_STATE.stopSim) GLOBAL_STATE.stopSim();
 
   let { stopSim, relax } = simulate(
@@ -43,6 +44,7 @@ export function runSimulation() {
           "yarnSequence",
           "machineChart",
           "flipped",
+          "showTimeNeedleView",
         ].some((key) => changes.includes(key));
 
         if (found) {

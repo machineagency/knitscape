@@ -576,7 +576,10 @@ function finalLocation(i, j, DS) {
 }
 
 function finalLocationRecursive(i, j, DS) {
-  // const cn = DS.cns[j * DS.width + i];
+  if (i < 0 || i >= DS.width || j < 0 || j >= DS.height) {
+    console.warn(`Trying to move outside chart bounds`);
+    console.log(i, j);
+  }
   const cn = DS.CN(i, j);
 
   if (cn[0] == stitches.KNIT || cn[0] == stitches.PURL) {

@@ -1,10 +1,10 @@
 import { Bimp } from "../lib/Bimp";
 import { GLOBAL_STATE, dispatch } from "../state";
-import { evaluateChart } from "../charting/evalChart";
+import { rasterizeChart } from "../charting/evalChart";
 import { bBoxAllBoundaries } from "../charting/helpers";
 import { fitChart } from "../interaction/chartPanZoom";
 
-export function hydrateWorkspaceJSON(dryWorkspaceJSON) {
+export function hydrateWorkspaceJSON(rawJSON) {
   // TODO: Make a default workspace and pull from there
   let {
     cellAspect = 7 / 11,
@@ -15,7 +15,7 @@ export function hydrateWorkspaceJSON(dryWorkspaceJSON) {
     paths = [],
     annotations = true,
     simLive = true,
-  } = dryWorkspaceJSON;
+  } = rawJSON;
 
   loadWorkspace({
     annotations,
@@ -23,23 +23,28 @@ export function hydrateWorkspaceJSON(dryWorkspaceJSON) {
     cellAspect,
     yarnPalette,
     boundaries,
-    regions: regions.map(({ pos, joinMode, yarnBlock, stitchBlock }) => {
-      return {
-        pos,
-        joinMode,
-        yarnBlock: Bimp.fromJSON(yarnBlock),
-        stitchBlock: Bimp.fromJSON(stitchBlock),
-      };
-    }),
-    paths: paths.map(({ pts, offset, tileMode, yarnBlock, stitchBlock }) => {
-      return {
-        pts,
-        offset,
-        tileMode,
-        yarnBlock: Bimp.fromJSON(yarnBlock),
-        stitchBlock: Bimp.fromJSON(stitchBlock),
-      };
-    }),
+    regions: regions.map(
+      ({ pos, joinMode = "none", shaping = 0, yarnBlock, stitchBlock }) => {
+        return {
+          pos,
+          joinMode,
+          shaping,
+          yarnBlock: Bimp.fromJSON(yarnBlock),
+          stitchBlock: Bimp.fromJSON(stitchBlock),
+        };
+      }
+    ),
+    paths: paths.map(
+      ({ pts, offset, tileMode = "tiled", yarnBlock, stitchBlock }) => {
+        return {
+          pts,
+          offset,
+          tileMode,
+          yarnBlock: Bimp.fromJSON(yarnBlock),
+          stitchBlock: Bimp.fromJSON(stitchBlock),
+        };
+      }
+    ),
     blocks: blocks.map(({ pos, yarnBlock, stitchBlock }) => {
       return {
         pos,
@@ -70,7 +75,8 @@ export function loadWorkspace(workspace) {
 
   // Make chart by evaluating workspace
   let { stitchChart, yarnChart, machineChart, yarnSequence, rowMap } =
-    evaluateChart(boundaries, regions, blocks, paths);
+    rasterizeChart(boundaries, regions, blocks, paths);
+
   dispatch({
     ...workspace,
     chart: stitchChart,

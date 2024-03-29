@@ -21,6 +21,32 @@ export const BACK_OPS = new Set([
   "BXL3",
 ]);
 
+export const FRONT_BED = new Set([
+  "KNIT",
+  "FT",
+  "FXR1",
+  "FXR2",
+  "FXR3",
+  "FXL1",
+  "FXL2",
+  "FXL3",
+]);
+
+export const TRANSFERS = new Set([
+  "FXR1",
+  "FXR2",
+  "FXR3",
+  "FXL1",
+  "FXL2",
+  "FXL3",
+  "BXR1",
+  "BXR2",
+  "BXR3",
+  "BXL1",
+  "BXL2",
+  "BXL3",
+]);
+
 // Paths made in https://yqnn.github.io/svg-path-editor/
 export const SYMBOL_DATA = {
   EMPTY: {
@@ -213,6 +239,48 @@ export const SYMBOL_DATA = {
     color: "#dfdfdf7f",
     description: "transparent",
   },
+  FTB: {
+    color: "#fcff46",
+  },
+  BTF: {
+    color: "#afff46",
+  },
+  FL1: {
+    color: "#de9321",
+  },
+  FL2: {
+    color: "#de9321",
+  },
+  FL3: {
+    color: "#de9321",
+  },
+  FR1: {
+    color: "#9557b4",
+  },
+  FR2: {
+    color: "#9557b4",
+  },
+  FR3: {
+    color: "#9557b4",
+  },
+  BL1: {
+    color: "#b47619",
+  },
+  BL2: {
+    color: "#b47619",
+  },
+  BL3: {
+    color: "#b47619",
+  },
+  BR1: {
+    color: "#74448d",
+  },
+  BR2: {
+    color: "#74448d",
+  },
+  BR3: {
+    color: "#74448d",
+  },
 };
 
 export const toolData = {
@@ -245,6 +313,20 @@ export const stitches = {
   BXL2: 17,
   BXL3: 18,
   TRANSPARENT: 19,
+  FTB: 20,
+  BTF: 21,
+  FR1: 22,
+  FR2: 23,
+  FR3: 24,
+  FL1: 25,
+  FL2: 26,
+  FL3: 27,
+  BR1: 28,
+  BR2: 29,
+  BR3: 30,
+  BL1: 31,
+  BL2: 32,
+  BL3: 33,
 };
 
 export const STITCH_MAP = Object.keys(stitches);

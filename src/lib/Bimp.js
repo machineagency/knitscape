@@ -116,6 +116,16 @@ export class Bimp {
     return this.pixels.at(x + y * this.width);
   }
 
+  pixelAt(x, y) {
+    if (x >= this.width || y >= this.height) {
+      return -1;
+    }
+    if (x < 0) x = this.width + x;
+    if (y < 0) y = this.height + y;
+
+    return this.pixels.at(x + y * this.width);
+  }
+
   draw(changes) {
     let copy = this.pixels.slice();
     for (let { x, y, color } of changes) {

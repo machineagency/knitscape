@@ -31,7 +31,7 @@ function rootAtZero(bbox, boundaries, regions, blocks, paths) {
   };
 }
 
-export function evaluateChart(rawBounds, rawRegions, rawBlocks, rawPaths) {
+export function rasterizeChart(rawBounds, rawRegions, rawBlocks, rawPaths) {
   const bbox = bBoxAllBoundaries(rawBounds);
 
   const { boundaries, regions, blocks, paths } = rootAtZero(

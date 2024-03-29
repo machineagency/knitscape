@@ -69,8 +69,8 @@ export function bottomBar() {
 
     <div class="h-group">
       <div class="pointer-pos">
-        <div><span>col</span> <span>${pointer[0] + 1}</span></div>
-        <div><span>row</span> <span>${pointer[1] + 1}</span></div>
+        <div><span>col</span> <span>${pointer[0]}</span></div>
+        <div><span>row</span> <span>${pointer[1]}</span></div>
       </div>
       <div class="chart-scale">
         <input

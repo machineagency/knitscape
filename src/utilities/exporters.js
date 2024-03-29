@@ -1,6 +1,7 @@
 import { bmp_lib } from "../lib/bmp";
 import { hexToRgb } from "./misc";
 import { SYMBOL_DATA } from "../constants";
+import { scheduleChart } from "../charting/planner";
 
 function downloadFile(dataStr, fileName) {
   const downloadAnchorNode = document.createElement("a");
@@ -32,14 +33,17 @@ export function downloadWorkspace({
         cellAspect,
         yarnPalette,
         boundaries,
-        regions: regions.map(({ pos, joinMode, yarnBlock, stitchBlock }) => {
-          return {
-            pos,
-            joinMode,
-            yarnBlock: yarnBlock.toJSON(),
-            stitchBlock: stitchBlock.toJSON(),
-          };
-        }),
+        regions: regions.map(
+          ({ pos, joinMode, shaping, yarnBlock, stitchBlock }) => {
+            return {
+              pos,
+              joinMode,
+              shaping,
+              yarnBlock: yarnBlock.toJSON(),
+              stitchBlock: stitchBlock.toJSON(),
+            };
+          }
+        ),
         paths: paths.map(
           ({ pts, offset, tileMode, yarnBlock, stitchBlock }) => {
             return {
@@ -64,19 +68,21 @@ export function downloadWorkspace({
   downloadFile(dataStr, "workspace.json");
 }
 
-const stitches = ".-,!#$%^&*()_+{}[]";
+const stitches = ".-,!#$%^&*()_+{}[]qwertyuiopasdfghjkl";
 
 export function downloadKniterate({ machineChart, yarnSequence }) {
-  const colors = yarnSequence.map((yarnIndex) =>
+  const { passes, yarns } = scheduleChart(machineChart, yarnSequence);
+
+  const colors = yarns.map((yarnIndex) =>
     new Array(machineChart.width).fill(yarnIndex).join("")
   );
 
+  console.log(passes);
   const text =
     "FILE FORMAT : DAK\nYARNS\n" +
     colors.toReversed().join("\n") +
     "\nYARN PALETTE\nSTITCH SYMBOLS\n" +
-    machineChart
-      .make2d()
+    passes
       .toReversed()
       .map((row) => row.map((stitch) => stitches[stitch]).join(""))
       .join("\n") +
@@ -88,8 +94,8 @@ export function downloadKniterate({ machineChart, yarnSequence }) {
   );
 }
 
-export function downloadTimeNeedleBMP(machineChart) {
-  const bmp2d = machineChart.make2d().toReversed();
+export function downloadTimeNeedleBMP(passSchedule) {
+  const bmp2d = passSchedule.toReversed();
   const rgbPalette = Object.values(SYMBOL_DATA).map(({ color }) =>
     hexToRgb(color)
   );
@@ -99,58 +105,3 @@ export function downloadTimeNeedleBMP(machineChart) {
 
   downloadFile(im.src, "pattern.bmp");
 }
-
-// export function downloadPunchcard() {
-//   const svg = document.getElementById("punchcard");
-
-//   //get svg source.
-//   const serializer = new XMLSerializer();
-//   let source = serializer.serializeToString(svg);
-
-//   //add name spaces.
-//   if (!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
-//     source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
-//   }
-//   if (!source.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)) {
-//     source = source.replace(
-//       /^<svg/,
-//       '<svg xmlns:xlink="http://www.w3.org/1999/xlink"'
-//     );
-//   }
-
-//   //add xml declaration
-//   source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
-
-//   download(
-//     "data:image/svg+xml;charset=utf-8," + encodeURIComponent(source),
-//     "punchcard.svg"
-//   );
-// }
-
-// export function downloadPNG() {
-//   download(
-//     document.getElementById("preview").toDataURL("image/png"),
-//     "chart.png"
-//   );
-// }
-
-// export function downloadSilverKnitTxt() {
-//   const text =
-//     "SilverKnit\n" +
-//     GLOBAL_STATE.repeats[0].bitmap
-//       .make2d()
-//       .map((row) =>
-//         row
-//           .map((pixel) => {
-//             if (pixel == 0 || pixel == 1) return 7;
-//             else return 8;
-//           })
-//           .join("")
-//       )
-//       .join("\n");
-
-//   download(
-//     "data:text/plain;charset=utf-8," + encodeURIComponent(text),
-//     "pattern.txt"
-//   );
-// }

@@ -3,11 +3,29 @@ import { GLOBAL_STATE, dispatch } from "../state";
 import { toggleFullscreen, currentlyFullscreen } from "../utilities/fullscreen";
 
 export function taskbar() {
-  const { showExampleLibrary, showDownload, showUpload, showSettings } =
-    GLOBAL_STATE;
+  const {
+    showExampleLibrary,
+    showDownload,
+    showUpload,
+    showSettings,
+    showTimeNeedleView,
+  } = GLOBAL_STATE;
   return html` <div id="taskbar">
     <h1 class="site-title">KnitScape</h1>
     <div class="button-group">
+      <div class="radio-group">
+        <button
+          class="${showTimeNeedleView ? "selected" : ""}"
+          @click=${() => dispatch({ showTimeNeedleView: true })}>
+          program
+        </button>
+        <button
+          class="${showTimeNeedleView ? "" : "selected"}"
+          @click=${() => dispatch({ showTimeNeedleView: false })}>
+          yarn
+        </button>
+      </div>
+
       <button
         class="btn icon ${showExampleLibrary ? "open" : ""}"
         @click=${() => dispatch({ showExampleLibrary: true })}>

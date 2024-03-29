@@ -33,6 +33,10 @@ canvas {
   overflow: hidden;
 }
 
+#view-pane {
+  display: flex;
+}
+
 .gutter {
   background-color: var(--base1);
   background-repeat: no-repeat;
@@ -333,6 +337,7 @@ canvas {
 #sim-pane {
   display: flex;
   flex-direction: column;
+  flex: 1;
 }
 
 #sim-container {
@@ -387,6 +392,53 @@ canvas {
   position: absolute;
   top: 0;
   left: 0;
+}
+
+/* #endregion */
+
+/* #region TIME NEEDLE VIEW */
+
+#time-needle-pane {
+  display: flex;
+  /* align-items: center; */
+  overflow: hidden;
+  flex: 1;
+}
+
+.time-needle-container {
+  display: flex;
+  gap: 3px;
+}
+
+#timeneedlebitmap {
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+.yarn-assignments {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column-reverse;
+  width: 30px;
+}
+
+.yarn-cell {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  font-family: monospace;
+  container-name: yarn;
+  color: var(--base0);
+  background-color: var(--color);
+}
+
+.yarn-cell div {
+  flex: 1;
+}
+
+.yarn-cell span {
+  position: absolute;
 }
 
 /* #endregion */

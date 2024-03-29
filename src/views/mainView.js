@@ -5,6 +5,7 @@ import { GLOBAL_STATE } from "../state";
 import { taskbar } from "./taskbar";
 import { simulationView } from "./simulationPane";
 import { chartPaneView } from "./chartPane";
+import { timeNeedleView } from "./timeNeedlePane";
 import { yarnPane } from "./yarnPane";
 
 import { closeModals } from "../utilities/misc";
@@ -21,7 +22,9 @@ export function mainView() {
     ${when(GLOBAL_STATE.showSettings, settingsModal)}
     <div id="site" @pointerdown=${closeModals}>
       <div id="chart-pane">${yarnPane()} ${chartPaneView()}</div>
-      ${simulationView()}
+      <div id="view-pane">
+        ${when(GLOBAL_STATE.showTimeNeedleView, timeNeedleView, simulationView)}
+      </div>
     </div>
   `;
 }

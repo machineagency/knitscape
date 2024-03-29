@@ -4,7 +4,7 @@ import { when } from "lit-html/directives/when.js";
 import { classMap } from "lit-html/directives/class-map.js";
 
 import { dispatch, GLOBAL_STATE } from "../state";
-import { SYMBOL_DATA } from "../constants";
+import { SYMBOL_DATA, stitches } from "../constants";
 import { editingTools } from "../charting/editingTools";
 import { toolData } from "../constants";
 
@@ -46,6 +46,7 @@ function getCurrentBlock() {
 function operationButton(symbolName, data, index) {
   // TODO: handle these cases somewhere else probably
   if (symbolName == "EMPTY" || symbolName == "BM") return;
+  if (stitches[symbolName] > 19) return;
   const classes = { selected: GLOBAL_STATE.activeSymbol == index };
 
   return html`<button

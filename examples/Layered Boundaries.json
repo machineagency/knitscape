@@ -1,1 +1,133 @@
-{"annotations":true,"simLive":true,"cellAspect":0.6363636363636364,"yarnPalette":["#7babc7ff","#ebe9bbff","#9DE295"],"boundaries":[[[16,7],[16,36],[33,36],[33,7]],[[20,10],[20,32],[30,32],[30,10]],[[3,0],[3,21],[33,21],[33,0]]],"regions":[{"pos":[24,14],"joinMode":"none","yarnBlock":{"pixels":[2],"width":1,"height":1},"stitchBlock":{"pixels":[1],"width":1,"height":1}},{"pos":[27,23],"joinMode":"none","yarnBlock":{"pixels":[3],"width":1,"height":1},"stitchBlock":{"pixels":[1],"width":1,"height":1}},{"pos":[4,0],"joinMode":"tucks","yarnBlock":{"pixels":[1],"width":1,"height":1},"stitchBlock":{"pixels":[1],"width":1,"height":1}}],"paths":[],"blocks":[]}
+{
+  "annotations": true,
+  "simLive": true,
+  "cellAspect": 0.6363636363636364,
+  "yarnPalette": [
+    "#7babc7ff",
+    "#ebe9bbff",
+    "#9DE295"
+  ],
+  "boundaries": [
+    [
+      [
+        16,
+        7
+      ],
+      [
+        16,
+        36
+      ],
+      [
+        33,
+        36
+      ],
+      [
+        33,
+        7
+      ]
+    ],
+    [
+      [
+        20,
+        10
+      ],
+      [
+        20,
+        32
+      ],
+      [
+        30,
+        32
+      ],
+      [
+        30,
+        10
+      ]
+    ],
+    [
+      [
+        3,
+        0
+      ],
+      [
+        3,
+        21
+      ],
+      [
+        33,
+        21
+      ],
+      [
+        33,
+        0
+      ]
+    ]
+  ],
+  "regions": [
+    {
+      "pos": [
+        24,
+        14
+      ],
+      "joinMode": "none",
+      "yarnBlock": {
+        "pixels": [
+          2
+        ],
+        "width": 1,
+        "height": 1
+      },
+      "stitchBlock": {
+        "pixels": [
+          1
+        ],
+        "width": 1,
+        "height": 1
+      }
+    },
+    {
+      "pos": [
+        27,
+        23
+      ],
+      "joinMode": "none",
+      "yarnBlock": {
+        "pixels": [
+          3
+        ],
+        "width": 1,
+        "height": 1
+      },
+      "stitchBlock": {
+        "pixels": [
+          1
+        ],
+        "width": 1,
+        "height": 1
+      }
+    },
+    {
+      "pos": [
+        4,
+        0
+      ],
+      "joinMode": "tucks",
+      "yarnBlock": {
+        "pixels": [
+          1
+        ],
+        "width": 1,
+        "height": 1
+      },
+      "stitchBlock": {
+        "pixels": [
+          1
+        ],
+        "width": 1,
+        "height": 1
+      }
+    }
+  ],
+  "paths": [],
+  "blocks": []
+}
