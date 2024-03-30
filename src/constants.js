@@ -315,12 +315,14 @@ export const stitches = {
   TRANSPARENT: 19,
   FTB: 20,
   BTF: 21,
+  // front to back racked transfers
   FR1: 22,
   FR2: 23,
   FR3: 24,
   FL1: 25,
   FL2: 26,
   FL3: 27,
+  // back to front racked transfers
   BR1: 28,
   BR2: 29,
   BR3: 30,

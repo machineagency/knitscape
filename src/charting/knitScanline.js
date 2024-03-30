@@ -32,7 +32,7 @@ function applyShaping(
   let diffLeft = xLeft - edgeLeft.xLast;
   let diffRight = xRight - edgeRight.xLast;
 
-  if (Math.abs(edgeLeft.dx) < 1) {
+  if (Math.abs(edgeLeft.dx) <= 1) {
     if (diffLeft === 1) {
       stitchChart = stitchChart.line(
         { x: edgeLeft.xLast, y: y - 1 },
@@ -51,7 +51,7 @@ function applyShaping(
     }
   }
 
-  if (Math.abs(edgeRight.dx) < 1) {
+  if (Math.abs(edgeRight.dx) <= 1) {
     if (diffRight === -1) {
       // console.log(`dec ${diffRight} on right`);
       stitchChart = stitchChart.line(

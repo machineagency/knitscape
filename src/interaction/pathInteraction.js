@@ -478,7 +478,7 @@ export function drawPathLine(e) {
     offset: [0, 0],
     yarnBlock: new Bimp(1, 1, [0]),
     stitchBlock: new Bimp(1, 1, [stitches.TRANSPARENT]),
-    tileMode: "round",
+    tileMode: "overlap",
   });
 
   dispatch({
