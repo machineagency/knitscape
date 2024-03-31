@@ -28,14 +28,16 @@ export function simulate(stitchPattern, scale) {
 
   // try {
   DS = populateDS(stitchPattern);
+
   orderCNs(DS, stitchPattern);
+
   yarnPaths = followTheYarn(
     DS,
     stitchPattern.yarnSequence,
     stitchPattern.carriagePasses
   );
 
-  // console.log(yarnPaths[2]);
+  // console.log(yarnPaths);
   // } catch {
   //   console.error("Error generating yarn topology");
   //   return { relax: null, stopSim: null };

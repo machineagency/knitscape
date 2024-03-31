@@ -173,6 +173,31 @@ export function addBoundary() {
   });
 }
 
+export function duplicateBoundary(boundaryindex) {
+  const updatedBoundaries = [...GLOBAL_STATE.boundaries];
+  const updatedRegions = [...GLOBAL_STATE.regions];
+
+  const regionToCopy = updatedRegions[boundaryindex];
+
+  const regionCopy = {
+    shaping: regionToCopy.shaping,
+    joinMode: regionToCopy.tileMode,
+    pos: [...regionToCopy.pos],
+    yarnBlock: regionToCopy.yarnBlock,
+    stitchBlock: regionToCopy.stitchBlock,
+  };
+
+  const boundaryCopy = [...updatedBoundaries[boundaryindex]];
+
+  updatedRegions.push(regionCopy);
+  updatedBoundaries.push(boundaryCopy);
+  dispatch({
+    regions: updatedRegions,
+    boundaries: updatedBoundaries,
+    selectedBoundary: updatedBoundaries.length - 1,
+  });
+}
+
 function addPoint(e) {
   const rect = e.currentTarget.getBoundingClientRect();
 

@@ -11,6 +11,7 @@ import {
   sendBoundaryToBack,
   setBoundaryJoinMode,
   setBoundaryShaping,
+  duplicateBoundary,
 } from "../interaction/boundaryInteraction";
 import {
   removePath,
@@ -194,6 +195,9 @@ export function boundaryToolbar() {
         Editing ${blockEditMode != null ? `${blockEditMode} fill of ` : ""}
         boundary ${selectedBoundary}
       </span>
+      <button class="btn" @click=${() => duplicateBoundary(selectedBoundary)}>
+        <i class="fa-solid fa-copy"></i>
+      </button>
       <button class="btn" @click=${() => sendBoundaryToBack(selectedBoundary)}>
         <i class="fa-solid fa-arrows-down-to-line"></i>
       </button>

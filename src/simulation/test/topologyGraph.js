@@ -17,15 +17,17 @@ export function drawGraph(pattern, parentID) {
   const opTypes = Object.keys(stitches);
   const opColors = d3.scaleOrdinal(d3.schemePastel1);
   const cnRadius = 7;
+  const rowMap = [0, 1, 2];
 
-  const chart = new Pattern(pattern, [0, 0, 0]);
+  const chart = new Pattern(pattern, [0, 0, 0], rowMap);
 
   const DS = populateDS(chart);
   orderCNs(DS, chart);
-  const yarnPath = followTheYarn(DS, chart);
-  const nodes = layoutNodes(DS, STITCH_WIDTH);
+  const yarnPaths = followTheYarn(DS, chart.yarnSequence, chart.carriagePasses);
+  const nodes = layoutNodes(DS, pattern, rowMap, STITCH_WIDTH);
   // orderLoops(DS, chart);
-  const links = buildSegmentData(DS, yarnPath, nodes, chart, STITCH_WIDTH);
+  const links = buildSegmentData(DS, yarnPaths, nodes, chart, STITCH_WIDTH);
+  console.log(links);
 
   nodes.forEach((node, index) => {
     const i = index % DS.width;

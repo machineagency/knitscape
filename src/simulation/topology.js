@@ -1,5 +1,4 @@
 import { stitches, cnStates, MAX_H_SHIFT, MAX_V_SHIFT } from "../constants";
-import { Vec2 } from "../lib/Vec2";
 
 function checkForTransfers(i, j, DS) {
   let iMin = i - MAX_H_SHIFT < 0 ? 0 : i - MAX_H_SHIFT;
@@ -487,7 +486,11 @@ function addToList(i, j, legNode, yarnPath, DS, rowDirections) {
       return false;
     } else if (AV == cnStates.UACN) {
       let m, n, row, part;
-      if (i % 2 != j % 2) {
+
+      const movingRight = rowDirections[j - 1] == "right";
+      const evenI = i % 2 == 0;
+
+      if (movingRight != evenI) {
         // if parities are different, we look backward in the yarn path
         [m, n, row, part] = yarnPath.at(-1);
       } else {
@@ -539,10 +542,6 @@ function addToList(i, j, legNode, yarnPath, DS, rowDirections) {
       // Determine final location
       const [_, jFinal] = finalLocation(i, j, DS);
 
-      // if (i == 6 && j == 4) {
-      //   console.log(jFinal, m, n);
-      // }
-
       if (n <= jFinal) {
         // if this CN is anchored, update it to ACN
         if (j < DS.height - 1) {
@@ -580,6 +579,7 @@ function finalLocationRecursive(i, j, DS) {
     console.warn(`Trying to move outside chart bounds`);
     console.log(i, j);
   }
+
   const cn = DS.CN(i, j);
 
   if (cn[0] == stitches.KNIT || cn[0] == stitches.PURL) {
