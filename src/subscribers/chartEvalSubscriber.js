@@ -56,6 +56,7 @@ export function chartEvalSubscriber() {
           "regions",
           "blocks",
           "paths",
+          "tucks",
           "showTimeNeedleView",
         ].some((key) => changes.includes(key));
 

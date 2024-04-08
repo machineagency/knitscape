@@ -42,6 +42,8 @@ let GLOBAL_STATE = {
 
   stitchSelect: null,
 
+  tucks: false,
+
   chart: null,
   yarnChart: null,
   machineChart: null,
@@ -66,7 +68,7 @@ let GLOBAL_STATE = {
 
   // YARN
   yarnPalette: null,
-  yarnWidth: 0.24,
+  yarnWidth: 0.25,
 
   // Various UI pane states
   showSettings: false,

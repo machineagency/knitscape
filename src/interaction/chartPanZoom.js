@@ -3,6 +3,7 @@ import { GLOBAL_STATE, dispatch } from "../state";
 export function pan(e) {
   const startPos = { x: e.clientX, y: e.clientY };
   const startPan = GLOBAL_STATE.chartPan;
+  document.body.classList.add("moving");
 
   function move(e) {
     if (e.buttons == 0) {
@@ -21,6 +22,8 @@ export function pan(e) {
   }
 
   function end() {
+    document.body.classList.remove("moving");
+
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerup", end);
     window.removeEventListener("pointerleave", end);

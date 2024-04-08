@@ -15,7 +15,13 @@ export function boundaryModePointerDown(e) {
     // path is only shown if the boundary is selected
     dragBoundaryLine(e);
   } else if (cl.contains("boundary")) {
-    if (
+    if (e.shiftKey) {
+      if (e.shiftKey) {
+        dispatch({ selectedBoundary: null });
+
+        selectBox(e);
+      }
+    } else if (
       GLOBAL_STATE.selectedBoundary == Number(e.target.dataset.boundaryindex)
     ) {
       dragBoundary(e);
@@ -159,8 +165,8 @@ export function addBoundary() {
     ],
     shaping: 0,
     joinMode: "none",
-    yarnBlock: new Bimp(1, 1, [1]),
-    stitchBlock: new Bimp(1, 1, [1]),
+    yarnBlock: new Bimp(1, 1, [0]),
+    stitchBlock: new Bimp(1, 1, [stitches.TRANSPARENT]),
   });
 
   dispatch({
@@ -243,6 +249,7 @@ function dragBoundaryPoint(e) {
 
   const startPos = { x: e.clientX, y: e.clientY };
   dispatch({ transforming: true });
+  document.body.classList.add("grabbing");
 
   function move(e) {
     if (e.buttons == 0) {
@@ -268,6 +275,8 @@ function dragBoundaryPoint(e) {
   }
 
   function end() {
+    document.body.classList.remove("grabbing");
+
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerup", end);
     window.removeEventListener("pointerleave", end);
@@ -292,6 +301,7 @@ function dragBoundaryLine(e) {
   const startPos = { x: e.clientX, y: e.clientY };
 
   dispatch({ transforming: true });
+  document.body.classList.add("grabbing");
 
   function move(e) {
     if (e.buttons == 0) {
@@ -321,6 +331,8 @@ function dragBoundaryLine(e) {
   }
 
   function end() {
+    document.body.classList.remove("grabbing");
+
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerup", end);
     window.removeEventListener("pointerleave", end);
@@ -344,6 +356,7 @@ function dragBoundary(e) {
 
   let last = [0, 0];
   dispatch({ transforming: true });
+  document.body.classList.add("moving");
 
   function move(e) {
     if (e.buttons == 0) {
@@ -370,6 +383,8 @@ function dragBoundary(e) {
   }
 
   function end() {
+    document.body.classList.remove("moving");
+
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerup", end);
     window.removeEventListener("pointerleave", end);
@@ -397,6 +412,7 @@ export function resizeFillBlock(e, direction) {
 
   const startPos = { x: e.clientX, y: e.clientY };
   dispatch({ transforming: true, locked: true });
+  document.body.classList.add("grabbing");
 
   function move(e) {
     if (e.buttons == 0) {
@@ -462,6 +478,8 @@ export function resizeFillBlock(e, direction) {
   }
 
   function end() {
+    document.body.classList.remove("grabbing");
+
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerup", end);
     window.removeEventListener("pointerleave", end);
@@ -475,6 +493,12 @@ export function resizeFillBlock(e, direction) {
 
 function beginDrag(e) {
   const startPos = { x: e.clientX, y: e.clientY };
+
+  if (e.shiftKey) {
+    dispatch({ selectedBoundary: null });
+
+    selectBox(e);
+  }
 
   let moved = false;
 
@@ -533,6 +557,7 @@ export function moveBoundaryFill(e) {
 
   const startPos = { x: e.clientX, y: e.clientY };
   dispatch({ transforming: true, locked: true });
+  document.body.classList.add("grabbing");
 
   function move(e) {
     if (e.buttons == 0) {
@@ -558,6 +583,8 @@ export function moveBoundaryFill(e) {
   }
 
   function end() {
+    document.body.classList.remove("grabbing");
+
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerup", end);
     window.removeEventListener("pointerleave", end);

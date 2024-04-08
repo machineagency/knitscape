@@ -158,6 +158,7 @@ export function dragPathLine(e) {
   const startPos = { x: e.clientX, y: e.clientY };
 
   dispatch({ transforming: true });
+  document.body.classList.add("grabbing");
 
   function move(e) {
     if (e.buttons == 0) {
@@ -192,6 +193,8 @@ export function dragPathLine(e) {
   }
 
   function end() {
+    document.body.classList.remove("grabbing");
+
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerup", end);
     window.removeEventListener("pointerleave", end);
@@ -204,6 +207,8 @@ export function dragPathLine(e) {
 }
 
 export function dragPathPoint(e) {
+  document.body.classList.add("grabbing");
+
   const pathIndex = Number(e.target.dataset.pathindex);
   const pointIndex = Number(e.target.dataset.pointindex);
 
@@ -237,6 +242,8 @@ export function dragPathPoint(e) {
   }
 
   function end() {
+    document.body.classList.remove("grabbing");
+
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerup", end);
     window.removeEventListener("pointerleave", end);
@@ -260,6 +267,7 @@ export function resizePathTile(e, direction) {
 
   const startPos = { x: e.clientX, y: e.clientY };
   dispatch({ transforming: true });
+  document.body.classList.add("grabbing");
 
   function move(e) {
     if (e.buttons == 0) {
@@ -324,6 +332,8 @@ export function resizePathTile(e, direction) {
   }
 
   function end() {
+    document.body.classList.remove("grabbing");
+
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerup", end);
     window.removeEventListener("pointerleave", end);
@@ -344,6 +354,7 @@ export function movePathTile(e) {
 
   const startPos = { x: e.clientX, y: e.clientY };
   dispatch({ transforming: true });
+  document.body.classList.add("grabbing");
 
   function move(e) {
     if (e.buttons == 0) {
@@ -369,6 +380,8 @@ export function movePathTile(e) {
   }
 
   function end() {
+    document.body.classList.remove("grabbing");
+
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerup", end);
     window.removeEventListener("pointerleave", end);
@@ -471,6 +484,7 @@ export function drawPathLine(e) {
 
   const startPos = { x: e.clientX, y: e.clientY };
   const startPoint = closestPointToMouse(e);
+  document.body.classList.add("grabbing");
 
   const updatedPaths = [...paths];
   updatedPaths.push({
@@ -559,6 +573,8 @@ export function drawPathLine(e) {
   }
 
   function end() {
+    document.body.classList.remove("grabbing");
+
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerup", end);
     window.removeEventListener("pointerleave", end);

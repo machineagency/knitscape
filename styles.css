@@ -26,6 +26,18 @@ canvas {
   display: block;
 }
 
+.grabbing {
+  cursor: grabbing;
+}
+
+.moving {
+  cursor: move;
+}
+
+.crosshair {
+  cursor: crosshair;
+}
+
 #site {
   flex: 1;
   display: flex;
@@ -400,7 +412,6 @@ canvas {
 
 #time-needle-pane {
   display: flex;
-  /* align-items: center; */
   overflow: hidden;
   flex: 1;
 }
@@ -477,8 +488,6 @@ canvas {
 }
 
 .pathMode.allowHover .background-path-hover:hover {
-  cursor: pointer;
-
   stroke: rgb(255, 255, 255);
   filter: drop-shadow(0px 0px 2px black);
 }
@@ -498,7 +507,7 @@ canvas {
   stroke: transparent;
   stroke-width: 7px;
   stroke-dasharray: 10 4;
-  cursor: pointer;
+  cursor: grab;
 }
 
 .path.top:hover {
@@ -513,7 +522,12 @@ canvas {
   stroke-width: 2px;
   filter: drop-shadow(0px 0px 2px black);
   pointer-events: all;
-  cursor: pointer;
+  cursor: grab;
+}
+
+.grabbing .path.top,
+.grabbing .point {
+  cursor: grabbing;
 }
 
 .point:hover {
@@ -618,6 +632,7 @@ canvas {
 }
 
 .move-block {
+  cursor: grab;
   position: absolute;
   right: 100%;
   top: 100%;
@@ -628,9 +643,15 @@ canvas {
   border-radius: 0.5em;
 }
 
+.grabbing .dragger,
+.grabbing .move-block {
+  cursor: grabbing;
+}
+
 .dragger {
   position: absolute;
   line-height: 0;
+  cursor: grab;
   display: inline-flex;
   align-items: center;
   border: 1px solid black;

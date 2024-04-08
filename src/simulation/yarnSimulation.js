@@ -194,9 +194,9 @@ export function simulate(stitchPattern, scale) {
         const currentLength = Math.abs(
           Math.hypot(n1[0] - n2[0], n1[1] - n2[1])
         );
-        const tension = 1 - segment.restLength / currentLength;
+        const tension = (1 - segment.restLength / currentLength) * 0.5;
         // console.log(tension);
-        // const tension = -0.5;
+        // const tension = 0.2;
         if (segment.layer.length == 2) {
           const splinePtsArr = splitYarnSpline(p0, p1, p2, p3, tension);
           segment.path = splinePtsArr.map((splinePts) => splinePath(splinePts));
@@ -297,7 +297,7 @@ export function simulate(stitchPattern, scale) {
         brightness = layer % 2 == 0 ? 0.6 - l * b : 0.8 - l * b;
       } else {
         //knit layer
-        brightness = layer % 2 == 0 ? 0.7 - l * b : 1 - l * b;
+        brightness = layer % 2 == 0 ? 0.75 - l * b : 1 - l * b;
       }
 
       canvas.style.cssText = `width: ${width}px; height: ${height}px; z-index: ${layer}; filter: brightness(${brightness});`;

@@ -17,6 +17,7 @@ export function selectBox(e) {
   let [lastX, lastY] = [startX, startY];
 
   dispatch({ transforming: true });
+  document.body.classList.add("crosshair");
 
   function move(moveEvent) {
     if (moveEvent.buttons == 0) {
@@ -44,6 +45,8 @@ export function selectBox(e) {
   }
 
   function end() {
+    document.body.classList.remove("crosshair");
+
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerup", end);
     window.removeEventListener("pointerleave", end);

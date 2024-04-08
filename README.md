@@ -27,7 +27,7 @@ KnitScape is a design and simulation tool for machine knitting.
   - [x] Move yarn and stitch fill origin
   - [x] show boundary size when selected
   - [x] change layer: raise/lower/front/back
-  - [ ] copy and paste
+  - [x] duplicate
   - [ ] affine transforms (reflect, scale, shear, rotate)
   - [ ] multiselect
 - Free blocks
@@ -44,6 +44,12 @@ KnitScape is a design and simulation tool for machine knitting.
 - Yarn Sequencer
   - [x] visualize active yarns in each row
   - [ ] show carriage direction
+
+## priority fixes
+
+- [ ] undo is currently bugged
+- [ ] sim topology resets on zoom/flip
+- [ ] removing a yarn from the yarn palette is bugged
 
 ## ideas
 

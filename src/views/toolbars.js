@@ -216,7 +216,7 @@ export function boundaryToolbar() {
 
     <div class="radio-group">
       <span>yarn join</span>
-      <button
+      <!-- <button
         class="${region.joinMode == "none" ? "selected" : ""}"
         @click=${() => setBoundaryJoinMode(selectedBoundary, "none")}>
         none
@@ -224,6 +224,16 @@ export function boundaryToolbar() {
       <button
         class="${region.joinMode == "tucks" ? "selected" : ""}"
         @click=${() => setBoundaryJoinMode(selectedBoundary, "tucks")}>
+        tucks
+      </button> -->
+      <button
+        class="${GLOBAL_STATE.tucks ? "" : "selected"}"
+        @click=${() => dispatch({ tucks: false })}>
+        none
+      </button>
+      <button
+        class="${GLOBAL_STATE.tucks ? "selected" : ""}"
+        @click=${() => dispatch({ tucks: true })}>
         tucks
       </button>
       <span>shaping</span>

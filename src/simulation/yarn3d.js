@@ -170,8 +170,10 @@ export function buildSegmentData(
 
       let restLength = loop
         ? Vec2.mag(Vec2.sub(nodes[sourceIndex].pos, nodes[targetIndex].pos)) *
-          stitchAspect
-        : Vec2.mag(Vec2.sub(nodes[sourceIndex].pos, nodes[targetIndex].pos));
+          stitchAspect *
+          0.7
+        : Vec2.mag(Vec2.sub(nodes[sourceIndex].pos, nodes[targetIndex].pos)) *
+          0.7;
       // : (Math.abs(sourceI - targetI) / 2) * stitchWidth;
 
       // let restLength = Vec2.mag(

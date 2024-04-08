@@ -1,5 +1,6 @@
 import { stitches } from "../constants";
 import { Bimp } from "../lib/Bimp";
+import { GLOBAL_STATE } from "../state";
 
 function processRow(yarnRow, stitchRow, direction, yarnSides) {
   let sequence = [];
@@ -44,7 +45,7 @@ function processRow(yarnRow, stitchRow, direction, yarnSides) {
         // This is be the normal way to join intarsia.
         // TODO: These boundary conditions should not be hard coded.
         // What is a better way to do this ? Perhaps it is a setting on the yarn fill.
-        passes[nextPassIndex][loc] = stitches.FT;
+        if (GLOBAL_STATE.tucks) passes[nextPassIndex][loc] = stitches.FT;
       }
     }
   }
