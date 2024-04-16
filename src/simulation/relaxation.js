@@ -15,7 +15,7 @@ export function yarnRelaxation(
 
   let running = true;
 
-  console.log("simulating!!");
+  // console.log("simulating!!");
 
   function applyYarnForce(p1, p2, restLength, K_YARN) {
     const displacement = Vec2.sub(p1.pos, p2.pos);
@@ -77,8 +77,7 @@ export function yarnRelaxation(
 
   function stop() {
     running = false;
-    console.log("Stop!");
-    // if (endedCB) endedCB();
+    // console.log("Stop!");
   }
 
   return {

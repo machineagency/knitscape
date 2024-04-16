@@ -38,7 +38,7 @@ export function editYarnColor(e, index) {
       value: GLOBAL_STATE.yarnPalette[index],
       onInput: () => {
         const newPalette = [...GLOBAL_STATE.yarnPalette];
-        newPalette[index] = picker.toRGBAString();
+        newPalette[index] = picker.toHEXString();
         dispatch({
           yarnPalette: newPalette,
         });

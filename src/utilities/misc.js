@@ -81,6 +81,7 @@ export function shuffle(arr) {
 }
 
 export function hexToRgb(hex) {
+  hex = hex.length > 7 ? hex.slice(0, 7) : hex;
   var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result
     ? [

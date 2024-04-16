@@ -1,6 +1,8 @@
 import { GLOBAL_STATE } from "../state";
 
-import { simulate } from "../simulation/yarnSimulation";
+// import { simulate } from "../simulation/yarnSimulation";
+import { simulate } from "../simulation/topDownYarnSimulation";
+
 import { Pattern } from "../simulation/Pattern";
 
 function debounce(callback, wait) {
@@ -13,11 +15,16 @@ function debounce(callback, wait) {
   };
 }
 
+function r() {
+  if (GLOBAL_STATE.simDraw) GLOBAL_STATE.simDraw();
+  requestAnimationFrame(r);
+}
+
 export function drawYarns() {
   if (GLOBAL_STATE.showTimeNeedleView) return;
   if (GLOBAL_STATE.stopSim) GLOBAL_STATE.stopSim();
 
-  let { stopSim, relax } = simulate(
+  let { stopSim, relax, draw } = simulate(
     new Pattern(
       GLOBAL_STATE.machineChart,
       GLOBAL_STATE.yarnSequence,
@@ -28,6 +35,7 @@ export function drawYarns() {
 
   GLOBAL_STATE.relax = relax;
   GLOBAL_STATE.simStop = stopSim;
+  GLOBAL_STATE.simDraw = draw;
 }
 
 export function runSimulation() {
@@ -35,6 +43,7 @@ export function runSimulation() {
     const debouncedRun = debounce(drawYarns, 30);
 
     drawYarns();
+    r();
 
     return {
       syncState(state, changes) {

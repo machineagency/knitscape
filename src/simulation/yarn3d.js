@@ -21,8 +21,8 @@ export function layoutNodes(
     return {
       pos: {
         x: i * HALF_STITCH,
-        y: (stitchChart.height - chartRow) * STITCH_HEIGHT,
-        // y: (stitchChart.height - j - 1) * STITCH_HEIGHT,
+        // y: (stitchChart.height - chartRow) * STITCH_HEIGHT,
+        y: chartRow * STITCH_HEIGHT,
       },
       f: {
         x: 0,
@@ -74,7 +74,6 @@ export function buildSegmentData(
 
       const paritiesEqual = sourceOddity == targetOddity;
 
-      let layer;
       let startLayer, endLayer;
 
       // if (sourceLayer > 0) {
@@ -128,9 +127,7 @@ export function buildSegmentData(
       // Special case for the selvage edge
       if (sourceRow != targetRow) {
         if (source[0] == stitches.KNIT) {
-          startLayer = startLayer = sourceLeg
-            ? 1
-            : 2 * maxStack - 2 * sourceLayer - 1;
+          startLayer = sourceLeg ? 1 : 2 * maxStack - 2 * sourceLayer - 1;
         } else if (source[0] == stitches.PURL) {
           startLayer = sourceLeg
             ? 2 * maxStack + 1
@@ -155,17 +152,14 @@ export function buildSegmentData(
       //   }
       // }
 
-      if (startLayer == endLayer) {
-        layer = startLayer;
-      } else if (startLayer == undefined || endLayer == undefined) {
-        layer = startLayer != undefined ? startLayer : endLayer;
-      } else {
-        layer = [startLayer, endLayer];
+      if (startLayer == undefined) {
+        // This happens at the top row?
+        startLayer = 2 * maxStack;
       }
 
-      if (layer == undefined) {
+      if (endLayer == undefined) {
         // This happens at the top row?
-        layer = 2 * maxStack;
+        endLayer = 2 * maxStack;
       }
 
       let restLength = loop
@@ -192,7 +186,7 @@ export function buildSegmentData(
         restLength,
 
         row: targetRow,
-        layer,
+        layer: [startLayer, endLayer],
         path: null,
       });
     }

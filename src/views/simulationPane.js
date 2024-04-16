@@ -8,17 +8,27 @@ import {
 } from "../interaction/simPanZoom";
 import { drawYarns } from "../subscribers/runSimulation";
 
-export function simulationView() {
-  let { x, y } = GLOBAL_STATE.simPan;
-  return html`
-    <div id="sim-pane" @pointerdown=${simPan} @wheel=${simZoom}>
-      ${simActionBar()}
+// export function simulationView() {
+//   let { x, y } = GLOBAL_STATE.simPan;
+//   return html`
+//     <div id="sim-pane" @pointerdown=${simPan} @wheel=${simZoom}>
+//       ${simActionBar()}
 
-      <div id="sim-container">
-        <div
-          id="canvas-container"
-          style="transform: translate(${x}px, ${y}px)"></div>
-      </div>
+//       <div id="sim-container">
+//         <div
+//           id="canvas-container"
+//           style="transform: translate(${x}px, ${y}px)"></div>
+//       </div>
+//       ${simToolbar()}
+//     </div>
+//   `;
+// }
+
+export function simulationView() {
+  return html`
+    <div id="sim-pane">
+      ${simActionBar()}
+      <canvas id="sim-canvas"></canvas>
       ${simToolbar()}
     </div>
   `;
