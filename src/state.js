@@ -24,10 +24,16 @@ let GLOBAL_STATE = {
 
   simScale: 1,
   simPan: { x: 0, y: 0 },
+  cellAspect: 7 / 11,
+  flipped: false,
+  simLive: true,
+  kYarn: 0.06,
+  yarnWidth: 0.25,
 
   activeYarn: 0,
-  yarnPalette: ["rgba(16,18,189,1)", "rgba(235,233,187,1)", "rgba(247,85,0,1)"], // Colors of the yarns
+  yarnPalette: ["#1012bd", "#ebe9bb", "#f75500"], // Colors of the yarns
   yarnSequence: new Bimp(1, 8, [1, 1, 1, 1, 2, 2, 0, 0]),
+  // yarnSequence: new Bimp(1, 4, [1, 1, 1, 1]),
 
   editingRepeat: -1,
   repeatPos: [-1, -1],
@@ -45,22 +51,27 @@ let GLOBAL_STATE = {
       pos: [0, 0],
       area: [48, 60],
     },
+    // {
+    //   bitmap: new Bimp(1, 1, [0]),
+    //   pos: [0, 0],
+    //   area: [10, 10],
+    // },
   ],
 
-  repeatLibrary: [
-    {
-      title: "blank",
-      bitmap: new Bimp(2, 2, [0, 0, 0, 0]),
-    },
-    {
-      title: "checks",
-      bitmap: new Bimp(2, 2, [0, 2, 2, 0]),
-    },
-    {
-      title: "stripe",
-      bitmap: new Bimp(2, 2, [0, 2, 0, 2]),
-    },
-  ], // Library of motifs which can be used as repeats
+  // repeatLibrary: [
+  //   {
+  //     title: "blank",
+  //     bitmap: new Bimp(2, 2, [0, 0, 0, 0]),
+  //   },
+  //   {
+  //     title: "checks",
+  //     bitmap: new Bimp(2, 2, [0, 2, 2, 0]),
+  //   },
+  //   {
+  //     title: "stripe",
+  //     bitmap: new Bimp(2, 2, [0, 2, 0, 2]),
+  //   },
+  // ], // Library of motifs which can be used as repeats
 
   // chart: Bimp.empty(5, 5, 0),
   chart: Bimp.empty(48, 60, 0),
@@ -68,7 +79,6 @@ let GLOBAL_STATE = {
   reverseScroll: false,
   grid: true,
   symbolLineWidth: 3,
-  flipped: false,
 
   // PUNCH CARD
   punchcardMode: false, // constrains repeat width to a punchcard-friendly width

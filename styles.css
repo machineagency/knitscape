@@ -82,7 +82,13 @@ SIM PANE
   box-shadow: inset 0 0 6px 0px rgba(0, 0, 0, 0.5);
 }
 
-.top {
+#canvas-container > canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* .top {
   z-index: 5;
 }
 
@@ -93,13 +99,13 @@ SIM PANE
 .bottom {
   z-index: 0;
   filter: brightness(0.7);
-}
+} */
 
 .mirrored > canvas {
   transform: scaleX(-1);
 }
 
-.sim-transform-group.right-side {
+/* .sim-transform-group.right-side {
   display: flex;
   flex-direction: column;
 }
@@ -115,7 +121,7 @@ SIM PANE
   position: absolute;
   top: 0;
   left: 0;
-}
+} */
 
 /**********************************
 
