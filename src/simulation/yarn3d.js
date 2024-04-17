@@ -76,10 +76,6 @@ export function buildSegmentData(
 
       let startLayer, endLayer;
 
-      // if (sourceLayer > 0) {
-      //   console.log(sourceI, sourceJ, targetJ);
-      // }
-
       if (source[0] == stitches.KNIT) {
         if (paritiesEqual || (leg && !paritiesEqual && sourceJ > targetJ)) {
           // treat as knit leg
@@ -93,7 +89,7 @@ export function buildSegmentData(
             : 4 * maxStack - 2 * sourceLayer - 1;
         }
       } else if (source[0] == stitches.PURL) {
-        if (paritiesEqual || (leg && !paritiesEqual)) {
+        if (paritiesEqual || (leg && !paritiesEqual && sourceJ > targetJ)) {
           // treat as purl leg
           startLayer = sourceLeg ? 1 : 2 * maxStack - 2 * sourceLayer - 1;
         } else {
@@ -115,7 +111,7 @@ export function buildSegmentData(
             : 4 * maxStack - 2 * targetLayer - 1;
         }
       } else if (target[0] == stitches.PURL) {
-        if (paritiesEqual || (leg && !paritiesEqual)) {
+        if (paritiesEqual || (leg && !paritiesEqual && targetJ > sourceJ)) {
           // treat as purl leg
           endLayer = targetLeg ? 1 : 2 * maxStack - 2 * targetLayer - 1;
         } else {
@@ -142,15 +138,16 @@ export function buildSegmentData(
             : 4 * maxStack - 2 * sourceLayer - 1;
         }
       }
-      // if (sourceRow != targetRow) {
-      //   if (source[0] == stitches.KNIT) {
-      //     startLayer = 2;
-      //   }
+      if (targetRow && sourceRow != targetRow) {
+        console.log(target[0]);
+        if (source[0] == stitches.KNIT) {
+          startLayer = 2 * maxStack;
+        }
 
-      //   if (target[0] == stitches.KNIT) {
-      //     endLayer = 4 * maxStack - 2;
-      //   }
-      // }
+        if (target[0] == stitches.KNIT) {
+          endLayer = 2 * maxStack;
+        }
+      }
 
       if (startLayer == undefined) {
         // This happens at the top row?
@@ -187,7 +184,6 @@ export function buildSegmentData(
 
         row: targetRow,
         layer: [startLayer, endLayer],
-        path: null,
       });
     }
   });

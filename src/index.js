@@ -35,7 +35,7 @@ async function init() {
   r();
 
   Split(["#chart-pane", "#view-pane"], {
-    sizes: [60, 40],
+    sizes: [30, 70],
     minSize: 100,
     gutterSize: 8,
   });

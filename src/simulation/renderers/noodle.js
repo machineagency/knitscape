@@ -10,7 +10,9 @@ import {
   Mesh,
 } from "ogl";
 
-const OUTLINE_WIDTH = 0.05;
+import { buildYarnCurve } from "./utils/yarnSpline";
+
+const OUTLINE_WIDTH = 0.02;
 let gl, controls, renderer, camera, scene;
 
 let yarnPoints = [];
@@ -28,6 +30,7 @@ attribute vec3 pointB;
 
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
+uniform vec2 resolution;
 
 
 uniform float uWidth;
@@ -37,29 +40,18 @@ uniform float uZMax;
 varying float vZ;
 
 void main() {
-  mat4 mvp = projectionMatrix * modelViewMatrix;
-
-  // The segment endpoint positions in clip space
-  vec4 clip0 = mvp * vec4(pointA, 1.0);
-  vec4 clip1 = mvp * vec4(pointB, 1.0);
+  // The segment endpoint positions in view space
+  vec4 p0 = modelViewMatrix * vec4(pointA, 1.0);
+  vec4 p1 = modelViewMatrix * vec4(pointB, 1.0);
 
   // This is our position in the instance geometry. the x component is along the line segment
-  vec2 xBasis = normalize(clip1.xy - clip0.xy); // vector between clip0 and clip1
-  vec2 yBasis = vec2(-xBasis.y, xBasis.x);
+  vec2 stripX = p1.xy - p0.xy;
+  vec2 stripY = uWidth * normalize(vec2(-stripX.y, stripX.x)); // perp
 
-  // position.x is either 0 or 1
-  // position.y is either -0.5 or + 0.5
-  // position.z is either 0 or 1
+  vec4 currentPoint = mix(p0, p1, position.z);
+  vec2 pt = currentPoint.xy + (position.x * stripX + position.y * stripY);
 
-  vec2 pt0 = clip0.xy + uWidth * (position.x * xBasis + position.y * yBasis);
-  vec2 pt1 = clip1.xy + uWidth * (position.x * xBasis + position.y * yBasis);
-
-  vec2 pt = mix(pt0, pt1, position.z);
-
-  vec4 clip = mix(clip0, clip1, position.z);
-
-  gl_Position = vec4(pt, clip.z, clip.w);
-
+  gl_Position = projectionMatrix * vec4(pt, currentPoint.z, 1.0);
 
   // Use the z component of the current point to shade the point according to the z range
   float whichZ = mix(pointA.z, pointB.z, position.z);
@@ -78,54 +70,6 @@ void main() {
 
     gl_FragColor.rgb = mix(shaded, uColor, vZ);
     gl_FragColor.a = 1.0;
-}
-`;
-
-const outlineVertexShader = /* glsl */ `
-precision highp float;
-// position in the instance geometry
-attribute vec3 position;
-
-// two endpoints of a yarn segment
-attribute vec3 pointA;
-attribute vec3 pointB;
-
-uniform mat4 modelViewMatrix;
-uniform mat4 projectionMatrix;
-
-
-uniform float uWidth;
-
-varying float vZ;
-
-void main() {
-  mat4 mvp = projectionMatrix * modelViewMatrix;
-
-  // The segment endpoint positions in clip space
-  vec4 clip0 = mvp * vec4(pointA, 1.0);
-  vec4 clip1 = mvp * vec4(pointB, 1.0);
-
-  // This is our position in the instance geometry. the x component is along the line segment
-  vec2 xBasis = normalize(clip1.xy - clip0.xy); // vector between clip0 and clip1
-  vec2 yBasis = vec2(-xBasis.y, xBasis.x);
-
-  vec2 pt0 = clip0.xy + uWidth * (position.x * xBasis + position.y * yBasis);
-  vec2 pt1 = clip1.xy + uWidth * (position.x * xBasis + position.y * yBasis);
-
-  vec2 pt = mix(pt0, pt1, position.z);
-
-  vec4 clip = mix(clip0, clip1, position.z);
-
-  gl_Position = vec4(pt, clip.z, clip.w);
-}
-`;
-
-const outlineFragmentShader = /* glsl */ `
-precision highp float;
-uniform vec3 uColor;
-
-void main() {
-    gl_FragColor = vec4(uColor, 1.0);
 }
 `;
 
@@ -149,9 +93,9 @@ varying float vZ;
 void main() {
   mat4 mvp = projectionMatrix * modelViewMatrix;
 
-  vec4 clipA = mvp * vec4(pointA, 1.0);
-  vec4 clipB = mvp * vec4(pointB, 1.0);
-  vec4 clipC = mvp * vec4(pointC, 1.0);
+  vec4 clipA = modelViewMatrix * vec4(pointA, 1.0);
+  vec4 clipB = modelViewMatrix * vec4(pointB, 1.0);
+  vec4 clipC = modelViewMatrix * vec4(pointC, 1.0);
 
   // Calculate the normal to the join tangent
   vec2 tangent = normalize(normalize(clipC.xy - clipB.xy) + normalize(clipB.xy - clipA.xy));
@@ -173,7 +117,7 @@ void main() {
   // Final vertex position coefficients ([0,0], [0,1], [1,0])
   vec2 clip = clipB.xy + position.x * p0 + position.y * p1;
 
-  gl_Position = vec4(clip, clipB.z, clipB.w);
+  gl_Position = projectionMatrix * vec4(clip, clipB.z, clipB.w);
 
   vZ = abs(pointB.z-uZMin) / abs(uZMax-uZMin);
 }
@@ -192,123 +136,6 @@ void main() {
     gl_FragColor.a = 1.0;
 }
 `;
-
-function catmullRom(p0, p1, p2, p3, alpha = 0.5, t = 0) {
-  let t01 = p0.distance(p1);
-  let t12 = p1.distance(p2);
-  let t23 = p2.distance(p3);
-
-  const m1x =
-    (1.0 - t) *
-    (p2[0] -
-      p1[0] +
-      t12 * ((p1[0] - p0[0]) / t01 - (p2[0] - p0[0]) / (t01 + t12)));
-
-  const m1y =
-    (1.0 - t) *
-    (p2[1] -
-      p1[1] +
-      t12 * ((p1[1] - p0[1]) / t01 - (p2[1] - p0[1]) / (t01 + t12)));
-
-  const m1z =
-    (1.0 - t) *
-    (p2[2] -
-      p1[2] +
-      t12 * ((p1[2] - p0[2]) / t01 - (p2[2] - p0[2]) / (t01 + t12)));
-
-  const m2x =
-    (1.0 - t) *
-    (p2[0] -
-      p1[0] +
-      t12 * ((p3[0] - p2[0]) / t23 - (p3[0] - p1[0]) / (t12 + t23)));
-
-  const m2y =
-    (1.0 - t) *
-    (p2[1] -
-      p1[1] +
-      t12 * ((p3[1] - p2[1]) / t23 - (p3[1] - p1[1]) / (t12 + t23)));
-
-  const m2z =
-    (1.0 - t) *
-    (p2[2] -
-      p1[2] +
-      t12 * ((p3[2] - p2[2]) / t23 - (p3[2] - p1[2]) / (t12 + t23)));
-
-  const m1 = new Vec3(m1x, m1y, m1z);
-  const m2 = new Vec3(m2x, m2y, m2z);
-
-  // const m1 = p2
-  //   .clone()
-  //   .sub(
-  //     p1.clone().add(
-  //       p1
-  //         .clone()
-  //         .sub(p0)
-  //         .divide(t01)
-  //         .sub(
-  //           p2
-  //             .clone()
-  //             .sub(p0)
-  //             .divide(t01 + t12)
-  //         )
-  //         .multiply(t12)
-  //     )
-  //   )
-  //   .multiply(1.0 - t);
-
-  // const m2 = p2
-  //   .clone()
-  //   .sub(
-  //     p1.clone().add(
-  //       p3
-  //         .clone()
-  //         .sub(p2)
-  //         .divide(t23)
-  //         .sub(
-  //           p3
-  //             .clone()
-  //             .sub(p1)
-  //             .divide(t12 + t23)
-  //         )
-  //         .multiply(t12)
-  //     )
-  //   )
-  //   .multiply(1.0 - t);
-
-  return {
-    a: p1.clone().sub(p2).multiply(2.0).add(m1).add(m2),
-    b: p1.clone().sub(p2).multiply(-3.0).sub(m1).sub(m1).sub(m2),
-    c: m1.clone(),
-    d: p1.clone(),
-  };
-}
-
-function pointInSegment(seg, t) {
-  return seg.a
-    .clone()
-    .multiply(t * t * t)
-    .add(seg.b.clone().multiply(t * t))
-    .add(seg.c.clone().multiply(t))
-    .add(seg.d.clone());
-}
-
-function buildYarnCurve(pts, divisions = 5) {
-  let vec3arr = [];
-
-  for (let i = 0; i < pts.length - 9; i += 3) {
-    let cp1 = new Vec3(pts[i + 0], pts[i + 1], pts[i + 2]);
-    let p1 = new Vec3(pts[i + 3], pts[i + 4], pts[i + 5]);
-    let p2 = new Vec3(pts[i + 6], pts[i + 7], pts[i + 8]);
-    let cp2 = new Vec3(pts[i + 9], pts[i + 10], pts[i + 11]);
-    const coefficients = catmullRom(cp1, p1, p2, cp2, 0, 0.5);
-
-    for (let t = 0; t < 1; t += 1 / divisions) {
-      vec3arr.push(pointInSegment(coefficients, t));
-    }
-  }
-
-  return new Float32Array(vec3arr.map((pt) => pt.toArray()).flat());
-}
 
 function buildYarnSegmentGeometry(splinePts, pointBuffer) {
   const instanceCount = splinePts.length / 3 - 1;
@@ -434,7 +261,7 @@ function init(yarnData, canvas) {
 
   if (!camera) {
     camera = new Camera(gl, { fov: 60, far: 100, near: 0.1 });
-    camera.position.set(center[0], center[1], 50);
+    camera.position.set(center[0], center[1], 15);
 
     controls = new Orbit(camera, {
       target: new Vec3(center[0], center[1], 0),
@@ -443,7 +270,6 @@ function init(yarnData, canvas) {
     camera.lookAt(controls.target);
   }
 
-  resize();
   scene = new Transform();
 
   yarnPoints = [];
@@ -452,7 +278,7 @@ function init(yarnData, canvas) {
   yarnData.forEach((yarn) => {
     if (yarn.pts.length < 6) return;
 
-    const splinePts = buildYarnCurve(yarn.pts);
+    const splinePts = new Float32Array(buildYarnCurve(yarn.pts, 12));
 
     yarnPoints.push(splinePts);
 
@@ -501,18 +327,15 @@ function init(yarnData, canvas) {
       geometry: joinGeometry,
       program: joinProgram,
     });
-    mesh.setParent(scene);
-    joinMesh.setParent(scene);
-
-    mesh.onBeforeRender(() => gl.polygonOffset(1, 1));
-    joinMesh.onBeforeRender(() => gl.polygonOffset(1, 1));
 
     const outlineProgram = new Program(gl, {
-      vertex: outlineVertexShader,
-      fragment: outlineFragmentShader,
+      vertex: vertexShader,
+      fragment: fragmentShader,
       uniforms: {
-        uColor: { value: outlineColor },
+        uColor: { value: [0, 0, 0] },
         uWidth: { value: yarn.radius + OUTLINE_WIDTH },
+        uZMin: { value: geometry.bounds.min[2] },
+        uZMax: { value: geometry.bounds.max[2] },
       },
     });
 
@@ -539,11 +362,16 @@ function init(yarnData, canvas) {
       program: joinOutlineProgram,
     });
 
-    outlineMesh.onBeforeRender(() => gl.polygonOffset(2, 1));
-    joinOutlineMesh.onBeforeRender(() => gl.polygonOffset(2, 1));
-
+    mesh.setParent(scene);
+    joinMesh.setParent(scene);
     joinOutlineMesh.setParent(scene);
     outlineMesh.setParent(scene);
+
+    // Set polygon offset to prevent z fighting
+    mesh.onBeforeRender(() => gl.polygonOffset(1, 0));
+    joinMesh.onBeforeRender(() => gl.polygonOffset(1, 0));
+    joinOutlineMesh.onBeforeRender(() => gl.polygonOffset(2, 0));
+    outlineMesh.onBeforeRender(() => gl.polygonOffset(2, 0));
   });
 }
 
@@ -567,16 +395,9 @@ function monitorView() {
   </div>`;
 }
 
-function resize() {
-  renderer.setSize(gl.canvas.clientWidth, gl.canvas.clientHeight);
-  camera.perspective({
-    aspect: gl.canvas.clientWidth / gl.canvas.clientHeight,
-  });
-}
-
 function updateYarnGeometry(yarnData) {
   yarnData.forEach((yarn, yarnIndex) => {
-    const splinePts = buildYarnCurve(yarn.pts);
+    const splinePts = buildYarnCurve(yarn.pts, 12);
 
     // Update the points in the yarn's point array
     splinePts.forEach((p, i) => (yarnPoints[yarnIndex][i] = p));
@@ -588,6 +409,13 @@ function updateYarnGeometry(yarnData) {
 }
 
 function draw() {
+  renderer.setSize(
+    gl.canvas.parentNode.clientWidth,
+    gl.canvas.parentNode.clientHeight
+  );
+  camera.perspective({
+    aspect: gl.canvas.clientWidth / gl.canvas.clientHeight,
+  });
   controls.update();
 
   renderer.render({ scene, camera });

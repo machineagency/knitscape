@@ -10,7 +10,7 @@ import { noodleRenderer } from "./renderers/noodle";
 
 let renderer = noodleRenderer;
 
-const YARN_RADIUS = 0.5;
+const YARN_RADIUS = 0.2;
 const STITCH_WIDTH = 1;
 
 export function simulate(stitchPattern) {
@@ -63,26 +63,67 @@ export function simulate(stitchPattern) {
   draw();
 
   // CN grid position, stitch row, previous CN coords, next CN coords
-  function nodeOffset([i, j], row, [x1, y1], [x2, y2]) {
+  function nodeOffset([i, j], row, prevCN, nextCN) {
     const right = stitchPattern.carriagePasses[row] == "right";
     const isLeg = j == row;
 
-    const x = x1 - x2;
-    const y = y1 - y2;
+    // const x = prevCN[0] - nextCN[0];
+    // const y = prevCN[1] - nextCN[1];
 
-    const mag = Math.sqrt(x ** 2 + y ** 2);
+    const tangent = [prevCN[0] - nextCN[0], prevCN[1] - nextCN[1]];
+    const normal =
+      right == isLeg ? [-tangent[1], tangent[0]] : [tangent[1], -tangent[0]];
 
-    if (mag == 0) {
-      return [0, 0];
-    }
-
-    const normal = right == isLeg ? [-y / mag, x / mag] : [y / mag, -x / mag];
-
+    const dist = Math.sqrt(tangent[0] ** 2 + tangent[1] ** 2);
     const [posX, posY] = getCoords([i, j]);
 
+    if (dist == 0) {
+      console.warn("degenerate?");
+      return [posX, posY];
+    }
+
+    // const n = right == isLeg ? [-y / mag, x / mag] : [y / mag, -x / mag];
+
+    const mag = YARN_RADIUS / 2 / dist;
+
+    // return [
+    //   posX + ((YARN_RADIUS / 2) * normal[0]) / dist,
+    //   posY + ((YARN_RADIUS / 2) * normal[1]) / dist,
+    // ];
+
+    return [posX + mag * normal[0], posY + mag * normal[1]];
+  }
+
+  function oldOffset(cnType, cnPos, prev, next, ltr, stitchType, yarnData) {
+    const dist = yarnData.radius;
+    const dx = prev.x - next.x;
+    const dy = prev.y - next.y;
+
+    const [zFirst, zLast] = calcZ(stitchType, cnType);
+
+    let yarnSide = cnType == "FH" || cnType == "LL" ? ltr : !ltr;
+
+    const alpha = yarnSide
+      ? Math.atan2(dy * STITCH_ASPECT, -dx)
+      : Math.atan2(-dy * STITCH_ASPECT, dx);
+
+    const beta = Math.PI / 4;
+
+    const signAlpha = ltr ? -1 : 1;
+    const signBeta = isHead(cnType) ? 1 : -1;
+    const signPurl = isPurl(stitchType) ? -1 : 1;
+
     return [
-      posX + (YARN_RADIUS / 3) * normal[0],
-      posY + (YARN_RADIUS / 3) * normal[1],
+      cnPos.x + signAlpha * dist * Math.cos(alpha),
+      cnPos.y +
+        signAlpha * dist * Math.sin(alpha) -
+        signBeta * signPurl * zFirst * dist * Math.sin(beta),
+      dist * Math.sin(zFirst * beta),
+      cnPos.x + signAlpha * dist * Math.cos(alpha),
+      cnPos.y +
+        signAlpha * dist * Math.sin(alpha) -
+        signBeta * signPurl * zLast * dist * Math.sin(beta),
+      dist * Math.sin(zLast * beta),
     ];
   }
 
@@ -92,9 +133,9 @@ export function simulate(stitchPattern) {
     const [posX, posY] = getCoords([i, j]);
 
     if (right) {
-      return [posX - YARN_RADIUS * 0.75, posY + YARN_RADIUS / 3];
+      return [posX - YARN_RADIUS * 0.75, posY + YARN_RADIUS / 2];
     } else {
-      return [posX + YARN_RADIUS * 0.75, posY + YARN_RADIUS / 3];
+      return [posX + YARN_RADIUS * 0.75, posY + YARN_RADIUS / 2];
     }
   }
 
@@ -107,25 +148,26 @@ export function simulate(stitchPattern) {
       console.warn(`Segment array for yarn  is empty`);
       return;
     }
+    console.log(segments);
 
     let points = [nodes[0].pos.x - STITCH_WIDTH, nodes[0].pos.y, 0];
 
-    for (let i = 0; i + 1 < segments.length; i++) {
-      // let prevSeg = segments[i - 1];
+    for (let i = 1; i + 1 < segments.length; i++) {
+      let prevSeg = segments[i - 1];
       let currSeg = segments[i];
       let nextSeg = segments[i + 1];
 
       // let prev = getCoords(prevSeg.source);
-      let prev = [points.at(-3), points.at(-2)];
+      // let prev = [points.at(-3), points.at(-2)];
 
       let p1 = nodeOffset(
         currSeg.source,
         currSeg.row,
-        prev,
+        getCoords(prevSeg.source),
         getCoords(currSeg.target)
       );
 
-      points.push(p1[0], p1[1], 0.1 * currSeg.layer[0]);
+      points.push(p1[0], p1[1], YARN_RADIUS * currSeg.layer[0]);
 
       let next;
 
@@ -137,7 +179,7 @@ export function simulate(stitchPattern) {
 
       let p2 = nodeOffset(currSeg.target, currSeg.row, p1, next);
 
-      points.push(p2[0], p2[1], 0.1 * currSeg.layer[1]);
+      points.push(p2[0], p2[1], YARN_RADIUS * currSeg.layer[1]);
     }
 
     return points;
