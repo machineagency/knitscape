@@ -22,7 +22,7 @@ let yarnColors = [];
 const vertexShader = /* glsl */ `
 precision highp float;
 // position in the instance geometry
-attribute vec3 position;
+attribute vec2 position;
 
 // two endpoints of a yarn segment
 attribute vec3 pointA;
@@ -40,21 +40,22 @@ uniform float uZMax;
 varying float vZ;
 
 void main() {
+  mat4 mvp = modelViewMatrix * projectionMatrix;
   // The segment endpoint positions in view space
   vec4 p0 = modelViewMatrix * vec4(pointA, 1.0);
   vec4 p1 = modelViewMatrix * vec4(pointB, 1.0);
 
   // This is our position in the instance geometry. the x component is along the line segment
-  vec2 stripX = p1.xy - p0.xy;
-  vec2 stripY = uWidth * normalize(vec2(-stripX.y, stripX.x)); // perp
+  vec2 tangent = p1.xy - p0.xy;
+  vec2 normal =   normalize(vec2(-tangent.y, tangent.x)); // perp
 
-  vec4 currentPoint = mix(p0, p1, position.z);
-  vec2 pt = currentPoint.xy + (position.x * stripX + position.y * stripY);
+  vec4 currentPoint = mix(p0, p1, position.x);
+  vec2 pt = currentPoint.xy + uWidth *(position.x * tangent/2. +  position.y * normal);
 
   gl_Position = projectionMatrix * vec4(pt, currentPoint.z, 1.0);
 
   // Use the z component of the current point to shade the point according to the z range
-  float whichZ = mix(pointA.z, pointB.z, position.z);
+  float whichZ = mix(pointA.z, pointB.z, position.x);
   vZ = abs(whichZ-uZMin) / abs(uZMax-uZMin);
 }
 `;
@@ -141,15 +142,15 @@ function buildYarnSegmentGeometry(splinePts, pointBuffer) {
   const instanceCount = splinePts.length / 3 - 1;
 
   const instanceGeometry = [
-    [0, -0.5, 0],
-    [0, -0.5, 1],
-    [0, 0.5, 0],
-    [0, 0.5, 1],
+    [0, -0.5],
+    [1, -0.5],
+    [0, 0.5],
+    [1, 0.5],
   ];
 
   const geometry = new Geometry(gl, {
     position: {
-      size: 3,
+      size: 2,
       data: new Float32Array(instanceGeometry.flat()),
       instanced: 0,
     },
@@ -298,6 +299,7 @@ function init(yarnData, canvas) {
     const program = new Program(gl, {
       vertex: vertexShader,
       fragment: fragmentShader,
+      cullFace: false,
       uniforms: {
         uWidth: { value: yarn.radius },
         uColor: { value: yarn.color },
@@ -315,6 +317,8 @@ function init(yarnData, canvas) {
     const joinProgram = new Program(gl, {
       vertex: joinVertexShader,
       fragment: joinFragmentShader,
+      cullFace: false,
+
       uniforms: {
         uColor: { value: yarn.color },
         uWidth: { value: yarn.radius },
@@ -356,22 +360,22 @@ function init(yarnData, canvas) {
       program: outlineProgram,
     });
 
-    const joinOutlineMesh = new Mesh(gl, {
-      mode: gl.TRIANGLES,
-      geometry: joinGeometry,
-      program: joinOutlineProgram,
-    });
+    // const joinOutlineMesh = new Mesh(gl, {
+    //   mode: gl.TRIANGLES,
+    //   geometry: joinGeometry,
+    //   program: joinOutlineProgram,
+    // });
 
     mesh.setParent(scene);
     joinMesh.setParent(scene);
-    joinOutlineMesh.setParent(scene);
-    outlineMesh.setParent(scene);
+    // joinOutlineMesh.setParent(scene);
+    // outlineMesh.setParent(scene);
 
     // Set polygon offset to prevent z fighting
     mesh.onBeforeRender(() => gl.polygonOffset(1, 0));
     joinMesh.onBeforeRender(() => gl.polygonOffset(1, 0));
-    joinOutlineMesh.onBeforeRender(() => gl.polygonOffset(2, 0));
-    outlineMesh.onBeforeRender(() => gl.polygonOffset(2, 0));
+    // joinOutlineMesh.onBeforeRender(() => gl.polygonOffset(2, 0));
+    // outlineMesh.onBeforeRender(() => gl.polygonOffset(2, 0));
   });
 }
 

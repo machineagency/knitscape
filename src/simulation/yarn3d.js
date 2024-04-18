@@ -139,7 +139,7 @@ export function buildSegmentData(
         }
       }
       if (targetRow && sourceRow != targetRow) {
-        console.log(target[0]);
+        // console.log(target[0]);
         if (source[0] == stitches.KNIT) {
           startLayer = 2 * maxStack;
         }

@@ -32,7 +32,8 @@ void main() {
 
   vec3 clip = u_Matrix * vec3(point, 1.0);
 
-  gl_Position = vec4(clip.xy, -currentPoint.z, 1.0);
+  // gl_Position = vec4(clip.xy, -currentPoint.z, 1.0);
+  gl_Position = vec4(clip.xy, -currentPoint.z/10.0, 1.0);
 
   vZ = abs(currentPoint.z-u_ZMin) / abs(u_ZMax-u_ZMin);
 
@@ -105,7 +106,8 @@ void main() {
 
   vec3 clip = u_Matrix * vec3(point, 1.0);
 
-  gl_Position =  vec4(clip.xy, -pointB.z, 1);
+  // gl_Position =  vec4(clip.xy, -pointB.z, 1);
+  gl_Position =  vec4(clip.xy,-pointB.z/5.0, 1);
 
   depth = -pointB.z;
   vZ = abs(pointB.z-u_ZMin) / abs(u_ZMax-u_ZMin);
@@ -486,10 +488,10 @@ function draw() {
   resizeCanvasToDisplaySize(gl.canvas);
 
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-  gl.clear(gl.COLOR_BUFFER_BIT);
+  // gl.clear(gl.COLOR_BUFFER_BIT);
   gl.enable(gl.POLYGON_OFFSET_FILL);
   gl.enable(gl.DEPTH_TEST);
-  gl.disable(gl.CULL_FACE);
+  // gl.disable(gl.CULL_FACE);
 
   let mvp = buildViewProjection();
 

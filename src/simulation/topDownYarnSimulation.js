@@ -7,10 +7,11 @@ import { layoutNodes, buildSegmentData } from "./yarn3d";
 
 import { topDownRenderer } from "./renderers/topdown";
 import { noodleRenderer } from "./renderers/noodle";
+import { threeToonRenderer } from "./renderers/threeToon";
 
-let renderer = noodleRenderer;
+let renderer = topDownRenderer;
 
-const YARN_RADIUS = 0.2;
+const YARN_RADIUS = 0.25;
 const STITCH_WIDTH = 1;
 
 export function simulate(stitchPattern) {
@@ -78,18 +79,18 @@ export function simulate(stitchPattern) {
     const [posX, posY] = getCoords([i, j]);
 
     if (dist == 0) {
-      console.warn("degenerate?");
+      // console.warn("degenerate?");
       return [posX, posY];
     }
 
     // const n = right == isLeg ? [-y / mag, x / mag] : [y / mag, -x / mag];
 
-    const mag = YARN_RADIUS / 2 / dist;
+    // const mag = YARN_RADIUS / 2 / dist;
 
-    // return [
-    //   posX + ((YARN_RADIUS / 2) * normal[0]) / dist,
-    //   posY + ((YARN_RADIUS / 2) * normal[1]) / dist,
-    // ];
+    return [
+      posX + ((YARN_RADIUS / 2) * normal[0]) / dist,
+      posY + ((YARN_RADIUS / 2) * normal[1]) / dist,
+    ];
 
     return [posX + mag * normal[0], posY + mag * normal[1]];
   }
@@ -148,7 +149,7 @@ export function simulate(stitchPattern) {
       console.warn(`Segment array for yarn  is empty`);
       return;
     }
-    console.log(segments);
+    // console.log(segments);
 
     let points = [nodes[0].pos.x - STITCH_WIDTH, nodes[0].pos.y, 0];
 
@@ -188,7 +189,7 @@ export function simulate(stitchPattern) {
   function draw() {
     if (sim && sim.running()) {
       sim.tick(yarnSegments, nodes);
-      console.log("running!");
+      // console.log("running!");
 
       for (let i = 0; i < yarnData.length; i++) {
         yarnData[i].pts = computeSplinePoints(yarnData[i].segs);
