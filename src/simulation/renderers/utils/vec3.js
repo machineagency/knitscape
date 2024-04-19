@@ -1,37 +1,4 @@
 export const Vec3 = {
-  // dot(a, b) {
-  //   return a.x * b.x + a.y * b.y + a.z * b.z;
-  // },
-
-  // cross(a, b) {
-  //   return {
-  //     x: a.y * b.z - a.z * b.y,
-  //     y: a.z * b.x - a.x * b.z,
-  //     z: a.x * b.y - a.y * b.x,
-  //   };
-  // },
-
-  // normalize(vec) {
-  //   const len = Math.sqrt(Vec3.dot(vec, vec));
-  //   return { x: vec.x / len, y: vec.y / len, z: vec.z / len };
-  // },
-
-  // add(a, b) {
-  //   return {
-  //     x: a.x + b.x,
-  //     y: a.y + b.y,
-  //     z: a.z + b.z,
-  //   };
-  // },
-
-  // mul(a, mag) {
-  //   return {
-  //     x: a.x * mag,
-  //     y: a.y * mag,
-  //     z: a.z * mag,
-  //   };
-  // },
-
   add(a, b) {
     return [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
   },

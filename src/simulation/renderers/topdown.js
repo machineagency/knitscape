@@ -383,7 +383,12 @@ export function init(yarnData, canvas) {
     yarnProgramData.push(initializeYarn(yarn));
   });
 
+  console.log(yarnProgramData[0]);
+  console.log(yarnProgramData[0].geometry.length / 3);
+
   bbox = bbox3d(yarnProgramData[0].geometry);
+
+  console.log(bbox);
 
   if (!camera) {
     camera = new Camera2D();
@@ -421,10 +426,7 @@ function drawMainYarn(uniforms, instances) {
     uniforms.u_Color[1],
     uniforms.u_Color[2]
   );
-  gl.uniform1f(
-    segmentProgramInfo.uniformLocations.u_Radius,
-    uniforms.u_Radius / 2
-  );
+  gl.uniform1f(segmentProgramInfo.uniformLocations.u_Radius, uniforms.u_Radius);
   gl.uniform1f(segmentProgramInfo.uniformLocations.u_ZMin, bbox.zMin);
   gl.uniform1f(segmentProgramInfo.uniformLocations.u_ZMax, bbox.zMax);
 
@@ -447,10 +449,7 @@ function drawJoin(uniforms, instances) {
     uniforms.u_Color[2]
   );
 
-  gl.uniform1f(
-    joinProgramInfo.uniformLocations.u_Radius,
-    uniforms.u_Radius / 2
-  );
+  gl.uniform1f(joinProgramInfo.uniformLocations.u_Radius, uniforms.u_Radius);
   gl.uniform1f(joinProgramInfo.uniformLocations.u_ZMin, bbox.zMin);
   gl.uniform1f(joinProgramInfo.uniformLocations.u_ZMax, bbox.zMax);
 

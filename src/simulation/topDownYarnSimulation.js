@@ -8,10 +8,12 @@ import { layoutNodes, buildSegmentData } from "./yarn3d";
 import { topDownRenderer } from "./renderers/topdown";
 import { noodleRenderer } from "./renderers/noodle";
 import { threeToonRenderer } from "./renderers/threeToon";
+import { Vec2D } from "../lib/Vec2";
+import { stitches } from "../constants";
 
 let renderer = topDownRenderer;
 
-const YARN_RADIUS = 0.25;
+const YARN_RADIUS = 0.2;
 const STITCH_WIDTH = 1;
 
 export function simulate(stitchPattern) {
@@ -49,10 +51,22 @@ export function simulate(stitchPattern) {
 
   const yarnData = [];
 
+  // Object.entries(yarnSegments).forEach(([yarnIndex, segmentArr]) => {
+  //   yarnData.push({
+  //     // segs: segmentArr,
+  //     pts: computeSplinePoints(segmentArr, yarnIndex),
+  //     radius: YARN_RADIUS,
+  //     color: hexToRgb(GLOBAL_STATE.yarnPalette[yarnIndex - 1]).map(
+  //       (colorInt) => colorInt / 255
+  //     ),
+  //   });
+  // });
+
   Object.entries(yarnSegments).forEach(([yarnIndex, segmentArr]) => {
     yarnData.push({
-      segs: segmentArr,
-      pts: computeSplinePoints(segmentArr, yarnIndex),
+      // segs: segmentArr,
+      yarnIndex: yarnIndex,
+      pts: computeYarnPathSpline(yarnPaths[yarnIndex]),
       radius: YARN_RADIUS,
       color: hexToRgb(GLOBAL_STATE.yarnPalette[yarnIndex - 1]).map(
         (colorInt) => colorInt / 255
@@ -95,39 +109,6 @@ export function simulate(stitchPattern) {
     return [posX + mag * normal[0], posY + mag * normal[1]];
   }
 
-  function oldOffset(cnType, cnPos, prev, next, ltr, stitchType, yarnData) {
-    const dist = yarnData.radius;
-    const dx = prev.x - next.x;
-    const dy = prev.y - next.y;
-
-    const [zFirst, zLast] = calcZ(stitchType, cnType);
-
-    let yarnSide = cnType == "FH" || cnType == "LL" ? ltr : !ltr;
-
-    const alpha = yarnSide
-      ? Math.atan2(dy * STITCH_ASPECT, -dx)
-      : Math.atan2(-dy * STITCH_ASPECT, dx);
-
-    const beta = Math.PI / 4;
-
-    const signAlpha = ltr ? -1 : 1;
-    const signBeta = isHead(cnType) ? 1 : -1;
-    const signPurl = isPurl(stitchType) ? -1 : 1;
-
-    return [
-      cnPos.x + signAlpha * dist * Math.cos(alpha),
-      cnPos.y +
-        signAlpha * dist * Math.sin(alpha) -
-        signBeta * signPurl * zFirst * dist * Math.sin(beta),
-      dist * Math.sin(zFirst * beta),
-      cnPos.x + signAlpha * dist * Math.cos(alpha),
-      cnPos.y +
-        signAlpha * dist * Math.sin(alpha) -
-        signBeta * signPurl * zLast * dist * Math.sin(beta),
-      dist * Math.sin(zLast * beta),
-    ];
-  }
-
   function selvageOffset([i, j], row) {
     const right = stitchPattern.carriagePasses[row] == "right";
 
@@ -142,6 +123,97 @@ export function simulate(stitchPattern) {
 
   function getCoords([i, j]) {
     return [nodes[i + j * DS.width].pos.x, nodes[i + j * DS.width].pos.y];
+  }
+
+  function computeYarnPathSpline(yarnPath) {
+    let points = [];
+    let [x, y] = getCoords([yarnPath[0][0], yarnPath[0][1]]);
+    points.push(x - STITCH_WIDTH / 2, y, 0);
+
+    for (let index = 1; index < yarnPath.length - 2; index++) {
+      let [i, j, row, layer] = yarnPath[index];
+      const isKnit = DS.ST(i, j) == stitches.KNIT;
+
+      const evenI = i % 2 == 0;
+      let prevCnPos = getCoords([
+        yarnPath[index - 1][0],
+        yarnPath[index - 1][1],
+      ]);
+      let nextCnPos = getCoords([
+        yarnPath[index + 1][0],
+        yarnPath[index + 1][1],
+      ]);
+
+      const tangent = Vec2D.sub(nextCnPos, prevCnPos);
+      const magTangent = Vec2D.mag(tangent);
+      const movingRight = stitchPattern.carriagePasses[row] == "right";
+      // the zeroth element in YPI is always a head and the first is always a leg.
+      const legNode = DS.YPI(i, j)[1] == index;
+      const side = movingRight == legNode;
+      const { x, y, z } = nodes[i + j * DS.width].pos;
+
+      // The normal side will depend on the direction the carriage is moving
+      const normal = side
+        ? Vec2D.normalize([tangent[1], -tangent[0]])
+        : Vec2D.normalize([-tangent[1], tangent[0]]);
+
+      // const normal = side
+      //   ? [tangent[1], -tangent[0]]
+      //   : [-tangent[1], tangent[0]];
+
+      if (magTangent == 0) {
+        points.push(x, y, z + YARN_RADIUS * layer);
+        points.push(x, y, z - YARN_RADIUS * layer);
+        continue;
+      }
+
+      const alpha = Math.atan2(normal[0] * STITCH_ASPECT, normal[1]);
+      const beta = Math.PI / 4;
+
+      let xOffset = legNode ? -Math.cos(alpha) : Math.cos(alpha);
+      let yOffset = -normal[1] - Math.sin(beta) * layer;
+      let zOffset = Math.sin(layer * beta);
+
+      let dx = xOffset * normal[0] * YARN_RADIUS;
+
+      let dyFront = yOffset * normal[1] * YARN_RADIUS;
+      let dyBack = -yOffset * normal[1] * YARN_RADIUS;
+
+      let dzFront = zOffset * YARN_RADIUS;
+      let dzBack = -zOffset * YARN_RADIUS;
+
+      if (DS.ST(i, j) == stitches.PURL) {
+        let temp = dyBack;
+        dyBack = dyFront;
+        dyFront = temp;
+      }
+
+      if (movingRight == evenI) {
+        // First leg or head node of a loop
+        if (legNode == isKnit) {
+          // Back to front
+          points.push(x + dx, y + dyBack, z + dzBack);
+          points.push(x + dx, y + dyFront, z + dzFront);
+        } else {
+          // Front to back
+          points.push(x + dx, y + dyFront, z + dzFront);
+          points.push(x + dx, y + dyBack, z + dzBack);
+        }
+      } else {
+        // last leg or head node of a loop
+        if (legNode == isKnit) {
+          // Front to back
+          points.push(x + dx, y + dyFront, z + dzFront);
+          points.push(x + dx, y + dyBack, z + dzBack);
+        } else {
+          // Back to front
+          points.push(x + dx, y + dyBack, z + dzBack);
+          points.push(x + dx, y + dyFront, z + dzFront);
+        }
+      }
+    }
+
+    return points;
   }
 
   function computeSplinePoints(segments) {
@@ -190,9 +262,11 @@ export function simulate(stitchPattern) {
     if (sim && sim.running()) {
       sim.tick(yarnSegments, nodes);
       // console.log("running!");
-
+      // console.log(yarnPaths);
       for (let i = 0; i < yarnData.length; i++) {
-        yarnData[i].pts = computeSplinePoints(yarnData[i].segs);
+        yarnData[i].pts = computeYarnPathSpline(
+          yarnPaths[yarnData[i].yarnIndex]
+        );
       }
 
       renderer.updateYarnGeometry(yarnData);

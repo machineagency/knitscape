@@ -1,6 +1,8 @@
 import { stitches } from "../constants";
 import { Vec2 } from "../lib/Vec2";
 
+const BED_OFFSET = 0.3;
+
 export function layoutNodes(
   DS,
   stitchChart,
@@ -18,11 +20,20 @@ export function layoutNodes(
 
     const chartRow = j < rowMap.length ? rowMap[j] : stitchChart.height;
 
+    let z = 0;
+    if (node[0] == stitches.KNIT) {
+      z = BED_OFFSET;
+    }
+    if (node[0] == stitches.PURL) {
+      z = -BED_OFFSET;
+    }
+
     return {
       pos: {
         x: i * HALF_STITCH,
         // y: (stitchChart.height - chartRow) * STITCH_HEIGHT,
         y: chartRow * STITCH_HEIGHT,
+        z: z,
       },
       f: {
         x: 0,
@@ -217,38 +228,38 @@ export function buildSegmentData(
 //   return stitchType === stitches.PURL;
 // }
 
-// function yarnOffset(cnType, cnPos, prev, next, ltr, stitchType, yarnData) {
-//   const dist = yarnData.radius;
-//   const dx = prev.x - next.x;
-//   const dy = prev.y - next.y;
+function yarnOffset(cnType, cnPos, prev, next, ltr, stitchType, yarnData) {
+  const dist = yarnData.radius;
+  const dx = prev.x - next.x;
+  const dy = prev.y - next.y;
 
-//   const [zFirst, zLast] = calcZ(stitchType, cnType);
+  const [zFirst, zLast] = calcZ(stitchType, cnType);
 
-//   let yarnSide = cnType == "FH" || cnType == "LL" ? ltr : !ltr;
+  let yarnSide = cnType == "FH" || cnType == "LL" ? ltr : !ltr;
 
-//   const alpha = yarnSide
-//     ? Math.atan2(dy * STITCH_ASPECT, -dx)
-//     : Math.atan2(-dy * STITCH_ASPECT, dx);
+  const alpha = yarnSide
+    ? Math.atan2(dy * STITCH_ASPECT, -dx)
+    : Math.atan2(-dy * STITCH_ASPECT, dx);
 
-//   const beta = Math.PI / 4;
+  const beta = Math.PI / 4;
 
-//   const signAlpha = ltr ? -1 : 1;
-//   const signBeta = isHead(cnType) ? 1 : -1;
-//   const signPurl = isPurl(stitchType) ? -1 : 1;
+  const signAlpha = ltr ? -1 : 1;
+  const signBeta = isHead(cnType) ? 1 : -1;
+  const signPurl = isPurl(stitchType) ? -1 : 1;
 
-//   return [
-//     cnPos.x + signAlpha * dist * Math.cos(alpha),
-//     cnPos.y +
-//       signAlpha * dist * Math.sin(alpha) -
-//       signBeta * signPurl * zFirst * dist * Math.sin(beta),
-//     dist * Math.sin(zFirst * beta),
-//     cnPos.x + signAlpha * dist * Math.cos(alpha),
-//     cnPos.y +
-//       signAlpha * dist * Math.sin(alpha) -
-//       signBeta * signPurl * zLast * dist * Math.sin(beta),
-//     dist * Math.sin(zLast * beta),
-//   ];
-// }
+  return [
+    cnPos.x + signAlpha * dist * Math.cos(alpha),
+    cnPos.y +
+      signAlpha * dist * Math.sin(alpha) -
+      signBeta * signPurl * zFirst * dist * Math.sin(beta),
+    dist * Math.sin(zFirst * beta),
+    cnPos.x + signAlpha * dist * Math.cos(alpha),
+    cnPos.y +
+      signAlpha * dist * Math.sin(alpha) -
+      signBeta * signPurl * zLast * dist * Math.sin(beta),
+    dist * Math.sin(zLast * beta),
+  ];
+}
 
 // export function calculateYarnPoints(chart, nodes, cnGrid, yarnPath, PARAMS) {
 //   yarnPath.forEach(([i, j, row, cnType], index) => {

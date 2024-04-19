@@ -413,25 +413,19 @@ export function followTheYarn(DS, yarnSequence, rowDirections) {
       }
 
       let layer = -1;
+      let cnStack = DS.CNO(...cnLoc);
 
-      // console.log(i, j);
-      for (const [index, [ii, jj]] of DS.CNO(...cnLoc).entries()) {
-        // const [iFinal, jFinal] = finalLocation(ii, jj, DS);
-        // console.log(cnLoc);
-        // console.log(ii, jj);
+      for (const [index, [ii, jj]] of cnStack.entries()) {
+        if (legNode && DS.YPI(ii, jj)[1] == yarnPathIndex) {
+          // If this is a leg node, nothing will stack in front of it
+          layer = 1;
+          // layer = cnStack.length - index;
 
-        if (
-          (legNode && DS.YPI(ii, jj)[1] == yarnPathIndex) ||
-          (!legNode && DS.YPI(ii, jj)[0] == yarnPathIndex)
-        ) {
-          layer = index;
+          break;
+        } else if (!legNode && DS.YPI(ii, jj)[0] == yarnPathIndex) {
+          layer = cnStack.length - index;
           break;
         }
-
-        // if (ii == i && jj == j) {
-        //   layer = index;
-        //   break;
-        // }
       }
 
       // console.log(layer);

@@ -40,33 +40,29 @@ export const Vec2 = {
   },
 };
 
-// export class Vec2D {
-//   constructor(x, y) {
-//     this.x = x;
-//     this.y = y;
-//   }
+export const Vec2D = {
+  add(a, b) {
+    return [a[0] + b[0], a[1] + b[1]];
+  },
 
-//   add(that) {
-//     return new Vec2D(this.x + that.x, this.y + that.y);
-//   }
+  sub(a, b) {
+    return [a[0] - b[0], a[1] - b[1]];
+  },
 
-//   subtract(that) {
-//     return new Vec2D(this.x - that.x, this.y - that.y);
-//   }
+  scale(v, scalar) {
+    return [v[0] * scalar, v[1] * scalar];
+  },
 
-//   divideBy(num) {
-//     return new Vec2D(this.x / num, this.y / num);
-//   }
-
-//   scaleBy(num) {
-//     return new Vec2D(this.x * num, this.y * num);
-//   }
-
-//   length() {
-//     return Math.hypot(this.x, this.y);
-//   }
-
-//   normalize() {
-//     return this.scaleBy(1 / this.length());
-//   }
-// }
+  abs(v) {
+    return [Math.abs(v[0], Math.abs(v[1]))];
+  },
+  mag(v) {
+    return Math.sqrt(v[0] * v[0] + v[1] * v[1]);
+  },
+  dot(a, b) {
+    return a[0] * b[0] + a[1] * b[1];
+  },
+  normalize(v) {
+    return this.scale(v, 1 / this.mag(v));
+  },
+};

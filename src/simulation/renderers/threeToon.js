@@ -57,6 +57,22 @@ function toVector3(arr) {
   return v3Arr;
 }
 
+function generateCNPoints(pointArray, color, pointSize = 0.1) {
+  const positions = new Float32Array(pointArray);
+
+  const pointGeom = new THREE.BufferGeometry();
+  pointGeom.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  pointGeom.computeBoundingBox();
+  const material = new THREE.PointsMaterial({
+    size: pointSize,
+    color: color,
+  });
+  material.depthTest = false;
+  console.log(material);
+
+  return new THREE.Points(pointGeom, material);
+}
+
 function init(yarnData, canvas) {
   let width = canvas.parentNode.clientWidth;
   let height = canvas.parentNode.clientHeight;
@@ -111,7 +127,9 @@ function init(yarnData, canvas) {
     );
     gradientMap.needsUpdate = true;
 
-    const curve = new THREE.CatmullRomCurve3(toVector3(yarn.pts));
+    const controlPoints = toVector3(yarn.pts);
+
+    const curve = new THREE.CatmullRomCurve3(controlPoints);
     const geometry = new THREE.TubeGeometry(
       curve,
       curve.points.length * 5,
@@ -124,6 +142,10 @@ function init(yarnData, canvas) {
     const mesh = new THREE.Mesh(geometry, material);
 
     scene.add(mesh);
+
+    // const CNPoints = generateCNPoints(yarn.pts, 0xffffff);
+    // scene.add(CNPoints);
+
     yarns.push(mesh);
     // scene.add(line);
     // yarns.push(line);

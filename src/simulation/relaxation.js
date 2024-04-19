@@ -1,5 +1,5 @@
 import { Vec2 } from "../lib/Vec2";
-
+import { Vec3 } from "./renderers/utils/vec3";
 export function yarnRelaxation(
   kYarn = 0.05,
   alphaMin = 0.001,
@@ -18,7 +18,10 @@ export function yarnRelaxation(
   // console.log("simulating!!");
 
   function applyYarnForce(p1, p2, restLength, K_YARN) {
-    const displacement = Vec2.sub(p1.pos, p2.pos);
+    let { x: x1, y: y1, z: z1 } = p1.pos;
+    let { x: x2, y: y2, z: z2 } = p2.pos;
+
+    const displacement = Vec2.sub({ x: x1, y: y1 }, { x: x2, y: y2 });
 
     const currentLength = Vec2.mag(displacement);
 
@@ -60,7 +63,9 @@ export function yarnRelaxation(
       nodes.forEach((node) => {
         node.v.x = (node.v.x + node.f.x) * velocityDecay;
         node.v.y = (node.v.y + node.f.y) * velocityDecay;
-        node.pos = Vec2.add(node.pos, node.v);
+        // node.pos = Vec2.add(node.pos, node.v);
+        node.pos.x += node.v.x;
+        node.pos.y += node.v.y;
         // sum forces
         total += Vec2.mag(node.f);
 
