@@ -1,5 +1,8 @@
-import { initShaderProgram } from "./utils/shaderProgram";
-import { bbox3d, resizeCanvasToDisplaySize } from "./utils/helpers";
+import {
+  bbox3d,
+  resizeCanvasToDisplaySize,
+  initShaderProgram,
+} from "./utils/helpers";
 import { Mat3 } from "./utils/Mat3";
 import { buildYarnCurve } from "./utils/yarnSpline";
 

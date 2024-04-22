@@ -1,7 +1,7 @@
 import { stitches } from "../constants";
 import { Vec2 } from "../lib/Vec2";
 
-const BED_OFFSET = 0.3;
+const BED_OFFSET = 0.2;
 
 export function layoutNodes(
   DS,

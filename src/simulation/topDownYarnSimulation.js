@@ -9,10 +9,18 @@ import { topDownRenderer } from "./renderers/topdown";
 import { noodleRenderer } from "./renderers/noodle";
 import { centerlineRenderer } from "./renderers/centerline";
 import { threeTubeRenderer } from "./renderers/threeTube";
+
 import { Vec2D } from "../lib/Vec2";
 import { stitches } from "../constants";
 
-let renderer = threeTubeRenderer;
+const renderers = {
+  Noodle: noodleRenderer,
+  "2D": topDownRenderer,
+  Centerline: centerlineRenderer,
+  Tube: threeTubeRenderer,
+};
+
+let renderer = renderers["Noodle"];
 
 const YARN_RADIUS = 0.25;
 const STITCH_WIDTH = 1;
@@ -43,90 +51,57 @@ export function simulate(stitchPattern) {
     STITCH_ASPECT
   );
 
-  const yarnSegments = buildSegmentData(
-    DS,
-    yarnPaths,
-    nodes,
-    STITCH_WIDTH,
-    STITCH_ASPECT
-  );
+  // TODO: only generate segment data when relaxation is requested.
+  // const yarnSegments = buildSegmentData(
+  //   DS,
+  //   yarnPaths,
+  //   nodes,
+  //   STITCH_WIDTH,
+  //   STITCH_ASPECT
+  // );
 
   const yarnData = [];
-
-  // Object.entries(yarnSegments).forEach(([yarnIndex, segmentArr]) => {
-  //   yarnData.push({
-  //     // segs: segmentArr,
-  //     pts: computeSplinePoints(segmentArr, yarnIndex),
-  //     radius: YARN_RADIUS,
-  //     color: hexToRgb(GLOBAL_STATE.yarnPalette[yarnIndex - 1]).map(
-  //       (colorInt) => colorInt / 255
-  //     ),
-  //   });
-  // });
-
   const splineData = computeYarnPathSpline(yarnPath);
-  // console.log(yarnSplines);
 
-  Object.entries(yarnSegments).forEach(([yarnIndex, segmentArr]) => {
-    // let splineData = computeYarnPathSpline(yarnPaths[yarnIndex]);
-    yarnData.push({
-      // segs: segmentArr,
-      yarnIndex: yarnIndex,
-      pts: splineData.yarnSplines[yarnIndex],
-      // normals: splineData.normals,
-      // cnPoints: splineData.cnPoints,
-      radius: YARN_RADIUS,
-      color: hexToRgb(GLOBAL_STATE.yarnPalette[yarnIndex - 1]).map(
-        (colorInt) => colorInt / 255
-      ),
-    });
-  });
+  Object.entries(splineData.yarnSplines).forEach(
+    ([yarnIndex, controlPoints]) => {
+      yarnData.push({
+        yarnIndex: yarnIndex,
+        pts: controlPoints,
+        radius: YARN_RADIUS,
+        color: hexToRgb(GLOBAL_STATE.yarnPalette[yarnIndex - 1]).map(
+          (colorInt) => colorInt / 255
+        ),
+      });
+    }
+  );
 
   renderer.init(yarnData, canvas);
-  draw();
 
-  // CN grid position, stitch row, previous CN coords, next CN coords
-  function nodeOffset([i, j], row, prevCN, nextCN) {
-    const right = stitchPattern.carriagePasses[row] == "right";
-    const isLeg = j == row;
+  function draw() {
+    if (sim && sim.running()) {
+      sim.tick(yarnSegments, nodes);
+      // console.log("running!");
+      // console.log(yarnPaths);
+      for (let i = 0; i < yarnData.length; i++) {
+        yarnData[i].pts = computeYarnPathSpline(
+          yarnPaths[yarnData[i].yarnIndex]
+        );
+      }
 
-    // const x = prevCN[0] - nextCN[0];
-    // const y = prevCN[1] - nextCN[1];
-
-    const tangent = [prevCN[0] - nextCN[0], prevCN[1] - nextCN[1]];
-    const normal =
-      right == isLeg ? [-tangent[1], tangent[0]] : [tangent[1], -tangent[0]];
-
-    const dist = Math.sqrt(tangent[0] ** 2 + tangent[1] ** 2);
-    const [posX, posY] = getCoords([i, j]);
-
-    if (dist == 0) {
-      // console.warn("degenerate?");
-      return [posX, posY];
+      renderer.updateYarnGeometry(yarnData);
     }
-
-    // const n = right == isLeg ? [-y / mag, x / mag] : [y / mag, -x / mag];
-
-    // const mag = YARN_RADIUS / 2 / dist;
-
-    return [
-      posX + ((YARN_RADIUS / 2) * normal[0]) / dist,
-      posY + ((YARN_RADIUS / 2) * normal[1]) / dist,
-    ];
-
-    return [posX + mag * normal[0], posY + mag * normal[1]];
+    renderer.draw();
   }
 
-  function selvageOffset([i, j], row) {
-    const right = stitchPattern.carriagePasses[row] == "right";
+  function relax() {
+    if (relaxed) return;
+    sim = yarnRelaxation(GLOBAL_STATE.kYarn);
+    relaxed = true;
+  }
 
-    const [posX, posY] = getCoords([i, j]);
-
-    if (right) {
-      return [posX - YARN_RADIUS * 0.75, posY + YARN_RADIUS / 2];
-    } else {
-      return [posX + YARN_RADIUS * 0.75, posY + YARN_RADIUS / 2];
-    }
+  function stopSim() {
+    if (sim) sim.stop();
   }
 
   function getCoords([i, j]) {
@@ -264,73 +239,91 @@ export function simulate(stitchPattern) {
     return { yarnSplines, points, normals, cnPoints };
   }
 
-  function computeSplinePoints(segments) {
-    if (segments.length == 0) {
-      console.warn(`Segment array for yarn  is empty`);
-      return;
-    }
-    // console.log(segments);
+  // function computeSplinePoints(segments) {
+  //   if (segments.length == 0) {
+  //     console.warn(`Segment array for yarn  is empty`);
+  //     return;
+  //   }
+  //   // console.log(segments);
 
-    let points = [nodes[0].pos.x - STITCH_WIDTH, nodes[0].pos.y, 0];
+  //   let points = [nodes[0].pos.x - STITCH_WIDTH, nodes[0].pos.y, 0];
 
-    for (let i = 1; i + 1 < segments.length; i++) {
-      let prevSeg = segments[i - 1];
-      let currSeg = segments[i];
-      let nextSeg = segments[i + 1];
+  //   for (let i = 1; i + 1 < segments.length; i++) {
+  //     let prevSeg = segments[i - 1];
+  //     let currSeg = segments[i];
+  //     let nextSeg = segments[i + 1];
 
-      // let prev = getCoords(prevSeg.source);
-      // let prev = [points.at(-3), points.at(-2)];
+  //     // let prev = getCoords(prevSeg.source);
+  //     // let prev = [points.at(-3), points.at(-2)];
 
-      let p1 = nodeOffset(
-        currSeg.source,
-        currSeg.row,
-        getCoords(prevSeg.source),
-        getCoords(currSeg.target)
-      );
+  //     let p1 = nodeOffset(
+  //       currSeg.source,
+  //       currSeg.row,
+  //       getCoords(prevSeg.source),
+  //       getCoords(currSeg.target)
+  //     );
 
-      points.push(p1[0], p1[1], YARN_RADIUS * currSeg.layer[0]);
+  //     points.push(p1[0], p1[1], YARN_RADIUS * currSeg.layer[0]);
 
-      let next;
+  //     let next;
 
-      if (nextSeg.row != currSeg.row) {
-        next = selvageOffset(nextSeg.target, currSeg.row);
-      } else {
-        next = getCoords(nextSeg.target);
-      }
+  //     if (nextSeg.row != currSeg.row) {
+  //       next = selvageOffset(nextSeg.target, currSeg.row);
+  //     } else {
+  //       next = getCoords(nextSeg.target);
+  //     }
 
-      let p2 = nodeOffset(currSeg.target, currSeg.row, p1, next);
+  //     let p2 = nodeOffset(currSeg.target, currSeg.row, p1, next);
 
-      points.push(p2[0], p2[1], YARN_RADIUS * currSeg.layer[1]);
-    }
+  //     points.push(p2[0], p2[1], YARN_RADIUS * currSeg.layer[1]);
+  //   }
 
-    return points;
-  }
+  //   return points;
+  // }
 
-  function draw() {
-    if (sim && sim.running()) {
-      sim.tick(yarnSegments, nodes);
-      // console.log("running!");
-      // console.log(yarnPaths);
-      for (let i = 0; i < yarnData.length; i++) {
-        yarnData[i].pts = computeYarnPathSpline(
-          yarnPaths[yarnData[i].yarnIndex]
-        );
-      }
+  // CN grid position, stitch row, previous CN coords, next CN coords
+  // function nodeOffset([i, j], row, prevCN, nextCN) {
+  //   const right = stitchPattern.carriagePasses[row] == "right";
+  //   const isLeg = j == row;
 
-      renderer.updateYarnGeometry(yarnData);
-    }
-    renderer.draw();
-  }
+  //   // const x = prevCN[0] - nextCN[0];
+  //   // const y = prevCN[1] - nextCN[1];
 
-  function relax() {
-    if (relaxed) return;
-    sim = yarnRelaxation(GLOBAL_STATE.kYarn);
-    relaxed = true;
-  }
+  //   const tangent = [prevCN[0] - nextCN[0], prevCN[1] - nextCN[1]];
+  //   const normal =
+  //     right == isLeg ? [-tangent[1], tangent[0]] : [tangent[1], -tangent[0]];
 
-  function stopSim() {
-    if (sim) sim.stop();
-  }
+  //   const dist = Math.sqrt(tangent[0] ** 2 + tangent[1] ** 2);
+  //   const [posX, posY] = getCoords([i, j]);
+
+  //   if (dist == 0) {
+  //     // console.warn("degenerate?");
+  //     return [posX, posY];
+  //   }
+
+  //   // const n = right == isLeg ? [-y / mag, x / mag] : [y / mag, -x / mag];
+
+  //   // const mag = YARN_RADIUS / 2 / dist;
+
+  //   return [
+  //     posX + ((YARN_RADIUS / 2) * normal[0]) / dist,
+  //     posY + ((YARN_RADIUS / 2) * normal[1]) / dist,
+  //   ];
+
+  //   return [posX + mag * normal[0], posY + mag * normal[1]];
+  // }
+
+  // function selvageOffset([i, j], row) {
+  //   const right = stitchPattern.carriagePasses[row] == "right";
+
+  //   const [posX, posY] = getCoords([i, j]);
+
+  //   if (right) {
+  //     return [posX - YARN_RADIUS * 0.75, posY + YARN_RADIUS / 2];
+  //   } else {
+  //     return [posX + YARN_RADIUS * 0.75, posY + YARN_RADIUS / 2];
+  //   }
+  // }
 
   return { relax, stopSim, draw };
 }
