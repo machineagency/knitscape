@@ -391,12 +391,12 @@ export function followTheYarn(DS, yarnSequence, rowDirections) {
       const CNL = acnsAt(i, j, DS); // Find the ACNs at this location
       DS.setCNL(i, j, CNL);
 
-      let location;
+      // let location;
       let cnLoc;
 
       if (legNode) {
         // leg nodes do not move, use the current i,j
-        location = [i, j, currentStitchRow, side + "L"];
+        // location = [i, j, currentStitchRow, side + "L"];
         cnLoc = [i, j];
 
         // Add the current yarn path index to all ACNs at this node.
@@ -406,7 +406,7 @@ export function followTheYarn(DS, yarnSequence, rowDirections) {
       } else {
         // head nodes might move, find final (i,j) location of the node
         cnLoc = finalLocation(i, j, DS);
-        location = [cnLoc[0], cnLoc[1], currentStitchRow, side + "H"];
+        // location = [cnLoc[0], cnLoc[1], currentStitchRow, side + "H"];
 
         // Add the current yarn path index to the head node
         DS.YPI(i, j).push(yarnPathIndex);
@@ -459,7 +459,7 @@ export function followTheYarn(DS, yarnSequence, rowDirections) {
   }
 
   DS.maxCNStack = highestLayer + 1;
-  return yarnPaths;
+  return { yarnPath, yarnPaths };
 }
 
 function addToList(i, j, legNode, yarnPath, DS, rowDirections) {
@@ -694,9 +694,6 @@ function determineRule(rowJ, pattern) {
   let currentRow = Array.from(
     pattern.ops.slice((rowJ - 1) * pattern.width, rowJ * pattern.width)
   );
-  // let currentRow = Array.from(
-  //   pattern.ops.slice(rowJ * pattern.width, (rowJ + 1) * pattern.width)
-  // );
 
   const frontTransfers = [
     stitches.FXL1,

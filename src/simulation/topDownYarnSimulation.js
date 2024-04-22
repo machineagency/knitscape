@@ -7,14 +7,16 @@ import { layoutNodes, buildSegmentData } from "./yarn3d";
 
 import { topDownRenderer } from "./renderers/topdown";
 import { noodleRenderer } from "./renderers/noodle";
-import { threeToonRenderer } from "./renderers/threeToon";
+import { centerlineRenderer } from "./renderers/centerline";
+import { threeTubeRenderer } from "./renderers/threeTube";
 import { Vec2D } from "../lib/Vec2";
 import { stitches } from "../constants";
 
-let renderer = topDownRenderer;
+let renderer = threeTubeRenderer;
 
-const YARN_RADIUS = 0.2;
+const YARN_RADIUS = 0.25;
 const STITCH_WIDTH = 1;
+const DEBUG = true;
 
 export function simulate(stitchPattern) {
   const STITCH_ASPECT = GLOBAL_STATE.cellAspect;
@@ -27,7 +29,7 @@ export function simulate(stitchPattern) {
 
   orderCNs(DS, stitchPattern);
 
-  let yarnPaths = followTheYarn(
+  let { yarnPath, yarnPaths } = followTheYarn(
     DS,
     stitchPattern.yarnSequence,
     stitchPattern.carriagePasses
@@ -62,11 +64,17 @@ export function simulate(stitchPattern) {
   //   });
   // });
 
+  const splineData = computeYarnPathSpline(yarnPath);
+  // console.log(yarnSplines);
+
   Object.entries(yarnSegments).forEach(([yarnIndex, segmentArr]) => {
+    // let splineData = computeYarnPathSpline(yarnPaths[yarnIndex]);
     yarnData.push({
       // segs: segmentArr,
       yarnIndex: yarnIndex,
-      pts: computeYarnPathSpline(yarnPaths[yarnIndex]),
+      pts: splineData.yarnSplines[yarnIndex],
+      // normals: splineData.normals,
+      // cnPoints: splineData.cnPoints,
       radius: YARN_RADIUS,
       color: hexToRgb(GLOBAL_STATE.yarnPalette[yarnIndex - 1]).map(
         (colorInt) => colorInt / 255
@@ -127,93 +135,133 @@ export function simulate(stitchPattern) {
 
   function computeYarnPathSpline(yarnPath) {
     let points = [];
+    let normals = [];
+    let cnPoints = [];
+
     let [x, y] = getCoords([yarnPath[0][0], yarnPath[0][1]]);
     points.push(x - STITCH_WIDTH / 2, y, 0);
 
+    const yarnSplines = {};
+
     for (let index = 1; index < yarnPath.length - 2; index++) {
       let [i, j, row, layer] = yarnPath[index];
+      let currentYarn = stitchPattern.yarnSequence[row];
+
+      if (!(currentYarn in yarnSplines)) {
+        yarnSplines[currentYarn] = [];
+      }
+
       const isKnit = DS.ST(i, j) == stitches.KNIT;
-
       const evenI = i % 2 == 0;
-      let prevCnPos = getCoords([
-        yarnPath[index - 1][0],
-        yarnPath[index - 1][1],
-      ]);
-      let nextCnPos = getCoords([
-        yarnPath[index + 1][0],
-        yarnPath[index + 1][1],
-      ]);
 
-      const tangent = Vec2D.sub(nextCnPos, prevCnPos);
-      const magTangent = Vec2D.mag(tangent);
       const movingRight = stitchPattern.carriagePasses[row] == "right";
       // the zeroth element in YPI is always a head and the first is always a leg.
       const legNode = DS.YPI(i, j)[1] == index;
-      const side = movingRight == legNode;
       const { x, y, z } = nodes[i + j * DS.width].pos;
 
-      // The normal side will depend on the direction the carriage is moving
-      const normal = side
-        ? Vec2D.normalize([tangent[1], -tangent[0]])
-        : Vec2D.normalize([-tangent[1], tangent[0]]);
+      const sign = evenI ? 1 : -1;
 
-      // const normal = side
-      //   ? [tangent[1], -tangent[0]]
-      //   : [-tangent[1], tangent[0]];
+      let xyBasis = legNode
+        ? Vec2D.normalize([sign * STITCH_ASPECT * 2, -1 / STITCH_ASPECT])
+        : Vec2D.normalize([sign * -STITCH_ASPECT * 2, 1 / STITCH_ASPECT]);
+      xyBasis = Vec2D.scale(xyBasis, YARN_RADIUS);
 
-      if (magTangent == 0) {
-        points.push(x, y, z + YARN_RADIUS * layer);
-        points.push(x, y, z - YARN_RADIUS * layer);
-        continue;
+      if (DEBUG == true) {
+        normals.push(x, y, z);
+        normals.push(
+          x + xyBasis[0] * YARN_RADIUS,
+          y + xyBasis[1] * YARN_RADIUS,
+          z
+        );
+        cnPoints.push(x, y, z);
       }
 
-      const alpha = Math.atan2(normal[0] * STITCH_ASPECT, normal[1]);
-      const beta = Math.PI / 4;
+      const stackHeight = DS.CNO(i, j).length;
 
-      let xOffset = legNode ? -Math.cos(alpha) : Math.cos(alpha);
-      let yOffset = -normal[1] - Math.sin(beta) * layer;
-      let zOffset = Math.sin(layer * beta);
+      /////////////////////////////
+      //  X OFFSET
+      /////////////////////////////
+      let dxFront, dxBack;
+      let base = xyBasis[0] * STITCH_ASPECT;
+      if (legNode) {
+        dxFront = base;
+        dxBack = base;
+      } else {
+        dxFront = base * (stackHeight - layer + 1);
+        dxBack = xyBasis[0] * STITCH_ASPECT;
+      }
 
-      let dx = xOffset * normal[0] * YARN_RADIUS;
+      /////////////////////////////
+      //  Y OFFSET
+      /////////////////////////////
 
-      let dyFront = yOffset * normal[1] * YARN_RADIUS;
-      let dyBack = -yOffset * normal[1] * YARN_RADIUS;
+      let dyFront, dyBack;
 
-      let dzFront = zOffset * YARN_RADIUS;
-      let dzBack = -zOffset * YARN_RADIUS;
+      if (legNode) {
+        const beta = Math.PI / 4;
+        let yLayer = Math.sin(beta * layer) * (stackHeight - layer + 1);
 
-      if (DS.ST(i, j) == stitches.PURL) {
+        dyFront = -xyBasis[1] * yLayer;
+        dyBack = xyBasis[1];
+      } else {
+        const beta = Math.PI / 8;
+        let yLayer = Math.sin(beta * layer) * (stackHeight - layer + 1);
+        dyFront = -xyBasis[1] * yLayer;
+        dyBack = xyBasis[1] * yLayer;
+      }
+
+      /////////////////////////////
+      //  ZOFFSET
+      /////////////////////////////
+      let dzFront, dzBack;
+
+      if (legNode) {
+        dzFront = (layer / 2) * YARN_RADIUS + YARN_RADIUS / 2;
+        dzBack = -YARN_RADIUS / 2;
+      } else {
+        dzFront = (layer * YARN_RADIUS) / 2;
+        dzBack = (-(stackHeight - layer) * YARN_RADIUS) / 2;
+      }
+
+      /////////////////////////////
+      //  SWAP
+      /////////////////////////////
+      if (DS.ST(i, j) != stitches.KNIT) {
         let temp = dyBack;
         dyBack = dyFront;
         dyFront = temp;
+
+        let tempX = dxBack;
+        dxBack = dxFront;
+        dxFront = tempX;
       }
 
       if (movingRight == evenI) {
         // First leg or head node of a loop
         if (legNode == isKnit) {
           // Back to front
-          points.push(x + dx, y + dyBack, z + dzBack);
-          points.push(x + dx, y + dyFront, z + dzFront);
+          yarnSplines[currentYarn].push(x + dxBack, y + dyBack, z + dzBack);
+          yarnSplines[currentYarn].push(x + dxFront, y + dyFront, z + dzFront);
         } else {
           // Front to back
-          points.push(x + dx, y + dyFront, z + dzFront);
-          points.push(x + dx, y + dyBack, z + dzBack);
+          yarnSplines[currentYarn].push(x + dxFront, y + dyFront, z + dzFront);
+          yarnSplines[currentYarn].push(x + dxBack, y + dyBack, z + dzBack);
         }
       } else {
         // last leg or head node of a loop
         if (legNode == isKnit) {
           // Front to back
-          points.push(x + dx, y + dyFront, z + dzFront);
-          points.push(x + dx, y + dyBack, z + dzBack);
+          yarnSplines[currentYarn].push(x + dxFront, y + dyFront, z + dzFront);
+          yarnSplines[currentYarn].push(x + dxBack, y + dyBack, z + dzBack);
         } else {
           // Back to front
-          points.push(x + dx, y + dyBack, z + dzBack);
-          points.push(x + dx, y + dyFront, z + dzFront);
+          yarnSplines[currentYarn].push(x + dxBack, y + dyBack, z + dzBack);
+          yarnSplines[currentYarn].push(x + dxFront, y + dyFront, z + dzFront);
         }
       }
     }
 
-    return points;
+    return { yarnSplines, points, normals, cnPoints };
   }
 
   function computeSplinePoints(segments) {

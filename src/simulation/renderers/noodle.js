@@ -50,7 +50,7 @@ void main() {
   vec2 normal =   normalize(vec2(-tangent.y, tangent.x)); // perp
 
   vec4 currentPoint = mix(p0, p1, position.x);
-  vec2 pt = currentPoint.xy + uWidth *(position.x * tangent/2. +  position.y * normal);
+  vec2 pt = currentPoint.xy + uWidth *(position.x * tangent +  position.y * normal);
 
   gl_Position = projectionMatrix * vec4(pt, currentPoint.z, 1.0);
 

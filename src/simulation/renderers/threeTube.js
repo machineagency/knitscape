@@ -175,7 +175,7 @@ function draw() {
   // effect.render(scene, camera);
 }
 
-export const threeToonRenderer = {
+export const threeTubeRenderer = {
   draw,
   init,
   updateYarnGeometry,

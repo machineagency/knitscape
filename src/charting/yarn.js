@@ -34,7 +34,7 @@ export function editYarnColor(e, index) {
   if (!target.jscolor) {
     const picker = new jscolor(target, {
       preset: "dark large",
-      format: "hexa",
+      format: "hex",
       value: GLOBAL_STATE.yarnPalette[index],
       onInput: () => {
         const newPalette = [...GLOBAL_STATE.yarnPalette];
