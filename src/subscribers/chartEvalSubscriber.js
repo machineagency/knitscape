@@ -43,6 +43,7 @@ function evalChart() {
     });
   }
 }
+
 export function chartEvalSubscriber() {
   return () => {
     const debouncedEval = debounce(evalChart, 30);

@@ -62,9 +62,8 @@ let GLOBAL_STATE = {
   // SIMULATION
   simScale: 1,
   simPan: { x: 0, y: 0 },
-  flipped: false,
   simLive: true,
-  kYarn: 0.06,
+  kYarn: 0.4,
 
   // YARN
   yarnPalette: null,

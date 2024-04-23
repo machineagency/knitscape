@@ -10,6 +10,7 @@ export function taskbar() {
     showSettings,
     showTimeNeedleView,
   } = GLOBAL_STATE;
+
   return html` <div id="taskbar">
     <h1 class="site-title">KnitScape</h1>
     <div class="button-group">

@@ -4,6 +4,7 @@ export class Pattern {
     this.width = bitmap.width;
     this.height = bitmap.height;
     this.yarnSequence = yarnSequence;
+    this.rowMap = rowMap;
     this.yarns = Array.from(
       yarnSequence.filter((value, index, arr) => arr.indexOf(value) === index)
     );

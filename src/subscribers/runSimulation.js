@@ -1,8 +1,5 @@
 import { GLOBAL_STATE } from "../state";
-
-// import { simulate } from "../simulation/yarnSimulation";
 import { simulate } from "../simulation/topDownYarnSimulation";
-
 import { Pattern } from "../simulation/Pattern";
 
 function debounce(callback, wait) {
@@ -52,7 +49,6 @@ export function runSimulation() {
           "yarnPalette",
           "yarnSequence",
           "machineChart",
-          "flipped",
           "showTimeNeedleView",
         ].some((key) => changes.includes(key));
 

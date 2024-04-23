@@ -1,6 +1,3 @@
-import { stitches } from "../constants";
-import { Bimp } from "../lib/Bimp";
-
 export function bBoxAllBoundaries(boundaries) {
   let xMin = Infinity;
   let yMin = Infinity;

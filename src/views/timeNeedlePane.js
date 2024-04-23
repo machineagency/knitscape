@@ -1,5 +1,5 @@
 import { html } from "lit-html";
-import { GLOBAL_STATE, dispatch } from "../state";
+import { GLOBAL_STATE } from "../state";
 
 let scale = 15;
 let x = 35;

@@ -4,6 +4,7 @@ import { render } from "lit-html";
 import { GLOBAL_STATE, StateMonitor } from "./state";
 
 import { runSimulation } from "./subscribers/runSimulation";
+// import { visualizationSubscriber } from "./subscribers/visualizationSubscriber";
 import { chartSubscriber } from "./subscribers/chartSubscriber";
 import { blockSubscriber } from "./subscribers/blockSubscriber";
 import { blockFillSubscriber } from "./subscribers/blockFillSubscriber";
@@ -18,7 +19,7 @@ import { fitChart } from "./interaction/chartPanZoom";
 
 import { mainView } from "./views/mainView";
 
-const DEFAULT_WORKSPACE = "test";
+const DEFAULT_WORKSPACE = "rib";
 
 function r() {
   render(mainView(), document.body);

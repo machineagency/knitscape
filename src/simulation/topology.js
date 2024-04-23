@@ -369,34 +369,24 @@ export function populateDS(pattern, populateFirstRow = true) {
   return DS;
 }
 
-export function followTheYarn(DS, yarnSequence, rowDirections) {
+export function followTheYarn(DS, rowDirections) {
   let i = 0,
     j = 0,
     legNode = true,
-    currentStitchRow = 0;
-  let yarnPathIndex = 0;
+    currentStitchRow = 0,
+    yarnPathIndex = 0;
 
-  const yarnPaths = {};
   const yarnPath = [];
-  let highestLayer = 0;
 
   while (j < DS.height) {
-    const movingRight = rowDirections[currentStitchRow] == "right";
-    let currentYarn = yarnSequence[currentStitchRow];
-
-    const evenI = i % 2 == 0;
-    const side = movingRight === evenI ? "F" : "L";
-
     if (addToList(i, j, legNode, yarnPath, DS, rowDirections)) {
       const CNL = acnsAt(i, j, DS); // Find the ACNs at this location
       DS.setCNL(i, j, CNL);
 
-      // let location;
       let cnLoc;
 
       if (legNode) {
         // leg nodes do not move, use the current i,j
-        // location = [i, j, currentStitchRow, side + "L"];
         cnLoc = [i, j];
 
         // Add the current yarn path index to all ACNs at this node.
@@ -406,44 +396,13 @@ export function followTheYarn(DS, yarnSequence, rowDirections) {
       } else {
         // head nodes might move, find final (i,j) location of the node
         cnLoc = finalLocation(i, j, DS);
-        // location = [cnLoc[0], cnLoc[1], currentStitchRow, side + "H"];
 
         // Add the current yarn path index to the head node
         DS.YPI(i, j).push(yarnPathIndex);
       }
 
-      let layer = -1;
-      let cnStack = DS.CNO(...cnLoc);
+      yarnPath.push([...cnLoc, currentStitchRow]);
 
-      for (const [index, [ii, jj]] of cnStack.entries()) {
-        if (legNode && DS.YPI(ii, jj)[1] == yarnPathIndex) {
-          // If this is a leg node, nothing will stack in front of it
-          layer = 1;
-          // layer = cnStack.length - index;
-
-          break;
-        } else if (!legNode && DS.YPI(ii, jj)[0] == yarnPathIndex) {
-          layer = cnStack.length - index;
-          break;
-        }
-      }
-
-      // console.log(layer);
-      if (layer < 0)
-        console.log(
-          `Couldn't find the stack index for cn (${i},${j}), ypi${yarnPathIndex}  `
-        );
-
-      if (layer > highestLayer) highestLayer = layer;
-
-      yarnPath.push([...cnLoc, currentStitchRow, layer]);
-
-      if (!(currentYarn in yarnPaths)) {
-        yarnPaths[currentYarn] = [];
-        // let prevYarn = yarnSequence[currentStitchRow - 1];
-        // if (prevYarn) yarnPaths[currentYarn].push(yarnPaths[prevYarn].at(-1));
-      }
-      yarnPaths[currentYarn].push([...cnLoc, currentStitchRow, layer]);
       yarnPathIndex++;
     }
 
@@ -457,9 +416,7 @@ export function followTheYarn(DS, yarnSequence, rowDirections) {
       rowDirections
     ));
   }
-
-  DS.maxCNStack = highestLayer + 1;
-  return { yarnPath, yarnPaths };
+  return yarnPath;
 }
 
 function addToList(i, j, legNode, yarnPath, DS, rowDirections) {

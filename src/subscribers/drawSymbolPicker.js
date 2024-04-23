@@ -1,6 +1,6 @@
 import { SYMBOL_DATA } from "../constants";
 
-export function drawSymbolPicker(symbolCanvas) {
+export function drawSymbolPicker() {
   return ({ state }) => {
     let { symbolMap, symbolLineWidth } = state;
 

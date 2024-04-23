@@ -1,5 +1,7 @@
-import { Vec2 } from "../lib/Vec2";
-import { Vec3 } from "./renderers/utils/vec3";
+import { Vec3 } from "./utils/Vec3";
+
+function torsion(p1, p2, p3, p4) {}
+
 export function yarnRelaxation(
   kYarn = 0.05,
   alphaMin = 0.001,
@@ -9,70 +11,50 @@ export function yarnRelaxation(
 ) {
   let ALPHA = 1;
   let ALPHA_MIN = alphaMin;
-
   let ALPHA_TARGET = alphaTarget;
   let ALPHA_DECAY = 1 - Math.pow(ALPHA_MIN, 1 / 300);
 
   let running = true;
 
-  // console.log("simulating!!");
-
   function applyYarnForce(p1, p2, restLength, K_YARN) {
-    let { x: x1, y: y1, z: z1 } = p1.pos;
-    let { x: x2, y: y2, z: z2 } = p2.pos;
-
-    const displacement = Vec2.sub({ x: x1, y: y1 }, { x: x2, y: y2 });
-
-    const currentLength = Vec2.mag(displacement);
+    const displacement = Vec3.subtract(p1.pos, p2.pos);
+    const currentLength = Vec3.magnitude(displacement);
 
     // Yarn does not spring back to rest length
-    if (currentLength < restLength) return { x: 0, y: 0 };
+    if (currentLength < restLength) return;
+
     const forceMagnitude = K_YARN * (currentLength - restLength);
 
-    const direction = Vec2.normalize(displacement);
+    const direction = Vec3.normalize(displacement);
 
-    const force = Vec2.scale(direction, -forceMagnitude * ALPHA);
+    const force = Vec3.scale(direction, -forceMagnitude * ALPHA);
 
-    p1.f.x += force.x;
-    p1.f.y += force.y;
-
-    p2.f.x -= force.x;
-    p2.f.y -= force.y;
+    p1.f = Vec3.add(p1.f, force);
+    p2.f = Vec3.subtract(p2.f, force);
   }
 
-  function tick(yarnSegments, nodes) {
-    let total = 0;
+  function updateContactNodePositions(nodes) {
+    nodes.forEach((node) => {
+      node.v = Vec3.scale(Vec3.add(node.v, node.f), velocityDecay);
+      node.pos = Vec3.add(node.pos, node.v);
 
+      // clear accumulated forces for next tick
+      node.f = [0, 0, 0];
+    });
+  }
+
+  function tick(yarns, nodes) {
     for (var k = 0; k < iterations; ++k) {
       ALPHA += (ALPHA_TARGET - ALPHA) * ALPHA_DECAY;
       // Accumulate forces to nodes
-      Object.entries(yarnSegments).forEach(([yarnIndex, yarnPath]) => {
-        yarnPath.forEach(
-          ({ sourceIndex, targetIndex, restLength, yarnIndex }) => {
-            applyYarnForce(
-              nodes[sourceIndex],
-              nodes[targetIndex],
-              restLength,
-              kYarn
-            );
-          }
-        );
+      Object.entries(yarns).forEach(([yarnIndex, segArr]) => {
+        for (let segIndex = 0; segIndex < segArr.length; segIndex++) {
+          let { source, target, restLength } = segArr[segIndex];
+          applyYarnForce(nodes[source], nodes[target], restLength, kYarn);
+        }
       });
 
-      // Update node positions
-      nodes.forEach((node) => {
-        node.v.x = (node.v.x + node.f.x) * velocityDecay;
-        node.v.y = (node.v.y + node.f.y) * velocityDecay;
-        // node.pos = Vec2.add(node.pos, node.v);
-        node.pos.x += node.v.x;
-        node.pos.y += node.v.y;
-        // sum forces
-        total += Vec2.mag(node.f);
-
-        // clear accumulated forces for next tick
-        node.f.x = 0;
-        node.f.y = 0;
-      });
+      updateContactNodePositions(nodes);
     }
 
     if (ALPHA < ALPHA_MIN) {
@@ -82,7 +64,6 @@ export function yarnRelaxation(
 
   function stop() {
     running = false;
-    // console.log("Stop!");
   }
 
   return {
