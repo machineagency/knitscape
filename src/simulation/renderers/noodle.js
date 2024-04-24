@@ -38,6 +38,7 @@ uniform float uZMin;
 uniform float uZMax;
 
 varying float vZ;
+varying float across;
 
 void main() {
   mat4 mvp = modelViewMatrix * projectionMatrix;
@@ -57,6 +58,7 @@ void main() {
   // Use the z component of the current point to shade the point according to the z range
   float whichZ = mix(pointA.z, pointB.z, position.x);
   vZ = abs(whichZ-uZMin) / abs(uZMax-uZMin);
+  across = position.y;
 }
 `;
 
@@ -65,11 +67,25 @@ precision highp float;
 
 uniform vec3 uColor;
 varying float vZ;
-
+varying float across;
 void main() {
+    // vec3 shaded = uColor - 0.4;
+
+    // gl_FragColor.rgb = mix(shaded, uColor, vZ);
+    // gl_FragColor.rgb = uColor;
+    // gl_FragColor.a = 1.0;
+
+    vec3 normal = vec3(0, 0, -1);
     vec3 shaded = uColor - 0.4;
 
+    vec3 highlight = normalize(vec3(0.0, across, -0.1 ));
+
+    float light = dot(normal, highlight);
+    light = smoothstep(0.0, 0.5, light);
+
+
     gl_FragColor.rgb = mix(shaded, uColor, vZ);
+    gl_FragColor.rgb *= light;
     gl_FragColor.a = 1.0;
 }
 `;
@@ -90,6 +106,7 @@ uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
 
 varying float vZ;
+varying float across;
 
 void main() {
   mat4 mvp = projectionMatrix * modelViewMatrix;
@@ -121,6 +138,7 @@ void main() {
   gl_Position = projectionMatrix * vec4(clip, clipB.z, clipB.w);
 
   vZ = abs(pointB.z-uZMin) / abs(uZMax-uZMin);
+  across = (position.x + position.y) * 0.5 * sigma;
 }
 `;
 
@@ -129,11 +147,25 @@ precision highp float;
 
 uniform vec3 uColor;
 varying float vZ;
+varying float across;
 
 void main() {
+    // vec3 shaded = uColor - 0.4;
+
+    // gl_FragColor.rgb = mix(shaded, uColor, vZ);
+    // gl_FragColor.a = 1.0;
+
+    vec3 normal = vec3(0, 0, -1);
     vec3 shaded = uColor - 0.4;
 
+    vec3 highlight = normalize(vec3(0.0, across, -0.1 ));
+
+    float light = dot(normal, highlight);
+    light = smoothstep(0.0, 0.5, light);
+
+
     gl_FragColor.rgb = mix(shaded, uColor, vZ);
+    gl_FragColor.rgb *= light;
     gl_FragColor.a = 1.0;
 }
 `;

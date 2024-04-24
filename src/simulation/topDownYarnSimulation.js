@@ -20,7 +20,7 @@ let renderer = noodleRenderer;
 
 const YARN_RADIUS = 0.25;
 const STITCH_WIDTH = 1;
-const BED_OFFSET = 0.2;
+const BED_OFFSET = 0.1;
 
 export function simulate(stitchPattern) {
   const ASPECT = GLOBAL_STATE.cellAspect;
@@ -73,7 +73,7 @@ export function simulate(stitchPattern) {
 
   function relax() {
     if (relaxed) return;
-    sim = yarnRelaxation(GLOBAL_STATE.kYarn);
+    sim = yarnRelaxation();
     relaxed = true;
   }
 

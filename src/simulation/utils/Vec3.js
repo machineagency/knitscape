@@ -15,6 +15,10 @@ export const Vec3 = {
     return [v[0] * scalar, v[1] * scalar, v[2] * scalar];
   },
 
+  abs(v) {
+    return [Math.abs(v[0]), Math.abs(v[1]), Math.abs(v[2])];
+  },
+
   cross(a, b) {
     return [
       a[1] * b[2] - a[2] * b[1],

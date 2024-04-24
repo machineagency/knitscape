@@ -178,10 +178,13 @@ export function computeYarnPathSpline(
       Vec3.subtract(nodes[prev.target].pos, nodes[prev.source].pos)
     );
 
+    // prev.restLength = dist * 0.9;
+
     let loop = prev.leg[0] == prev.leg[1];
 
-    // prev.restLength = loop ? dist * ASPECT * 0.7 : dist * 0.7;
-    prev.restLength = loop ? STITCH_WIDTH * ASPECT * 0.7 : STITCH_WIDTH * 0.7;
+    prev.restLength = loop
+      ? (STITCH_WIDTH / 2) * ASPECT * 0.9
+      : STITCH_WIDTH * ASPECT * 0.9;
   }
 
   Object.entries(links).forEach(([yarnIndex, linkArr]) => {
@@ -194,7 +197,7 @@ export function computeYarnPathSpline(
     let dist = Vec3.magnitude(
       Vec3.subtract(nodes[lastLink.target].pos, nodes[lastLink.source].pos)
     );
-    lastLink.restLength = isLoop ? dist * ASPECT * 0.7 : dist * 0.7;
+    lastLink.restLength = isLoop ? dist * ASPECT * 0.8 : dist * 0.8;
   });
   return links;
 }
