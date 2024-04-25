@@ -14,6 +14,25 @@ export function generateTopology(stitchPattern) {
   return { DS, yarnPath };
 }
 
+function getNodePosition(DS, ypIndex, i, j) {
+  let layer, legNode;
+  let cnStack = DS.CNO(i, j);
+  for (const [index, [ii, jj]] of cnStack.entries()) {
+    let visitedIndices = DS.YPI(ii, jj);
+    if (visitedIndices[1] == ypIndex) {
+      // If this is a leg node, nothing will stack in front of it
+      layer = 1;
+      legNode = true;
+      break;
+    } else if (visitedIndices[0] == ypIndex) {
+      layer = cnStack.length - index;
+      legNode = false;
+      break;
+    }
+  }
+  return { layer, legNode };
+}
+
 export function computeYarnPathSpline(
   DS,
   yarnPath,
@@ -26,25 +45,9 @@ export function computeYarnPathSpline(
 
   for (let ypIndex = 0; ypIndex < yarnPath.length; ypIndex++) {
     let [i, j, row] = yarnPath[ypIndex];
-
-    let layer, legNode;
-    let cnStack = DS.CNO(i, j);
     let currIndex = i + j * DS.width;
 
-    for (const [index, [ii, jj]] of cnStack.entries()) {
-      let visitedIndices = DS.YPI(ii, jj);
-      if (visitedIndices[1] == ypIndex) {
-        // If this is a leg node, nothing will stack in front of it
-        layer = 1;
-        legNode = true;
-        break;
-      } else if (visitedIndices[0] == ypIndex) {
-        layer = cnStack.length - index;
-        legNode = false;
-        break;
-      }
-    }
-
+    let { layer, legNode } = getNodePosition(DS, ypIndex, i, j);
     let currentYarn = stitchPattern.yarnSequence[row];
 
     if (!(currentYarn in yarnSplines)) {

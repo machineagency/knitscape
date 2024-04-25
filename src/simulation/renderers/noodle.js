@@ -5,16 +5,13 @@ import {
   Camera,
   Orbit,
   Vec3,
-  Color,
   Geometry,
   Mesh,
 } from "ogl";
 
 import { buildYarnCurve } from "./utils/yarnSpline";
 
-const OUTLINE_WIDTH = 0.02;
 let gl, controls, renderer, camera, scene;
-
 let yarnPoints = [];
 let yarnGeometry = [];
 let yarnColors = [];
@@ -32,17 +29,12 @@ uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
 uniform vec2 resolution;
 
-
 uniform float uWidth;
-uniform float uZMin;
-uniform float uZMax;
 
-varying float vZ;
 varying float across;
 
 void main() {
-  mat4 mvp = modelViewMatrix * projectionMatrix;
-  // The segment endpoint positions in view space
+  // The segment endpoint positions in model view space
   vec4 p0 = modelViewMatrix * vec4(pointA, 1.0);
   vec4 p1 = modelViewMatrix * vec4(pointB, 1.0);
 
@@ -55,9 +47,6 @@ void main() {
 
   gl_Position = projectionMatrix * vec4(pt, currentPoint.z, 1.0);
 
-  // Use the z component of the current point to shade the point according to the z range
-  float whichZ = mix(pointA.z, pointB.z, position.x);
-  vZ = abs(whichZ-uZMin) / abs(uZMax-uZMin);
   across = position.y;
 }
 `;
@@ -66,26 +55,16 @@ const fragmentShader = /* glsl */ `
 precision highp float;
 
 uniform vec3 uColor;
-varying float vZ;
 varying float across;
+
 void main() {
-    // vec3 shaded = uColor - 0.4;
-
-    // gl_FragColor.rgb = mix(shaded, uColor, vZ);
-    // gl_FragColor.rgb = uColor;
-    // gl_FragColor.a = 1.0;
-
     vec3 normal = vec3(0, 0, -1);
-    vec3 shaded = uColor - 0.4;
-
     vec3 highlight = normalize(vec3(0.0, across, -0.1 ));
-
     float light = dot(normal, highlight);
+
     light = smoothstep(0.0, 0.5, light);
 
-
-    gl_FragColor.rgb = mix(shaded, uColor, vZ);
-    gl_FragColor.rgb *= light;
+    gl_FragColor.rgb = uColor * light;
     gl_FragColor.a = 1.0;
 }
 `;
@@ -99,13 +78,10 @@ attribute vec3 pointB;
 attribute vec3 pointC;
 
 uniform float uWidth;
-uniform float uZMin;
-uniform float uZMax;
 
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
 
-varying float vZ;
 varying float across;
 
 void main() {
@@ -137,36 +113,7 @@ void main() {
 
   gl_Position = projectionMatrix * vec4(clip, clipB.z, clipB.w);
 
-  vZ = abs(pointB.z-uZMin) / abs(uZMax-uZMin);
   across = (position.x + position.y) * 0.5 * sigma;
-}
-`;
-
-const joinFragmentShader = /* glsl */ `
-precision highp float;
-
-uniform vec3 uColor;
-varying float vZ;
-varying float across;
-
-void main() {
-    // vec3 shaded = uColor - 0.4;
-
-    // gl_FragColor.rgb = mix(shaded, uColor, vZ);
-    // gl_FragColor.a = 1.0;
-
-    vec3 normal = vec3(0, 0, -1);
-    vec3 shaded = uColor - 0.4;
-
-    vec3 highlight = normalize(vec3(0.0, across, -0.1 ));
-
-    float light = dot(normal, highlight);
-    light = smoothstep(0.0, 0.5, light);
-
-
-    gl_FragColor.rgb = mix(shaded, uColor, vZ);
-    gl_FragColor.rgb *= light;
-    gl_FragColor.a = 1.0;
 }
 `;
 
@@ -323,11 +270,8 @@ function init(yarnData, canvas) {
     const joinGeometry = buildJoinGeometry(splinePts, pointBuffer);
 
     yarnGeometry.push(geometry);
-
-    geometry.computeBoundingBox(geometry.attributes.pointA);
-
-    const outlineColor = new Color(0, 0, 0);
     yarnColors.push(yarn.color);
+
     const program = new Program(gl, {
       vertex: vertexShader,
       fragment: fragmentShader,
@@ -335,8 +279,6 @@ function init(yarnData, canvas) {
       uniforms: {
         uWidth: { value: yarn.radius },
         uColor: { value: yarn.color },
-        uZMin: { value: geometry.bounds.min[2] },
-        uZMax: { value: geometry.bounds.max[2] },
       },
     });
 
@@ -348,14 +290,12 @@ function init(yarnData, canvas) {
 
     const joinProgram = new Program(gl, {
       vertex: joinVertexShader,
-      fragment: joinFragmentShader,
+      fragment: fragmentShader,
       cullFace: false,
 
       uniforms: {
         uColor: { value: yarn.color },
         uWidth: { value: yarn.radius },
-        uZMin: { value: geometry.bounds.min[2] },
-        uZMax: { value: geometry.bounds.max[2] },
       },
     });
 
@@ -364,71 +304,13 @@ function init(yarnData, canvas) {
       program: joinProgram,
     });
 
-    const outlineProgram = new Program(gl, {
-      vertex: vertexShader,
-      fragment: fragmentShader,
-      uniforms: {
-        uColor: { value: [0, 0, 0] },
-        uWidth: { value: yarn.radius + OUTLINE_WIDTH },
-        uZMin: { value: geometry.bounds.min[2] },
-        uZMax: { value: geometry.bounds.max[2] },
-      },
-    });
-
-    const joinOutlineProgram = new Program(gl, {
-      vertex: joinVertexShader,
-      fragment: joinFragmentShader,
-      uniforms: {
-        uColor: { value: outlineColor },
-        uWidth: { value: yarn.radius + OUTLINE_WIDTH },
-        uZMin: { value: geometry.bounds.min[2] },
-        uZMax: { value: geometry.bounds.max[2] },
-      },
-    });
-
-    const outlineMesh = new Mesh(gl, {
-      mode: gl.TRIANGLE_STRIP,
-      geometry,
-      program: outlineProgram,
-    });
-
-    // const joinOutlineMesh = new Mesh(gl, {
-    //   mode: gl.TRIANGLES,
-    //   geometry: joinGeometry,
-    //   program: joinOutlineProgram,
-    // });
-
     mesh.setParent(scene);
     joinMesh.setParent(scene);
-    // joinOutlineMesh.setParent(scene);
-    // outlineMesh.setParent(scene);
 
     // Set polygon offset to prevent z fighting
     mesh.onBeforeRender(() => gl.polygonOffset(1, 0));
     joinMesh.onBeforeRender(() => gl.polygonOffset(1, 0));
-    // joinOutlineMesh.onBeforeRender(() => gl.polygonOffset(2, 0));
-    // outlineMesh.onBeforeRender(() => gl.polygonOffset(2, 0));
   });
-}
-
-function monitorView() {
-  return html`<div
-    style="position: absolute; top:0; color: #fff;display:grid; grid-template-columns: 100px 300px;">
-    <div>controls</div>
-    <div style="display: flex; flex-direction: column;">
-      <div>x: ${controls.target[0].toFixed(2)}</div>
-      <div>y: ${controls.target[1].toFixed(2)}</div>
-      <div>z: ${controls.target[2].toFixed(2)}</div>
-    </div>
-    <div>camera</div>
-    <div style="display: flex; flex-direction: column;">
-      <div style="display: flex; flex-direction: column;">
-        <div>x: ${camera.position[0].toFixed(2)}</div>
-        <div>y: ${camera.position[1].toFixed(2)}</div>
-        <div>z: ${camera.position[2].toFixed(2)}</div>
-      </div>
-    </div>
-  </div>`;
 }
 
 function updateYarnGeometry(yarnData) {
@@ -462,3 +344,23 @@ export const noodleRenderer = {
   init,
   updateYarnGeometry,
 };
+
+// function monitorView() {
+//   return html`<div
+//     style="position: absolute; top:0; color: #fff;display:grid; grid-template-columns: 100px 300px;">
+//     <div>controls</div>
+//     <div style="display: flex; flex-direction: column;">
+//       <div>x: ${controls.target[0].toFixed(2)}</div>
+//       <div>y: ${controls.target[1].toFixed(2)}</div>
+//       <div>z: ${controls.target[2].toFixed(2)}</div>
+//     </div>
+//     <div>camera</div>
+//     <div style="display: flex; flex-direction: column;">
+//       <div style="display: flex; flex-direction: column;">
+//         <div>x: ${camera.position[0].toFixed(2)}</div>
+//         <div>y: ${camera.position[1].toFixed(2)}</div>
+//         <div>z: ${camera.position[2].toFixed(2)}</div>
+//       </div>
+//     </div>
+//   </div>`;
+// }
