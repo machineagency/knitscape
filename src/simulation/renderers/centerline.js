@@ -288,7 +288,7 @@ function init(yarnData, canvas) {
     const controlPointData = new Float32Array(yarn.pts);
 
     buildControlPointLineStrip(controlPointData);
-    buildSplineLineStrip(controlPointData);
+    // buildSplineLineStrip(controlPointData);
   });
 }
 

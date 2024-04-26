@@ -21,7 +21,7 @@ let GLOBAL_STATE = {
   pointer: [0, 0], // Pointer postition in chart coordinates
   locked: false,
 
-  cellAspect: 11 / 7,
+  cellAspect: 0.75,
 
   activeTool: "pointer",
   activeSymbol: 1,

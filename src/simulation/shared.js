@@ -72,58 +72,74 @@ export function computeYarnPathSpline(
     const sign = evenI ? 1 : -1;
 
     let xyBasis = legNode
-      ? Vec2.normalize([sign * ASPECT * 2, -1 / ASPECT])
-      : Vec2.normalize([sign * -ASPECT * 2, 1 / ASPECT]);
+      ? Vec2.normalize([sign, -1])
+      : Vec2.normalize([-sign, 1]);
 
-    xyBasis = Vec2.scale(xyBasis, YARN_RADIUS);
+    xyBasis = Vec2.scale(xyBasis, YARN_RADIUS / 2);
 
-    const stackHeight = DS.CNO(i, j).length;
+    // const stackHeight = DS.CNO(i, j).length;
 
     /////////////////////////////
     //  X OFFSET
     /////////////////////////////
     let dxFront, dxBack;
-    let base = xyBasis[0] * ASPECT;
 
-    if (legNode) {
-      dxFront = base;
-      dxBack = base;
-    } else {
-      dxFront = base * (stackHeight - layer + 1);
-      dxBack = base;
-    }
+    // dxFront = xyBasis[0];
+    // dxBack = xyBasis[0];
+    dxFront = evenI
+      ? xyBasis[0] - YARN_RADIUS / 6
+      : xyBasis[0] + YARN_RADIUS / 6;
+    dxBack = evenI
+      ? xyBasis[0] + YARN_RADIUS / 6
+      : xyBasis[0] - YARN_RADIUS / 6;
+
+    // if (legNode) {
+    //   dxFront = base;
+    //   dxBack = base;
+    // } else {
+    //   dxFront = base * (stackHeight - layer + 1);
+    //   dxBack = base;
+    // }
 
     /////////////////////////////
     //  Y OFFSET
     /////////////////////////////
 
     let dyFront, dyBack;
+    // const beta = Math.PI / 8;
+    // let yLayer = Math.sin(beta * layer) * (stackHeight - layer + 1);
 
-    if (legNode) {
-      const beta = Math.PI / 4;
-      let yLayer = Math.sin(beta * layer) * (stackHeight - layer + 1);
+    dyFront = -xyBasis[1];
+    dyBack = xyBasis[1];
 
-      dyFront = -xyBasis[1] * yLayer;
-      dyBack = xyBasis[1];
-    } else {
-      const beta = Math.PI / 8;
-      let yLayer = Math.sin(beta * layer) * (stackHeight - layer + 1);
-      dyFront = -xyBasis[1] * yLayer;
-      dyBack = xyBasis[1] * yLayer;
-    }
+    // if (legNode) {
+    //   let yLayer = Math.sin(beta * layer) * (stackHeight - layer + 1);
+
+    //   dyFront = -xyBasis[1] * yLayer;
+    //   dyBack = xyBasis[1] * yLayer;
+    // } else {
+    //   let yLayer = Math.sin(beta * layer) * (stackHeight - layer + 1);
+    //   dyFront = -xyBasis[1] * yLayer;
+    //   dyBack = xyBasis[1] * yLayer;
+    // }
 
     /////////////////////////////
     //  ZOFFSET
     /////////////////////////////
     let dzFront, dzBack;
+    dzFront = YARN_RADIUS / 2;
+    dzBack = -YARN_RADIUS / 2;
 
-    if (legNode) {
-      dzFront = (layer / 2) * YARN_RADIUS + YARN_RADIUS / 2;
-      dzBack = -YARN_RADIUS / 2;
-    } else {
-      dzFront = (layer * YARN_RADIUS) / 2;
-      dzBack = (-(stackHeight - layer) * YARN_RADIUS) / 2;
-    }
+    // dzFront = (layer / 2) * YARN_RADIUS + YARN_RADIUS / 2;
+    // dzBack = (layer / 2) * YARN_RADIUS - YARN_RADIUS / 2;
+
+    // if (legNode) {
+    //   dzFront = (layer / 2) * YARN_RADIUS + YARN_RADIUS / 2;
+    //   dzBack = (layer / 2) * YARN_RADIUS - YARN_RADIUS / 2;
+    // } else {
+    //   dzFront = (layer * YARN_RADIUS) / 2;
+    //   dzBack = (-(stackHeight - layer) * YARN_RADIUS) / 2;
+    // }
 
     /////////////////////////////
     //  SWAP
@@ -185,9 +201,7 @@ export function computeYarnPathSpline(
 
     let loop = prev.leg[0] == prev.leg[1];
 
-    prev.restLength = loop
-      ? (STITCH_WIDTH / 2) * ASPECT * 0.9
-      : STITCH_WIDTH * ASPECT * 0.9;
+    prev.restLength = loop ? dist * 0.7 : STITCH_WIDTH * ASPECT * 0.7;
   }
 
   Object.entries(links).forEach(([yarnIndex, linkArr]) => {

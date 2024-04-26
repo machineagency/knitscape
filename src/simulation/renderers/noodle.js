@@ -7,16 +7,19 @@ import {
   Vec3,
   Geometry,
   Mesh,
+  Shadow,
+  Mat4,
 } from "ogl";
 
 import { buildYarnCurve } from "./utils/yarnSpline";
+import { bbox3d } from "./utils/helpers";
 
-let gl, controls, renderer, camera, scene;
+let gl, controls, renderer, camera, scene, light, shadow;
 let yarnPoints = [];
 let yarnGeometry = [];
 let yarnColors = [];
 
-const vertexShader = /* glsl */ `
+const segmentVertexShader = /* glsl */ `
 precision highp float;
 // position in the instance geometry
 attribute vec2 position;
@@ -25,13 +28,28 @@ attribute vec2 position;
 attribute vec3 pointA;
 attribute vec3 pointB;
 
+uniform mat4 modelMatrix;
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
-uniform vec2 resolution;
+uniform mat4 uInverseModelViewMatrix;
+
+uniform mat4 shadowViewMatrix;
+uniform mat4 shadowProjectionMatrix;
+
 
 uniform float uWidth;
 
 varying float across;
+varying vec4 vLightNDC;
+
+
+// Matrix to shift range from -1->1 to 0->1
+const mat4 depthScaleMatrix = mat4(
+    0.5, 0, 0, 0,
+    0, 0.5, 0, 0,
+    0, 0, 0.5, 0,
+    0.5, 0.5, 0.5, 1
+);
 
 void main() {
   // The segment endpoint positions in model view space
@@ -45,26 +63,48 @@ void main() {
   vec4 currentPoint = mix(p0, p1, position.x);
   vec2 pt = currentPoint.xy + uWidth *(position.x * tangent +  position.y * normal);
 
-  gl_Position = projectionMatrix * vec4(pt, currentPoint.z, 1.0);
+  vec4 mvPosition = vec4(pt, currentPoint.z, 1.0);
+
+  gl_Position = projectionMatrix * mvPosition;
+
+  vec4 undo = uInverseModelViewMatrix * mvPosition;
 
   across = position.y;
+
+  // Calculate the NDC (normalized device coords) for the light to compare against shadowmap
+  vLightNDC = depthScaleMatrix * shadowProjectionMatrix * shadowViewMatrix * modelMatrix * undo;
 }
 `;
 
 const fragmentShader = /* glsl */ `
 precision highp float;
 
+uniform float uWidth;
 uniform vec3 uColor;
+uniform sampler2D tShadow;
+
 varying float across;
+varying vec4 vLightNDC;
+
+float unpackRGBA (vec4 v) {
+    return dot(v, 1.0 / vec4(1.0, 255.0, 65025.0, 16581375.0));
+}
+
+vec3 normal = vec3(0.0, 0.0, 1.0);
+
 
 void main() {
-    vec3 normal = vec3(0, 0, -1);
-    vec3 highlight = normalize(vec3(0.0, across, -0.1 ));
-    float light = dot(normal, highlight);
+    vec3 lightPos = vLightNDC.xyz / vLightNDC.w;
+    float bias = 0.0001;
+    float depth = lightPos.z - bias;
+    float occluder = unpackRGBA(texture2D(tShadow, lightPos.xy));
+    float shadow = mix(0.6, 1.0, smoothstep(depth-0.0005, depth+0.0005, occluder));
 
-    light = smoothstep(0.0, 0.5, light);
+    vec3 highlight = normalize(vec3(0.0, across*2., 0.4));
+    float outline = dot(normal, highlight);
+    outline = step(0.4, outline);
 
-    gl_FragColor.rgb = uColor * light;
+    gl_FragColor.rgb = uColor * outline * shadow;
     gl_FragColor.a = 1.0;
 }
 `;
@@ -79,10 +119,26 @@ attribute vec3 pointC;
 
 uniform float uWidth;
 
+uniform mat4 modelMatrix;
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
+uniform mat4 uInverseModelViewMatrix;
+
+uniform mat4 shadowViewMatrix;
+uniform mat4 shadowProjectionMatrix;
+
 
 varying float across;
+varying vec4 vLightNDC;
+
+
+// Matrix to shift range from -1->1 to 0->1
+const mat4 depthScaleMatrix = mat4(
+    0.5, 0, 0, 0,
+    0, 0.5, 0, 0,
+    0, 0, 0.5, 0,
+    0.5, 0.5, 0.5, 1
+);
 
 void main() {
   mat4 mvp = projectionMatrix * modelViewMatrix;
@@ -111,10 +167,111 @@ void main() {
   // Final vertex position coefficients ([0,0], [0,1], [1,0])
   vec2 clip = clipB.xy + position.x * p0 + position.y * p1;
 
-  gl_Position = projectionMatrix * vec4(clip, clipB.z, clipB.w);
+
+  vec4 mvPosition = vec4(clip, clipB.z, clipB.w);
+
+  gl_Position = projectionMatrix * mvPosition;
+
+  vec4 undo = uInverseModelViewMatrix * mvPosition;
 
   across = (position.x + position.y) * 0.5 * sigma;
+    // Calculate the NDC (normalized device coords) for the light to compare against shadowmap
+  vLightNDC = depthScaleMatrix * shadowProjectionMatrix * shadowViewMatrix * modelMatrix * undo;
 }
+`;
+
+const segmentDepthVertex = /* glsl */ `
+precision highp float;
+// position in the instance geometry
+attribute vec2 position;
+
+// two endpoints of a yarn segment
+attribute vec3 pointA;
+attribute vec3 pointB;
+
+uniform mat4 modelMatrix;
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+
+uniform float uWidth;
+
+void main() {
+  // The segment endpoint positions in model view space
+  vec4 p0 = modelViewMatrix * vec4(pointA, 1.0);
+  vec4 p1 = modelViewMatrix * vec4(pointB, 1.0);
+
+  // This is our position in the instance geometry. the x component is along the line segment
+  vec2 tangent = p1.xy - p0.xy;
+  vec2 normal =   normalize(vec2(-tangent.y, tangent.x)); // perp
+
+  vec4 currentPoint = mix(p0, p1, position.x);
+  vec2 pt = currentPoint.xy + uWidth *(position.x * tangent +  position.y * normal);
+
+  gl_Position = projectionMatrix * vec4(pt, currentPoint.z, 1.0);
+}
+`;
+
+const joinDepthVertex = /* glsl */ `
+precision highp float;
+
+attribute vec3 position;
+attribute vec3 pointA;
+attribute vec3 pointB;
+attribute vec3 pointC;
+
+uniform float uWidth;
+
+uniform mat4 modelMatrix;
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+
+void main() {
+  mat4 mvp = projectionMatrix * modelViewMatrix;
+
+  vec4 clipA = modelViewMatrix * vec4(pointA, 1.0);
+  vec4 clipB = modelViewMatrix * vec4(pointB, 1.0);
+  vec4 clipC = modelViewMatrix * vec4(pointC, 1.0);
+
+  // Calculate the normal to the join tangent
+  vec2 tangent = normalize(normalize(clipC.xy - clipB.xy) + normalize(clipB.xy - clipA.xy));
+  vec2 normal = vec2(-tangent.y, tangent.x);
+
+  vec2 ab = clipB.xy - clipA.xy;
+  vec2 cb = clipB.xy - clipC.xy;
+
+  vec2 abn = normalize(vec2(-ab.y, ab.x));
+  vec2 cbn = -normalize(vec2(-cb.y, cb.x));
+
+  float sigma = sign(dot(ab + cb, normal)); // Direction of the bend
+
+  // Basis vectors for the bevel geometry
+  vec2 p0 = 0.5 * sigma * uWidth * (sigma < 0.0 ? abn : cbn);
+  vec2 p1 = 0.5 * sigma * uWidth * (sigma < 0.0 ? cbn : abn);
+
+
+  // Final vertex position coefficients ([0,0], [0,1], [1,0])
+  vec2 clip = clipB.xy + position.x * p0 + position.y * p1;
+
+
+  vec4 mvPosition = vec4(clip, clipB.z, clipB.w);
+
+  gl_Position = projectionMatrix * mvPosition;
+
+}
+`;
+
+const depthFragment = /* glsl */ `
+    precision highp float;
+
+    vec4 packRGBA (float v) {
+        vec4 pack = fract(vec4(1.0, 255.0, 65025.0, 16581375.0) * v);
+        pack -= pack.yzww * vec2(1.0 / 255.0, 0.0).xxxy;
+        return pack;
+    }
+
+    void main() {
+        gl_FragColor = packRGBA(gl_FragCoord.z);
+    }
 `;
 
 function buildYarnSegmentGeometry(splinePts, pointBuffer) {
@@ -204,28 +361,6 @@ function buildJoinGeometry(splinePts, pointBuffer) {
   return geometry;
 }
 
-function minMax(pts) {
-  const min = { x: Infinity, y: Infinity, z: Infinity };
-  const max = { x: -Infinity, y: -Infinity, z: -Infinity };
-
-  for (let i = 0; i + 2 < pts.length; i += 3) {
-    min.x = Math.min(min.x, pts[i + 0]);
-    min.y = Math.min(min.y, pts[i + 1]);
-    min.z = Math.min(min.z, pts[i + 2]);
-    max.x = Math.max(max.x, pts[i + 0]);
-    max.y = Math.max(max.y, pts[i + 1]);
-    max.z = Math.max(max.z, pts[i + 2]);
-  }
-
-  return { min, max };
-}
-
-function computeCenter(pts) {
-  const { min, max } = minMax(pts);
-
-  return [0.5 * (min.x + max.x), 0.5 * (min.y + max.y), 0.5 * (min.z + max.z)];
-}
-
 function init(yarnData, canvas) {
   renderer = new Renderer({
     dpr: 2,
@@ -235,22 +370,35 @@ function init(yarnData, canvas) {
   });
   gl = renderer.gl;
   gl.clearColor(0.1, 0.1, 0.1, 1);
-  gl.enable(gl.POLYGON_OFFSET_FILL);
 
-  let center = computeCenter(yarnData[0].pts);
+  let bbox = bbox3d(yarnData[0].pts);
 
   if (!camera) {
     camera = new Camera(gl, { fov: 60, far: 100, near: 0.1 });
-    camera.position.set(center[0], center[1], 15);
+    camera.position.set(bbox.center[0], bbox.center[1], 15);
 
     controls = new Orbit(camera, {
-      target: new Vec3(center[0], center[1], 0),
+      target: new Vec3(bbox.center[0], bbox.center[1], 0),
       element: canvas,
     });
     camera.lookAt(controls.target);
   }
 
   scene = new Transform();
+
+  light = new Camera(gl, {
+    left: -bbox.dimensions[0],
+    right: bbox.dimensions[0],
+    bottom: -bbox.dimensions[1],
+    top: bbox.dimensions[1],
+    far: 100,
+    near: 0.1,
+  });
+
+  light.position.set(bbox.xMin, bbox.yMax, 25);
+  light.lookAt(bbox.center);
+  shadow = new Shadow(gl, { light });
+  shadow.setSize({ width: 2048 });
 
   yarnPoints = [];
   yarnGeometry = [];
@@ -266,37 +414,58 @@ function init(yarnData, canvas) {
     gl.bindBuffer(gl.ARRAY_BUFFER, pointBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, splinePts, gl.STATIC_DRAW);
 
-    const geometry = buildYarnSegmentGeometry(splinePts, pointBuffer);
+    const segmentGeometry = buildYarnSegmentGeometry(splinePts, pointBuffer);
     const joinGeometry = buildJoinGeometry(splinePts, pointBuffer);
 
-    yarnGeometry.push(geometry);
+    yarnGeometry.push(segmentGeometry);
     yarnColors.push(yarn.color);
 
-    const program = new Program(gl, {
-      vertex: vertexShader,
+    const segmentProgram = new Program(gl, {
+      vertex: segmentVertexShader,
       fragment: fragmentShader,
       cullFace: false,
       uniforms: {
         uWidth: { value: yarn.radius },
         uColor: { value: yarn.color },
+        uInverseModelViewMatrix: { value: null },
       },
-    });
-
-    const mesh = new Mesh(gl, {
-      mode: gl.TRIANGLE_STRIP,
-      geometry,
-      program,
     });
 
     const joinProgram = new Program(gl, {
       vertex: joinVertexShader,
       fragment: fragmentShader,
       cullFace: false,
-
       uniforms: {
         uColor: { value: yarn.color },
         uWidth: { value: yarn.radius },
+        uInverseModelViewMatrix: { value: null },
       },
+    });
+
+    const segmentDepthProgram = new Program(gl, {
+      vertex: segmentDepthVertex,
+      fragment: depthFragment,
+      cullFace: false,
+      uniforms: {
+        uWidth: { value: yarn.radius },
+        uInverseModelViewMatrix: { value: null },
+      },
+    });
+
+    const joinDepthProgram = new Program(gl, {
+      vertex: joinDepthVertex,
+      fragment: depthFragment,
+      cullFace: false,
+      uniforms: {
+        uWidth: { value: yarn.radius },
+        uInverseModelViewMatrix: { value: null },
+      },
+    });
+
+    const mesh = new Mesh(gl, {
+      mode: gl.TRIANGLE_STRIP,
+      geometry: segmentGeometry,
+      program: segmentProgram,
     });
 
     const joinMesh = new Mesh(gl, {
@@ -304,12 +473,23 @@ function init(yarnData, canvas) {
       program: joinProgram,
     });
 
+    function computeInverseModelViewUniform({ mesh }) {
+      let inverse = new Mat4();
+      inverse.inverse(mesh.modelViewMatrix);
+      mesh.program.uniforms.uInverseModelViewMatrix.value = inverse;
+    }
+
+    mesh.onBeforeRender(computeInverseModelViewUniform);
+    joinMesh.onBeforeRender(computeInverseModelViewUniform);
+
+    mesh.depthProgram = segmentDepthProgram;
+    joinMesh.depthProgram = joinDepthProgram;
+
+    shadow.add({ mesh: mesh });
+    shadow.add({ mesh: joinMesh });
+
     mesh.setParent(scene);
     joinMesh.setParent(scene);
-
-    // Set polygon offset to prevent z fighting
-    mesh.onBeforeRender(() => gl.polygonOffset(1, 0));
-    joinMesh.onBeforeRender(() => gl.polygonOffset(1, 0));
   });
 }
 
@@ -334,8 +514,10 @@ function draw() {
   camera.perspective({
     aspect: gl.canvas.clientWidth / gl.canvas.clientHeight,
   });
+
   controls.update();
 
+  shadow.render({ scene });
   renderer.render({ scene, camera });
 }
 

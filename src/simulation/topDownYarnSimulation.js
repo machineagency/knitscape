@@ -18,7 +18,7 @@ export const visualizations = {
 
 let renderer = noodleRenderer;
 
-const YARN_RADIUS = 0.25;
+const YARN_RADIUS = 0.3;
 const STITCH_WIDTH = 1;
 const BED_OFFSET = 0.1;
 
@@ -30,7 +30,7 @@ export function simulate(stitchPattern) {
   let relaxed = false;
   let sim;
 
-  let { DS, yarnPath } = generateTopology(stitchPattern);
+  const { DS, yarnPath } = generateTopology(stitchPattern);
 
   const nodes = layoutNodes(DS, stitchPattern, params);
 
@@ -57,7 +57,7 @@ export function simulate(stitchPattern) {
 
   function draw() {
     if (sim && sim.running()) {
-      sim.tick(segments, nodes);
+      sim.tick(segments, DS, nodes);
 
       for (let i = 0; i < yarnData.length; i++) {
         yarnData[i].pts = segmentsToPoints(
