@@ -1,8 +1,8 @@
 import { Vec3 } from "./utils/Vec3";
 
 export function yarnRelaxation(
-  kYarn = 0.3,
-  tYarn = 0.03,
+  kYarn = 0.4,
+  tYarn = 0.01,
   alphaMin = 0.001,
   alphaTarget = 0,
   iterations = 4,
@@ -66,11 +66,7 @@ export function yarnRelaxation(
     let B2 = Vec3.cross(T12, T23);
 
     let omega = -Math.acos(Vec3.dot(Vec3.normalize(B1), Vec3.normalize(B2)));
-
-    // let omega = -Math.acos(Vec3.dot(B1, B2));
-    let cross = Vec3.cross(B1, B2);
-    // console.log(omega);
-    if (Vec3.dot(T12, cross) < 0) {
+    if (Vec3.dot(T12, Vec3.cross(B1, B2)) < 0) {
       omega = -omega;
     }
 
@@ -95,18 +91,18 @@ export function yarnRelaxation(
     //   (mag * seg2.restLength) / seg3.restLength
     // );
 
-    let r1 = seg2.restLength / seg1.restLength;
-    let r2 = seg2.restLength / seg3.restLength;
-
     // console.log(r1, r2);
 
-    // let f1 = Vec3.scale(Vec3.normalize(B1), mag);
-    // let f2 = Vec3.scale(Vec3.normalize(B2), mag);
-    let f1 = Vec3.scale(Vec3.normalize(B1), mag * (r1 < 10 ? r1 : 1));
-    let f2 = Vec3.scale(Vec3.normalize(B2), mag * (r2 < 10 ? r2 : 1));
+    let f1 = Vec3.scale(Vec3.normalize(B1), mag);
+    let f2 = Vec3.scale(Vec3.normalize(B2), -mag);
+
+    // let r1 = seg2.restLength / seg1.restLength;
+    // let r2 = seg2.restLength / seg3.restLength;
+    // let f1 = Vec3.scale(Vec3.normalize(B1), mag * (r1 < 10 ? r1 : 1));
+    // let f2 = Vec3.scale(Vec3.normalize(B2), mag * (r2 < 10 ? r2 : 1));
 
     CN1.f = Vec3.add(CN1.f, f1);
-    CN2.f = Vec3.subtract(CN2.f, f2);
+    CN2.f = Vec3.add(CN2.f, f2);
   }
 
   function updateContactNodePositions(DS, nodes) {
@@ -114,15 +110,15 @@ export function yarnRelaxation(
       let i = index % DS.width;
       let j = Math.floor(index / DS.width);
 
-      if (i == 0 || i == DS.width - 1) {
-        // left/right boundary node
-        return;
-      }
+      // if (i == 0 || i == DS.width - 1) {
+      //   // left/right boundary node
+      //   return;
+      // }
 
-      if (j <= 1 || j >= DS.height - 2) {
-        // boundary top/bottom node
-        return;
-      }
+      // if (j <= 1 || j >= DS.height - 2) {
+      //   // boundary top/bottom node
+      //   return;
+      // }
       node.v = Vec3.scale(Vec3.add(node.v, node.f), velocityDecay);
       node.pos = Vec3.add(node.pos, node.v);
       // clear accumulated forces for next tick

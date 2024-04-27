@@ -120,7 +120,6 @@ void main() {
 
 let gl, segmentProgramInfo, joinProgramInfo, camera, bbox;
 
-const OUTLINE_WIDTH = 0.02;
 let yarnProgramData = [];
 
 const yarnInstanceGeometry = new Float32Array([
@@ -349,7 +348,7 @@ function initializeYarn(yarn) {
 
   const yarnUniforms = {
     u_Color: yarn.color,
-    u_Radius: yarn.radius,
+    u_Radius: yarn.diameter,
   };
 
   return {
@@ -401,27 +400,6 @@ export function init(yarnData, canvas) {
   }
 }
 
-function drawOutline(uniforms, instances) {
-  // Set polygon offset to prevent z-fighting
-  gl.polygonOffset(2, 0);
-
-  gl.uniform3f(segmentProgramInfo.uniformLocations.u_Color, 0, 0, 0);
-  gl.uniform1f(
-    segmentProgramInfo.uniformLocations.u_Radius,
-    uniforms.u_Radius / 2 + OUTLINE_WIDTH
-  );
-  gl.uniform1f(segmentProgramInfo.uniformLocations.u_ZMin, bbox.zMin);
-  gl.uniform1f(segmentProgramInfo.uniformLocations.u_ZMax, bbox.zMax);
-
-  // Draw instanced triangle strip along the entire yarn
-  gl.drawArraysInstanced(
-    gl.TRIANGLE_STRIP, // gl.LINES works but doesn't look good when you zoom out
-    0,
-    yarnInstanceGeometry.length / 3, // number of indices to be rendered per instance
-    instances // number of instances of the range of elements to draw
-  );
-}
-
 function drawMainYarn(uniforms, instances) {
   gl.uniform3f(
     segmentProgramInfo.uniformLocations.u_Color,
@@ -465,27 +443,6 @@ function drawJoin(uniforms, instances) {
   );
 }
 
-function drawJoinOutline(uniforms, instances) {
-  // Main yarn should always be in front of outline. Set polygon offset to prevent z-fighting
-  gl.polygonOffset(0, 0);
-  gl.uniform3f(joinProgramInfo.uniformLocations.u_Color, 0, 0, 0);
-
-  gl.uniform1f(
-    joinProgramInfo.uniformLocations.u_Radius,
-    uniforms.u_Radius / 2 + OUTLINE_WIDTH
-  );
-  gl.uniform1f(joinProgramInfo.uniformLocations.u_ZMin, bbox.zMin);
-  gl.uniform1f(joinProgramInfo.uniformLocations.u_ZMax, bbox.zMax);
-
-  // Draw instanced triangle strip along the entire yarn
-  gl.drawArraysInstanced(
-    gl.TRIANGLES,
-    0,
-    joinInstanceGeometry.length / 2, // number of indices to be rendered per instance
-    instances - 1 // number of instances of the range of elements to draw
-  );
-}
-
 function draw() {
   resizeCanvasToDisplaySize(gl.canvas);
 
@@ -511,7 +468,6 @@ function draw() {
     );
 
     drawMainYarn(uniforms, instances);
-    // drawOutline(uniforms, instances);
 
     // Draw yarn join
     gl.useProgram(joinProgramInfo.program);
@@ -520,7 +476,6 @@ function draw() {
     gl.uniformMatrix3fv(joinProgramInfo.uniformLocations.u_Matrix, false, mvp);
 
     drawJoin(uniforms, instances);
-    // drawJoinOutline(uniforms, instances);
   }
 }
 

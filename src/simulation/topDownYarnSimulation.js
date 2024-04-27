@@ -18,13 +18,18 @@ export const visualizations = {
 
 let renderer = noodleRenderer;
 
-const YARN_RADIUS = 0.3;
+const YARN_DIAMETER = 0.27;
 const STITCH_WIDTH = 1;
 const BED_OFFSET = 0.1;
 
 export function simulate(stitchPattern) {
   const ASPECT = GLOBAL_STATE.cellAspect;
-  const params = { YARN_RADIUS, STITCH_WIDTH, ASPECT, BED_OFFSET };
+  const params = {
+    YARN_RADIUS: YARN_DIAMETER / 2,
+    STITCH_WIDTH,
+    ASPECT,
+    BED_OFFSET,
+  };
 
   let canvas = document.getElementById("sim-canvas");
   let relaxed = false;
@@ -46,7 +51,7 @@ export function simulate(stitchPattern) {
     return {
       yarnIndex: yarnIndex,
       pts: segmentsToPoints(segmentArr, nodes),
-      radius: YARN_RADIUS,
+      diameter: YARN_DIAMETER,
       color: hexToRgb(GLOBAL_STATE.yarnPalette[yarnIndex - 1]).map(
         (colorInt) => colorInt / 255
       ),

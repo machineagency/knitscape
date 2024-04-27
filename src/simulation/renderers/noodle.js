@@ -98,7 +98,8 @@ void main() {
     float bias = 0.0001;
     float depth = lightPos.z - bias;
     float occluder = unpackRGBA(texture2D(tShadow, lightPos.xy));
-    float shadow = mix(0.6, 1.0, smoothstep(depth-0.0005, depth+0.0005, occluder));
+    // float shadow = mix(0.6, 1.0, smoothstep(depth-0.0005, depth+0.0005, occluder));
+    float shadow = mix(0.6, 1.0, step(depth, occluder));
 
     vec3 highlight = normalize(vec3(0.0, across*2., 0.4));
     float outline = dot(normal, highlight);
@@ -406,7 +407,7 @@ function init(yarnData, canvas) {
   yarnData.forEach((yarn) => {
     if (yarn.pts.length < 6) return;
 
-    const splinePts = new Float32Array(buildYarnCurve(yarn.pts, 12));
+    const splinePts = new Float32Array(buildYarnCurve(yarn.pts, 12, 0));
 
     yarnPoints.push(splinePts);
 
@@ -425,7 +426,7 @@ function init(yarnData, canvas) {
       fragment: fragmentShader,
       cullFace: false,
       uniforms: {
-        uWidth: { value: yarn.radius },
+        uWidth: { value: yarn.diameter },
         uColor: { value: yarn.color },
         uInverseModelViewMatrix: { value: null },
       },
@@ -437,7 +438,7 @@ function init(yarnData, canvas) {
       cullFace: false,
       uniforms: {
         uColor: { value: yarn.color },
-        uWidth: { value: yarn.radius },
+        uWidth: { value: yarn.diameter },
         uInverseModelViewMatrix: { value: null },
       },
     });
@@ -447,7 +448,7 @@ function init(yarnData, canvas) {
       fragment: depthFragment,
       cullFace: false,
       uniforms: {
-        uWidth: { value: yarn.radius },
+        uWidth: { value: yarn.diameter },
         uInverseModelViewMatrix: { value: null },
       },
     });
@@ -457,7 +458,7 @@ function init(yarnData, canvas) {
       fragment: depthFragment,
       cullFace: false,
       uniforms: {
-        uWidth: { value: yarn.radius },
+        uWidth: { value: yarn.diameter },
         uInverseModelViewMatrix: { value: null },
       },
     });

@@ -133,7 +133,7 @@ function init(yarnData, canvas) {
     const geometry = new THREE.TubeGeometry(
       curve,
       curve.points.length * 5,
-      yarn.radius / 2,
+      yarn.diameter / 2,
       8
     );
     const material = new THREE.MeshLambertMaterial({
